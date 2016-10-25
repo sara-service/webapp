@@ -1,0 +1,6 @@
+/venv/
+/.settings/
+/__pycache__/
+/downloads/
+.pydevproject
+.project
