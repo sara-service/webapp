@@ -28,6 +28,8 @@ def main():
     
     
     
+    
+    
     # Logout
     r = server.logout()
     print("Token: ", server.getToken())
