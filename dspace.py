@@ -22,7 +22,7 @@ class DSpaceServer(object):
         self.token = self.login(email, password) #make login and save token 
     
             
-    # Login
+    # Login 
     # Return: token
     def login(self, email, password):
         
