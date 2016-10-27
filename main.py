@@ -1,19 +1,37 @@
 # The main file. 
 
-from dspace import Server
 import config
+from dspace import DSpaceServer
+
+from pprint import pprint
 
 
 def main():
-    server = Server(config.OPARU_URL,config.OPARU_TOKEN,config.OPARU_REQUEST_TYPE,config.OPARU_VERIFY)
+
+    # Create a server and login to it - OPARU
+    server = DSpaceServer(config.OPARU_URL,config.OPARU_EMAIL, config.OPARU_PASSWORD, config.OPARU_REQUEST_TYPE,config.OPARU_VERIFY)
+    print("Token: ", server.getToken())
+       
+    # Get communities
+    header = {"Content-Type": "application/{}".format(config.OPARU_REQUEST_TYPE)}
+    r = server.request("communities", "get", header)
+    pprint(r.json())
     
-    request = server.login(config.OPARU_MAIL, config.OPARU_PASSWORD)
-    print(request.text)
+    
+    # Get items
     
     
     
     
     
+    
+    # Logout
+    r = server.logout()
+    print("Token: ", server.getToken())
+    
+
+      
+      
     
     
 if __name__ == '__main__':

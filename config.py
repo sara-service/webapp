@@ -7,9 +7,14 @@ OPARU_AUTH = {
     }
 
 # Default values
-OPARU_MAIL = OPARU_AUTH["email"]
+OPARU_EMAIL = OPARU_AUTH["email"]
 OPARU_PASSWORD = OPARU_AUTH["password"]
-OPARU_TOKEN = ""
+#OPARU_TOKEN = ""
 OPARU_REQUEST_TYPE = "json"
 OPARU_VERIFY = False
-OPARU_URL = "https://vtstest.rz.uni-ulm.de"
+OPARU_HEADERS = {
+            "Content-Type": "application/{}".format(OPARU_REQUEST_TYPE),
+            "rest-dspace-token": "{}".format(""),
+            "Accept": "application/{}".format(OPARU_REQUEST_TYPE)
+            }
+OPARU_URL = "https://vtstest.rz.uni-ulm.de" #without '/' at the end
