@@ -1,6 +1,7 @@
 # The main file. 
 
 import config
+import data
 from dspace import DSpaceServer
 
 from pprint import pprint
@@ -18,10 +19,20 @@ def main():
     #header = {"Content-Type": "application/{}".format(config.OPARU_REQUEST_TYPE)}
     
     r = server.request("communities", "get", header_default)
-    pprint(r.json())
+    #pprint(r.json())
     
     
     # Get items
+    r = server.request("items", "get", header_default)
+    #pprint(r.json())
+    
+    # Get item ID
+    r = server.request("items/6053", "get", header_default)
+    pprint(r.json())
+    
+    # Search item per metadata
+    #r = server.request("items/find-by-metadata-field", "post", header_default) # NULL pointer exception :)
+    #pprint(r.text)
     
     
     
