@@ -12,26 +12,18 @@ import config
 # DSpaceServer-class, methods to communicate with REST 
 class DSpaceServer(object):
     
-    # Constructor
+    # Constructor (init variables, login, save token)
     def __init__(self, url, email, password, request_type, verify):
                  
         self.url = url
         self.rest_url = url + "/rest"
         self.request_type = request_type
         self.verify = verify 
-        
-        self.token = self.login(email, password) 
-        
-           
-                        
-        #self.headers_content_type = {"Content-Type": "application/{}".format(request_type)}
-        #self.headers_token = {"rest-dspace-token": "{}".format(self.token)}
-        #self.headers_accept = {"Accept": "application/{}".format(request_type)}
-        #
-        #self.headers_all = {**self.headers_content_type, **self.headers_token, **self.headers_accept}
+        self.token = self.login(email, password) #make login and save token 
     
             
     # Login
+    # Return: token
     def login(self, email, password):
         
         headers = {"Content-Type": "application/{}".format(self.request_type)}
@@ -42,6 +34,7 @@ class DSpaceServer(object):
     
     
     # Logout
+    # Return: request
     def logout(self): 
         headers = {'Content-Type': 'application/json', 'rest-dspace-token': self.token}
         r = self.request("logout", "post", headers) 
@@ -87,7 +80,7 @@ class DSpaceServer(object):
             request_action = requests.delete
         else:
             return None
-      
+                  
         # Call original "requests.post/get/put/delete"
         # All input parameters instead of "url" now are **kwargs
         #

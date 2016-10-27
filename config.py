@@ -12,9 +12,10 @@ OPARU_PASSWORD = OPARU_AUTH["password"]
 #OPARU_TOKEN = ""
 OPARU_REQUEST_TYPE = "json"
 OPARU_VERIFY = False
-OPARU_HEADERS = {
-            "Content-Type": "application/{}".format(OPARU_REQUEST_TYPE),
-            "rest-dspace-token": "{}".format(""),
-            "Accept": "application/{}".format(OPARU_REQUEST_TYPE)
-            }
+
+HEADER_CONTENT_TYPE = {"Content-Type": "application/{}".format(OPARU_REQUEST_TYPE)}
+HEADER_ACCEPT = {"Accept": "application/{}".format(OPARU_REQUEST_TYPE)}
+
+HEADER_DEFAULT = {**HEADER_CONTENT_TYPE, **HEADER_ACCEPT}
+
 OPARU_URL = "https://vtstest.rz.uni-ulm.de" #without '/' at the end
