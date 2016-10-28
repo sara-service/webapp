@@ -15,7 +15,6 @@ OPARU_VERIFY = False
 
 HEADER_CONTENT_TYPE = {"Content-Type": "application/{}".format(OPARU_REQUEST_TYPE)}
 HEADER_ACCEPT = {"Accept": "application/{}".format(OPARU_REQUEST_TYPE)}
-
 HEADER_DEFAULT = {**HEADER_CONTENT_TYPE, **HEADER_ACCEPT}
 
 OPARU_URL = "https://vtstest.rz.uni-ulm.de" #without '/' at the end

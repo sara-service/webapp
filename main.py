@@ -28,17 +28,25 @@ def main():
     
     # Get item ID
     r = server.request("items/6053", "get", header_default)
-    #pprint(r.json())
+    pprint(r.json())
+    
+    # Get item ID metadata
+    r = server.request("items/6053/metadata", "get", header_default)
+    pprint(r.json())
+    #exit(0)
+    
     
     # Search item per metadata
-    #metadata = {'name': 'Zur axiomatischen Fundierung und Struktur von Aktienkursindizes'}
-    #r = server.request("items/find-by-metadata-field", "post", header_default, metadata) # NULL pointer exception :)
-    #pprint(r.text)
     
-    
-    
-    
-    
+    metadata = data.METADATA_ENTRY
+    metadata["key"] = "dc.contributor.author"
+    metadata["value"] = "Süslü, Mustafa Kemal"
+    print("------------------")
+    print("Try to find item via metadata:")
+    print(metadata)
+    print("------------------")
+    r = server.request("items/find-by-metadata-field", "post", header_default, metadata) # NULL pointer exception :)
+    pprint(r.json()) 
     
     
     
