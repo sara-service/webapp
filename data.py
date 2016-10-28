@@ -4,7 +4,49 @@
 # https://github.com/carthage-college/django-djpsilobus/blob/master/djpsilobus/core/data.py
 
 # Metadata for creating a new item in a collection
-METADATA_ITEM = {
+METADATA_DEFAULT = {
+    "default": [
+        {
+            "key": "dc.contributor.author",
+            "language": None,
+            "value": ""
+        },
+        {
+            "key": "dc.title",
+            "language": None,
+            "value": ""
+        },
+        {
+            "key": "dc.publisher",
+            "language": None,
+            "value": ""
+        },
+        {
+            "key": "dc.date.issued",
+            "language": None,
+            "value": ""
+        },
+        {
+            "key": "uulm.typeDCMI",
+            "language": None,
+            "value": "Software"
+        },
+        {
+            "key": "dc.type",
+            "language": None,
+            "value": "Software"
+        },
+        {
+            "key": "dc.description",
+            "language": "en_US",
+            "value": "sara-test"
+        }
+    ]
+}
+
+# Example from:
+# https://github.com/carthage-college/django-djpsilobus/blob/master/djpsilobus/core/data.py
+ITEM_METADATA = {
     "metadata":[
         {
             "key": "dc.contributor.author",
@@ -37,6 +79,7 @@ METADATA_ITEM = {
         }
     ]
 }
+
 
 METADATA_ENTRY = {
     "key": "dc.description.abstract",
