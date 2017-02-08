@@ -5,7 +5,7 @@
 
 # Metadata for creating a new item in a collection
 METADATA_DEFAULT = {
-    "default": [
+    "datacite": [
         {
             "key": "dc.contributor.author",
             "language": None,
@@ -44,41 +44,47 @@ METADATA_DEFAULT = {
     ]
 }
 
-# Example from:
-# https://github.com/carthage-college/django-djpsilobus/blob/master/djpsilobus/core/data.py
-ITEM_METADATA = {
-    "metadata":[
+
+METADATA_TEST = {
+    "datacite": [
         {
             "key": "dc.contributor.author",
-            "value": ""
+            "language": None,
+            "value": "Volodymyr Kushnarenko"
+        },
+        {
+            "key": "dc.title",
+            "language": None,
+            "value": "Test title"
+        },
+        {
+            "key": "dc.publisher",
+            "language": None,
+            "value": "Test publisher"
+        },
+        {
+            "key": "dc.date.issued",
+            "language": None,
+            "value": "01.09.2016"
+        },
+        {
+            "key": "uulm.typeDCMI",
+            "language": None,
+            "value": "Software"
+        },
+        {
+            "key": "dc.type",
+            "language": None,
+            "value": "Software"
         },
         {
             "key": "dc.description",
             "language": "en_US",
-            "value": ""
-        },
-        {
-            "key": "dc.title",
-            "language": "en_US",
-            "value": ""
-        },
-        {
-            "key": "dc.title.alternative",
-            "language": "en_US",
-            "value": ""
-        },
-        {
-            "key": "dc.subject",
-            "language": "en_US",
-            "value": ""
-        },
-        {
-            "key": "dc.subject",
-            "language": "en_US",
-            "value": ""
+            "value": "sara-test"
         }
     ]
 }
+
 
 
 METADATA_ENTRY = {
@@ -153,5 +159,39 @@ METADATA_EXAMPLE_FULL = {
     ]
     }
 
-
+# Example of Metadata from:
+# https://github.com/carthage-college/django-djpsilobus/blob/master/djpsilobus/core/data.py
+ITEM_METADATA = {
+    "metadata":[
+        {
+            "key": "dc.contributor.author",
+            "value": ""
+        },
+        {
+            "key": "dc.description",
+            "language": "en_US",
+            "value": ""
+        },
+        {
+            "key": "dc.title",
+            "language": "en_US",
+            "value": ""
+        },
+        {
+            "key": "dc.title.alternative",
+            "language": "en_US",
+            "value": ""
+        },
+        {
+            "key": "dc.subject",
+            "language": "en_US",
+            "value": ""
+        },
+        {
+            "key": "dc.subject",
+            "language": "en_US",
+            "value": ""
+        }
+    ]
+}
 

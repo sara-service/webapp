@@ -1,6 +1,10 @@
+##
+## Python
+##
 /venv/
 /.settings/
 /__pycache__/
 /downloads/
+/tmp/
 .pydevproject
 .project
