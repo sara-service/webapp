@@ -11,8 +11,4 @@ package bwfdm.sara.repositories;
  */
 public class Kops extends Oparu{
     
-  
-    public void publishItem(){
-        
-    }
 }

@@ -24,5 +24,6 @@ public interface PublicationRepository {
     public void publishItemRepository();
     public void changeItemRepository();
     public void deleteItemRepository();
+    public void changeMetadataItemRepository();
     
 }

@@ -11,7 +11,7 @@ import bwfdm.sara.metadata.MetadataCollection;
  *
  * @author vk
  */
-public class Oparu implements DSpaceREST,ArchivRepository{
+public class Oparu implements DSpaceREST,PublicationRepository{
 
     @Override
     public boolean isRestEnabled() {
@@ -112,24 +112,34 @@ public class Oparu implements DSpaceREST,ArchivRepository{
     /**
      * Methods from the "PublicationRepository" Interface
      */
-    
+
     @Override
-    public boolean push() {
+    public boolean loginRepository() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public boolean pull() {
+    public boolean logoutRepository() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public String getLinkHistory() {
+    public void publishItemRepository() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public String getLinkCommit() {
+    public void changeItemRepository() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void deleteItemRepository() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void changeMetadataItemRepository() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 

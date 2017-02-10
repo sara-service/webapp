@@ -9,5 +9,33 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
-    </properties>
+    </properties> 
+    
+    <!-- to specify manifest.mf file (for the Main class) -->
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>2.4</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            
+                            <mainClass>bwfdm.sara.core.MainInt</mainClass>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+        </plugins>
+        
+        <!-- own resources, e.g login.txt --> 
+        <resources>
+            <resource>
+                <directory>src/my-resources</directory>
+            </resource>
+        </resources>
+    </build> 
+    <!-- end of the manifest specification -->     
+    
 </project>
