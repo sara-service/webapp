@@ -46,48 +46,27 @@ public class DSpaceConfig {
 
     /** 
      * KOPS config
+     * 
      */
     
     
-    
-//    /**
-//     * Get password 
-//     * Read file "login.txt"
-//     * Format:
-//     * email:password
-//     * @param email
-//     * @return password string
-//     */
-//    public static String getPasswordFromFile(String email){
-//        
-//        //String filename = System.getProperty("java.class.path") + "/login.txt";
-//        //String filename = DSpaceConfig.class.getProtectionDomain().getCodeSource().getLocation().getPath() + "\\login.txt" ;
-//                
-//        // TODO: Not clear, what is the correct path to the file
-//        String filename = "login.txt";
-//        String password = "";
-//        BufferedReader br;
-//               
-//        try {
-//            //br = new BufferedReader(new FileReader(DSpaceConfig.class.getResource(filename).toString()));
-//            br = new BufferedReader(new FileReader(filename));
-//            String line = br.readLine();
-//
-//            while (line != null) {
-//                if(line.startsWith(email)){
-//                    password = line.split(":")[1];
-//                    break;
-//                }
-//                line = br.readLine();
-//            }
-//            br.close();
-//        } catch(IOException ex) {
-//            Logger.getLogger(DSpaceConfig.class.getName()).log(Level.SEVERE, null, ex); 
-//        }
-//        return password;
-//    }
-    
-    
-    
+    /**
+     * TODO: implement some secure algorithm/mechanism
+     *       to get password from the outside.
+     * 
+     * but for now just return a constant value from this class
+     * 
+     * @param email
+     * @return password string
+     */
+    public static String getPassword(String email){
+            
+        switch (email){
+            case EMAIL_OPARU: 
+                return PASSWORD_OPARU;
+            default: 
+                return "some_default_password";
+        }
+    }
     
 }

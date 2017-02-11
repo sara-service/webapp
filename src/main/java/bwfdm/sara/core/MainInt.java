@@ -22,7 +22,7 @@ public class MainInt {
     public static void main(String[] args) {
         
              
-        
+        System.out.println(DSpaceConfig.getPassword(DSpaceConfig.EMAIL_OPARU));
     }
     
 }
