@@ -36,6 +36,12 @@
             </resource>
         </resources>
     </build> 
-    <!-- end of the manifest specification -->     
-    
+    <!-- end of the manifest specification -->
+    <dependencies>
+        <dependency>
+            <groupId>org.glassfish.jersey.core</groupId>
+            <artifactId>jersey-client</artifactId>
+            <version>2.25</version>
+        </dependency>
+    </dependencies>
 </project>

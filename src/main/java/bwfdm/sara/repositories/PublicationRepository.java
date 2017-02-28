@@ -19,11 +19,11 @@ package bwfdm.sara.repositories;
  */
 public interface PublicationRepository {
     
-    public boolean loginRepository();
-    public boolean logoutRepository();
-    public void publishItemRepository();
-    public void changeItemRepository();
-    public void deleteItemRepository();
-    public void changeMetadataItemRepository();
+    public boolean loginPublicationRepository();
+    public boolean logoutPublicationRepository();
+    public void publishElement();
+    public void changeElement();
+    public void deleteElement();
+    public void changeElementMetadata();
     
 }

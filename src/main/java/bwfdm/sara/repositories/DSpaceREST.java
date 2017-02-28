@@ -15,11 +15,11 @@ import bwfdm.sara.metadata.MetadataCollection;
  * @author vk
  */
 public interface DSpaceREST {
-
-    public boolean isRestEnabled();
-    public String login();
+    
+    public boolean isRestEnable();
+    public boolean login(String email, String password);
     public boolean logout();
-    public String loginStatus();
+    public String getToken();
     
     public String createCommunity(String communityName, String parentCommunityID);
     public String deleteCommunity(String communityID);

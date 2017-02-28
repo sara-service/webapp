@@ -25,23 +25,27 @@ public class DSpaceConfig {
      * OPARU config
      */
     public static final String URL_OPARU = "https://vtstest.rz.uni-ulm.de";
+    public static final String URL_OPARU_REST = "https://vtstest.rz.uni-ulm.de/rest";
     public static final String EMAIL_OPARU = "project-sara@uni-konstanz.de";
     public static final String PASSWORD_OPARU = "SaraTest";
-    public static final String REQUEST_TYPE_OPARU = "json";
-    public static final String VERIFY_OPARU = "false";
+    public static final String SSL_VERIFY_OPARU = "false";
+    public static final String RESPONSE_TEST_OPARU = "REST api is running.";
     
-    public static final String HEADER_CONTENT_TYPE_OPARU = 
-            " {" + 
-            " \"Content-Type\": \"application/" + REQUEST_TYPE_OPARU + "\"" + 
-            " }";
-    public static final String HEADER_ACCEPT_OPARU = 
-            " {" + 
-            " \"Accept\": \"application/" + REQUEST_TYPE_OPARU + "\"" + 
-            " }";
-    public static final String HEADER_TOKEN_OPARU = 
-            " {" + 
-            " \"rest-dspace-token\": \"\"" + 
-            " }";
+    public static final String HEADER_CONTENT_TYPE_OPARU = "application/json";
+     public static final String HEADER_ACCEPT_OPARU = "application/json";
+    
+//    public static final String HEADER_CONTENT_TYPE_OPARU = 
+//            " {" + 
+//            " \"Content-Type\": \"application/" + REQUEST_TYPE_OPARU + "\"" + 
+//            " }";
+//    public static final String HEADER_ACCEPT_OPARU = 
+//            " {" + 
+//            " \"Accept\": \"application/" + REQUEST_TYPE_OPARU + "\"" + 
+//            " }";
+//    public static final String HEADER_TOKEN_OPARU = 
+//            " {" + 
+//            " \"rest-dspace-token\": \"\"" + 
+//            " }";
 
 
     /** 
