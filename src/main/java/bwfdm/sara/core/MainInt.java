@@ -16,29 +16,105 @@ import java.util.logging.Logger;
  * @author vk
  */
 public class MainInt {
-
+    
+    public static Oparu oparu = new Oparu();
+    public static boolean isOK;
+    
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) {
         
-             
-        System.out.println(DSpaceConfig.getPassword(DSpaceConfig.EMAIL_OPARU));
-        String tokenOparu = "";
-        Oparu oparu = new Oparu();
-        boolean isOK;
-        
-        System.out.println("Is REST enable: " + oparu.isRestEnable());
-        
-        for (int i = 1; i <= 2; i++) {
-            System.out.println("---" + i + "---");
-            isOK = oparu.login(DSpaceConfig.EMAIL_OPARU, DSpaceConfig.getPassword(DSpaceConfig.EMAIL_OPARU));
-            System.out.println("login OK: " + isOK);
-            System.out.println("token login: " + oparu.getToken());
-            isOK = oparu.logout();
-            System.out.println("logout OK: " + isOK);
-            System.out.println("token logout: " + oparu.getToken());
+        // Test Form
+       /* Set the Nimbus look and feel */
+        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
+        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
+         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
+         */
+        try {
+            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+                if ("Nimbus".equals(info.getName())) {
+                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
+                    break;
+                }
+            }
+        } catch (ClassNotFoundException ex) {
+            java.util.logging.Logger.getLogger(TestForm.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (InstantiationException ex) {
+            java.util.logging.Logger.getLogger(TestForm.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (IllegalAccessException ex) {
+            java.util.logging.Logger.getLogger(TestForm.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
+            java.util.logging.Logger.getLogger(TestForm.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
+        //</editor-fold>
+
+        /* Create and display the form */
+        java.awt.EventQueue.invokeLater(new Runnable() {
+            public void run() {
+                new TestForm().setVisible(true);
+            }
+        });
+        
+                
+        
+        
+        System.out.println("Password is: " + DSpaceConfig.getPassword(DSpaceConfig.EMAIL_OPARU));
+    
+             
+                    
+        
+    }
+    
+    public static void testRest(){
+         System.out.println("Is REST enable: " + oparu.isRestEnable()); 
+    }
+    
+    public static void getTokenStatus(){
+        System.out.println("Token status: " + oparu.getTokenStatus(oparu.getToken()));
+    }
+    
+    public static void loginDspace(){
+        isOK = oparu.login(DSpaceConfig.EMAIL_OPARU, DSpaceConfig.getPassword(DSpaceConfig.EMAIL_OPARU));
+        System.out.println("login OK: " + isOK);
+        System.out.println("token login: " + oparu.getToken());
+    }
+    
+    public static void logoutDspace(){
+        isOK = oparu.logout();
+        System.out.println("logout OK: " + isOK);
+        System.out.println("token logout: " + oparu.getToken());
+    }
+    
+    public static void getCommunities(){
+        
+    }
+    
+    public static void getCollections(){
+        
+    }
+    
+    public static void getItems(){
+        
+    }
+    
+    public static void getItemId(){
+        
+    }
+    
+    public static void getItemIdMetadata(){
+        
+    }
+    
+    public static void findItemsPerMetadataAuthor(){
+        
+    }
+    
+    public static void createNewItem(){
+        
+    }
+    
+    public static void exit(){
         
     }
     

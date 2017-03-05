@@ -36,6 +36,7 @@ public class Oparu implements DSpaceREST,PublicationRepository{
     private final WebTarget loginWebTarget;
     private final WebTarget logoutWebTarget;
     private final WebTarget testWebTarget;
+    private final WebTarget statusWebTarget;
     
     private final int responseStatusOK = 200;
         
@@ -61,6 +62,7 @@ public class Oparu implements DSpaceREST,PublicationRepository{
         this.loginWebTarget = this.restWebTarget.path("login");
         this.logoutWebTarget = this.restWebTarget.path("logout");
         this.testWebTarget = this.restWebTarget.path("test");
+        this.statusWebTarget = this.restWebTarget.path("status");
     }
 
 
@@ -70,7 +72,7 @@ public class Oparu implements DSpaceREST,PublicationRepository{
         
         Invocation.Builder invocationBuilder = testWebTarget.request(); 
         Response response = invocationBuilder.get();
-        return response.readEntity(String.class).equals(DSpaceConfig.RESPONSE_TEST_OPARU);
+        return response.readEntity(String.class).equals(DSpaceConfig.RESPONSE_TEST_OPARU); //connection will be closed automatically after the readEntity
     }
 
     @Override
@@ -90,7 +92,8 @@ public class Oparu implements DSpaceREST,PublicationRepository{
             this.token = response.readEntity(String.class);
             loginCorrect = true;
         }
-        System.out.println("response login: " + response.getStatus());    
+        System.out.println("response login: " + response.getStatus()); 
+        response.close(); //not realy needed but better to close
         return loginCorrect;
     }
 
@@ -102,14 +105,26 @@ public class Oparu implements DSpaceREST,PublicationRepository{
         boolean logoutCorrect = false;
         Invocation.Builder invocationBuilder = logoutWebTarget.request();
         invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_CONTENT_TYPE_OPARU);
-        invocationBuilder.header("rest-dspace-token", "this.token");
+        invocationBuilder.header("rest-dspace-token", this.token);
         Response response = invocationBuilder.post(Entity.json(""));
         if (response.getStatus() == this.responseStatusOK){
             this.token = response.readEntity(String.class);
             logoutCorrect = true;
         }
         System.out.println("response logout: " + response.getStatus());
+        response.close(); //not realy needed but better to close
         return logoutCorrect;
+    }
+    
+    @Override
+    public String getTokenStatus(String token){
+        
+        Invocation.Builder invocationBuilder = statusWebTarget.request();
+        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_CONTENT_TYPE_OPARU);
+        invocationBuilder.header("Accept", DSpaceConfig.HEADER_ACCEPT_OPARU);
+        invocationBuilder.header("rest-dspace-token", token);
+        Response response = invocationBuilder.get();
+        return response.readEntity(String.class);        
     }
     
     @Override

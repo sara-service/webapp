@@ -14,7 +14,9 @@ import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 
 /**
- *
+ * Method is got from the "https://dzone.com/articles/jersey-ignoring-ssl"
+ * @return Client client
+ * @throws Exception 
  * @author vk
  */
 public class WebUtils {

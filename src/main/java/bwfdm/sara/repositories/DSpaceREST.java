@@ -19,6 +19,7 @@ public interface DSpaceREST {
     public boolean isRestEnable();
     public boolean login(String email, String password);
     public boolean logout();
+    public String getTokenStatus(String token);
     public String getToken();
     
     public String createCommunity(String communityName, String parentCommunityID);
