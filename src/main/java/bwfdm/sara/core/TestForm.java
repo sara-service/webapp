@@ -5,6 +5,8 @@
  */
 package bwfdm.sara.core;
 
+import bwfdm.sara.utils.JsonUtils;
+
 /**
  *
  * @author vk
@@ -16,6 +18,7 @@ public class TestForm extends javax.swing.JFrame {
      */
     public TestForm() {
         initComponents();
+        textAreaOutput.setEditable(false);     
     }
 
     /**
@@ -26,102 +29,201 @@ public class TestForm extends javax.swing.JFrame {
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
+        java.awt.GridBagConstraints gridBagConstraints;
 
-        jPanel1 = new javax.swing.JPanel();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        jTextArea1 = new javax.swing.JTextArea();
+        jPanelButtons = new javax.swing.JPanel();
         btnRestTest = new javax.swing.JButton();
+        btnTokenStatus = new javax.swing.JButton();
+        btnCreateCommunity = new javax.swing.JButton();
+        btnGetCommunityById = new javax.swing.JButton();
+        btnGetAllCommunities = new javax.swing.JButton();
         btnLogin = new javax.swing.JButton();
         btnLogout = new javax.swing.JButton();
-        btnTokenStatus = new javax.swing.JButton();
-        jButton5 = new javax.swing.JButton();
+        jPanelOutput = new javax.swing.JPanel();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        textAreaOutput = new javax.swing.JTextArea();
+        tfID = new javax.swing.JTextField();
+        jLabel1 = new javax.swing.JLabel();
+        tfName = new javax.swing.JTextField();
+        jLabel2 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setMinimumSize(new java.awt.Dimension(600, 400));
+        setPreferredSize(new java.awt.Dimension(600, 400));
+        getContentPane().setLayout(new java.awt.GridBagLayout());
 
-        jTextArea1.setColumns(20);
-        jTextArea1.setRows(5);
-        jTextArea1.setText("Text is here\n\n\n\n\n\n\n\n\n\n\nyo!");
-        jScrollPane1.setViewportView(jTextArea1);
-
-        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 241, Short.MAX_VALUE)
-                .addContainerGap())
-        );
-        jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane1)
-        );
+        jPanelButtons.setLayout(new java.awt.GridBagLayout());
 
         btnRestTest.setText("REST-test");
+        btnRestTest.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         btnRestTest.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnRestTestActionPerformed(evt);
             }
         });
-
-        btnLogin.setText("login");
-        btnLogin.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnLoginActionPerformed(evt);
-            }
-        });
-
-        btnLogout.setText("logout");
-        btnLogout.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnLogoutActionPerformed(evt);
-            }
-        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        jPanelButtons.add(btnRestTest, gridBagConstraints);
 
         btnTokenStatus.setText("token status");
+        btnTokenStatus.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         btnTokenStatus.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnTokenStatusActionPerformed(evt);
             }
         });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 4;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        jPanelButtons.add(btnTokenStatus, gridBagConstraints);
 
-        jButton5.setText("jButton5");
+        btnCreateCommunity.setText("create Community (parentID, name)");
+        btnCreateCommunity.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        btnCreateCommunity.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCreateCommunityActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 9;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        jPanelButtons.add(btnCreateCommunity, gridBagConstraints);
 
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
-        getContentPane().setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(btnRestTest)
-                    .addComponent(btnLogin)
-                    .addComponent(btnLogout)
-                    .addComponent(btnTokenStatus)
-                    .addComponent(jButton5))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 26, Short.MAX_VALUE)
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
-        );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(btnRestTest)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnLogin)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnLogout)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnTokenStatus)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButton5)
-                        .addGap(0, 139, Short.MAX_VALUE))
-                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap())
-        );
+        btnGetCommunityById.setText("get Community by ID");
+        btnGetCommunityById.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        btnGetCommunityById.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnGetCommunityByIdActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 8;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        jPanelButtons.add(btnGetCommunityById, gridBagConstraints);
+
+        btnGetAllCommunities.setText("all communities");
+        btnGetAllCommunities.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        btnGetAllCommunities.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnGetAllCommunitiesActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 7;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        jPanelButtons.add(btnGetAllCommunities, gridBagConstraints);
+
+        btnLogin.setText("login");
+        btnLogin.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        btnLogin.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnLoginActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        jPanelButtons.add(btnLogin, gridBagConstraints);
+
+        btnLogout.setText("logout");
+        btnLogout.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        btnLogout.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnLogoutActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        jPanelButtons.add(btnLogout, gridBagConstraints);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        getContentPane().add(jPanelButtons, gridBagConstraints);
+
+        jPanelOutput.setLayout(new java.awt.GridBagLayout());
+
+        textAreaOutput.setColumns(20);
+        textAreaOutput.setRows(5);
+        textAreaOutput.setText("Text is here\n\n\n\n\n\n\n\n\n\n\nyo!");
+        textAreaOutput.setMinimumSize(new java.awt.Dimension(180, 220));
+        textAreaOutput.setPreferredSize(new java.awt.Dimension(180, 220));
+        jScrollPane1.setViewportView(textAreaOutput);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.ipadx = 218;
+        gridBagConstraints.ipady = 381;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.SOUTHWEST;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.weighty = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        jPanelOutput.add(jScrollPane1, gridBagConstraints);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.ipadx = 75;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        jPanelOutput.add(tfID, gridBagConstraints);
+
+        jLabel1.setText("ID:");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        jPanelOutput.add(jLabel1, gridBagConstraints);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.ipadx = 75;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        jPanelOutput.add(tfName, gridBagConstraints);
+
+        jLabel2.setText("Name:");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        jPanelOutput.add(jLabel2, gridBagConstraints);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridheight = java.awt.GridBagConstraints.RELATIVE;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.ipadx = 125;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.weightx = 0.5;
+        gridBagConstraints.weighty = 0.5;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        getContentPane().add(jPanelOutput, gridBagConstraints);
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
@@ -142,19 +244,42 @@ public class TestForm extends javax.swing.JFrame {
         MainInt.getTokenStatus();
     }//GEN-LAST:event_btnTokenStatusActionPerformed
 
+    private void btnGetAllCommunitiesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGetAllCommunitiesActionPerformed
+        textAreaOutput.setText(JsonUtils.jsonStringPrettyPrint(MainInt.getAllCommunities()));
+    }//GEN-LAST:event_btnGetAllCommunitiesActionPerformed
+
+    private void btnGetCommunityByIdActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGetCommunityByIdActionPerformed
+        String id = tfID.getText();
+        String str = MainInt.getCommunityById(id);
+        textAreaOutput.setText(JsonUtils.jsonStringPrettyPrint(str));
+    }//GEN-LAST:event_btnGetCommunityByIdActionPerformed
+
+    private void btnCreateCommunityActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCreateCommunityActionPerformed
+        String idParent = tfID.getText();
+        String name = tfName.getText();
+        textAreaOutput.setText(MainInt.createCommunity(name, idParent));
+    }//GEN-LAST:event_btnCreateCommunityActionPerformed
+
     /**
      * @param args the command line arguments
      */
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnCreateCommunity;
+    private javax.swing.JButton btnGetAllCommunities;
+    private javax.swing.JButton btnGetCommunityById;
     private javax.swing.JButton btnLogin;
     private javax.swing.JButton btnLogout;
     private javax.swing.JButton btnRestTest;
     private javax.swing.JButton btnTokenStatus;
-    private javax.swing.JButton jButton5;
-    private javax.swing.JPanel jPanel1;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JPanel jPanelButtons;
+    private javax.swing.JPanel jPanelOutput;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTextArea jTextArea1;
+    private javax.swing.JTextArea textAreaOutput;
+    private javax.swing.JTextField tfID;
+    private javax.swing.JTextField tfName;
     // End of variables declaration//GEN-END:variables
 }

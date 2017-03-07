@@ -34,7 +34,7 @@ public interface DSpaceREST {
     
     public String createItem(String itemName, String itemTitle, String collectionID);
     public boolean deleteItem(String itemID);
-    public boolean delteItemInCollection(String collectionID, String itemID);
+    public boolean deleteItemInCollection(String collectionID, String itemID);
     
     public boolean itemAddMetadata(String itemID, MetadataCollection collectionWithMetadata);
     public boolean itemUpdateMetadata(String itemID, String metadataEntry);

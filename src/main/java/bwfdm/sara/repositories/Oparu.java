@@ -17,6 +17,7 @@ import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 
@@ -37,6 +38,11 @@ public class Oparu implements DSpaceREST,PublicationRepository{
     private final WebTarget logoutWebTarget;
     private final WebTarget testWebTarget;
     private final WebTarget statusWebTarget;
+    private final WebTarget communitiesWebTarget;
+    private final WebTarget collectionsWebTarget;
+    private final WebTarget itemsWebTarget;
+    private final WebTarget bitstreamsWebTarget;
+    private final WebTarget handleWebTarget;
     
     private final int responseStatusOK = 200;
         
@@ -55,14 +61,18 @@ public class Oparu implements DSpaceREST,PublicationRepository{
             catch (Exception ex) { 
                 Logger.getLogger(MainInt.class.getName()).log(Level.SEVERE, null, ex); 
             }
-        }
-        
+        }    
         //WebTargets
         this.restWebTarget = this.client.target(DSpaceConfig.URL_OPARU_REST);
         this.loginWebTarget = this.restWebTarget.path("login");
         this.logoutWebTarget = this.restWebTarget.path("logout");
         this.testWebTarget = this.restWebTarget.path("test");
         this.statusWebTarget = this.restWebTarget.path("status");
+        this.communitiesWebTarget = this.restWebTarget.path("communities");
+        this.collectionsWebTarget = this.restWebTarget.path("collections");
+        this.itemsWebTarget = this.restWebTarget.path("items");
+        this.bitstreamsWebTarget = this.restWebTarget.path("bitstreams");
+        this.handleWebTarget = this.restWebTarget.path("handle");
     }
 
 
@@ -128,13 +138,53 @@ public class Oparu implements DSpaceREST,PublicationRepository{
     }
     
     @Override
-    public String getToken() {
+    public String getToken() {      
         return this.token;
     }
 
+    
+    /**
+     * Communities 
+     */
+    
+    public String getAllCommunities(){
+        
+        Invocation.Builder invocationBuilder = communitiesWebTarget.request();
+        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_CONTENT_TYPE_OPARU);
+        invocationBuilder.header("Accept", DSpaceConfig.HEADER_ACCEPT_OPARU);
+        Response response = invocationBuilder.get();
+        return response.readEntity(String.class); //Connection will be closed automatically after the "readEntity"
+    }
+    
+    public String getCommunityByID(String id){
+        
+        WebTarget communityIdWebTarget = communitiesWebTarget.path(id);
+        Invocation.Builder invocationBuilder = communityIdWebTarget.request();
+        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_CONTENT_TYPE_OPARU);
+        invocationBuilder.header("Accept", DSpaceConfig.HEADER_ACCEPT_OPARU);
+        Response response = invocationBuilder.get();
+        return response.readEntity(String.class); //Connection will be closed automatically after the "readEntity"
+    }
+    
     @Override
     public String createCommunity(String communityName, String parentCommunityID) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        
+        WebTarget newCommunityWebTarget = communitiesWebTarget;
+        if (!parentCommunityID.equals("")){
+            newCommunityWebTarget = communitiesWebTarget.path(parentCommunityID).path("communities");
+        }
+        Invocation.Builder invocationBuilder = newCommunityWebTarget.request();
+        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_CONTENT_TYPE_OPARU);
+        invocationBuilder.header("rest-dspace-token", token);
+        String data = "{"
+                + "\"name\":" + "\"" + communityName + "\""
+                + "}";
+        System.out.println(data);
+        System.out.println(newCommunityWebTarget.toString());
+        //System.out.println(invocationBuilder.toString());
+        Response response = invocationBuilder.post(Entity.json(data));
+        System.out.println("response status - create community: " + response.getStatus());
+        return response.readEntity(String.class); //Connection will be closed automatically after the "readEntity"
     }
 
     @Override
@@ -152,6 +202,29 @@ public class Oparu implements DSpaceREST,PublicationRepository{
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
+    /**
+     * Collections
+     */
+    
+    public String getAllCollections(){
+        
+        Invocation.Builder invocationBuilder = collectionsWebTarget.request();
+        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_CONTENT_TYPE_OPARU);
+        invocationBuilder.header("Accept", DSpaceConfig.HEADER_ACCEPT_OPARU);
+        Response response = invocationBuilder.get();
+        return response.readEntity(String.class); //Connection will be closed automatically after the "readEntity"
+    }
+    
+    public String getCollectionByID(String id){
+        
+        WebTarget communityIdWebTarget = collectionsWebTarget.path(id);
+        Invocation.Builder invocationBuilder = communityIdWebTarget.request();
+        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_CONTENT_TYPE_OPARU);
+        invocationBuilder.header("Accept", DSpaceConfig.HEADER_ACCEPT_OPARU);
+        Response response = invocationBuilder.get();
+        return response.readEntity(String.class); //Connection will be closed automatically after the "readEntity"
+    }
+    
     @Override
     public String createCollection(String collectionName, String parentCommunityID) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
@@ -178,7 +251,7 @@ public class Oparu implements DSpaceREST,PublicationRepository{
     }
 
     @Override
-    public boolean delteItemInCollection(String collectionID, String itemID) {
+    public boolean deleteItemInCollection(String collectionID, String itemID) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 

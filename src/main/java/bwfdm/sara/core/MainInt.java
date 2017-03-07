@@ -86,8 +86,21 @@ public class MainInt {
         System.out.println("token logout: " + oparu.getToken());
     }
     
-    public static void getCommunities(){
-        
+    public static String getAllCommunities(){
+        //System.out.println("All communities: " + oparu.getAllCommunities());
+        return oparu.getAllCommunities();
+    }
+    
+    public static String getCommunityById(String id){
+//        String str = oparu.getCommunityByID(id);
+//        System.out.println("Community id " + id + ": " + str);
+        return oparu.getCommunityByID(id);
+    }
+    
+    public static String createCommunity(String name, String idParent){
+//        String str = oparu.createCommunity(name, idParent);
+//        System.out.println("Create new Community:" + str);
+        return oparu.createCommunity(name, idParent);
     }
     
     public static void getCollections(){
