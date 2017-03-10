@@ -6,7 +6,8 @@
 package bwfdm.sara.core;
 
 import bwfdm.sara.repositories.DSpaceConfig;
-import bwfdm.sara.repositories.Oparu;
+import bwfdm.sara.repositories.OparuFive;
+import bwfdm.sara.repositories.OparuSix;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -17,8 +18,13 @@ import java.util.logging.Logger;
  */
 public class MainInt {
     
-    public static Oparu oparu = new Oparu();
+    //public static OparuFive oparu = new OparuFive();
+    public static OparuSix oparu = new OparuSix();
     public static boolean isOK;
+    
+   
+    
+    
     
     /**
      * @param args the command line arguments
@@ -55,56 +61,65 @@ public class MainInt {
                 new TestForm().setVisible(true);
             }
         });
-        
-                
-        
-        
-        System.out.println("Password is: " + DSpaceConfig.getPassword(DSpaceConfig.EMAIL_OPARU));
     
-             
-                    
-        
     }
     
-    public static void testRest(){
-         System.out.println("Is REST enable: " + oparu.isRestEnable()); 
+    public static String testRest(){
+        return Boolean.toString(oparu.isRestEnable());
     }
     
-    public static void getTokenStatus(){
-        System.out.println("Token status: " + oparu.getTokenStatus(oparu.getToken()));
+    public static String getTokenStatus(){
+        return oparu.getTokenStatus(oparu.getToken());
     }
     
-    public static void loginDspace(){
+    public static String loginDspace(){
         isOK = oparu.login(DSpaceConfig.EMAIL_OPARU, DSpaceConfig.getPassword(DSpaceConfig.EMAIL_OPARU));
-        System.out.println("login OK: " + isOK);
-        System.out.println("token login: " + oparu.getToken());
+        String str = "login OK: " + isOK + "\n" +
+                     "token login: " + oparu.getToken();
+        return str;
     }
     
-    public static void logoutDspace(){
+    public static String logoutDspace(){
         isOK = oparu.logout();
-        System.out.println("logout OK: " + isOK);
-        System.out.println("token logout: " + oparu.getToken());
+        String str = "logout OK: " + isOK + "\n" +
+                     "token logout: " + oparu.getToken();
+        return str;
     }
     
     public static String getAllCommunities(){
-        //System.out.println("All communities: " + oparu.getAllCommunities());
         return oparu.getAllCommunities();
     }
     
     public static String getCommunityById(String id){
-//        String str = oparu.getCommunityByID(id);
-//        System.out.println("Community id " + id + ": " + str);
-        return oparu.getCommunityByID(id);
+        return oparu.getCommunityById(id);
     }
     
     public static String createCommunity(String name, String idParent){
-//        String str = oparu.createCommunity(name, idParent);
-//        System.out.println("Create new Community:" + str);
         return oparu.createCommunity(name, idParent);
     }
     
-    public static void getCollections(){
-        
+    public static String getAllCollections(){
+        return oparu.getAllCollections();
+    }
+    
+    public static String getCollectionById(String id){
+        return oparu.getCollectionById(id);
+    }
+    
+    public static String createCollection(String name, String idParent){
+        return oparu.createCollection(name, idParent);
+    }
+    
+    public static String getAllItems(){
+        return oparu.getAllItems();
+    }
+    
+    public static String getItemById(String id){
+        return oparu.getItemById(id);
+    }
+    
+    public static String createItem(String name, String itemTitel, String idCollection){
+        return oparu.createItem(name, itemTitel, idCollection);
     }
     
     public static void getItems(){

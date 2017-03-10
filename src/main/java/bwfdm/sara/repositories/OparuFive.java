@@ -25,14 +25,13 @@ import javax.ws.rs.core.Response;
  *
  * @author vk
  */
-public class Oparu implements DSpaceREST,PublicationRepository{
+public class OparuFive implements DSpaceREST,PublicationRepository {
 
-    private String urlServer = "";
-    private String urlRest = "";
-    private String verify = "";
-    private String token = "";
+    private final String urlServer;
+    private final String urlRest;
+    private final String verify;
+    private final int responseStatusOK;
     
-    private Client client;
     private final WebTarget restWebTarget;
     private final WebTarget loginWebTarget;
     private final WebTarget logoutWebTarget;
@@ -42,19 +41,24 @@ public class Oparu implements DSpaceREST,PublicationRepository{
     private final WebTarget collectionsWebTarget;
     private final WebTarget itemsWebTarget;
     private final WebTarget bitstreamsWebTarget;
-    private final WebTarget handleWebTarget;
-    
-    private final int responseStatusOK = 200;
+    private final WebTarget handleWebTarget;    
+
+    private String token = "";
+    private Client client;
         
     // Constructor
-    public Oparu() {
-        this.urlServer = DSpaceConfig.URL_OPARU;
-        this.urlRest = DSpaceConfig.URL_OPARU_REST;
-        this.verify = DSpaceConfig.SSL_VERIFY_OPARU;
+    public OparuFive() {
         
-        //REST-client
+        System.out.println("Constructor oparu-5.");
+        
+        this.urlServer = DSpaceConfig.URL_OPARU_FIVE;
+        this.urlRest = DSpaceConfig.URL_OPARU_FIVE_REST;
+        this.verify = DSpaceConfig.SSL_VERIFY_OPARU_FIVE;
+        this.responseStatusOK = DSpaceConfig.RESPONSE_STATUS_OK_OPARU_FIVE;
+        
+        // REST-client
         this.client = ClientBuilder.newClient();
-        if (DSpaceConfig.SSL_VERIFY_OPARU.equals("false")){
+        if (DSpaceConfig.SSL_VERIFY_OPARU_FIVE.equals("false")){
             try { 
                 this.client = WebUtils.IgnoreSSLClient(); //Ignore SSL-Verification
             }
@@ -62,8 +66,8 @@ public class Oparu implements DSpaceREST,PublicationRepository{
                 Logger.getLogger(MainInt.class.getName()).log(Level.SEVERE, null, ex); 
             }
         }    
-        //WebTargets
-        this.restWebTarget = this.client.target(DSpaceConfig.URL_OPARU_REST);
+        // WebTargets
+        this.restWebTarget = this.client.target(DSpaceConfig.URL_OPARU_FIVE_REST);
         this.loginWebTarget = this.restWebTarget.path("login");
         this.logoutWebTarget = this.restWebTarget.path("logout");
         this.testWebTarget = this.restWebTarget.path("test");
@@ -75,11 +79,8 @@ public class Oparu implements DSpaceREST,PublicationRepository{
         this.handleWebTarget = this.restWebTarget.path("handle");
     }
 
-
-       
     @Override
-    public boolean isRestEnable() {
-        
+    public boolean isRestEnable() {   
         Invocation.Builder invocationBuilder = testWebTarget.request(); 
         Response response = invocationBuilder.get();
         return response.readEntity(String.class).equals(DSpaceConfig.RESPONSE_TEST_OPARU); //connection will be closed automatically after the readEntity
@@ -89,6 +90,8 @@ public class Oparu implements DSpaceREST,PublicationRepository{
     public boolean login(String email, String password) {
         //Login command:
         //curl -H "Content-Type: application/json" --data '{"email":"admin@dspace.org", "password":"dspace"}' http://localhost:8080/rest/login
+        
+        System.out.println("login oparu-5");
         
         boolean loginCorrect = false;
         Invocation.Builder invocationBuilder = loginWebTarget.request(); 
@@ -147,6 +150,7 @@ public class Oparu implements DSpaceREST,PublicationRepository{
      * Communities 
      */
     
+    @Override
     public String getAllCommunities(){
         
         Invocation.Builder invocationBuilder = communitiesWebTarget.request();
@@ -156,7 +160,8 @@ public class Oparu implements DSpaceREST,PublicationRepository{
         return response.readEntity(String.class); //Connection will be closed automatically after the "readEntity"
     }
     
-    public String getCommunityByID(String id){
+    @Override
+    public String getCommunityById(String id){
         
         WebTarget communityIdWebTarget = communitiesWebTarget.path(id);
         Invocation.Builder invocationBuilder = communityIdWebTarget.request();
@@ -206,6 +211,7 @@ public class Oparu implements DSpaceREST,PublicationRepository{
      * Collections
      */
     
+    @Override
     public String getAllCollections(){
         
         Invocation.Builder invocationBuilder = collectionsWebTarget.request();
@@ -215,7 +221,8 @@ public class Oparu implements DSpaceREST,PublicationRepository{
         return response.readEntity(String.class); //Connection will be closed automatically after the "readEntity"
     }
     
-    public String getCollectionByID(String id){
+    @Override
+    public String getCollectionById(String id){
         
         WebTarget communityIdWebTarget = collectionsWebTarget.path(id);
         Invocation.Builder invocationBuilder = communityIdWebTarget.request();
@@ -227,7 +234,20 @@ public class Oparu implements DSpaceREST,PublicationRepository{
     
     @Override
     public String createCollection(String collectionName, String parentCommunityID) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        
+        WebTarget newCollectionWebTarget = communitiesWebTarget.path(parentCommunityID).path("collections");
+        
+        Invocation.Builder invocationBuilder = newCollectionWebTarget.request();
+        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_CONTENT_TYPE_OPARU);
+        invocationBuilder.header("rest-dspace-token", token);
+        String data = "{"
+                + "\"name\":" + "\"" + collectionName + "\""
+                + "}";
+        System.out.println(data);
+        System.out.println(newCollectionWebTarget.toString());
+        Response response = invocationBuilder.post(Entity.json(data));
+        System.out.println("response status - create collection: " + response.getStatus());
+        return response.readEntity(String.class); //Connection will be closed automatically after the "readEntity"
     }
 
     @Override
@@ -242,9 +262,56 @@ public class Oparu implements DSpaceREST,PublicationRepository{
 
     @Override
     public String createItem(String itemName, String itemTitle, String collectionID) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        
+        WebTarget newItemWebTarget = collectionsWebTarget.path(collectionID).path("items");
+        
+        Invocation.Builder invocationBuilder = newItemWebTarget.request();
+        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_CONTENT_TYPE_OPARU);
+        invocationBuilder.header("Accept", DSpaceConfig.HEADER_ACCEPT_OPARU);
+        invocationBuilder.header("user", DSpaceConfig.EMAIL_OPARU);
+        invocationBuilder.header("pass", DSpaceConfig.getPassword(DSpaceConfig.EMAIL_OPARU));
+//        invocationBuilder.header("rest-dspace-token", this.getToken());
+//        invocationBuilder.header("login", token);
+        String data = "{"
+                + "\"name\":" + "\"" + itemName + "\""
+                + "}";
+//        String data = "{"
+//                + "\"metadata\":["
+//                    + "{"
+//                    + "\"key\":" + "\"dc.contributor.author\""
+//                    + "\"value\":" + "\"" + itemName + "\""
+//                    + "}"
+//                + "]}";
+        System.out.println(data);
+        System.out.println(newItemWebTarget.toString());
+        Response response = invocationBuilder.post(Entity.json(data));
+        System.out.println("response status - create item: " + response.getStatus());
+        return response.readEntity(String.class); //Connection will be closed automatically after the "readEntity"
     }
 
+    @Override
+    public String getAllItems(){
+        
+        Invocation.Builder invocationBuilder = itemsWebTarget.request();
+        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_CONTENT_TYPE_OPARU);
+        invocationBuilder.header("Accept", DSpaceConfig.HEADER_ACCEPT_OPARU);
+        Response response = invocationBuilder.get();
+        return response.readEntity(String.class); //Connection will be closed automatically after the "readEntity"
+        
+    }
+    
+    @Override
+    public String getItemById(String id){
+        
+        WebTarget itemIdWebTarget = itemsWebTarget.path(id);
+        Invocation.Builder invocationBuilder = itemIdWebTarget.request();
+        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_CONTENT_TYPE_OPARU);
+        invocationBuilder.header("Accept", DSpaceConfig.HEADER_ACCEPT_OPARU);
+        Response response = invocationBuilder.get();
+        return response.readEntity(String.class); //Connection will be closed automatically after the "readEntity"
+        
+    }
+    
     @Override
     public boolean deleteItem(String itemID) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.

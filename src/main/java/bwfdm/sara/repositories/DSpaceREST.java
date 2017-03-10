@@ -43,6 +43,15 @@ public interface DSpaceREST {
     
     public boolean downloadBitstream(String bitstreamID, String filenameToSave);
     
+    // Not important methods
+    public String getAllCommunities();
+    public String getCommunityById(String id);
+    public String getAllCollections();
+    public String getCollectionById(String id);
+    public String getAllItems();
+    public String getItemById(String id);
+    
+    
     
     
 

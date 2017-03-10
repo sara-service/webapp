@@ -9,6 +9,6 @@ package bwfdm.sara.repositories;
  *
  * @author vk
  */
-public class Kops extends Oparu{
+public class KopsFive extends OparuFive{
     
 }

@@ -19,6 +19,9 @@ public class JsonUtils {
       
     public static String jsonStringPrettyPrint(String jsonString){
         
+        if (jsonString.equals("")){
+            return "Error,empty string.";
+        }
         ObjectMapper mapper = new ObjectMapper();
         String prettyJsonString = "";
         try {

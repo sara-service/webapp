@@ -22,17 +22,29 @@ import java.util.logging.Logger;
 public class DSpaceConfig {
     
     /** 
-     * OPARU config
+     * OPARU-5 config
      */
-    public static final String URL_OPARU = "https://vtstest.rz.uni-ulm.de";
-    public static final String URL_OPARU_REST = "https://vtstest.rz.uni-ulm.de/rest";
+    public static final String URL_OPARU_FIVE = "https://vtstest.rz.uni-ulm.de";
+    public static final String URL_OPARU_FIVE_REST = "https://vtstest.rz.uni-ulm.de/rest";   
+    public static final String SSL_VERIFY_OPARU_FIVE = "false";
+    public static final int RESPONSE_STATUS_OK_OPARU_FIVE = 200;
+        
+    /** 
+     * OPARU-6 config
+     */
+    public static final String URL_OPARU_SIX = "https://bib-test.rz.uni-ulm.de";
+    public static final String URL_OPARU_SIX_REST = "https://bib-test.rz.uni-ulm.de/rest";
+    public static final String SSL_VERIFY_OPARU_SIX = "false";
+    public static final int RESPONSE_STATUS_OK_OPARU_SIX = 200;
+       
+    /** 
+     * OPARU-general config
+     */
     public static final String EMAIL_OPARU = "project-sara@uni-konstanz.de";
-    public static final String PASSWORD_OPARU = "SaraTest";
-    public static final String SSL_VERIFY_OPARU = "false";
+    public static final String PASSWORD_OPARU = "SaraTest";    
     public static final String RESPONSE_TEST_OPARU = "REST api is running.";
-    
     public static final String HEADER_CONTENT_TYPE_OPARU = "application/json";
-     public static final String HEADER_ACCEPT_OPARU = "application/json";
+    public static final String HEADER_ACCEPT_OPARU = "application/json";
     
 //    public static final String HEADER_CONTENT_TYPE_OPARU = 
 //            " {" + 

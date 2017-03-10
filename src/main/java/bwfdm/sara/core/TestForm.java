@@ -32,27 +32,43 @@ public class TestForm extends javax.swing.JFrame {
         java.awt.GridBagConstraints gridBagConstraints;
 
         jPanelButtons = new javax.swing.JPanel();
+        panelRest = new javax.swing.JPanel();
         btnRestTest = new javax.swing.JButton();
         btnTokenStatus = new javax.swing.JButton();
-        btnCreateCommunity = new javax.swing.JButton();
-        btnGetCommunityById = new javax.swing.JButton();
-        btnGetAllCommunities = new javax.swing.JButton();
         btnLogin = new javax.swing.JButton();
         btnLogout = new javax.swing.JButton();
+        panelCommunity = new javax.swing.JPanel();
+        btnCreateCommunity = new javax.swing.JButton();
+        btnGetAllCommunities = new javax.swing.JButton();
+        btnGetCommunityById = new javax.swing.JButton();
+        panelCollections = new javax.swing.JPanel();
+        btnCreateCollection = new javax.swing.JButton();
+        btnGetCollectionById = new javax.swing.JButton();
+        btnGetAllCollections = new javax.swing.JButton();
+        panelItems = new javax.swing.JPanel();
+        btnGetAllItems = new javax.swing.JButton();
+        btnGetItemById = new javax.swing.JButton();
+        btnCreateItem = new javax.swing.JButton();
+        panelBitstreams = new javax.swing.JPanel();
+        btnGetBitstream = new javax.swing.JButton();
         jPanelOutput = new javax.swing.JPanel();
+        jPanel1 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         textAreaOutput = new javax.swing.JTextArea();
-        tfID = new javax.swing.JTextField();
         jLabel1 = new javax.swing.JLabel();
-        tfName = new javax.swing.JTextField();
         jLabel2 = new javax.swing.JLabel();
+        tfID = new javax.swing.JTextField();
+        tfName = new javax.swing.JTextField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setMinimumSize(new java.awt.Dimension(600, 400));
-        setPreferredSize(new java.awt.Dimension(600, 400));
+        setMinimumSize(new java.awt.Dimension(800, 800));
+        setPreferredSize(new java.awt.Dimension(800, 800));
         getContentPane().setLayout(new java.awt.GridBagLayout());
 
         jPanelButtons.setLayout(new java.awt.GridBagLayout());
+
+        panelRest.setBorder(javax.swing.BorderFactory.createTitledBorder("REST"));
+        panelRest.setLayout(new java.awt.GridBagLayout());
 
         btnRestTest.setText("REST-test");
         btnRestTest.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
@@ -63,12 +79,13 @@ public class TestForm extends javax.swing.JFrame {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 3;
+        gridBagConstraints.gridy = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 0.5;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-        jPanelButtons.add(btnRestTest, gridBagConstraints);
+        panelRest.add(btnRestTest, gridBagConstraints);
 
-        btnTokenStatus.setText("token status");
+        btnTokenStatus.setText("Token status");
         btnTokenStatus.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         btnTokenStatus.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -77,54 +94,13 @@ public class TestForm extends javax.swing.JFrame {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 4;
+        gridBagConstraints.gridy = 3;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 0.5;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-        jPanelButtons.add(btnTokenStatus, gridBagConstraints);
+        panelRest.add(btnTokenStatus, gridBagConstraints);
 
-        btnCreateCommunity.setText("create Community (parentID, name)");
-        btnCreateCommunity.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        btnCreateCommunity.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnCreateCommunityActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 9;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-        jPanelButtons.add(btnCreateCommunity, gridBagConstraints);
-
-        btnGetCommunityById.setText("get Community by ID");
-        btnGetCommunityById.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        btnGetCommunityById.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnGetCommunityByIdActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 8;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-        jPanelButtons.add(btnGetCommunityById, gridBagConstraints);
-
-        btnGetAllCommunities.setText("all communities");
-        btnGetAllCommunities.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        btnGetAllCommunities.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnGetAllCommunitiesActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 7;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-        jPanelButtons.add(btnGetAllCommunities, gridBagConstraints);
-
-        btnLogin.setText("login");
+        btnLogin.setText("Login");
         btnLogin.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         btnLogin.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -135,10 +111,11 @@ public class TestForm extends javax.swing.JFrame {
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 0.5;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-        jPanelButtons.add(btnLogin, gridBagConstraints);
+        panelRest.add(btnLogin, gridBagConstraints);
 
-        btnLogout.setText("logout");
+        btnLogout.setText("Logout");
         btnLogout.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         btnLogout.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -149,45 +126,237 @@ public class TestForm extends javax.swing.JFrame {
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 0.5;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-        jPanelButtons.add(btnLogout, gridBagConstraints);
+        panelRest.add(btnLogout, gridBagConstraints);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        jPanelButtons.add(panelRest, gridBagConstraints);
+
+        panelCommunity.setBorder(javax.swing.BorderFactory.createTitledBorder("Community"));
+        panelCommunity.setLayout(new java.awt.GridBagLayout());
+
+        btnCreateCommunity.setText("create Community (parentID, name)");
+        btnCreateCommunity.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        btnCreateCommunity.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCreateCommunityActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 0.5;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        panelCommunity.add(btnCreateCommunity, gridBagConstraints);
+
+        btnGetAllCommunities.setText("get all Communities");
+        btnGetAllCommunities.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        btnGetAllCommunities.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnGetAllCommunitiesActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 0.5;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        panelCommunity.add(btnGetAllCommunities, gridBagConstraints);
+
+        btnGetCommunityById.setText("get Community by ID");
+        btnGetCommunityById.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        btnGetCommunityById.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnGetCommunityByIdActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 0.5;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        panelCommunity.add(btnGetCommunityById, gridBagConstraints);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        jPanelButtons.add(panelCommunity, gridBagConstraints);
+
+        panelCollections.setBorder(javax.swing.BorderFactory.createTitledBorder("Collection"));
+        panelCollections.setLayout(new java.awt.GridBagLayout());
+
+        btnCreateCollection.setText("create Collection");
+        btnCreateCollection.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        btnCreateCollection.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCreateCollectionActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 0.5;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        panelCollections.add(btnCreateCollection, gridBagConstraints);
+
+        btnGetCollectionById.setText("get Collection by ID");
+        btnGetCollectionById.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        btnGetCollectionById.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnGetCollectionByIdActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 0.5;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        panelCollections.add(btnGetCollectionById, gridBagConstraints);
+
+        btnGetAllCollections.setText("get all Collections");
+        btnGetAllCollections.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        btnGetAllCollections.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnGetAllCollectionsActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 0.5;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        panelCollections.add(btnGetAllCollections, gridBagConstraints);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        jPanelButtons.add(panelCollections, gridBagConstraints);
+
+        panelItems.setBorder(javax.swing.BorderFactory.createTitledBorder("Item"));
+        panelItems.setLayout(new java.awt.GridBagLayout());
+
+        btnGetAllItems.setText("get all Items");
+        btnGetAllItems.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        btnGetAllItems.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnGetAllItemsActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 0.5;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        panelItems.add(btnGetAllItems, gridBagConstraints);
+
+        btnGetItemById.setText("get Item by ID");
+        btnGetItemById.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        btnGetItemById.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnGetItemByIdActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 0.5;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        panelItems.add(btnGetItemById, gridBagConstraints);
+
+        btnCreateItem.setText("create Item");
+        btnCreateItem.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        btnCreateItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCreateItemActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 0.5;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        panelItems.add(btnCreateItem, gridBagConstraints);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        jPanelButtons.add(panelItems, gridBagConstraints);
+
+        panelBitstreams.setBorder(javax.swing.BorderFactory.createTitledBorder("Bitstream"));
+        panelBitstreams.setLayout(new java.awt.GridBagLayout());
+
+        btnGetBitstream.setText("get Bitstream");
+        btnGetBitstream.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        btnGetBitstream.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnGetBitstreamActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 0.5;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        panelBitstreams.add(btnGetBitstream, gridBagConstraints);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 4;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        jPanelButtons.add(panelBitstreams, gridBagConstraints);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         getContentPane().add(jPanelButtons, gridBagConstraints);
 
         jPanelOutput.setLayout(new java.awt.GridBagLayout());
 
+        jPanel1.setLayout(new java.awt.BorderLayout());
+
         textAreaOutput.setColumns(20);
         textAreaOutput.setRows(5);
         textAreaOutput.setText("Text is here\n\n\n\n\n\n\n\n\n\n\nyo!");
         textAreaOutput.setMinimumSize(new java.awt.Dimension(180, 220));
-        textAreaOutput.setPreferredSize(new java.awt.Dimension(180, 220));
+        textAreaOutput.setPreferredSize(null);
         jScrollPane1.setViewportView(textAreaOutput);
+
+        jPanel1.add(jScrollPane1, java.awt.BorderLayout.CENTER);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 2;
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.ipadx = 218;
-        gridBagConstraints.ipady = 381;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.SOUTHWEST;
-        gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.weighty = 1.0;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.weightx = 0.5;
+        gridBagConstraints.weighty = 0.5;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        jPanelOutput.add(jScrollPane1, gridBagConstraints);
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.ipadx = 75;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        jPanelOutput.add(tfID, gridBagConstraints);
+        jPanelOutput.add(jPanel1, gridBagConstraints);
 
         jLabel1.setText("ID:");
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -196,14 +365,6 @@ public class TestForm extends javax.swing.JFrame {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         jPanelOutput.add(jLabel1, gridBagConstraints);
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.ipadx = 75;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        jPanelOutput.add(tfName, gridBagConstraints);
 
         jLabel2.setText("Name:");
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -212,6 +373,22 @@ public class TestForm extends javax.swing.JFrame {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         jPanelOutput.add(jLabel2, gridBagConstraints);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.ipadx = 75;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        jPanelOutput.add(tfID, gridBagConstraints);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.ipadx = 75;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        jPanelOutput.add(tfName, gridBagConstraints);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
@@ -229,23 +406,28 @@ public class TestForm extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnRestTestActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRestTestActionPerformed
-        MainInt.testRest();
+        String str = MainInt.testRest();
+        textAreaOutput.setText(str);
     }//GEN-LAST:event_btnRestTestActionPerformed
 
     private void btnLoginActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLoginActionPerformed
-        MainInt.loginDspace();
+        String str = MainInt.loginDspace();
+        textAreaOutput.setText(str);
     }//GEN-LAST:event_btnLoginActionPerformed
 
     private void btnLogoutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLogoutActionPerformed
-        MainInt.logoutDspace();
+        String str = MainInt.logoutDspace();
+        textAreaOutput.setText(str);
     }//GEN-LAST:event_btnLogoutActionPerformed
 
     private void btnTokenStatusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnTokenStatusActionPerformed
-        MainInt.getTokenStatus();
+        String str = MainInt.getTokenStatus();
+        textAreaOutput.setText(JsonUtils.jsonStringPrettyPrint(str));
     }//GEN-LAST:event_btnTokenStatusActionPerformed
 
     private void btnGetAllCommunitiesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGetAllCommunitiesActionPerformed
-        textAreaOutput.setText(JsonUtils.jsonStringPrettyPrint(MainInt.getAllCommunities()));
+        String str = MainInt.getAllCommunities();
+        textAreaOutput.setText(JsonUtils.jsonStringPrettyPrint(str));
     }//GEN-LAST:event_btnGetAllCommunitiesActionPerformed
 
     private void btnGetCommunityByIdActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGetCommunityByIdActionPerformed
@@ -257,8 +439,49 @@ public class TestForm extends javax.swing.JFrame {
     private void btnCreateCommunityActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCreateCommunityActionPerformed
         String idParent = tfID.getText();
         String name = tfName.getText();
-        textAreaOutput.setText(MainInt.createCommunity(name, idParent));
+        String str = MainInt.createCommunity(name, idParent);
+        textAreaOutput.setText(JsonUtils.jsonStringPrettyPrint(str));
     }//GEN-LAST:event_btnCreateCommunityActionPerformed
+
+    private void btnGetAllCollectionsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGetAllCollectionsActionPerformed
+        String str = MainInt.getAllCollections();
+        textAreaOutput.setText(JsonUtils.jsonStringPrettyPrint(str));
+    }//GEN-LAST:event_btnGetAllCollectionsActionPerformed
+
+    private void btnGetCollectionByIdActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGetCollectionByIdActionPerformed
+        String id = tfID.getText();
+        String str = MainInt.getCollectionById(id);
+        textAreaOutput.setText(JsonUtils.jsonStringPrettyPrint(str));
+    }//GEN-LAST:event_btnGetCollectionByIdActionPerformed
+
+    private void btnCreateCollectionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCreateCollectionActionPerformed
+        String idParent = tfID.getText();
+        String name = tfName.getText();
+        String str = MainInt.createCollection(name, idParent);
+        textAreaOutput.setText(JsonUtils.jsonStringPrettyPrint(str));
+    }//GEN-LAST:event_btnCreateCollectionActionPerformed
+
+    private void btnCreateItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCreateItemActionPerformed
+        String idCollection = tfID.getText();
+        String name = tfName.getText();
+        String str = MainInt.createItem(name, "test-item-titel", idCollection);
+        textAreaOutput.setText(JsonUtils.jsonStringPrettyPrint(str));
+    }//GEN-LAST:event_btnCreateItemActionPerformed
+
+    private void btnGetAllItemsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGetAllItemsActionPerformed
+        String str = MainInt.getAllItems();
+        textAreaOutput.setText(JsonUtils.jsonStringPrettyPrint(str));
+    }//GEN-LAST:event_btnGetAllItemsActionPerformed
+
+    private void btnGetItemByIdActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGetItemByIdActionPerformed
+        String id = tfID.getText();
+        String str = MainInt.getItemById(id);
+        textAreaOutput.setText(JsonUtils.jsonStringPrettyPrint(str));
+    }//GEN-LAST:event_btnGetItemByIdActionPerformed
+
+    private void btnGetBitstreamActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGetBitstreamActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_btnGetBitstreamActionPerformed
 
     /**
      * @param args the command line arguments
@@ -266,18 +489,31 @@ public class TestForm extends javax.swing.JFrame {
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnCreateCollection;
     private javax.swing.JButton btnCreateCommunity;
+    private javax.swing.JButton btnCreateItem;
+    private javax.swing.JButton btnGetAllCollections;
     private javax.swing.JButton btnGetAllCommunities;
+    private javax.swing.JButton btnGetAllItems;
+    private javax.swing.JButton btnGetBitstream;
+    private javax.swing.JButton btnGetCollectionById;
     private javax.swing.JButton btnGetCommunityById;
+    private javax.swing.JButton btnGetItemById;
     private javax.swing.JButton btnLogin;
     private javax.swing.JButton btnLogout;
     private javax.swing.JButton btnRestTest;
     private javax.swing.JButton btnTokenStatus;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
+    private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanelButtons;
     private javax.swing.JPanel jPanelOutput;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JPanel panelBitstreams;
+    private javax.swing.JPanel panelCollections;
+    private javax.swing.JPanel panelCommunity;
+    private javax.swing.JPanel panelItems;
+    private javax.swing.JPanel panelRest;
     private javax.swing.JTextArea textAreaOutput;
     private javax.swing.JTextField tfID;
     private javax.swing.JTextField tfName;
