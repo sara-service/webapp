@@ -68,21 +68,23 @@ public class MainInt {
         return Boolean.toString(oparu.isRestEnable());
     }
     
-    public static String getTokenStatus(){
-        return oparu.getTokenStatus(oparu.getToken());
+    public static String getConnectionStatus(){
+        return oparu.getConnectionStatus();
     }
     
     public static String loginDspace(){
         isOK = oparu.login(DSpaceConfig.EMAIL_OPARU, DSpaceConfig.getPassword(DSpaceConfig.EMAIL_OPARU));
-        String str = "login OK: " + isOK + "\n" +
-                     "token login: " + oparu.getToken();
+        String str = "login OK: " + isOK + "\n"; 
+//                +
+//                     "token login: " + oparu.getToken();
         return str;
     }
     
     public static String logoutDspace(){
         isOK = oparu.logout();
-        String str = "logout OK: " + isOK + "\n" +
-                     "token logout: " + oparu.getToken();
+        String str = "logout OK: " + isOK + "\n"; 
+//        +
+//                     "token logout: " + oparu.getToken();
         return str;
     }
     

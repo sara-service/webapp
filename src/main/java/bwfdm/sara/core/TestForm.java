@@ -34,7 +34,7 @@ public class TestForm extends javax.swing.JFrame {
         jPanelButtons = new javax.swing.JPanel();
         panelRest = new javax.swing.JPanel();
         btnRestTest = new javax.swing.JButton();
-        btnTokenStatus = new javax.swing.JButton();
+        btnConnectionStatus = new javax.swing.JButton();
         btnLogin = new javax.swing.JButton();
         btnLogout = new javax.swing.JButton();
         panelCommunity = new javax.swing.JPanel();
@@ -85,11 +85,11 @@ public class TestForm extends javax.swing.JFrame {
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         panelRest.add(btnRestTest, gridBagConstraints);
 
-        btnTokenStatus.setText("Token status");
-        btnTokenStatus.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        btnTokenStatus.addActionListener(new java.awt.event.ActionListener() {
+        btnConnectionStatus.setText("Connection status");
+        btnConnectionStatus.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        btnConnectionStatus.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnTokenStatusActionPerformed(evt);
+                btnConnectionStatusActionPerformed(evt);
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -98,7 +98,7 @@ public class TestForm extends javax.swing.JFrame {
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 0.5;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-        panelRest.add(btnTokenStatus, gridBagConstraints);
+        panelRest.add(btnConnectionStatus, gridBagConstraints);
 
         btnLogin.setText("Login");
         btnLogin.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
@@ -420,10 +420,10 @@ public class TestForm extends javax.swing.JFrame {
         textAreaOutput.setText(str);
     }//GEN-LAST:event_btnLogoutActionPerformed
 
-    private void btnTokenStatusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnTokenStatusActionPerformed
-        String str = MainInt.getTokenStatus();
+    private void btnConnectionStatusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnConnectionStatusActionPerformed
+        String str = MainInt.getConnectionStatus();
         textAreaOutput.setText(JsonUtils.jsonStringPrettyPrint(str));
-    }//GEN-LAST:event_btnTokenStatusActionPerformed
+    }//GEN-LAST:event_btnConnectionStatusActionPerformed
 
     private void btnGetAllCommunitiesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGetAllCommunitiesActionPerformed
         String str = MainInt.getAllCommunities();
@@ -489,6 +489,7 @@ public class TestForm extends javax.swing.JFrame {
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnConnectionStatus;
     private javax.swing.JButton btnCreateCollection;
     private javax.swing.JButton btnCreateCommunity;
     private javax.swing.JButton btnCreateItem;
@@ -502,7 +503,6 @@ public class TestForm extends javax.swing.JFrame {
     private javax.swing.JButton btnLogin;
     private javax.swing.JButton btnLogout;
     private javax.swing.JButton btnRestTest;
-    private javax.swing.JButton btnTokenStatus;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JPanel jPanel1;
