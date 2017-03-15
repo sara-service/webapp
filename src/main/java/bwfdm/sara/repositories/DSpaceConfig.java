@@ -35,16 +35,19 @@ public class DSpaceConfig {
     public static final String URL_OPARU_SIX = "https://bib-test.rz.uni-ulm.de";
     public static final String URL_OPARU_SIX_REST = "https://bib-test.rz.uni-ulm.de/rest";
     public static final String SSL_VERIFY_OPARU_SIX = "false";
+    public static final String COOKIE_KEY_OPARU_SIX = "JSESSIONID";
     public static final int RESPONSE_STATUS_OK_OPARU_SIX = 200;
+    
        
     /** 
      * OPARU-general config
      */
     public static final String EMAIL_OPARU = "project-sara@uni-konstanz.de";
-    public static final String PASSWORD_OPARU = "SaraTest";    
+    public static final String PASSWORD_OPARU = "Sara+Test";    
     public static final String RESPONSE_TEST_OPARU = "REST api is running.";
     public static final String HEADER_CONTENT_TYPE_OPARU = "application/json";
     public static final String HEADER_ACCEPT_OPARU = "application/json";
+    
     
 //    public static final String HEADER_CONTENT_TYPE_OPARU = 
 //            " {" + 

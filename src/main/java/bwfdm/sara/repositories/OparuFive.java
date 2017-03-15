@@ -17,6 +17,7 @@ import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -130,21 +131,30 @@ public class OparuFive implements DSpaceREST,PublicationRepository {
     }
     
     @Override
-    public String getTokenStatus(String token){
+    public boolean isAuthenticated(){    
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+    
+    //@Override
+    public String getConnectionStatus(){
         
         Invocation.Builder invocationBuilder = statusWebTarget.request();
         invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_CONTENT_TYPE_OPARU);
         invocationBuilder.header("Accept", DSpaceConfig.HEADER_ACCEPT_OPARU);
-        invocationBuilder.header("rest-dspace-token", token);
+        invocationBuilder.header("rest-dspace-token", this.token);
         Response response = invocationBuilder.get();
         return response.readEntity(String.class);        
     }
     
-    @Override
+    //@Override
     public String getToken() {      
         return this.token;
     }
 
+    //@Override
+    public Cookie getCookie() {      
+        return null;
+    }
     
     /**
      * Communities 

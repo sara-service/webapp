@@ -5,6 +5,8 @@
  */
 package bwfdm.sara.utils;
 
+import bwfdm.sara.repositories.OparuSix;
+import bwfdm.sara.rest.CookieStatusResponseDto;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
@@ -33,6 +35,17 @@ public class JsonUtils {
             Logger.getLogger(JsonUtils.class.getName()).log(Level.SEVERE, null, ex);
         }
         return prettyJsonString;
+    }
+    
+    public static <T> T jsonStringToObject(String jsonString, Class<T> type){
+        ObjectMapper mapper = new ObjectMapper();
+        T obj = null;
+        try{
+            obj = type.cast(mapper.readValue(jsonString, type));
+        }catch (IOException ex) {
+            Logger.getLogger(OparuSix.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return obj;
     }
     
 }

@@ -6,6 +6,7 @@
 package bwfdm.sara.repositories;
 
 import bwfdm.sara.metadata.MetadataCollection;
+import javax.ws.rs.core.Cookie;
 
 /**
  * Interface for the typical DSpace Publication Repository.
@@ -19,8 +20,10 @@ public interface DSpaceREST {
     public boolean isRestEnable();
     public boolean login(String email, String password);
     public boolean logout();
-    public String getTokenStatus(String token);
-    public String getToken();
+    public boolean isAuthenticated();
+    //public String getConnectionStatus();
+    //public String getToken();
+    //public Cookie getCookie();
     
     public String createCommunity(String communityName, String parentCommunityID);
     public String deleteCommunity(String communityID);

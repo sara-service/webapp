@@ -7,7 +7,11 @@ package bwfdm.sara.repositories;
 
 import bwfdm.sara.core.MainInt;
 import bwfdm.sara.metadata.MetadataCollection;
+import bwfdm.sara.rest.CookieStatusResponseDto;
+import bwfdm.sara.utils.JsonUtils;
 import bwfdm.sara.utils.WebUtils;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.logging.Level;
@@ -17,6 +21,7 @@ import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.Feature;
 import javax.ws.rs.core.Form;
 import javax.ws.rs.core.MediaType;
@@ -46,13 +51,13 @@ public class OparuSix implements DSpaceREST,PublicationRepository {
     private final WebTarget bitstreamsWebTarget;
     private final WebTarget handleWebTarget;    
 
-    private String coockie = "";
+    private Cookie cookie;
     private Client client;
 
     // Constructor
     public OparuSix() {
         
-        System.out.println("Constructor Oparu-6.");
+        System.out.println("--- Constructor Oparu-6 ---");
         
         this.urlServer = DSpaceConfig.URL_OPARU_SIX;
         this.urlRest = DSpaceConfig.URL_OPARU_SIX_REST;
@@ -68,11 +73,7 @@ public class OparuSix implements DSpaceREST,PublicationRepository {
             catch (Exception ex) { 
                 Logger.getLogger(MainInt.class.getName()).log(Level.SEVERE, null, ex); 
             }
-        } 
-        
-        Logger logger = Logger.getLogger(getClass().getName());
-        Feature feature = new LoggingFeature(logger, Level.INFO, null, null);
-        client.register(feature);
+        }
         
         // WebTargets
         this.restWebTarget = this.client.target(DSpaceConfig.URL_OPARU_SIX_REST);
@@ -85,6 +86,14 @@ public class OparuSix implements DSpaceREST,PublicationRepository {
         this.itemsWebTarget = this.restWebTarget.path("items");
         this.bitstreamsWebTarget = this.restWebTarget.path("bitstreams");
         this.handleWebTarget = this.restWebTarget.path("handle");
+        
+        // Cookies
+        this.cookie = new Cookie("", "");
+        
+        //Logging of all requests/responses
+        Logger logger = Logger.getLogger(getClass().getName());
+        Feature feature = new LoggingFeature(logger, Level.INFO, null, null);
+        client.register(feature);
     }
     
     @Override
@@ -99,10 +108,32 @@ public class OparuSix implements DSpaceREST,PublicationRepository {
         // Login command:
         // curl -v -X POST --data "email=admin@dspace.org&password=mypass" https://dspace.myu.edu/rest/login
         
-        System.out.println("login oparu-6");
+        System.out.println("--- login ---");
         
-        //TODO: encode correct!
+        // Check if login already done
+        if (this.isAuthenticated()){
+            return true;
+        }
+        System.out.println("cookie full string: " + this.getCookie());
+        Invocation.Builder invocationBuilder = loginWebTarget.request(); 
+        invocationBuilder.header("Content-Type", "application/x-www-form-urlencoded");
+        Form form = new Form();
+        form.param("email", email);
+        form.param("password", password);
+        Response response = invocationBuilder.post(Entity.form(form));
+        if (response.getStatus() == this.responseStatusOK){
+            this.setCookie(response.getCookies().get(DSpaceConfig.COOKIE_KEY_OPARU_SIX));
+        }
+        //this.cookie = response.getCookies().get(DSpaceConfig.COOKIE_KEY_OPARU_SIX);
+        System.out.println("cookie full string: " + this.getCookie());
+        System.out.println("response login: " + response.getStatus()); 
+        System.out.println("response coockie: " + this.getCookie().getValue());
+        System.out.println("cookie name: " + this.getCookie().getName());
+        response.close(); //not realy needed but better to close
+        return this.isAuthenticated();   
         
+        // to remove
+        // Encoding, it is done automatically! We do not need it.
 //        try {
 //            email = URLEncoder.encode(email, "ISO-8859-1");
 //            password = URLEncoder.encode(password, "ISO-8859-1");
@@ -111,48 +142,57 @@ public class OparuSix implements DSpaceREST,PublicationRepository {
 //            Logger.getLogger(OparuSix.class.getName()).log(Level.SEVERE, null, ex);
 //        }
         
-        boolean loginCorrect = false;
-        Invocation.Builder invocationBuilder = loginWebTarget.request(); 
-        invocationBuilder.header("Content-Type", "application/x-www-form-urlencoded");
-        //invocationBuilder.header("Content-Type", "application/json");
-        //String data = "email=" + email + "&password=" + password;
-        //String data = "email=project-sara@uni-konstanz.de&password=SaraTest";
-        //System.out.println(data);
-        //System.out.println(loginWebTarget.toString());
-        Form form = new Form();
-        form.param("email", email);
-        form.param("password", password);
-        Response response = invocationBuilder.post(Entity.form(form));
-        if (response.getStatus() == this.responseStatusOK){
-            this.coockie = response.readEntity(String.class);
-            loginCorrect = true;
-        }
-        System.out.println("response login: " + response.getStatus()); 
-        System.out.println("response string: " + this.coockie);
-        response.close(); //not realy needed but better to close
-        return loginCorrect;        
     }
 
     @Override
     public boolean logout() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
+        // Command:
+        // curl -v -X POST --cookie "JSESSIONID=6B98CF8648BCE57DCD99689FE77CB1B8" https://dspace.myu.edu/rest/logout
+        System.out.println("--- logout ---");
+        
+        Invocation.Builder invocationBuilder = logoutWebTarget.request(); 
+        invocationBuilder.cookie(this.getCookie()); 
+        //invocationBuilder.cookie(new Cookie("",""));
+        Response response = invocationBuilder.post(Entity.json(null)); //ohne "--data"
+        System.out.println("response logout: " + response.getStatus()); 
+        System.out.println("response string: " + response.readEntity(String.class));
+        System.out.println("cookie before = " + this.getCookie());
+        if ((response.getStatus() == this.responseStatusOK) && !this.isAuthenticated()){ // even if cookie is wrong response Status is 200! 
+            this.setCookie(new Cookie("", ""));
+            System.out.println("cookie after = " + this.getCookie());
+            return true;
+        }        
 
-    @Override
-    public String getTokenStatus(String token){
-        Invocation.Builder invocationBuilder = statusWebTarget.request();
-        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_CONTENT_TYPE_OPARU);
-        invocationBuilder.header("Accept", DSpaceConfig.HEADER_ACCEPT_OPARU);
-        invocationBuilder.header("rest-dspace-token", token);
-        Response response = invocationBuilder.get();
-        return response.readEntity(String.class);        
+        System.out.println("-------");
+        return false;
     }
     
     @Override
-    public String getToken() {      
-        return this.coockie;
+    public boolean isAuthenticated(){
+        
+        String status = this.getConnectionStatus();
+        CookieStatusResponseDto cookieStatus = JsonUtils.jsonStringToObject(status, CookieStatusResponseDto.class);
+        return cookieStatus.isAuthenticated();
+    }
+    
+    public String getConnectionStatus(){
+        
+        Invocation.Builder invocationBuilder = statusWebTarget.request();
+        invocationBuilder.header("Accept", "application/json");
+        invocationBuilder.cookie(this.getCookie());     
+        Response response = invocationBuilder.get();
+        String status = response.readEntity(String.class); // Connection will be closed automatically       
+        return status;
+    }
+   
+    public Cookie getCookie(){      
+        return this.cookie;
     }
 
+    public void setCookie(Cookie cookie) {
+        this.cookie = cookie;
+    }
+        
     @Override
     public String createCommunity(String communityName, String parentCommunityID) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
