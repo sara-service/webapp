@@ -35,4 +35,16 @@ public class WebUtils {
     return ClientBuilder.newBuilder().sslContext(sslcontext).hostnameVerifier((s1, s2) -> true).build();
     }
     
+    
+            // to remove
+        // Encoding, it is done automatically! We do not need it.
+//        try {
+//            email = URLEncoder.encode(email, "ISO-8859-1");
+//            password = URLEncoder.encode(password, "ISO-8859-1");
+//            System.out.println("email + password encoded: " + email + " " + password);
+//        } catch (UnsupportedEncodingException ex) {
+//            Logger.getLogger(OparuSix.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+    
+    
 }

@@ -130,18 +130,7 @@ public class OparuSix implements DSpaceREST,PublicationRepository {
         System.out.println("response coockie: " + this.getCookie().getValue());
         System.out.println("cookie name: " + this.getCookie().getName());
         response.close(); //not realy needed but better to close
-        return this.isAuthenticated();   
-        
-        // to remove
-        // Encoding, it is done automatically! We do not need it.
-//        try {
-//            email = URLEncoder.encode(email, "ISO-8859-1");
-//            password = URLEncoder.encode(password, "ISO-8859-1");
-//            System.out.println("email + password encoded: " + email + " " + password);
-//        } catch (UnsupportedEncodingException ex) {
-//            Logger.getLogger(OparuSix.class.getName()).log(Level.SEVERE, null, ex);
-//        }
-        
+        return this.isAuthenticated();           
     }
 
     @Override
@@ -192,10 +181,50 @@ public class OparuSix implements DSpaceREST,PublicationRepository {
     public void setCookie(Cookie cookie) {
         this.cookie = cookie;
     }
+      
+    @Override
+    public String getAllCommunities(){
         
+        Invocation.Builder invocationBuilder = communitiesWebTarget.request();
+        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_APPLICATION_JSON);
+        invocationBuilder.header("Accept", DSpaceConfig.HEADER_ACCEPT_OPARU);
+        Response response = invocationBuilder.get();
+        return response.readEntity(String.class); //Connection will be closed automatically after the "readEntity"
+    }
+
+    @Override
+    public String getCommunityById(String id){
+        
+        WebTarget communityIdWebTarget = communitiesWebTarget.path(id);
+        Invocation.Builder invocationBuilder = communityIdWebTarget.request();
+        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_APPLICATION_JSON);
+        invocationBuilder.header("Accept", DSpaceConfig.HEADER_ACCEPT_OPARU);
+        Response response = invocationBuilder.get();
+        return response.readEntity(String.class); //Connection will be closed automatically after the "readEntity"
+    }
+    
+    
     @Override
     public String createCommunity(String communityName, String parentCommunityID) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        
+        WebTarget newCommunityWebTarget = communitiesWebTarget;
+        if (!parentCommunityID.equals("")){
+            newCommunityWebTarget = communitiesWebTarget.path(parentCommunityID).path("communities");
+        }
+        Invocation.Builder invocationBuilder = newCommunityWebTarget.request();
+        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_APPLICATION_JSON);
+        invocationBuilder.header("Accept", DSpaceConfig.HEADER_ACCEPT_OPARU);
+        invocationBuilder.cookie(this.getCookie());
+        String data = "{"
+                + "\"name\":" + "\"" + communityName + "\""
+                + "}";
+        Response response = invocationBuilder.post(Entity.json(data));
+        
+        if (response.getStatus() != this.responseStatusOK){
+            return DSpaceConfig.RESPONSE_EMPTY_JSON;
+        }
+ 
+        return response.readEntity(String.class); //Connection will be closed automatically after the "readEntity"
     }
 
     @Override
@@ -214,8 +243,56 @@ public class OparuSix implements DSpaceREST,PublicationRepository {
     }
 
     @Override
+    public String getAllCollections(){
+        
+        Invocation.Builder invocationBuilder = collectionsWebTarget.request();
+        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_APPLICATION_JSON);
+        invocationBuilder.header("Accept", DSpaceConfig.HEADER_ACCEPT_OPARU);
+        Response response = invocationBuilder.get();
+        
+        if (response.getStatus() != this.responseStatusOK){
+            return DSpaceConfig.RESPONSE_EMPTY_JSON;
+        }
+        
+        return response.readEntity(String.class); //Connection will be closed automatically after the "readEntity"
+    }
+
+    @Override
+    public String getCollectionById(String id){
+        
+        WebTarget communityIdWebTarget = collectionsWebTarget.path(id);
+        Invocation.Builder invocationBuilder = communityIdWebTarget.request();
+        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_APPLICATION_JSON);
+        invocationBuilder.header("Accept", DSpaceConfig.HEADER_ACCEPT_OPARU);
+        Response response = invocationBuilder.get();
+        
+        if (response.getStatus() != this.responseStatusOK){
+            return DSpaceConfig.RESPONSE_EMPTY_JSON;
+        }
+        
+        return response.readEntity(String.class); //Connection will be closed automatically after the "readEntity"
+    }
+    
+    
+    @Override
     public String createCollection(String collectionName, String parentCommunityID) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        
+        WebTarget newCollectionWebTarget = communitiesWebTarget.path(parentCommunityID).path("collections");
+        
+        Invocation.Builder invocationBuilder = newCollectionWebTarget.request();
+        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_APPLICATION_JSON);
+        invocationBuilder.header("Accept", DSpaceConfig.HEADER_ACCEPT_OPARU);
+        invocationBuilder.cookie(this.getCookie());
+        String data = "{"
+                + "\"name\":" + "\"" + collectionName + "\""
+                + "}";
+        Response response = invocationBuilder.post(Entity.json(data));
+        
+        if (response.getStatus() != this.responseStatusOK){
+            return DSpaceConfig.RESPONSE_EMPTY_JSON;
+        }
+        
+        return response.readEntity(String.class); //Connection will be closed automatically after the "readEntity"
     }
 
     @Override
@@ -268,25 +345,9 @@ public class OparuSix implements DSpaceREST,PublicationRepository {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
-    @Override
-    public String getAllCommunities() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
+    
 
-    @Override
-    public String getCommunityById(String id) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public String getAllCollections() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public String getCollectionById(String id) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
+    
 
     @Override
     public String getAllItems() {
@@ -327,6 +388,5 @@ public class OparuSix implements DSpaceREST,PublicationRepository {
     public void changeElementMetadata() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-
     
 }

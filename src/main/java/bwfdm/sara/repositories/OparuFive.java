@@ -96,7 +96,7 @@ public class OparuFive implements DSpaceREST,PublicationRepository {
         
         boolean loginCorrect = false;
         Invocation.Builder invocationBuilder = loginWebTarget.request(); 
-        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_CONTENT_TYPE_OPARU);
+        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_APPLICATION_JSON);
         String data = "{"
                 + "\"email\":\"" + email + "\", "
                 + "\"password\":\"" + password + "\""
@@ -118,7 +118,7 @@ public class OparuFive implements DSpaceREST,PublicationRepository {
         
         boolean logoutCorrect = false;
         Invocation.Builder invocationBuilder = logoutWebTarget.request();
-        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_CONTENT_TYPE_OPARU);
+        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_APPLICATION_JSON);
         invocationBuilder.header("rest-dspace-token", this.token);
         Response response = invocationBuilder.post(Entity.json(""));
         if (response.getStatus() == this.responseStatusOK){
@@ -139,7 +139,7 @@ public class OparuFive implements DSpaceREST,PublicationRepository {
     public String getConnectionStatus(){
         
         Invocation.Builder invocationBuilder = statusWebTarget.request();
-        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_CONTENT_TYPE_OPARU);
+        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_APPLICATION_JSON);
         invocationBuilder.header("Accept", DSpaceConfig.HEADER_ACCEPT_OPARU);
         invocationBuilder.header("rest-dspace-token", this.token);
         Response response = invocationBuilder.get();
@@ -164,7 +164,7 @@ public class OparuFive implements DSpaceREST,PublicationRepository {
     public String getAllCommunities(){
         
         Invocation.Builder invocationBuilder = communitiesWebTarget.request();
-        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_CONTENT_TYPE_OPARU);
+        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_APPLICATION_JSON);
         invocationBuilder.header("Accept", DSpaceConfig.HEADER_ACCEPT_OPARU);
         Response response = invocationBuilder.get();
         return response.readEntity(String.class); //Connection will be closed automatically after the "readEntity"
@@ -175,7 +175,7 @@ public class OparuFive implements DSpaceREST,PublicationRepository {
         
         WebTarget communityIdWebTarget = communitiesWebTarget.path(id);
         Invocation.Builder invocationBuilder = communityIdWebTarget.request();
-        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_CONTENT_TYPE_OPARU);
+        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_APPLICATION_JSON);
         invocationBuilder.header("Accept", DSpaceConfig.HEADER_ACCEPT_OPARU);
         Response response = invocationBuilder.get();
         return response.readEntity(String.class); //Connection will be closed automatically after the "readEntity"
@@ -189,7 +189,7 @@ public class OparuFive implements DSpaceREST,PublicationRepository {
             newCommunityWebTarget = communitiesWebTarget.path(parentCommunityID).path("communities");
         }
         Invocation.Builder invocationBuilder = newCommunityWebTarget.request();
-        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_CONTENT_TYPE_OPARU);
+        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_APPLICATION_JSON);
         invocationBuilder.header("rest-dspace-token", token);
         String data = "{"
                 + "\"name\":" + "\"" + communityName + "\""
@@ -225,7 +225,7 @@ public class OparuFive implements DSpaceREST,PublicationRepository {
     public String getAllCollections(){
         
         Invocation.Builder invocationBuilder = collectionsWebTarget.request();
-        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_CONTENT_TYPE_OPARU);
+        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_APPLICATION_JSON);
         invocationBuilder.header("Accept", DSpaceConfig.HEADER_ACCEPT_OPARU);
         Response response = invocationBuilder.get();
         return response.readEntity(String.class); //Connection will be closed automatically after the "readEntity"
@@ -236,7 +236,7 @@ public class OparuFive implements DSpaceREST,PublicationRepository {
         
         WebTarget communityIdWebTarget = collectionsWebTarget.path(id);
         Invocation.Builder invocationBuilder = communityIdWebTarget.request();
-        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_CONTENT_TYPE_OPARU);
+        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_APPLICATION_JSON);
         invocationBuilder.header("Accept", DSpaceConfig.HEADER_ACCEPT_OPARU);
         Response response = invocationBuilder.get();
         return response.readEntity(String.class); //Connection will be closed automatically after the "readEntity"
@@ -248,7 +248,7 @@ public class OparuFive implements DSpaceREST,PublicationRepository {
         WebTarget newCollectionWebTarget = communitiesWebTarget.path(parentCommunityID).path("collections");
         
         Invocation.Builder invocationBuilder = newCollectionWebTarget.request();
-        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_CONTENT_TYPE_OPARU);
+        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_APPLICATION_JSON);
         invocationBuilder.header("rest-dspace-token", token);
         String data = "{"
                 + "\"name\":" + "\"" + collectionName + "\""
@@ -276,7 +276,7 @@ public class OparuFive implements DSpaceREST,PublicationRepository {
         WebTarget newItemWebTarget = collectionsWebTarget.path(collectionID).path("items");
         
         Invocation.Builder invocationBuilder = newItemWebTarget.request();
-        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_CONTENT_TYPE_OPARU);
+        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_APPLICATION_JSON);
         invocationBuilder.header("Accept", DSpaceConfig.HEADER_ACCEPT_OPARU);
         invocationBuilder.header("user", DSpaceConfig.EMAIL_OPARU);
         invocationBuilder.header("pass", DSpaceConfig.getPassword(DSpaceConfig.EMAIL_OPARU));
@@ -303,7 +303,7 @@ public class OparuFive implements DSpaceREST,PublicationRepository {
     public String getAllItems(){
         
         Invocation.Builder invocationBuilder = itemsWebTarget.request();
-        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_CONTENT_TYPE_OPARU);
+        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_APPLICATION_JSON);
         invocationBuilder.header("Accept", DSpaceConfig.HEADER_ACCEPT_OPARU);
         Response response = invocationBuilder.get();
         return response.readEntity(String.class); //Connection will be closed automatically after the "readEntity"
@@ -315,7 +315,7 @@ public class OparuFive implements DSpaceREST,PublicationRepository {
         
         WebTarget itemIdWebTarget = itemsWebTarget.path(id);
         Invocation.Builder invocationBuilder = itemIdWebTarget.request();
-        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_CONTENT_TYPE_OPARU);
+        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_APPLICATION_JSON);
         invocationBuilder.header("Accept", DSpaceConfig.HEADER_ACCEPT_OPARU);
         Response response = invocationBuilder.get();
         return response.readEntity(String.class); //Connection will be closed automatically after the "readEntity"

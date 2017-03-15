@@ -45,11 +45,17 @@ public class DSpaceConfig {
     public static final String EMAIL_OPARU = "project-sara@uni-konstanz.de";
     public static final String PASSWORD_OPARU = "Sara+Test";    
     public static final String RESPONSE_TEST_OPARU = "REST api is running.";
-    public static final String HEADER_CONTENT_TYPE_OPARU = "application/json";
+    
+    /**
+     * General config
+     */
+    public static final String HEADER_APPLICATION_JSON = "application/json";
     public static final String HEADER_ACCEPT_OPARU = "application/json";
+    public static final String RESPONSE_EMPTY_JSON = "{\"\":\"\"}";
     
     
-//    public static final String HEADER_CONTENT_TYPE_OPARU = 
+    
+//    public static final String HEADER_APPLICATION_JSON = 
 //            " {" + 
 //            " \"Content-Type\": \"application/" + REQUEST_TYPE_OPARU + "\"" + 
 //            " }";
