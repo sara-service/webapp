@@ -100,6 +100,14 @@ public class MainInt {
         return oparu.createCommunity(name, idParent);
     }
     
+    public static String deleteCommunity(String idCommunity){
+        return oparu.deleteCommunity(idCommunity);
+    }
+    
+    public static String updateCommunity(String newName, String idCommunity){
+        return oparu.updateCommunity(newName, idCommunity);
+    }
+    
     public static String getAllCollections(){
         return oparu.getAllCollections();
     }
@@ -110,6 +118,14 @@ public class MainInt {
     
     public static String createCollection(String name, String idParent){
         return oparu.createCollection(name, idParent);
+    }
+    
+    public static String deleteCollection(String idCollection){
+        return oparu.deleteCollection(idCollection);
+    }
+    
+    public static String updateCollection(String newName, String idCollection){
+        return oparu.updateCollection(newName, idCollection);
     }
     
     public static String getAllItems(){

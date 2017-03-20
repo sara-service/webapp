@@ -27,13 +27,13 @@ public interface DSpaceREST {
     
     public String createCommunity(String communityName, String parentCommunityID);
     public String deleteCommunity(String communityID);
-    public boolean updateCommunity(String communityName, String communityID);
+    public String updateCommunity(String communityName, String communityID);
     
     public String getObjectProperties(String objectName, String objectID);
     
     public String createCollection(String collectionName, String parentCommunityID);
     public String deleteCollection(String collectionID);
-    public boolean updateCollection(String collectionName, String collectionID);
+    public String updateCollection(String collectionName, String collectionID);
     
     public String createItem(String itemName, String itemTitle, String collectionID);
     public boolean deleteItem(String itemID);

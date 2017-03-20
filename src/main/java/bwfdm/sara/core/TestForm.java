@@ -41,10 +41,14 @@ public class TestForm extends javax.swing.JFrame {
         btnCreateCommunity = new javax.swing.JButton();
         btnGetAllCommunities = new javax.swing.JButton();
         btnGetCommunityById = new javax.swing.JButton();
+        btnDeleteCommunity = new javax.swing.JButton();
+        btnUpdateCommunity = new javax.swing.JButton();
         panelCollections = new javax.swing.JPanel();
         btnCreateCollection = new javax.swing.JButton();
         btnGetCollectionById = new javax.swing.JButton();
         btnGetAllCollections = new javax.swing.JButton();
+        btnDeleteCollection = new javax.swing.JButton();
+        btnUpdateCollection = new javax.swing.JButton();
         panelItems = new javax.swing.JPanel();
         btnGetAllItems = new javax.swing.JButton();
         btnGetItemById = new javax.swing.JButton();
@@ -185,6 +189,36 @@ public class TestForm extends javax.swing.JFrame {
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         panelCommunity.add(btnGetCommunityById, gridBagConstraints);
 
+        btnDeleteCommunity.setText("delete Community (by ID)");
+        btnDeleteCommunity.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        btnDeleteCommunity.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnDeleteCommunityActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 0.5;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        panelCommunity.add(btnDeleteCommunity, gridBagConstraints);
+
+        btnUpdateCommunity.setText("update Community (ID, new name)");
+        btnUpdateCommunity.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        btnUpdateCommunity.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnUpdateCommunityActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 4;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 0.5;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        panelCommunity.add(btnUpdateCommunity, gridBagConstraints);
+
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;
@@ -239,6 +273,38 @@ public class TestForm extends javax.swing.JFrame {
         gridBagConstraints.weightx = 0.5;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         panelCollections.add(btnGetAllCollections, gridBagConstraints);
+
+        btnDeleteCollection.setText("delete Collection (ID)");
+        btnDeleteCollection.setActionCommand("delete Collection (ID)");
+        btnDeleteCollection.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        btnDeleteCollection.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnDeleteCollectionActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 0.5;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        panelCollections.add(btnDeleteCollection, gridBagConstraints);
+
+        btnUpdateCollection.setText("update Collection (ID, new name)");
+        btnUpdateCollection.setToolTipText("");
+        btnUpdateCollection.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        btnUpdateCollection.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnUpdateCollectionActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 4;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 0.5;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        panelCollections.add(btnUpdateCollection, gridBagConstraints);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -483,6 +549,32 @@ public class TestForm extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_btnGetBitstreamActionPerformed
 
+    private void btnDeleteCommunityActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteCommunityActionPerformed
+        String idCommunity = tfID.getText();
+        String str = MainInt.deleteCommunity(idCommunity);
+        textAreaOutput.setText(JsonUtils.jsonStringPrettyPrint(str));
+    }//GEN-LAST:event_btnDeleteCommunityActionPerformed
+
+    private void btnUpdateCommunityActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdateCommunityActionPerformed
+        String idCommunity = tfID.getText();
+        String newName = tfName.getText();
+        String str = MainInt.updateCommunity(newName, idCommunity);
+        textAreaOutput.setText(JsonUtils.jsonStringPrettyPrint(str));
+    }//GEN-LAST:event_btnUpdateCommunityActionPerformed
+
+    private void btnDeleteCollectionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteCollectionActionPerformed
+        String idCollection = tfID.getText();
+        String str = MainInt.deleteCollection(idCollection);
+        textAreaOutput.setText(JsonUtils.jsonStringPrettyPrint(str));
+    }//GEN-LAST:event_btnDeleteCollectionActionPerformed
+
+    private void btnUpdateCollectionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdateCollectionActionPerformed
+        String idCollection = tfID.getText();
+        String newName = tfName.getText();
+        String str = MainInt.updateCollection(newName, idCollection);
+        textAreaOutput.setText(JsonUtils.jsonStringPrettyPrint(str));
+    }//GEN-LAST:event_btnUpdateCollectionActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -493,6 +585,8 @@ public class TestForm extends javax.swing.JFrame {
     private javax.swing.JButton btnCreateCollection;
     private javax.swing.JButton btnCreateCommunity;
     private javax.swing.JButton btnCreateItem;
+    private javax.swing.JButton btnDeleteCollection;
+    private javax.swing.JButton btnDeleteCommunity;
     private javax.swing.JButton btnGetAllCollections;
     private javax.swing.JButton btnGetAllCommunities;
     private javax.swing.JButton btnGetAllItems;
@@ -503,6 +597,8 @@ public class TestForm extends javax.swing.JFrame {
     private javax.swing.JButton btnLogin;
     private javax.swing.JButton btnLogout;
     private javax.swing.JButton btnRestTest;
+    private javax.swing.JButton btnUpdateCollection;
+    private javax.swing.JButton btnUpdateCommunity;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JPanel jPanel1;

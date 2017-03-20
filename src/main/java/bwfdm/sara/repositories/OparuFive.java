@@ -208,7 +208,7 @@ public class OparuFive implements DSpaceREST,PublicationRepository {
     }
 
     @Override
-    public boolean updateCommunity(String communityName, String communityID) {
+    public String updateCommunity(String communityName, String communityID) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
@@ -266,7 +266,7 @@ public class OparuFive implements DSpaceREST,PublicationRepository {
     }
 
     @Override
-    public boolean updateCollection(String collectionName, String collectionID) {
+    public String updateCollection(String collectionName, String collectionID) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 

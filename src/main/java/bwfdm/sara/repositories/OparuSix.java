@@ -229,12 +229,53 @@ public class OparuSix implements DSpaceREST,PublicationRepository {
 
     @Override
     public String deleteCommunity(String communityID) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        
+        if (communityID.equals("")){
+            return DSpaceConfig.RESPONSE_EMPTY_JSON; //empty ID, error
+        }
+        
+        WebTarget deleteCommunityWebTarget = communitiesWebTarget;
+        deleteCommunityWebTarget = communitiesWebTarget.path(communityID);
+
+        Invocation.Builder invocationBuilder = deleteCommunityWebTarget.request();
+        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_APPLICATION_JSON);
+        invocationBuilder.header("Accept", DSpaceConfig.HEADER_ACCEPT_OPARU);
+        invocationBuilder.cookie(this.getCookie());
+        
+        Response response = invocationBuilder.delete();
+        
+        System.out.println("delete, response: " + response.getStatus());
+        if (response.getStatus() != this.responseStatusOK){
+            return DSpaceConfig.RESPONSE_EMPTY_JSON;
+        }
+ 
+        return response.readEntity(String.class);
     }
 
     @Override
-    public boolean updateCommunity(String communityName, String communityID) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public String updateCommunity(String newCommunityName, String communityID) {
+        
+        if (communityID.equals("")){
+            return DSpaceConfig.RESPONSE_EMPTY_JSON; //empty ID, error
+        }
+        
+        WebTarget newCommunityWebTarget = communitiesWebTarget;
+        newCommunityWebTarget = communitiesWebTarget.path(communityID);
+        
+        Invocation.Builder invocationBuilder = newCommunityWebTarget.request();
+        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_APPLICATION_JSON);
+        invocationBuilder.header("Accept", DSpaceConfig.HEADER_ACCEPT_OPARU);
+        invocationBuilder.cookie(this.getCookie());
+        String data = "{"
+                + "\"name\":" + "\"" + newCommunityName + "\""
+                + "}";
+        Response response = invocationBuilder.put(Entity.json(data));
+        
+        if (response.getStatus() != this.responseStatusOK){
+            return DSpaceConfig.RESPONSE_EMPTY_JSON;
+        }
+ 
+        return response.readEntity(String.class); //Connection will be closed automatically after the "readEntity" 
     }
 
     @Override
@@ -297,12 +338,51 @@ public class OparuSix implements DSpaceREST,PublicationRepository {
 
     @Override
     public String deleteCollection(String collectionID) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        
+        WebTarget newCollectionWebTarget = collectionsWebTarget.path(collectionID);
+        
+        Invocation.Builder invocationBuilder = newCollectionWebTarget.request();
+        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_APPLICATION_JSON);
+        invocationBuilder.header("Accept", DSpaceConfig.HEADER_ACCEPT_OPARU);
+        invocationBuilder.cookie(this.getCookie());
+        
+        Response response = invocationBuilder.delete();
+        
+        System.out.println("delete, response: " + response.getStatus());
+        if (response.getStatus() != this.responseStatusOK){
+            return DSpaceConfig.RESPONSE_EMPTY_JSON;
+        }
+        
+        return response.readEntity(String.class); //Connection will be closed automatically after the "readEntity"
+    
     }
 
     @Override
-    public boolean updateCollection(String collectionName, String collectionID) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public String updateCollection(String newCollectionName, String collectionID) {
+        
+        if (collectionID.equals("")){
+            return DSpaceConfig.RESPONSE_EMPTY_JSON; //empty ID, error
+        }
+        
+        WebTarget collectionWebTarget = collectionsWebTarget;
+        collectionWebTarget = collectionsWebTarget.path(collectionID);
+        
+        Invocation.Builder invocationBuilder = collectionWebTarget.request();
+        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_APPLICATION_JSON);
+        invocationBuilder.header("Accept", DSpaceConfig.HEADER_ACCEPT_OPARU);
+        invocationBuilder.cookie(this.getCookie());
+        String data = "{"
+                + "\"name\":" + "\"" + newCollectionName + "\""
+                + "}";
+        Response response = invocationBuilder.put(Entity.json(data));
+        
+        System.out.println("update, response: " + response.getStatus());
+        if (response.getStatus() != this.responseStatusOK){
+            return DSpaceConfig.RESPONSE_EMPTY_JSON;
+        }
+ 
+        return response.readEntity(String.class); //Connection will be closed automatically after the "readEntity" 
+    
     }
 
     @Override
