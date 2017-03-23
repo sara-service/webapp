@@ -33,7 +33,7 @@ import sun.nio.cs.ISO_8859_2;
  *
  * @author vk
  */
-public class OparuSix implements DSpaceREST,PublicationRepository {
+public class OparuSix implements DSpace {
 
     private final String urlServer;
     private final String urlRest;
@@ -164,6 +164,7 @@ public class OparuSix implements DSpaceREST,PublicationRepository {
         return cookieStatus.isAuthenticated();
     }
     
+    @Override
     public String getConnectionStatus(){
         
         Invocation.Builder invocationBuilder = statusWebTarget.request();
@@ -182,6 +183,10 @@ public class OparuSix implements DSpaceREST,PublicationRepository {
         this.cookie = cookie;
     }
       
+    
+    /* COMMUNITIES */
+    
+    
     @Override
     public String getAllCommunities(){
         
@@ -221,7 +226,7 @@ public class OparuSix implements DSpaceREST,PublicationRepository {
         Response response = invocationBuilder.post(Entity.json(data));
         
         if (response.getStatus() != this.responseStatusOK){
-            return DSpaceConfig.RESPONSE_EMPTY_JSON;
+            return DSpaceConfig.RESPONSE_ERROR_JSON;
         }
  
         return response.readEntity(String.class); //Connection will be closed automatically after the "readEntity"
@@ -231,7 +236,7 @@ public class OparuSix implements DSpaceREST,PublicationRepository {
     public String deleteCommunity(String communityID) {
         
         if (communityID.equals("")){
-            return DSpaceConfig.RESPONSE_EMPTY_JSON; //empty ID, error
+            return DSpaceConfig.RESPONSE_ERROR_JSON; //empty ID, error
         }
         
         WebTarget deleteCommunityWebTarget = communitiesWebTarget;
@@ -246,7 +251,7 @@ public class OparuSix implements DSpaceREST,PublicationRepository {
         
         System.out.println("delete, response: " + response.getStatus());
         if (response.getStatus() != this.responseStatusOK){
-            return DSpaceConfig.RESPONSE_EMPTY_JSON;
+            return DSpaceConfig.RESPONSE_ERROR_JSON;
         }
  
         return response.readEntity(String.class);
@@ -256,7 +261,7 @@ public class OparuSix implements DSpaceREST,PublicationRepository {
     public String updateCommunity(String newCommunityName, String communityID) {
         
         if (communityID.equals("")){
-            return DSpaceConfig.RESPONSE_EMPTY_JSON; //empty ID, error
+            return DSpaceConfig.RESPONSE_ERROR_JSON; //empty ID, error
         }
         
         WebTarget newCommunityWebTarget = communitiesWebTarget;
@@ -272,7 +277,7 @@ public class OparuSix implements DSpaceREST,PublicationRepository {
         Response response = invocationBuilder.put(Entity.json(data));
         
         if (response.getStatus() != this.responseStatusOK){
-            return DSpaceConfig.RESPONSE_EMPTY_JSON;
+            return DSpaceConfig.RESPONSE_ERROR_JSON;
         }
  
         return response.readEntity(String.class); //Connection will be closed automatically after the "readEntity" 
@@ -283,6 +288,10 @@ public class OparuSix implements DSpaceREST,PublicationRepository {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
+    
+    /* COLLECTIONS */
+    
+    
     @Override
     public String getAllCollections(){
         
@@ -292,7 +301,7 @@ public class OparuSix implements DSpaceREST,PublicationRepository {
         Response response = invocationBuilder.get();
         
         if (response.getStatus() != this.responseStatusOK){
-            return DSpaceConfig.RESPONSE_EMPTY_JSON;
+            return DSpaceConfig.RESPONSE_ERROR_JSON;
         }
         
         return response.readEntity(String.class); //Connection will be closed automatically after the "readEntity"
@@ -308,13 +317,12 @@ public class OparuSix implements DSpaceREST,PublicationRepository {
         Response response = invocationBuilder.get();
         
         if (response.getStatus() != this.responseStatusOK){
-            return DSpaceConfig.RESPONSE_EMPTY_JSON;
+            return DSpaceConfig.RESPONSE_ERROR_JSON;
         }
         
         return response.readEntity(String.class); //Connection will be closed automatically after the "readEntity"
     }
-    
-    
+       
     @Override
     public String createCollection(String collectionName, String parentCommunityID) {
         
@@ -330,7 +338,7 @@ public class OparuSix implements DSpaceREST,PublicationRepository {
         Response response = invocationBuilder.post(Entity.json(data));
         
         if (response.getStatus() != this.responseStatusOK){
-            return DSpaceConfig.RESPONSE_EMPTY_JSON;
+            return DSpaceConfig.RESPONSE_ERROR_JSON;
         }
         
         return response.readEntity(String.class); //Connection will be closed automatically after the "readEntity"
@@ -350,7 +358,7 @@ public class OparuSix implements DSpaceREST,PublicationRepository {
         
         System.out.println("delete, response: " + response.getStatus());
         if (response.getStatus() != this.responseStatusOK){
-            return DSpaceConfig.RESPONSE_EMPTY_JSON;
+            return DSpaceConfig.RESPONSE_ERROR_JSON;
         }
         
         return response.readEntity(String.class); //Connection will be closed automatically after the "readEntity"
@@ -361,7 +369,7 @@ public class OparuSix implements DSpaceREST,PublicationRepository {
     public String updateCollection(String newCollectionName, String collectionID) {
         
         if (collectionID.equals("")){
-            return DSpaceConfig.RESPONSE_EMPTY_JSON; //empty ID, error
+            return "Update collection, error: empty ID."; //empty ID, error
         }
         
         WebTarget collectionWebTarget = collectionsWebTarget;
@@ -378,16 +386,86 @@ public class OparuSix implements DSpaceREST,PublicationRepository {
         
         System.out.println("update, response: " + response.getStatus());
         if (response.getStatus() != this.responseStatusOK){
-            return DSpaceConfig.RESPONSE_EMPTY_JSON;
+            return DSpaceConfig.RESPONSE_ERROR_JSON;
         }
  
         return response.readEntity(String.class); //Connection will be closed automatically after the "readEntity" 
     
     }
 
+    
+    /* ITEMS */
+    
+    
+    @Override
+    public String getAllItems() {
+        
+        Invocation.Builder invocationBuilder = itemsWebTarget.request();
+        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_APPLICATION_JSON);
+        invocationBuilder.header("Accept", DSpaceConfig.HEADER_ACCEPT_OPARU);
+        Response response = invocationBuilder.get();
+        
+        if (response.getStatus() != this.responseStatusOK){
+            return DSpaceConfig.RESPONSE_ERROR_JSON;
+        }
+        return response.readEntity(String.class);
+    }
+
+    @Override
+    public String getItemById(String id) {
+        
+        WebTarget itemIdWebTarget = itemsWebTarget.path(id);
+        Invocation.Builder invocationBuilder = itemIdWebTarget.request();
+        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_APPLICATION_JSON);
+        invocationBuilder.header("Accept", DSpaceConfig.HEADER_ACCEPT_OPARU);
+        Response response = invocationBuilder.get();
+        
+        if (response.getStatus() != this.responseStatusOK){
+            return DSpaceConfig.RESPONSE_ERROR_JSON;
+        }        
+        return response.readEntity(String.class);
+    }
+    
+    @Override
+    public String getItemMetadataById(String id) {
+        
+        WebTarget itemIdWebTarget = itemsWebTarget.path(id).path("metadata");
+        Invocation.Builder invocationBuilder = itemIdWebTarget.request();
+        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_APPLICATION_JSON);
+        invocationBuilder.header("Accept", DSpaceConfig.HEADER_ACCEPT_OPARU);
+        Response response = invocationBuilder.get();
+        
+        if (response.getStatus() != this.responseStatusOK){
+            return DSpaceConfig.RESPONSE_ERROR_JSON;
+        } 
+        return response.readEntity(String.class);
+    }
+    
     @Override
     public String createItem(String itemName, String itemTitle, String collectionID) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    
+        if (collectionID.equals("")){
+            return DSpaceConfig.RESPONSE_ERROR_JSON; //empty ID, error
+        }
+        
+        WebTarget newItemWebTarget = collectionsWebTarget.path(collectionID).path("items");
+        
+        Invocation.Builder invocationBuilder = newItemWebTarget.request();
+        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_APPLICATION_JSON);
+        invocationBuilder.header("Accept", DSpaceConfig.HEADER_ACCEPT_OPARU);
+        invocationBuilder.cookie(this.getCookie());
+        String data = "{"
+                + "\"name\":" + "\"" + itemName + "\""
+                + "}";
+        Response response = invocationBuilder.post(Entity.json(data));
+        
+        System.out.println("create item, response: " + response.getStatus());
+        if (response.getStatus() != this.responseStatusOK){
+            return DSpaceConfig.RESPONSE_ERROR_JSON;
+        }
+        
+        return response.readEntity(String.class); //Connection will be closed automatically after the "readEntity"
+    
     }
 
     @Override
@@ -399,10 +477,34 @@ public class OparuSix implements DSpaceREST,PublicationRepository {
     public boolean deleteItemInCollection(String collectionID, String itemID) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-
+    
+    //TODO:
+    // 1. Escape characters (\n.....)
+    // 2. Special metadata field for the GitLab link.
+    //
     @Override
-    public boolean itemAddMetadata(String itemID, MetadataCollection collectionWithMetadata) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public String itemAddMetadata(String itemID, String metadata) {
+        
+        System.out.println("--- add item metadata ---");
+        
+        WebTarget itemMetadataWebTarget = itemsWebTarget;
+        itemMetadataWebTarget = itemsWebTarget.path(itemID).path("metadata");
+        
+        Invocation.Builder invocationBuilder = itemMetadataWebTarget.request();
+        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_APPLICATION_JSON);
+        invocationBuilder.header("Accept", DSpaceConfig.HEADER_ACCEPT_OPARU);
+        invocationBuilder.cookie(this.getCookie());
+        String data = metadata;
+        
+        Response response = invocationBuilder.put(Entity.json(data));
+        
+        System.out.println("add item metadata, response: " + response.getStatus());
+        
+        if (response.getStatus() != this.responseStatusOK){
+            return DSpaceConfig.RESPONSE_ERROR_JSON;
+        }
+ 
+        return response.readEntity(String.class);
     }
 
     @Override
@@ -425,19 +527,8 @@ public class OparuSix implements DSpaceREST,PublicationRepository {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
-    
+   
 
-    
-
-    @Override
-    public String getAllItems() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public String getItemById(String id) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
 
     @Override
     public boolean loginPublicationRepository() {
@@ -469,4 +560,8 @@ public class OparuSix implements DSpaceREST,PublicationRepository {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
+    @Override
+    public String getRepositoryUrl(){
+        return this.urlServer;
+    }
 }

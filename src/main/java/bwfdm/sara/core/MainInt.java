@@ -5,6 +5,7 @@
  */
 package bwfdm.sara.core;
 
+import bwfdm.sara.repositories.DSpace;
 import bwfdm.sara.repositories.DSpaceConfig;
 import bwfdm.sara.repositories.OparuFive;
 import bwfdm.sara.repositories.OparuSix;
@@ -19,7 +20,14 @@ import java.util.logging.Logger;
 public class MainInt {
     
     //public static OparuFive oparu = new OparuFive();
-    public static OparuSix oparu = new OparuSix();
+    public static DSpace oparu;
+    
+    public static DSpace oparuFive = new OparuFive();
+    public static DSpace oparuSix = new OparuSix();
+   
+    
+    
+    
     public static boolean isOK;
     
    
@@ -58,10 +66,24 @@ public class MainInt {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
+                oparu = oparuSix;
                 new TestForm().setVisible(true);
+                
             }
         });
     
+    }
+    
+    public static void chooseOparuFive(){
+        //oparu = null;
+        //oparu = new OparuFive();
+        oparu = oparuFive;
+    }
+    
+    public static void chooseOparuSix(){
+        //oparu = null;
+        //oparu = new OparuSix();
+        oparu = oparuSix;
     }
     
     public static String testRest(){
@@ -73,7 +95,7 @@ public class MainInt {
     }
     
     public static String loginDspace(){
-        isOK = oparu.login(DSpaceConfig.EMAIL_OPARU, DSpaceConfig.getPassword(DSpaceConfig.EMAIL_OPARU));
+        isOK = oparu.login(DSpaceConfig.EMAIL_OPARU, DSpaceConfig.getPassword(DSpaceConfig.EMAIL_OPARU, oparu));
         String str = "login OK: " + isOK + "\n"; 
 //                +
 //                     "token login: " + oparu.getToken();
@@ -136,21 +158,18 @@ public class MainInt {
         return oparu.getItemById(id);
     }
     
+    public static String getItemMetadataById(String id){
+        return oparu.getItemMetadataById(id);
+    }
+    
     public static String createItem(String name, String itemTitel, String idCollection){
         return oparu.createItem(name, itemTitel, idCollection);
     }
     
-    public static void getItems(){
-        
+    public static String addItemMetadata(String id, String metadata){
+        return oparu.itemAddMetadata(id, metadata);
     }
-    
-    public static void getItemId(){
-        
-    }
-    
-    public static void getItemIdMetadata(){
-        
-    }
+ 
     
     public static void findItemsPerMetadataAuthor(){
         

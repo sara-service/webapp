@@ -5,6 +5,11 @@
  */
 package bwfdm.sara.core;
 
+import bwfdm.sara.metadata.ItemMetadataDto;
+import bwfdm.sara.metadata.ItemMetadataFieldDto;
+import bwfdm.sara.metadata.MetadataConstants;
+import bwfdm.sara.repositories.DSpaceConfig;
+import bwfdm.sara.repositories.OparuFive;
 import bwfdm.sara.utils.JsonUtils;
 
 /**
@@ -18,7 +23,10 @@ public class TestForm extends javax.swing.JFrame {
      */
     public TestForm() {
         initComponents();
-        textAreaOutput.setEditable(false);     
+        textAreaOutput.setEditable(true);
+        rbtnOparuSix.setSelected(true);
+        buttonGroup1.add(rbtnOparuFive);
+        buttonGroup1.add(rbtnOparuSix);                
     }
 
     /**
@@ -31,6 +39,7 @@ public class TestForm extends javax.swing.JFrame {
     private void initComponents() {
         java.awt.GridBagConstraints gridBagConstraints;
 
+        buttonGroup1 = new javax.swing.ButtonGroup();
         jPanelButtons = new javax.swing.JPanel();
         panelRest = new javax.swing.JPanel();
         btnRestTest = new javax.swing.JButton();
@@ -53,6 +62,8 @@ public class TestForm extends javax.swing.JFrame {
         btnGetAllItems = new javax.swing.JButton();
         btnGetItemById = new javax.swing.JButton();
         btnCreateItem = new javax.swing.JButton();
+        btnGetItemIdMetadata = new javax.swing.JButton();
+        btnAddItemMetadata = new javax.swing.JButton();
         panelBitstreams = new javax.swing.JPanel();
         btnGetBitstream = new javax.swing.JButton();
         jPanelOutput = new javax.swing.JPanel();
@@ -60,13 +71,15 @@ public class TestForm extends javax.swing.JFrame {
         jScrollPane1 = new javax.swing.JScrollPane();
         textAreaOutput = new javax.swing.JTextArea();
         jLabel1 = new javax.swing.JLabel();
+        rbtnOparuFive = new javax.swing.JRadioButton();
+        rbtnOparuSix = new javax.swing.JRadioButton();
         jLabel2 = new javax.swing.JLabel();
         tfID = new javax.swing.JTextField();
         tfName = new javax.swing.JTextField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setMinimumSize(new java.awt.Dimension(800, 800));
-        setPreferredSize(new java.awt.Dimension(800, 800));
+        setMinimumSize(new java.awt.Dimension(800, 900));
+        setPreferredSize(new java.awt.Dimension(800, 900));
         getContentPane().setLayout(new java.awt.GridBagLayout());
 
         jPanelButtons.setLayout(new java.awt.GridBagLayout());
@@ -275,7 +288,6 @@ public class TestForm extends javax.swing.JFrame {
         panelCollections.add(btnGetAllCollections, gridBagConstraints);
 
         btnDeleteCollection.setText("delete Collection (ID)");
-        btnDeleteCollection.setActionCommand("delete Collection (ID)");
         btnDeleteCollection.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         btnDeleteCollection.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -355,11 +367,41 @@ public class TestForm extends javax.swing.JFrame {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 2;
+        gridBagConstraints.gridy = 3;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 0.5;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         panelItems.add(btnCreateItem, gridBagConstraints);
+
+        btnGetItemIdMetadata.setText("get Item ID metadata");
+        btnGetItemIdMetadata.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        btnGetItemIdMetadata.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnGetItemIdMetadataActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 0.5;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        panelItems.add(btnGetItemIdMetadata, gridBagConstraints);
+
+        btnAddItemMetadata.setText("add Item metadata");
+        btnAddItemMetadata.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        btnAddItemMetadata.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnAddItemMetadataActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 4;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 0.5;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        panelItems.add(btnAddItemMetadata, gridBagConstraints);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -396,6 +438,7 @@ public class TestForm extends javax.swing.JFrame {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridheight = 2;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         getContentPane().add(jPanelButtons, gridBagConstraints);
@@ -432,6 +475,28 @@ public class TestForm extends javax.swing.JFrame {
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         jPanelOutput.add(jLabel1, gridBagConstraints);
 
+        rbtnOparuFive.setText("OPARU-5");
+        rbtnOparuFive.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                rbtnOparuFiveActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 3;
+        jPanelOutput.add(rbtnOparuFive, gridBagConstraints);
+
+        rbtnOparuSix.setText("OPARU-6");
+        rbtnOparuSix.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                rbtnOparuSixActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 4;
+        jPanelOutput.add(rbtnOparuSix, gridBagConstraints);
+
         jLabel2.setText("Name:");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -458,7 +523,7 @@ public class TestForm extends javax.swing.JFrame {
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridy = 1;
         gridBagConstraints.gridheight = java.awt.GridBagConstraints.RELATIVE;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.ipadx = 125;
@@ -575,12 +640,49 @@ public class TestForm extends javax.swing.JFrame {
         textAreaOutput.setText(JsonUtils.jsonStringPrettyPrint(str));
     }//GEN-LAST:event_btnUpdateCollectionActionPerformed
 
+    private void btnGetItemIdMetadataActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGetItemIdMetadataActionPerformed
+        String id = tfID.getText();
+        String str = MainInt.getItemMetadataById(id);
+        textAreaOutput.setText(JsonUtils.jsonStringPrettyPrint(str));
+    }//GEN-LAST:event_btnGetItemIdMetadataActionPerformed
+
+    private void rbtnOparuFiveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_rbtnOparuFiveActionPerformed
+        MainInt.chooseOparuFive();        
+    }//GEN-LAST:event_rbtnOparuFiveActionPerformed
+
+    private void rbtnOparuSixActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_rbtnOparuSixActionPerformed
+        MainInt.chooseOparuSix();
+    }//GEN-LAST:event_rbtnOparuSixActionPerformed
+
+    private void btnAddItemMetadataActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddItemMetadataActionPerformed
+        
+        // test item: 70dd4e09-0148-499e-b772-06e88414c16a
+        
+        ChangeMetadataDialog metadataDialog = new ChangeMetadataDialog(this, true, JsonUtils.jsonStringPrettyPrint(MetadataConstants.ITEM_METADATA_EXAMPLE));
+        metadataDialog.setLocationRelativeTo(this);
+        metadataDialog.setVisible(true);   
+        String metadata = metadataDialog.getMetadata(); // get metadata from the Dialog    
+       
+        // Convert String metadata to Object
+        ItemMetadataFieldDto[] metadataObj;
+        metadataObj = JsonUtils.jsonStringToObject(metadata, ItemMetadataFieldDto[].class);
+        // Convert Object with metadata to the String
+        String metadataConverted = JsonUtils.objectToJsonString(metadataObj);
+        System.out.println(JsonUtils.jsonStringPrettyPrint(metadataConverted));
+        
+        // REST-Request, change metadata
+        String id = tfID.getText();
+        String str = MainInt.addItemMetadata(id, metadata);
+        textAreaOutput.setText(JsonUtils.jsonStringPrettyPrint(str));
+    }//GEN-LAST:event_btnAddItemMetadataActionPerformed
+
     /**
      * @param args the command line arguments
      */
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnAddItemMetadata;
     private javax.swing.JButton btnConnectionStatus;
     private javax.swing.JButton btnCreateCollection;
     private javax.swing.JButton btnCreateCommunity;
@@ -594,11 +696,13 @@ public class TestForm extends javax.swing.JFrame {
     private javax.swing.JButton btnGetCollectionById;
     private javax.swing.JButton btnGetCommunityById;
     private javax.swing.JButton btnGetItemById;
+    private javax.swing.JButton btnGetItemIdMetadata;
     private javax.swing.JButton btnLogin;
     private javax.swing.JButton btnLogout;
     private javax.swing.JButton btnRestTest;
     private javax.swing.JButton btnUpdateCollection;
     private javax.swing.JButton btnUpdateCommunity;
+    private javax.swing.ButtonGroup buttonGroup1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JPanel jPanel1;
@@ -610,6 +714,8 @@ public class TestForm extends javax.swing.JFrame {
     private javax.swing.JPanel panelCommunity;
     private javax.swing.JPanel panelItems;
     private javax.swing.JPanel panelRest;
+    private javax.swing.JRadioButton rbtnOparuFive;
+    private javax.swing.JRadioButton rbtnOparuSix;
     private javax.swing.JTextArea textAreaOutput;
     private javax.swing.JTextField tfID;
     private javax.swing.JTextField tfName;

@@ -21,7 +21,7 @@ public interface DSpaceREST {
     public boolean login(String email, String password);
     public boolean logout();
     public boolean isAuthenticated();
-    //public String getConnectionStatus();
+    public String getConnectionStatus();
     //public String getToken();
     //public Cookie getCookie();
     
@@ -39,7 +39,7 @@ public interface DSpaceREST {
     public boolean deleteItem(String itemID);
     public boolean deleteItemInCollection(String collectionID, String itemID);
     
-    public boolean itemAddMetadata(String itemID, MetadataCollection collectionWithMetadata);
+    public String itemAddMetadata(String itemID, String metadata);
     public boolean itemUpdateMetadata(String itemID, String metadataEntry);
     public String itemAddBitstream(String itemID, String bitstreamToAdd);
     public boolean itemDeleteBitstream(String itemID, String bitstreamToDelete);
@@ -53,7 +53,7 @@ public interface DSpaceREST {
     public String getCollectionById(String id);
     public String getAllItems();
     public String getItemById(String id);
-    
+    public String getItemMetadataById(String id);
     
     
     

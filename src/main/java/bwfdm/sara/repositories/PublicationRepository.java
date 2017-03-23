@@ -25,5 +25,6 @@ public interface PublicationRepository {
     public void changeElement();
     public void deleteElement();
     public void changeElementMetadata();
+    public String getRepositoryUrl();
     
 }

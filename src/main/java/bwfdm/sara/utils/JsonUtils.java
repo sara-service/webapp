@@ -19,6 +19,12 @@ import java.util.logging.Logger;
  */
 public class JsonUtils {
       
+    /**
+     * Make pretty print of JSON.
+     * 
+     * @param jsonString
+     * @return String or ""
+     */
     public static String jsonStringPrettyPrint(String jsonString){
         
         if (jsonString.equals("")){
@@ -37,6 +43,14 @@ public class JsonUtils {
         return prettyJsonString;
     }
     
+    /**
+     * Convert JSON-String to the object (DTO)
+     * 
+     * @param <T> - any class
+     * @param jsonString - input string
+     * @param type - type of the class
+     * @return any object, DTO
+     */
     public static <T> T jsonStringToObject(String jsonString, Class<T> type){
         ObjectMapper mapper = new ObjectMapper();
         T obj = null;
@@ -46,6 +60,24 @@ public class JsonUtils {
             Logger.getLogger(OparuSix.class.getName()).log(Level.SEVERE, null, ex);
         }
         return obj;
+    }
+    
+    /**
+     * Convert some object to JSON-String
+     * 
+     * @param <T> - any type of object
+     * @param obj - any object
+     * @return String or ""
+     */
+    public static <T> String objectToJsonString(T obj){
+        ObjectMapper mapper = new ObjectMapper();
+        String jsonString = "";
+        try {
+            jsonString  = mapper.writeValueAsString(obj);
+        } catch (JsonProcessingException ex) {
+            Logger.getLogger(JsonUtils.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return jsonString;
     }
     
 }

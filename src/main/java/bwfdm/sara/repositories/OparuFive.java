@@ -26,7 +26,7 @@ import javax.ws.rs.core.Response;
  *
  * @author vk
  */
-public class OparuFive implements DSpaceREST,PublicationRepository {
+public class OparuFive implements DSpace {
 
     private final String urlServer;
     private final String urlRest;
@@ -135,7 +135,7 @@ public class OparuFive implements DSpaceREST,PublicationRepository {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
-    //@Override
+    @Override
     public String getConnectionStatus(){
         
         Invocation.Builder invocationBuilder = statusWebTarget.request();
@@ -279,7 +279,7 @@ public class OparuFive implements DSpaceREST,PublicationRepository {
         invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_APPLICATION_JSON);
         invocationBuilder.header("Accept", DSpaceConfig.HEADER_ACCEPT_OPARU);
         invocationBuilder.header("user", DSpaceConfig.EMAIL_OPARU);
-        invocationBuilder.header("pass", DSpaceConfig.getPassword(DSpaceConfig.EMAIL_OPARU));
+        invocationBuilder.header("pass", DSpaceConfig.getPassword(DSpaceConfig.EMAIL_OPARU, this));
 //        invocationBuilder.header("rest-dspace-token", this.getToken());
 //        invocationBuilder.header("login", token);
         String data = "{"
@@ -323,6 +323,18 @@ public class OparuFive implements DSpaceREST,PublicationRepository {
     }
     
     @Override
+    public String getItemMetadataById(String id){
+        
+        WebTarget itemIdWebTarget = itemsWebTarget.path(id).path("metadata");
+        Invocation.Builder invocationBuilder = itemIdWebTarget.request();
+        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_APPLICATION_JSON);
+        invocationBuilder.header("Accept", DSpaceConfig.HEADER_ACCEPT_OPARU);
+        Response response = invocationBuilder.get();
+        return response.readEntity(String.class); //Connection will be closed automatically after the "readEntity"
+        
+    }
+    
+    @Override
     public boolean deleteItem(String itemID) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
@@ -333,7 +345,7 @@ public class OparuFive implements DSpaceREST,PublicationRepository {
     }
 
     @Override
-    public boolean itemAddMetadata(String itemID, MetadataCollection collectionWithMetadata) {
+    public String itemAddMetadata(String itemID, String metadata) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
@@ -392,6 +404,9 @@ public class OparuFive implements DSpaceREST,PublicationRepository {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
-    
+    @Override
+    public String getRepositoryUrl(){
+        return this.urlServer;
+    }
    
 }
