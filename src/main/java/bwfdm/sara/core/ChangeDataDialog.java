@@ -9,18 +9,18 @@ package bwfdm.sara.core;
  *
  * @author vk
  */
-public class ChangeMetadataDialog extends javax.swing.JDialog {
+public class ChangeDataDialog extends javax.swing.JDialog {
     
-    private String metadata = "";
+    private String text = "";
     
     /**
      * Creates new form ChangeMetadataDialog
      */
-    public ChangeMetadataDialog(java.awt.Frame parent, boolean modal, String metadata) {
+    public ChangeDataDialog(java.awt.Frame parent, boolean modal, String metadata) {
         super(parent, modal);
         initComponents();
-        this.metadata = metadata;
-        textAreaMetadata.setText(metadata);
+        this.text = metadata;
+        textAreaData.setText(metadata);
     }
 
     /**
@@ -35,18 +35,18 @@ public class ChangeMetadataDialog extends javax.swing.JDialog {
 
         jPanel1 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
-        textAreaMetadata = new javax.swing.JTextArea();
+        textAreaData = new javax.swing.JTextArea();
         btnCancel = new javax.swing.JButton();
-        btnSaveMetadata = new javax.swing.JButton();
+        btnSave = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         getContentPane().setLayout(new java.awt.GridBagLayout());
 
         jPanel1.setLayout(new java.awt.GridBagLayout());
 
-        textAreaMetadata.setColumns(20);
-        textAreaMetadata.setRows(5);
-        jScrollPane1.setViewportView(textAreaMetadata);
+        textAreaData.setColumns(20);
+        textAreaData.setRows(5);
+        jScrollPane1.setViewportView(textAreaData);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -71,10 +71,10 @@ public class ChangeMetadataDialog extends javax.swing.JDialog {
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         jPanel1.add(btnCancel, gridBagConstraints);
 
-        btnSaveMetadata.setText("Save");
-        btnSaveMetadata.addActionListener(new java.awt.event.ActionListener() {
+        btnSave.setText("Save");
+        btnSave.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnSaveMetadataActionPerformed(evt);
+                btnSaveActionPerformed(evt);
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -82,7 +82,7 @@ public class ChangeMetadataDialog extends javax.swing.JDialog {
         gridBagConstraints.gridy = 1;
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        jPanel1.add(btnSaveMetadata, gridBagConstraints);
+        jPanel1.add(btnSave, gridBagConstraints);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -97,26 +97,26 @@ public class ChangeMetadataDialog extends javax.swing.JDialog {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void btnSaveMetadataActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSaveMetadataActionPerformed
-        this.metadata = textAreaMetadata.getText();
+    private void btnSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSaveActionPerformed
+        this.text = textAreaData.getText();
         dispose();
-    }//GEN-LAST:event_btnSaveMetadataActionPerformed
+    }//GEN-LAST:event_btnSaveActionPerformed
 
     private void btnCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelActionPerformed
-        this.metadata = "";
+        this.text = "";
         dispose();
     }//GEN-LAST:event_btnCancelActionPerformed
     
-    public String getMetadata(){
-        return this.metadata;
+    public String getText(){
+        return this.text;
     }
     
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnCancel;
-    private javax.swing.JButton btnSaveMetadata;
+    private javax.swing.JButton btnSave;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTextArea textAreaMetadata;
+    private javax.swing.JTextArea textAreaData;
     // End of variables declaration//GEN-END:variables
 }

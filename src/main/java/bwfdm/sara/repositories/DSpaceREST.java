@@ -25,26 +25,32 @@ public interface DSpaceREST {
     //public String getToken();
     //public Cookie getCookie();
     
+    /* Community */
     public String createCommunity(String communityName, String parentCommunityID);
     public String deleteCommunity(String communityID);
     public String updateCommunity(String communityName, String communityID);
     
     public String getObjectProperties(String objectName, String objectID);
     
+    /* Collection */
     public String createCollection(String collectionName, String parentCommunityID);
     public String deleteCollection(String collectionID);
     public String updateCollection(String collectionName, String collectionID);
     
+    /* Item */
     public String createItem(String itemName, String itemTitle, String collectionID);
-    public boolean deleteItem(String itemID);
-    public boolean deleteItemInCollection(String collectionID, String itemID);
-    
+    public String deleteItem(String itemID);
     public String itemAddMetadata(String itemID, String metadata);
-    public boolean itemUpdateMetadata(String itemID, String metadataEntry);
-    public String itemAddBitstream(String itemID, String bitstreamToAdd);
-    public boolean itemDeleteBitstream(String itemID, String bitstreamToDelete);
+    public String itemUpdateMetadata(String itemID, String metadata);
+    public String itemClearMetadata(String itemID);
+    public String itemGetAllBitstreams(String itemID);
+    public String itemAddBitstream(String itemID, String bitstreamDescription);
+    public String itemDeleteBitstream(String itemID, String bitstreamToDelete);
     
-    public boolean downloadBitstream(String bitstreamID, String filenameToSave);
+    
+    /* Bitstreams */
+    public String getAllBitstreams();
+    public String downloadBitstream(String bitstreamID, String filenameToSave);
     
     // Not important methods
     public String getAllCommunities();

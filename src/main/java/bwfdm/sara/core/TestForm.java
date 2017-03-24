@@ -64,8 +64,15 @@ public class TestForm extends javax.swing.JFrame {
         btnCreateItem = new javax.swing.JButton();
         btnGetItemIdMetadata = new javax.swing.JButton();
         btnAddItemMetadata = new javax.swing.JButton();
+        btnUpdateItemMetadata = new javax.swing.JButton();
+        btnClearItemMetadata = new javax.swing.JButton();
+        btnDeleteItem1 = new javax.swing.JButton();
+        btnGetAllBitstreamsItem = new javax.swing.JButton();
+        btnAdditemBitstream = new javax.swing.JButton();
+        btnDeleteItemBitstream = new javax.swing.JButton();
         panelBitstreams = new javax.swing.JPanel();
-        btnGetBitstream = new javax.swing.JButton();
+        btnGetAllBitstreams = new javax.swing.JButton();
+        btnGetBitstreamById = new javax.swing.JButton();
         jPanelOutput = new javax.swing.JPanel();
         jPanel1 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
@@ -95,8 +102,8 @@ public class TestForm extends javax.swing.JFrame {
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 2;
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 0.5;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
@@ -110,8 +117,8 @@ public class TestForm extends javax.swing.JFrame {
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 3;
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 1;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 0.5;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
@@ -166,7 +173,7 @@ public class TestForm extends javax.swing.JFrame {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 2;
+        gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 0.5;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
@@ -180,7 +187,7 @@ public class TestForm extends javax.swing.JFrame {
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 0.5;
@@ -195,7 +202,7 @@ public class TestForm extends javax.swing.JFrame {
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 1;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 0.5;
@@ -211,7 +218,7 @@ public class TestForm extends javax.swing.JFrame {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 3;
+        gridBagConstraints.gridy = 1;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 0.5;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
@@ -226,7 +233,7 @@ public class TestForm extends javax.swing.JFrame {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 4;
+        gridBagConstraints.gridy = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 0.5;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
@@ -251,7 +258,7 @@ public class TestForm extends javax.swing.JFrame {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 2;
+        gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 0.5;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
@@ -265,7 +272,7 @@ public class TestForm extends javax.swing.JFrame {
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 1;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 0.5;
@@ -280,7 +287,7 @@ public class TestForm extends javax.swing.JFrame {
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 0.5;
@@ -296,7 +303,7 @@ public class TestForm extends javax.swing.JFrame {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 3;
+        gridBagConstraints.gridy = 1;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 0.5;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
@@ -312,7 +319,7 @@ public class TestForm extends javax.swing.JFrame {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 4;
+        gridBagConstraints.gridy = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 0.5;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
@@ -367,7 +374,7 @@ public class TestForm extends javax.swing.JFrame {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 3;
+        gridBagConstraints.gridy = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 0.5;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
@@ -381,8 +388,8 @@ public class TestForm extends javax.swing.JFrame {
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 2;
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 0.5;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
@@ -396,12 +403,104 @@ public class TestForm extends javax.swing.JFrame {
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 4;
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 1;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 0.5;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         panelItems.add(btnAddItemMetadata, gridBagConstraints);
+
+        btnUpdateItemMetadata.setText("update Item metadata");
+        btnUpdateItemMetadata.setActionCommand("update Item metadata");
+        btnUpdateItemMetadata.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        btnUpdateItemMetadata.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnUpdateItemMetadataActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 0.5;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        panelItems.add(btnUpdateItemMetadata, gridBagConstraints);
+
+        btnClearItemMetadata.setText("clear Item metadata");
+        btnClearItemMetadata.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        btnClearItemMetadata.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnClearItemMetadataActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 0.5;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        panelItems.add(btnClearItemMetadata, gridBagConstraints);
+
+        btnDeleteItem1.setText("delete Item");
+        btnDeleteItem1.setActionCommand("delete Item");
+        btnDeleteItem1.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        btnDeleteItem1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnDeleteItem1ActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 0.5;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        panelItems.add(btnDeleteItem1, gridBagConstraints);
+
+        btnGetAllBitstreamsItem.setText("get Item Bitstreams");
+        btnGetAllBitstreamsItem.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        btnGetAllBitstreamsItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnGetAllBitstreamsItemActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 0.5;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        panelItems.add(btnGetAllBitstreamsItem, gridBagConstraints);
+
+        btnAdditemBitstream.setText("add Item Bitstream");
+        btnAdditemBitstream.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        btnAdditemBitstream.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnAdditemBitstreamActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 0.5;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        panelItems.add(btnAdditemBitstream, gridBagConstraints);
+
+        btnDeleteItemBitstream.setText("delete Item Btstream");
+        btnDeleteItemBitstream.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        btnDeleteItemBitstream.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnDeleteItemBitstreamActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 0.5;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        panelItems.add(btnDeleteItemBitstream, gridBagConstraints);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -413,11 +512,11 @@ public class TestForm extends javax.swing.JFrame {
         panelBitstreams.setBorder(javax.swing.BorderFactory.createTitledBorder("Bitstream"));
         panelBitstreams.setLayout(new java.awt.GridBagLayout());
 
-        btnGetBitstream.setText("get Bitstream");
-        btnGetBitstream.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        btnGetBitstream.addActionListener(new java.awt.event.ActionListener() {
+        btnGetAllBitstreams.setText("get all Bitstreams");
+        btnGetAllBitstreams.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        btnGetAllBitstreams.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnGetBitstreamActionPerformed(evt);
+                btnGetAllBitstreamsActionPerformed(evt);
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -426,7 +525,22 @@ public class TestForm extends javax.swing.JFrame {
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 0.5;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-        panelBitstreams.add(btnGetBitstream, gridBagConstraints);
+        panelBitstreams.add(btnGetAllBitstreams, gridBagConstraints);
+
+        btnGetBitstreamById.setText("get Bitstream by ID");
+        btnGetBitstreamById.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        btnGetBitstreamById.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnGetBitstreamByIdActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 0.5;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        panelBitstreams.add(btnGetBitstreamById, gridBagConstraints);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -610,9 +724,10 @@ public class TestForm extends javax.swing.JFrame {
         textAreaOutput.setText(JsonUtils.jsonStringPrettyPrint(str));
     }//GEN-LAST:event_btnGetItemByIdActionPerformed
 
-    private void btnGetBitstreamActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGetBitstreamActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_btnGetBitstreamActionPerformed
+    private void btnGetAllBitstreamsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGetAllBitstreamsActionPerformed
+        String str = MainInt.getAllBitstreams();
+        textAreaOutput.setText(JsonUtils.jsonStringPrettyPrint(str));
+    }//GEN-LAST:event_btnGetAllBitstreamsActionPerformed
 
     private void btnDeleteCommunityActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteCommunityActionPerformed
         String idCommunity = tfID.getText();
@@ -658,11 +773,8 @@ public class TestForm extends javax.swing.JFrame {
         
         // test item: 70dd4e09-0148-499e-b772-06e88414c16a
         
-        ChangeMetadataDialog metadataDialog = new ChangeMetadataDialog(this, true, JsonUtils.jsonStringPrettyPrint(MetadataConstants.ITEM_METADATA_EXAMPLE));
-        metadataDialog.setLocationRelativeTo(this);
-        metadataDialog.setVisible(true);   
-        String metadata = metadataDialog.getMetadata(); // get metadata from the Dialog    
-       
+        String metadata = getDataFromDialog(JsonUtils.jsonStringPrettyPrint(MetadataConstants.ITEM_METADATA_EXAMPLE));
+        
         // Convert String metadata to Object
         ItemMetadataFieldDto[] metadataObj;
         metadataObj = JsonUtils.jsonStringToObject(metadata, ItemMetadataFieldDto[].class);
@@ -672,10 +784,67 @@ public class TestForm extends javax.swing.JFrame {
         
         // REST-Request, change metadata
         String id = tfID.getText();
-        String str = MainInt.addItemMetadata(id, metadata);
+        String str = MainInt.addItemMetadata(id, metadataConverted);
         textAreaOutput.setText(JsonUtils.jsonStringPrettyPrint(str));
     }//GEN-LAST:event_btnAddItemMetadataActionPerformed
 
+    private void btnUpdateItemMetadataActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdateItemMetadataActionPerformed
+        String metadata = getDataFromDialog(JsonUtils.jsonStringPrettyPrint(MetadataConstants.ITEM_METADATA_EXAMPLE));
+        
+        // Convert String metadata to Object
+        ItemMetadataFieldDto[] metadataObj;
+        metadataObj = JsonUtils.jsonStringToObject(metadata, ItemMetadataFieldDto[].class);
+        // Convert Object with metadata to the String
+        String metadataConverted = JsonUtils.objectToJsonString(metadataObj);
+        System.out.println(JsonUtils.jsonStringPrettyPrint(metadataConverted));
+        
+        // REST-Request, change metadata
+        String id = tfID.getText();
+        String str = MainInt.updateItemMetadata(id, metadataConverted);
+        textAreaOutput.setText(JsonUtils.jsonStringPrettyPrint(str));
+    }//GEN-LAST:event_btnUpdateItemMetadataActionPerformed
+
+    private void btnClearItemMetadataActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnClearItemMetadataActionPerformed
+        String id = tfID.getText();
+        String str = MainInt.clearItemMetadata(id);
+        textAreaOutput.setText(JsonUtils.jsonStringPrettyPrint(str));
+    }//GEN-LAST:event_btnClearItemMetadataActionPerformed
+
+    private void btnDeleteItem1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteItem1ActionPerformed
+        String id = tfID.getText();
+        String str = MainInt.deleteItem(id);
+        textAreaOutput.setText(JsonUtils.jsonStringPrettyPrint(str));
+    }//GEN-LAST:event_btnDeleteItem1ActionPerformed
+
+    private void btnGetBitstreamByIdActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGetBitstreamByIdActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_btnGetBitstreamByIdActionPerformed
+
+    private void btnGetAllBitstreamsItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGetAllBitstreamsItemActionPerformed
+        String id = tfID.getText();
+        String str = MainInt.getAllItemBitstreams(id);
+        textAreaOutput.setText(JsonUtils.jsonStringPrettyPrint(str));
+    }//GEN-LAST:event_btnGetAllBitstreamsItemActionPerformed
+
+    private void btnAdditemBitstreamActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAdditemBitstreamActionPerformed
+        String bitstreamDescription = getDataFromDialog(JsonUtils.jsonStringPrettyPrint(MetadataConstants.ITEM_BITSTREAM_DESCRIPTION_EXAMPLE));
+        String itemId = tfID.getText();
+        String str = MainInt.itemAddBitstream(itemId, bitstreamDescription);
+        textAreaOutput.setText(JsonUtils.jsonStringPrettyPrint(str));
+    }//GEN-LAST:event_btnAdditemBitstreamActionPerformed
+
+    private void btnDeleteItemBitstreamActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteItemBitstreamActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_btnDeleteItemBitstreamActionPerformed
+
+    
+    private String getDataFromDialog(String text){
+        ChangeDataDialog metadataDialog = new ChangeDataDialog(this, true, text);
+        metadataDialog.setLocationRelativeTo(this);
+        metadataDialog.setVisible(true);   
+        String metadata = metadataDialog.getText(); // get metadata from the Dialog 
+        return metadata;
+    }
     /**
      * @param args the command line arguments
      */
@@ -683,16 +852,22 @@ public class TestForm extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAddItemMetadata;
+    private javax.swing.JButton btnAdditemBitstream;
+    private javax.swing.JButton btnClearItemMetadata;
     private javax.swing.JButton btnConnectionStatus;
     private javax.swing.JButton btnCreateCollection;
     private javax.swing.JButton btnCreateCommunity;
     private javax.swing.JButton btnCreateItem;
     private javax.swing.JButton btnDeleteCollection;
     private javax.swing.JButton btnDeleteCommunity;
+    private javax.swing.JButton btnDeleteItem1;
+    private javax.swing.JButton btnDeleteItemBitstream;
+    private javax.swing.JButton btnGetAllBitstreams;
+    private javax.swing.JButton btnGetAllBitstreamsItem;
     private javax.swing.JButton btnGetAllCollections;
     private javax.swing.JButton btnGetAllCommunities;
     private javax.swing.JButton btnGetAllItems;
-    private javax.swing.JButton btnGetBitstream;
+    private javax.swing.JButton btnGetBitstreamById;
     private javax.swing.JButton btnGetCollectionById;
     private javax.swing.JButton btnGetCommunityById;
     private javax.swing.JButton btnGetItemById;
@@ -702,6 +877,7 @@ public class TestForm extends javax.swing.JFrame {
     private javax.swing.JButton btnRestTest;
     private javax.swing.JButton btnUpdateCollection;
     private javax.swing.JButton btnUpdateCommunity;
+    private javax.swing.JButton btnUpdateItemMetadata;
     private javax.swing.ButtonGroup buttonGroup1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;

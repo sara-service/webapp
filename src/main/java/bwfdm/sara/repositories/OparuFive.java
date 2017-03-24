@@ -335,12 +335,7 @@ public class OparuFive implements DSpace {
     }
     
     @Override
-    public boolean deleteItem(String itemID) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public boolean deleteItemInCollection(String collectionID, String itemID) {
+    public String deleteItem(String itemID) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
@@ -350,25 +345,61 @@ public class OparuFive implements DSpace {
     }
 
     @Override
-    public boolean itemUpdateMetadata(String itemID, String metadataEntry) {
+    public String itemUpdateMetadata(String itemID, String metadata) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
+    
+    @Override
+    public String itemClearMetadata(String itemID){
+        return "";
+    }
 
+    public String itemGetAllBitstreams(String itemID){
+        System.out.println("--- OPARU-5, get all bitstreams of the item ---");
+        
+        WebTarget itemBitstreamsWebTarget = itemsWebTarget.path(itemID).path("bitstreams");
+        Invocation.Builder invocationBuilder = itemBitstreamsWebTarget.request();
+        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_APPLICATION_JSON);
+        invocationBuilder.header("Accept", DSpaceConfig.HEADER_ACCEPT_OPARU);
+        Response response = invocationBuilder.get();
+        
+        if (response.getStatus() != this.responseStatusOK){
+            return DSpaceConfig.RESPONSE_ERROR_JSON;
+        } 
+        return response.readEntity(String.class);
+    }
+    
     @Override
     public String itemAddBitstream(String itemID, String bitstreamToAdd) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public boolean itemDeleteBitstream(String itemID, String bitstreamToDelete) {
+    public String itemDeleteBitstream(String itemID, String bitstreamToDelete) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public boolean downloadBitstream(String bitstreamID, String filenameToSave) {
+    public String downloadBitstream(String bitstreamID, String filenameToSave) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-
+    
+    @Override
+    public String getAllBitstreams(){
+        System.out.println("--- OPARU-5, get all bitstreams ---");
+        
+        Invocation.Builder invocationBuilder = bitstreamsWebTarget.request();
+        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_APPLICATION_JSON);
+        invocationBuilder.header("Accept", DSpaceConfig.HEADER_ACCEPT_OPARU);
+        Response response = invocationBuilder.get();
+        
+        if (response.getStatus() != this.responseStatusOK){
+            return DSpaceConfig.RESPONSE_ERROR_JSON;
+        }
+        
+        return response.readEntity(String.class);
+    }
+    
     
     /**
      * Methods from the "PublicationRepository" Interface

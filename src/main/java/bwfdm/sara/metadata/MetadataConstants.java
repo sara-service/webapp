@@ -60,4 +60,9 @@ public class MetadataConstants {
             + "]";
     
     
+    
+    public static String ITEM_BITSTREAM_DESCRIPTION_EXAMPLE = "{"
+                + "\"name\":" + "\"" + "test-bitstream" + "\""
+                + "}";
+    
 }

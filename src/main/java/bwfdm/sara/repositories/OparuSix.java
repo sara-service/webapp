@@ -57,7 +57,7 @@ public class OparuSix implements DSpace {
     // Constructor
     public OparuSix() {
         
-        System.out.println("--- Constructor Oparu-6 ---");
+        System.out.println("--- OPARU-6, constructor ---");
         
         this.urlServer = DSpaceConfig.URL_OPARU_SIX;
         this.urlRest = DSpaceConfig.URL_OPARU_SIX_REST;
@@ -96,19 +96,31 @@ public class OparuSix implements DSpace {
         client.register(feature);
     }
     
+    /**
+     * Check if REST API is anable
+     * @return 
+     */
     @Override
     public boolean isRestEnable() {
+        System.out.println("--- OPARU-6, is REST enable ---");
+        
         Invocation.Builder invocationBuilder = testWebTarget.request(); 
         Response response = invocationBuilder.get();
         return response.readEntity(String.class).equals(DSpaceConfig.RESPONSE_TEST_OPARU); //connection will be closed automatically after the readEntity
     }
     
+    /**
+     * Login, email/password
+     * 
+     * @param email
+     * @param password
+     * @return 
+     */
     @Override
     public boolean login(String email, String password) {
         // Login command:
         // curl -v -X POST --data "email=admin@dspace.org&password=mypass" https://dspace.myu.edu/rest/login
-        
-        System.out.println("--- login ---");
+        System.out.println("--- OPARU-6, login ---");
         
         // Check if login already done
         if (this.isAuthenticated()){
@@ -133,11 +145,15 @@ public class OparuSix implements DSpace {
         return this.isAuthenticated();           
     }
 
+    /**
+     * Logout.
+     * @return true or false 
+     */
     @Override
     public boolean logout() {
         // Command:
         // curl -v -X POST --cookie "JSESSIONID=6B98CF8648BCE57DCD99689FE77CB1B8" https://dspace.myu.edu/rest/logout
-        System.out.println("--- logout ---");
+        System.out.println("--- OPARU-6, logout ---");
         
         Invocation.Builder invocationBuilder = logoutWebTarget.request(); 
         invocationBuilder.cookie(this.getCookie()); 
@@ -156,17 +172,27 @@ public class OparuSix implements DSpace {
         return false;
     }
     
+    /**
+     * Check if authenticated
+     * @return true/false
+     */
     @Override
     public boolean isAuthenticated(){
+        System.out.println("--- OPARU-6, is authenticated ---");
         
         String status = this.getConnectionStatus();
         CookieStatusResponseDto cookieStatus = JsonUtils.jsonStringToObject(status, CookieStatusResponseDto.class);
         return cookieStatus.isAuthenticated();
     }
     
+    /**
+     * Check connection status.
+     * @return response string, JSON
+     */
     @Override
     public String getConnectionStatus(){
-        
+        System.out.println("--- OPARU-6, get connection status");
+       
         Invocation.Builder invocationBuilder = statusWebTarget.request();
         invocationBuilder.header("Accept", "application/json");
         invocationBuilder.cookie(this.getCookie());     
@@ -175,10 +201,18 @@ public class OparuSix implements DSpace {
         return status;
     }
    
+    /**
+     * Get cookie
+     * @return 
+     */
     public Cookie getCookie(){      
         return this.cookie;
     }
 
+    /**
+     * Set cookie.
+     * @param cookie 
+     */
     public void setCookie(Cookie cookie) {
         this.cookie = cookie;
     }
@@ -187,8 +221,13 @@ public class OparuSix implements DSpace {
     /* COMMUNITIES */
     
     
+    /**
+     * Get all communities
+     * @return String, JSON
+     */
     @Override
     public String getAllCommunities(){
+        System.out.println("--- OPARU-6, get all communities ---");
         
         Invocation.Builder invocationBuilder = communitiesWebTarget.request();
         invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_APPLICATION_JSON);
@@ -197,8 +236,14 @@ public class OparuSix implements DSpace {
         return response.readEntity(String.class); //Connection will be closed automatically after the "readEntity"
     }
 
+    /**
+     * Get community by ID
+     * @param id
+     * @return String, JSON
+     */
     @Override
     public String getCommunityById(String id){
+        System.out.println("--- OPARU-6, get community by ID ---");
         
         WebTarget communityIdWebTarget = communitiesWebTarget.path(id);
         Invocation.Builder invocationBuilder = communityIdWebTarget.request();
@@ -208,9 +253,16 @@ public class OparuSix implements DSpace {
         return response.readEntity(String.class); //Connection will be closed automatically after the "readEntity"
     }
     
-    
+    /**
+     * Create new community
+     * 
+     * @param communityName
+     * @param parentCommunityID
+     * @return String, response 
+     */
     @Override
     public String createCommunity(String communityName, String parentCommunityID) {
+        System.out.println("--- OPARU-6, create new community ---");
         
         WebTarget newCommunityWebTarget = communitiesWebTarget;
         if (!parentCommunityID.equals("")){
@@ -232,8 +284,14 @@ public class OparuSix implements DSpace {
         return response.readEntity(String.class); //Connection will be closed automatically after the "readEntity"
     }
 
+    /**
+     * Delete community
+     * @param communityID
+     * @return response string
+     */
     @Override
     public String deleteCommunity(String communityID) {
+        System.out.println("--- OPARU-6, delete community ---");
         
         if (communityID.equals("")){
             return DSpaceConfig.RESPONSE_ERROR_JSON; //empty ID, error
@@ -257,8 +315,16 @@ public class OparuSix implements DSpace {
         return response.readEntity(String.class);
     }
 
+    /**
+     * Update community
+     * 
+     * @param newCommunityName
+     * @param communityID
+     * @return 
+     */
     @Override
     public String updateCommunity(String newCommunityName, String communityID) {
+        System.out.println("--- OPARU-6, update community ---");
         
         if (communityID.equals("")){
             return DSpaceConfig.RESPONSE_ERROR_JSON; //empty ID, error
@@ -291,9 +357,14 @@ public class OparuSix implements DSpace {
     
     /* COLLECTIONS */
     
-    
+    /**
+     * Get all collections
+     * 
+     * @return JSON string 
+     */
     @Override
     public String getAllCollections(){
+        System.out.println("--- OPARU-6, get all collections ---");
         
         Invocation.Builder invocationBuilder = collectionsWebTarget.request();
         invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_APPLICATION_JSON);
@@ -307,8 +378,15 @@ public class OparuSix implements DSpace {
         return response.readEntity(String.class); //Connection will be closed automatically after the "readEntity"
     }
 
+    /**
+     * Get collection by ID
+     * 
+     * @param id
+     * @return JSON string
+     */
     @Override
     public String getCollectionById(String id){
+        System.out.println("--- OPARU-6, get collection by ID ---");
         
         WebTarget communityIdWebTarget = collectionsWebTarget.path(id);
         Invocation.Builder invocationBuilder = communityIdWebTarget.request();
@@ -323,8 +401,16 @@ public class OparuSix implements DSpace {
         return response.readEntity(String.class); //Connection will be closed automatically after the "readEntity"
     }
        
+    /**
+     * Create collection
+     * 
+     * @param collectionName
+     * @param parentCommunityID
+     * @return response string
+     */
     @Override
     public String createCollection(String collectionName, String parentCommunityID) {
+        System.out.println("--- OPARU-6, create collection ---");
         
         WebTarget newCollectionWebTarget = communitiesWebTarget.path(parentCommunityID).path("collections");
         
@@ -344,8 +430,15 @@ public class OparuSix implements DSpace {
         return response.readEntity(String.class); //Connection will be closed automatically after the "readEntity"
     }
 
+    /**
+     * Delete collection
+     * 
+     * @param collectionID
+     * @return response string
+     */
     @Override
     public String deleteCollection(String collectionID) {
+        System.out.println("--- OPARU-6, delete collection ---");
         
         WebTarget newCollectionWebTarget = collectionsWebTarget.path(collectionID);
         
@@ -365,8 +458,16 @@ public class OparuSix implements DSpace {
     
     }
 
+    /**
+     * Update collection (name)
+     * 
+     * @param newCollectionName
+     * @param collectionID
+     * @return 
+     */
     @Override
     public String updateCollection(String newCollectionName, String collectionID) {
+        System.out.println("--- OPARU-6, update collection --");
         
         if (collectionID.equals("")){
             return "Update collection, error: empty ID."; //empty ID, error
@@ -396,7 +497,10 @@ public class OparuSix implements DSpace {
     
     /* ITEMS */
     
-    
+    /**
+     * Get all items
+     * @return 
+     */
     @Override
     public String getAllItems() {
         
@@ -411,8 +515,15 @@ public class OparuSix implements DSpace {
         return response.readEntity(String.class);
     }
 
+    /**
+     * Get item by the ID
+     * 
+     * @param id
+     * @return JSON string
+     */
     @Override
     public String getItemById(String id) {
+        System.out.println("--- OPARU-6, get item by ID ---");
         
         WebTarget itemIdWebTarget = itemsWebTarget.path(id);
         Invocation.Builder invocationBuilder = itemIdWebTarget.request();
@@ -428,6 +539,7 @@ public class OparuSix implements DSpace {
     
     @Override
     public String getItemMetadataById(String id) {
+        System.out.println("--- OPARU-6, get item metadta by ID ---");
         
         WebTarget itemIdWebTarget = itemsWebTarget.path(id).path("metadata");
         Invocation.Builder invocationBuilder = itemIdWebTarget.request();
@@ -441,9 +553,18 @@ public class OparuSix implements DSpace {
         return response.readEntity(String.class);
     }
     
+    /**
+     * Create new item
+     * 
+     * @param itemName
+     * @param itemTitle
+     * @param collectionID
+     * @return response string, JSON
+     */
     @Override
     public String createItem(String itemName, String itemTitle, String collectionID) {
-    
+        System.out.println("--- OPARU-6, create new item");
+        
         if (collectionID.equals("")){
             return DSpaceConfig.RESPONSE_ERROR_JSON; //empty ID, error
         }
@@ -468,25 +589,84 @@ public class OparuSix implements DSpace {
     
     }
 
+    /**
+     * Delete item by ID
+     * @param itemID
+     * @return 
+     */
     @Override
-    public boolean deleteItem(String itemID) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public String deleteItem(String itemID) {
+        System.out.println("--- OPARU-6, delete item by ID ---");
+        
+        WebTarget itemWebTarget = itemsWebTarget;
+        itemWebTarget = itemsWebTarget.path(itemID);
+        
+        Invocation.Builder invocationBuilder = itemWebTarget.request();
+        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_APPLICATION_JSON);
+        invocationBuilder.header("Accept", DSpaceConfig.HEADER_ACCEPT_OPARU);
+        invocationBuilder.cookie(this.getCookie());
+        
+        Response response = invocationBuilder.delete();
+        
+        System.out.println("delete item, response: " + response.getStatus());
+        
+        if (response.getStatus() != this.responseStatusOK){
+            return DSpaceConfig.RESPONSE_ERROR_JSON;
+        }
+        return response.readEntity(String.class);
     }
 
-    @Override
-    public boolean deleteItemInCollection(String collectionID, String itemID) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
     
     //TODO:
     // 1. Escape characters (\n.....)
     // 2. Special metadata field for the GitLab link.
     //
+    /**
+     * Add metadata to the item
+     * 
+     * @param itemID
+     * @param metadata
+     * @return 
+     * 
+     * TODO:
+     * 1. Escape characters (\n.....)
+     * 2. Special metadata field for the GitLab link.
+     */
     @Override
     public String itemAddMetadata(String itemID, String metadata) {
+        System.out.println("--- OPARU-6, add metadata to the item ---");
         
-        System.out.println("--- add item metadata ---");
+        WebTarget itemMetadataWebTarget = itemsWebTarget;
+        itemMetadataWebTarget = itemsWebTarget.path(itemID).path("metadata");
         
+        Invocation.Builder invocationBuilder = itemMetadataWebTarget.request();
+        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_APPLICATION_JSON);
+        invocationBuilder.header("Accept", DSpaceConfig.HEADER_ACCEPT_OPARU);
+        invocationBuilder.cookie(this.getCookie());
+        String data = metadata;
+        
+        Response response = invocationBuilder.post(Entity.json(data));
+        
+        System.out.println("add item metadata, response: " + response.getStatus());
+        
+        if (response.getStatus() != this.responseStatusOK){
+            return DSpaceConfig.RESPONSE_ERROR_JSON;
+        }
+ 
+        return response.readEntity(String.class);
+    }
+
+    /**
+     * Update metadata of the item
+     * 
+     * @param itemID
+     * @param metadata
+     * @return 
+     */
+    @Override
+    public String itemUpdateMetadata(String itemID, String metadata) {
+        System.out.println("--- OPARU-6, update metadata of the item ---");
+          
         WebTarget itemMetadataWebTarget = itemsWebTarget;
         itemMetadataWebTarget = itemsWebTarget.path(itemID).path("metadata");
         
@@ -503,32 +683,114 @@ public class OparuSix implements DSpace {
         if (response.getStatus() != this.responseStatusOK){
             return DSpaceConfig.RESPONSE_ERROR_JSON;
         }
+        return response.readEntity(String.class);
+    }
+
+    /**
+     * Clear metadata of the item. 
+     * Remain only "dc.date.accessioned" and "dc.date.available"
+     * 
+     * @param itemID
+     * @return response string
+     */
+    @Override
+    public String itemClearMetadata(String itemID){
+        
+        System.out.println("--- OPARU-6, clear metadata of the item ---");
+          
+        WebTarget itemMetadataWebTarget = itemsWebTarget;
+        itemMetadataWebTarget = itemsWebTarget.path(itemID).path("metadata");
+        
+        Invocation.Builder invocationBuilder = itemMetadataWebTarget.request();
+        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_APPLICATION_JSON);
+        invocationBuilder.header("Accept", DSpaceConfig.HEADER_ACCEPT_OPARU);
+        invocationBuilder.cookie(this.getCookie());
+        
+        Response response = invocationBuilder.delete();
+        
+        System.out.println("clear item metadata, response: " + response.getStatus());
+        
+        if (response.getStatus() != this.responseStatusOK){
+            return DSpaceConfig.RESPONSE_ERROR_JSON;
+        }
+        return response.readEntity(String.class);
+    }
+    
+    
+    public String itemGetAllBitstreams(String itemID){
+        System.out.println("--- OPARU-6, get all bitstreams of the item ---");
+        
+        WebTarget itemBitstreamsWebTarget = itemsWebTarget.path(itemID).path("bitstreams");
+        Invocation.Builder invocationBuilder = itemBitstreamsWebTarget.request();
+        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_APPLICATION_JSON);
+        invocationBuilder.header("Accept", DSpaceConfig.HEADER_ACCEPT_OPARU);
+        Response response = invocationBuilder.get();
+        
+        if (response.getStatus() != this.responseStatusOK){
+            return DSpaceConfig.RESPONSE_ERROR_JSON;
+        } 
+        return response.readEntity(String.class);
+    }
+    
+    @Override
+    public String itemAddBitstream(String itemID, String bitstreamDescription) {
+        System.out.println("--- OPARU-6, add bitstream to the item ---");
+        
+        WebTarget itemBitstreamWebTarget = itemsWebTarget;
+        itemBitstreamWebTarget = itemsWebTarget.path(itemID).path("bitstreams");
+        
+        Invocation.Builder invocationBuilder = itemBitstreamWebTarget.request();
+        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_APPLICATION_JSON);
+        invocationBuilder.header("Accept", DSpaceConfig.HEADER_ACCEPT_OPARU);
+        invocationBuilder.cookie(this.getCookie());
+        
+        String data = bitstreamDescription;
+        
+//        String data = "{"
+//                + "\"name\":" + "\"" + "test-bitstream" + "\""
+//                + "}";
+        
+        Response response = invocationBuilder.post(Entity.json(data));
+        
+        System.out.println("add item bitstream, response: " + response.getStatus());
+        
+        if (response.getStatus() != this.responseStatusOK){
+            return DSpaceConfig.RESPONSE_ERROR_JSON;
+        }
  
         return response.readEntity(String.class);
     }
 
     @Override
-    public boolean itemUpdateMetadata(String itemID, String metadataEntry) {
+    public String itemDeleteBitstream(String itemID, String bitstreamToDelete) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public String itemAddBitstream(String itemID, String bitstreamToAdd) {
+    public String downloadBitstream(String bitstreamID, String filenameToSave) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
+    
     @Override
-    public boolean itemDeleteBitstream(String itemID, String bitstreamToDelete) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public String getAllBitstreams(){
+        System.out.println("--- OPARU-6, get all bitstreams ---");
+        
+        Invocation.Builder invocationBuilder = bitstreamsWebTarget.request();
+        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_APPLICATION_JSON);
+        invocationBuilder.header("Accept", DSpaceConfig.HEADER_ACCEPT_OPARU);
+        Response response = invocationBuilder.get();
+        
+        if (response.getStatus() != this.responseStatusOK){
+            return DSpaceConfig.RESPONSE_ERROR_JSON;
+        }
+        
+        return response.readEntity(String.class);
     }
-
-    @Override
-    public boolean downloadBitstream(String bitstreamID, String filenameToSave) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
    
 
+    /* PUBLICATION REPOSITORY methods */
+    
 
     @Override
     public boolean loginPublicationRepository() {

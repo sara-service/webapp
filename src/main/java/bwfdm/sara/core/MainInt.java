@@ -166,10 +166,33 @@ public class MainInt {
         return oparu.createItem(name, itemTitel, idCollection);
     }
     
+    public static String deleteItem(String id){
+        return oparu.deleteItem(id);
+    }
+    
     public static String addItemMetadata(String id, String metadata){
         return oparu.itemAddMetadata(id, metadata);
     }
+    
+    public static String updateItemMetadata(String id, String metadata){
+        return oparu.itemUpdateMetadata(id, metadata);
+    }
+    
+    public static String clearItemMetadata(String id){
+        return oparu.itemClearMetadata(id);
+    }
+    
+    public static String getAllItemBitstreams(String id){
+        return oparu.itemGetAllBitstreams(id);
+    }
  
+    public static String getAllBitstreams(){
+        return oparu.getAllBitstreams();
+    }
+    
+    public static String itemAddBitstream(String itemID, String bitstreamDescription){
+        return oparu.itemAddBitstream(itemID, bitstreamDescription);
+    }
     
     public static void findItemsPerMetadataAuthor(){
         
