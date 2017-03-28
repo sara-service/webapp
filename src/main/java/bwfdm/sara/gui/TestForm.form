@@ -10,9 +10,6 @@
     <Property name="minimumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
       <Dimension value="[800, 900]"/>
     </Property>
-    <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
-      <Dimension value="[800, 900]"/>
-    </Property>
   </Properties>
   <SyntheticProperties>
     <SyntheticProperty name="formSizePolicy" type="int" value="1"/>
@@ -382,7 +379,6 @@
             <Component class="javax.swing.JButton" name="btnUpdateItemMetadata">
               <Properties>
                 <Property name="text" type="java.lang.String" value="update Item metadata"/>
-                <Property name="actionCommand" type="java.lang.String" value="update Item metadata"/>
                 <Property name="horizontalAlignment" type="int" value="2"/>
               </Properties>
               <Events>
@@ -411,7 +407,6 @@
             <Component class="javax.swing.JButton" name="btnDeleteItem1">
               <Properties>
                 <Property name="text" type="java.lang.String" value="delete Item"/>
-                <Property name="actionCommand" type="java.lang.String" value="delete Item"/>
                 <Property name="horizontalAlignment" type="int" value="2"/>
               </Properties>
               <Events>

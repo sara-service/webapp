@@ -3,10 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package bwfdm.sara.repositories;
+package bwfdm.sara.publication;
 
-import bwfdm.sara.core.MainInt;
-import bwfdm.sara.metadata.MetadataCollection;
+import bwfdm.sara.gui.MainInt;
 import bwfdm.sara.utils.WebUtils;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -28,7 +27,7 @@ import javax.ws.rs.core.Response;
  */
 public class OparuFive implements DSpace {
 
-    private final String urlServer;
+    final String urlServer;
     private final String urlRest;
     private final String verify;
     private final int responseStatusOK;
@@ -84,7 +83,7 @@ public class OparuFive implements DSpace {
     public boolean isRestEnable() {   
         Invocation.Builder invocationBuilder = testWebTarget.request(); 
         Response response = invocationBuilder.get();
-        return response.readEntity(String.class).equals(DSpaceConfig.RESPONSE_TEST_OPARU); //connection will be closed automatically after the readEntity
+        return response.readEntity(String.class).equals(DSpaceConfig.RESPONSE_REST_TEST_OPARU); //connection will be closed automatically after the readEntity
     }
 
     @Override
@@ -96,7 +95,7 @@ public class OparuFive implements DSpace {
         
         boolean loginCorrect = false;
         Invocation.Builder invocationBuilder = loginWebTarget.request(); 
-        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_APPLICATION_JSON);
+        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_CONTENT_TYPE_OPARU);
         String data = "{"
                 + "\"email\":\"" + email + "\", "
                 + "\"password\":\"" + password + "\""
@@ -118,7 +117,7 @@ public class OparuFive implements DSpace {
         
         boolean logoutCorrect = false;
         Invocation.Builder invocationBuilder = logoutWebTarget.request();
-        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_APPLICATION_JSON);
+        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_CONTENT_TYPE_OPARU);
         invocationBuilder.header("rest-dspace-token", this.token);
         Response response = invocationBuilder.post(Entity.json(""));
         if (response.getStatus() == this.responseStatusOK){
@@ -139,8 +138,8 @@ public class OparuFive implements DSpace {
     public String getConnectionStatus(){
         
         Invocation.Builder invocationBuilder = statusWebTarget.request();
-        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_APPLICATION_JSON);
-        invocationBuilder.header("Accept", DSpaceConfig.HEADER_ACCEPT_OPARU);
+        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_CONTENT_TYPE_OPARU);
+        invocationBuilder.header("Accept", DSpaceConfig.HEADER_ACCEPT_TYPE_OPARU);
         invocationBuilder.header("rest-dspace-token", this.token);
         Response response = invocationBuilder.get();
         return response.readEntity(String.class);        
@@ -164,8 +163,8 @@ public class OparuFive implements DSpace {
     public String getAllCommunities(){
         
         Invocation.Builder invocationBuilder = communitiesWebTarget.request();
-        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_APPLICATION_JSON);
-        invocationBuilder.header("Accept", DSpaceConfig.HEADER_ACCEPT_OPARU);
+        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_CONTENT_TYPE_OPARU);
+        invocationBuilder.header("Accept", DSpaceConfig.HEADER_ACCEPT_TYPE_OPARU);
         Response response = invocationBuilder.get();
         return response.readEntity(String.class); //Connection will be closed automatically after the "readEntity"
     }
@@ -175,8 +174,8 @@ public class OparuFive implements DSpace {
         
         WebTarget communityIdWebTarget = communitiesWebTarget.path(id);
         Invocation.Builder invocationBuilder = communityIdWebTarget.request();
-        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_APPLICATION_JSON);
-        invocationBuilder.header("Accept", DSpaceConfig.HEADER_ACCEPT_OPARU);
+        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_CONTENT_TYPE_OPARU);
+        invocationBuilder.header("Accept", DSpaceConfig.HEADER_ACCEPT_TYPE_OPARU);
         Response response = invocationBuilder.get();
         return response.readEntity(String.class); //Connection will be closed automatically after the "readEntity"
     }
@@ -189,7 +188,7 @@ public class OparuFive implements DSpace {
             newCommunityWebTarget = communitiesWebTarget.path(parentCommunityID).path("communities");
         }
         Invocation.Builder invocationBuilder = newCommunityWebTarget.request();
-        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_APPLICATION_JSON);
+        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_CONTENT_TYPE_OPARU);
         invocationBuilder.header("rest-dspace-token", token);
         String data = "{"
                 + "\"name\":" + "\"" + communityName + "\""
@@ -225,8 +224,8 @@ public class OparuFive implements DSpace {
     public String getAllCollections(){
         
         Invocation.Builder invocationBuilder = collectionsWebTarget.request();
-        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_APPLICATION_JSON);
-        invocationBuilder.header("Accept", DSpaceConfig.HEADER_ACCEPT_OPARU);
+        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_CONTENT_TYPE_OPARU);
+        invocationBuilder.header("Accept", DSpaceConfig.HEADER_ACCEPT_TYPE_OPARU);
         Response response = invocationBuilder.get();
         return response.readEntity(String.class); //Connection will be closed automatically after the "readEntity"
     }
@@ -236,8 +235,8 @@ public class OparuFive implements DSpace {
         
         WebTarget communityIdWebTarget = collectionsWebTarget.path(id);
         Invocation.Builder invocationBuilder = communityIdWebTarget.request();
-        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_APPLICATION_JSON);
-        invocationBuilder.header("Accept", DSpaceConfig.HEADER_ACCEPT_OPARU);
+        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_CONTENT_TYPE_OPARU);
+        invocationBuilder.header("Accept", DSpaceConfig.HEADER_ACCEPT_TYPE_OPARU);
         Response response = invocationBuilder.get();
         return response.readEntity(String.class); //Connection will be closed automatically after the "readEntity"
     }
@@ -248,7 +247,7 @@ public class OparuFive implements DSpace {
         WebTarget newCollectionWebTarget = communitiesWebTarget.path(parentCommunityID).path("collections");
         
         Invocation.Builder invocationBuilder = newCollectionWebTarget.request();
-        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_APPLICATION_JSON);
+        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_CONTENT_TYPE_OPARU);
         invocationBuilder.header("rest-dspace-token", token);
         String data = "{"
                 + "\"name\":" + "\"" + collectionName + "\""
@@ -276,8 +275,8 @@ public class OparuFive implements DSpace {
         WebTarget newItemWebTarget = collectionsWebTarget.path(collectionID).path("items");
         
         Invocation.Builder invocationBuilder = newItemWebTarget.request();
-        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_APPLICATION_JSON);
-        invocationBuilder.header("Accept", DSpaceConfig.HEADER_ACCEPT_OPARU);
+        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_CONTENT_TYPE_OPARU);
+        invocationBuilder.header("Accept", DSpaceConfig.HEADER_ACCEPT_TYPE_OPARU);
         invocationBuilder.header("user", DSpaceConfig.EMAIL_OPARU);
         invocationBuilder.header("pass", DSpaceConfig.getPassword(DSpaceConfig.EMAIL_OPARU, this));
 //        invocationBuilder.header("rest-dspace-token", this.getToken());
@@ -303,8 +302,8 @@ public class OparuFive implements DSpace {
     public String getAllItems(){
         
         Invocation.Builder invocationBuilder = itemsWebTarget.request();
-        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_APPLICATION_JSON);
-        invocationBuilder.header("Accept", DSpaceConfig.HEADER_ACCEPT_OPARU);
+        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_CONTENT_TYPE_OPARU);
+        invocationBuilder.header("Accept", DSpaceConfig.HEADER_ACCEPT_TYPE_OPARU);
         Response response = invocationBuilder.get();
         return response.readEntity(String.class); //Connection will be closed automatically after the "readEntity"
         
@@ -315,8 +314,8 @@ public class OparuFive implements DSpace {
         
         WebTarget itemIdWebTarget = itemsWebTarget.path(id);
         Invocation.Builder invocationBuilder = itemIdWebTarget.request();
-        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_APPLICATION_JSON);
-        invocationBuilder.header("Accept", DSpaceConfig.HEADER_ACCEPT_OPARU);
+        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_CONTENT_TYPE_OPARU);
+        invocationBuilder.header("Accept", DSpaceConfig.HEADER_ACCEPT_TYPE_OPARU);
         Response response = invocationBuilder.get();
         return response.readEntity(String.class); //Connection will be closed automatically after the "readEntity"
         
@@ -327,8 +326,8 @@ public class OparuFive implements DSpace {
         
         WebTarget itemIdWebTarget = itemsWebTarget.path(id).path("metadata");
         Invocation.Builder invocationBuilder = itemIdWebTarget.request();
-        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_APPLICATION_JSON);
-        invocationBuilder.header("Accept", DSpaceConfig.HEADER_ACCEPT_OPARU);
+        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_CONTENT_TYPE_OPARU);
+        invocationBuilder.header("Accept", DSpaceConfig.HEADER_ACCEPT_TYPE_OPARU);
         Response response = invocationBuilder.get();
         return response.readEntity(String.class); //Connection will be closed automatically after the "readEntity"
         
@@ -340,27 +339,27 @@ public class OparuFive implements DSpace {
     }
 
     @Override
-    public String itemAddMetadata(String itemID, String metadata) {
+    public String addItemMetadata(String itemID, String metadata) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public String itemUpdateMetadata(String itemID, String metadata) {
+    public String updateItemMetadata(String itemID, String metadata) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
     @Override
-    public String itemClearMetadata(String itemID){
+    public String clearItemMetadata(String itemID){
         return "";
     }
 
-    public String itemGetAllBitstreams(String itemID){
+    public String getItemBitstreams(String itemID){
         System.out.println("--- OPARU-5, get all bitstreams of the item ---");
         
         WebTarget itemBitstreamsWebTarget = itemsWebTarget.path(itemID).path("bitstreams");
         Invocation.Builder invocationBuilder = itemBitstreamsWebTarget.request();
-        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_APPLICATION_JSON);
-        invocationBuilder.header("Accept", DSpaceConfig.HEADER_ACCEPT_OPARU);
+        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_CONTENT_TYPE_OPARU);
+        invocationBuilder.header("Accept", DSpaceConfig.HEADER_ACCEPT_TYPE_OPARU);
         Response response = invocationBuilder.get();
         
         if (response.getStatus() != this.responseStatusOK){
@@ -370,12 +369,12 @@ public class OparuFive implements DSpace {
     }
     
     @Override
-    public String itemAddBitstream(String itemID, String bitstreamToAdd) {
+    public String addItemBitstream(String itemID, String bitstreamToAdd) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public String itemDeleteBitstream(String itemID, String bitstreamToDelete) {
+    public String deleteItemBitstream(String itemID, String bitstreamToDelete) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
@@ -389,8 +388,8 @@ public class OparuFive implements DSpace {
         System.out.println("--- OPARU-5, get all bitstreams ---");
         
         Invocation.Builder invocationBuilder = bitstreamsWebTarget.request();
-        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_APPLICATION_JSON);
-        invocationBuilder.header("Accept", DSpaceConfig.HEADER_ACCEPT_OPARU);
+        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_CONTENT_TYPE_OPARU);
+        invocationBuilder.header("Accept", DSpaceConfig.HEADER_ACCEPT_TYPE_OPARU);
         Response response = invocationBuilder.get();
         
         if (response.getStatus() != this.responseStatusOK){

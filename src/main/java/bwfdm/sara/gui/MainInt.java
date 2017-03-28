@@ -3,12 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package bwfdm.sara.core;
+package bwfdm.sara.gui;
 
-import bwfdm.sara.repositories.DSpace;
-import bwfdm.sara.repositories.DSpaceConfig;
-import bwfdm.sara.repositories.OparuFive;
-import bwfdm.sara.repositories.OparuSix;
+import bwfdm.sara.publication.DSpace;
+import bwfdm.sara.publication.DSpaceConfig;
+import bwfdm.sara.publication.OparuFive;
+import bwfdm.sara.publication.OparuSix;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -171,19 +171,19 @@ public class MainInt {
     }
     
     public static String addItemMetadata(String id, String metadata){
-        return oparu.itemAddMetadata(id, metadata);
+        return oparu.addItemMetadata(id, metadata);
     }
     
     public static String updateItemMetadata(String id, String metadata){
-        return oparu.itemUpdateMetadata(id, metadata);
+        return oparu.updateItemMetadata(id, metadata);
     }
     
     public static String clearItemMetadata(String id){
-        return oparu.itemClearMetadata(id);
+        return oparu.clearItemMetadata(id);
     }
     
     public static String getAllItemBitstreams(String id){
-        return oparu.itemGetAllBitstreams(id);
+        return oparu.getItemBitstreams(id);
     }
  
     public static String getAllBitstreams(){
@@ -191,7 +191,7 @@ public class MainInt {
     }
     
     public static String itemAddBitstream(String itemID, String bitstreamDescription){
-        return oparu.itemAddBitstream(itemID, bitstreamDescription);
+        return oparu.addItemBitstream(itemID, bitstreamDescription);
     }
     
     public static void findItemsPerMetadataAuthor(){

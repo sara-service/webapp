@@ -3,13 +3,13 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package bwfdm.sara.metadata;
+package bwfdm.sara.publication.dto;
 
 /**
  *
  * @author vk
  */
-public class ItemMetadataFieldDto {
+public class ItemMetadataEntryDspace {
     
     private String key;
     private String language;

@@ -3,12 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package bwfdm.sara.metadata;
+package bwfdm.sara.publication;
 
 /**
- * 
+ *
  * @author vk
  */
-public class MetadataCollection {
+public interface DSpace extends DSpaceREST, PublicationRepository{
     
 }

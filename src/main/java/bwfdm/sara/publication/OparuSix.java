@@ -3,11 +3,10 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package bwfdm.sara.repositories;
+package bwfdm.sara.publication;
 
-import bwfdm.sara.core.MainInt;
-import bwfdm.sara.metadata.MetadataCollection;
-import bwfdm.sara.rest.CookieStatusResponseDto;
+import bwfdm.sara.gui.MainInt;
+import bwfdm.sara.publication.dto.CookieStatusResponseDspace;
 import bwfdm.sara.utils.JsonUtils;
 import bwfdm.sara.utils.WebUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -27,13 +26,12 @@ import javax.ws.rs.core.Form;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.glassfish.jersey.logging.LoggingFeature;
-import sun.nio.cs.ISO_8859_2;
 
 /**
  *
  * @author vk
  */
-public class OparuSix implements DSpace {
+public class OparuSix implements DSpace{
 
     private final String urlServer;
     private final String urlRest;
@@ -106,7 +104,7 @@ public class OparuSix implements DSpace {
         
         Invocation.Builder invocationBuilder = testWebTarget.request(); 
         Response response = invocationBuilder.get();
-        return response.readEntity(String.class).equals(DSpaceConfig.RESPONSE_TEST_OPARU); //connection will be closed automatically after the readEntity
+        return response.readEntity(String.class).equals(DSpaceConfig.RESPONSE_REST_TEST_OPARU); //connection will be closed automatically after the readEntity
     }
     
     /**
@@ -181,7 +179,7 @@ public class OparuSix implements DSpace {
         System.out.println("--- OPARU-6, is authenticated ---");
         
         String status = this.getConnectionStatus();
-        CookieStatusResponseDto cookieStatus = JsonUtils.jsonStringToObject(status, CookieStatusResponseDto.class);
+        CookieStatusResponseDspace cookieStatus = JsonUtils.jsonStringToObject(status, CookieStatusResponseDspace.class);
         return cookieStatus.isAuthenticated();
     }
     
@@ -194,7 +192,7 @@ public class OparuSix implements DSpace {
         System.out.println("--- OPARU-6, get connection status");
        
         Invocation.Builder invocationBuilder = statusWebTarget.request();
-        invocationBuilder.header("Accept", "application/json");
+        invocationBuilder.header("Accept", MediaType.APPLICATION_JSON);
         invocationBuilder.cookie(this.getCookie());     
         Response response = invocationBuilder.get();
         String status = response.readEntity(String.class); // Connection will be closed automatically       
@@ -203,7 +201,7 @@ public class OparuSix implements DSpace {
    
     /**
      * Get cookie
-     * @return 
+     * @return Cookie
      */
     public Cookie getCookie(){      
         return this.cookie;
@@ -229,9 +227,9 @@ public class OparuSix implements DSpace {
     public String getAllCommunities(){
         System.out.println("--- OPARU-6, get all communities ---");
         
-        Invocation.Builder invocationBuilder = communitiesWebTarget.request();
-        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_APPLICATION_JSON);
-        invocationBuilder.header("Accept", DSpaceConfig.HEADER_ACCEPT_OPARU);
+        Invocation.Builder invocationBuilder = communitiesWebTarget.path("top-communities").request();
+        invocationBuilder.header("Content-Type", MediaType.APPLICATION_JSON);
+        invocationBuilder.header("Accept", MediaType.APPLICATION_JSON);
         Response response = invocationBuilder.get();
         return response.readEntity(String.class); //Connection will be closed automatically after the "readEntity"
     }
@@ -247,8 +245,8 @@ public class OparuSix implements DSpace {
         
         WebTarget communityIdWebTarget = communitiesWebTarget.path(id);
         Invocation.Builder invocationBuilder = communityIdWebTarget.request();
-        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_APPLICATION_JSON);
-        invocationBuilder.header("Accept", DSpaceConfig.HEADER_ACCEPT_OPARU);
+        invocationBuilder.header("Content-Type", MediaType.APPLICATION_JSON);
+        invocationBuilder.header("Accept", MediaType.APPLICATION_JSON);
         Response response = invocationBuilder.get();
         return response.readEntity(String.class); //Connection will be closed automatically after the "readEntity"
     }
@@ -269,8 +267,8 @@ public class OparuSix implements DSpace {
             newCommunityWebTarget = communitiesWebTarget.path(parentCommunityID).path("communities");
         }
         Invocation.Builder invocationBuilder = newCommunityWebTarget.request();
-        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_APPLICATION_JSON);
-        invocationBuilder.header("Accept", DSpaceConfig.HEADER_ACCEPT_OPARU);
+        invocationBuilder.header("Content-Type", MediaType.APPLICATION_JSON);
+        invocationBuilder.header("Accept", MediaType.APPLICATION_JSON);
         invocationBuilder.cookie(this.getCookie());
         String data = "{"
                 + "\"name\":" + "\"" + communityName + "\""
@@ -301,8 +299,8 @@ public class OparuSix implements DSpace {
         deleteCommunityWebTarget = communitiesWebTarget.path(communityID);
 
         Invocation.Builder invocationBuilder = deleteCommunityWebTarget.request();
-        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_APPLICATION_JSON);
-        invocationBuilder.header("Accept", DSpaceConfig.HEADER_ACCEPT_OPARU);
+        invocationBuilder.header("Content-Type", MediaType.APPLICATION_JSON);
+        invocationBuilder.header("Accept", MediaType.APPLICATION_JSON);
         invocationBuilder.cookie(this.getCookie());
         
         Response response = invocationBuilder.delete();
@@ -334,8 +332,8 @@ public class OparuSix implements DSpace {
         newCommunityWebTarget = communitiesWebTarget.path(communityID);
         
         Invocation.Builder invocationBuilder = newCommunityWebTarget.request();
-        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_APPLICATION_JSON);
-        invocationBuilder.header("Accept", DSpaceConfig.HEADER_ACCEPT_OPARU);
+        invocationBuilder.header("Content-Type", MediaType.APPLICATION_JSON);
+        invocationBuilder.header("Accept", MediaType.APPLICATION_JSON);
         invocationBuilder.cookie(this.getCookie());
         String data = "{"
                 + "\"name\":" + "\"" + newCommunityName + "\""
@@ -367,8 +365,8 @@ public class OparuSix implements DSpace {
         System.out.println("--- OPARU-6, get all collections ---");
         
         Invocation.Builder invocationBuilder = collectionsWebTarget.request();
-        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_APPLICATION_JSON);
-        invocationBuilder.header("Accept", DSpaceConfig.HEADER_ACCEPT_OPARU);
+        invocationBuilder.header("Content-Type", MediaType.APPLICATION_JSON);
+        invocationBuilder.header("Accept", MediaType.APPLICATION_JSON);
         Response response = invocationBuilder.get();
         
         if (response.getStatus() != this.responseStatusOK){
@@ -390,8 +388,8 @@ public class OparuSix implements DSpace {
         
         WebTarget communityIdWebTarget = collectionsWebTarget.path(id);
         Invocation.Builder invocationBuilder = communityIdWebTarget.request();
-        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_APPLICATION_JSON);
-        invocationBuilder.header("Accept", DSpaceConfig.HEADER_ACCEPT_OPARU);
+        invocationBuilder.header("Content-Type", MediaType.APPLICATION_JSON);
+        invocationBuilder.header("Accept", MediaType.APPLICATION_JSON);
         Response response = invocationBuilder.get();
         
         if (response.getStatus() != this.responseStatusOK){
@@ -415,8 +413,8 @@ public class OparuSix implements DSpace {
         WebTarget newCollectionWebTarget = communitiesWebTarget.path(parentCommunityID).path("collections");
         
         Invocation.Builder invocationBuilder = newCollectionWebTarget.request();
-        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_APPLICATION_JSON);
-        invocationBuilder.header("Accept", DSpaceConfig.HEADER_ACCEPT_OPARU);
+        invocationBuilder.header("Content-Type", MediaType.APPLICATION_JSON);
+        invocationBuilder.header("Accept", MediaType.APPLICATION_JSON);
         invocationBuilder.cookie(this.getCookie());
         String data = "{"
                 + "\"name\":" + "\"" + collectionName + "\""
@@ -443,8 +441,8 @@ public class OparuSix implements DSpace {
         WebTarget newCollectionWebTarget = collectionsWebTarget.path(collectionID);
         
         Invocation.Builder invocationBuilder = newCollectionWebTarget.request();
-        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_APPLICATION_JSON);
-        invocationBuilder.header("Accept", DSpaceConfig.HEADER_ACCEPT_OPARU);
+        invocationBuilder.header("Content-Type", MediaType.APPLICATION_JSON);
+        invocationBuilder.header("Accept", MediaType.APPLICATION_JSON);
         invocationBuilder.cookie(this.getCookie());
         
         Response response = invocationBuilder.delete();
@@ -477,8 +475,8 @@ public class OparuSix implements DSpace {
         collectionWebTarget = collectionsWebTarget.path(collectionID);
         
         Invocation.Builder invocationBuilder = collectionWebTarget.request();
-        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_APPLICATION_JSON);
-        invocationBuilder.header("Accept", DSpaceConfig.HEADER_ACCEPT_OPARU);
+        invocationBuilder.header("Content-Type", MediaType.APPLICATION_JSON);
+        invocationBuilder.header("Accept", MediaType.APPLICATION_JSON);
         invocationBuilder.cookie(this.getCookie());
         String data = "{"
                 + "\"name\":" + "\"" + newCollectionName + "\""
@@ -505,8 +503,8 @@ public class OparuSix implements DSpace {
     public String getAllItems() {
         
         Invocation.Builder invocationBuilder = itemsWebTarget.request();
-        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_APPLICATION_JSON);
-        invocationBuilder.header("Accept", DSpaceConfig.HEADER_ACCEPT_OPARU);
+        invocationBuilder.header("Content-Type", MediaType.APPLICATION_JSON);
+        invocationBuilder.header("Accept", MediaType.APPLICATION_JSON);
         Response response = invocationBuilder.get();
         
         if (response.getStatus() != this.responseStatusOK){
@@ -527,8 +525,8 @@ public class OparuSix implements DSpace {
         
         WebTarget itemIdWebTarget = itemsWebTarget.path(id);
         Invocation.Builder invocationBuilder = itemIdWebTarget.request();
-        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_APPLICATION_JSON);
-        invocationBuilder.header("Accept", DSpaceConfig.HEADER_ACCEPT_OPARU);
+        invocationBuilder.header("Content-Type", MediaType.APPLICATION_JSON);
+        invocationBuilder.header("Accept", MediaType.APPLICATION_JSON);
         Response response = invocationBuilder.get();
         
         if (response.getStatus() != this.responseStatusOK){
@@ -543,8 +541,8 @@ public class OparuSix implements DSpace {
         
         WebTarget itemIdWebTarget = itemsWebTarget.path(id).path("metadata");
         Invocation.Builder invocationBuilder = itemIdWebTarget.request();
-        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_APPLICATION_JSON);
-        invocationBuilder.header("Accept", DSpaceConfig.HEADER_ACCEPT_OPARU);
+        invocationBuilder.header("Content-Type", MediaType.APPLICATION_JSON);
+        invocationBuilder.header("Accept", MediaType.APPLICATION_JSON);
         Response response = invocationBuilder.get();
         
         if (response.getStatus() != this.responseStatusOK){
@@ -572,8 +570,8 @@ public class OparuSix implements DSpace {
         WebTarget newItemWebTarget = collectionsWebTarget.path(collectionID).path("items");
         
         Invocation.Builder invocationBuilder = newItemWebTarget.request();
-        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_APPLICATION_JSON);
-        invocationBuilder.header("Accept", DSpaceConfig.HEADER_ACCEPT_OPARU);
+        invocationBuilder.header("Content-Type", MediaType.APPLICATION_JSON);
+        invocationBuilder.header("Accept", MediaType.APPLICATION_JSON);
         invocationBuilder.cookie(this.getCookie());
         String data = "{"
                 + "\"name\":" + "\"" + itemName + "\""
@@ -602,8 +600,8 @@ public class OparuSix implements DSpace {
         itemWebTarget = itemsWebTarget.path(itemID);
         
         Invocation.Builder invocationBuilder = itemWebTarget.request();
-        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_APPLICATION_JSON);
-        invocationBuilder.header("Accept", DSpaceConfig.HEADER_ACCEPT_OPARU);
+        invocationBuilder.header("Content-Type", MediaType.APPLICATION_JSON);
+        invocationBuilder.header("Accept", MediaType.APPLICATION_JSON);
         invocationBuilder.cookie(this.getCookie());
         
         Response response = invocationBuilder.delete();
@@ -633,15 +631,15 @@ public class OparuSix implements DSpace {
      * 2. Special metadata field for the GitLab link.
      */
     @Override
-    public String itemAddMetadata(String itemID, String metadata) {
+    public String addItemMetadata(String itemID, String metadata) {
         System.out.println("--- OPARU-6, add metadata to the item ---");
         
         WebTarget itemMetadataWebTarget = itemsWebTarget;
         itemMetadataWebTarget = itemsWebTarget.path(itemID).path("metadata");
         
         Invocation.Builder invocationBuilder = itemMetadataWebTarget.request();
-        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_APPLICATION_JSON);
-        invocationBuilder.header("Accept", DSpaceConfig.HEADER_ACCEPT_OPARU);
+        invocationBuilder.header("Content-Type", MediaType.APPLICATION_JSON);
+        invocationBuilder.header("Accept", MediaType.APPLICATION_JSON);
         invocationBuilder.cookie(this.getCookie());
         String data = metadata;
         
@@ -664,15 +662,15 @@ public class OparuSix implements DSpace {
      * @return 
      */
     @Override
-    public String itemUpdateMetadata(String itemID, String metadata) {
+    public String updateItemMetadata(String itemID, String metadata) {
         System.out.println("--- OPARU-6, update metadata of the item ---");
           
         WebTarget itemMetadataWebTarget = itemsWebTarget;
         itemMetadataWebTarget = itemsWebTarget.path(itemID).path("metadata");
         
         Invocation.Builder invocationBuilder = itemMetadataWebTarget.request();
-        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_APPLICATION_JSON);
-        invocationBuilder.header("Accept", DSpaceConfig.HEADER_ACCEPT_OPARU);
+        invocationBuilder.header("Content-Type", MediaType.APPLICATION_JSON);
+        invocationBuilder.header("Accept", MediaType.APPLICATION_JSON);
         invocationBuilder.cookie(this.getCookie());
         String data = metadata;
         
@@ -694,7 +692,7 @@ public class OparuSix implements DSpace {
      * @return response string
      */
     @Override
-    public String itemClearMetadata(String itemID){
+    public String clearItemMetadata(String itemID){
         
         System.out.println("--- OPARU-6, clear metadata of the item ---");
           
@@ -702,8 +700,8 @@ public class OparuSix implements DSpace {
         itemMetadataWebTarget = itemsWebTarget.path(itemID).path("metadata");
         
         Invocation.Builder invocationBuilder = itemMetadataWebTarget.request();
-        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_APPLICATION_JSON);
-        invocationBuilder.header("Accept", DSpaceConfig.HEADER_ACCEPT_OPARU);
+        invocationBuilder.header("Content-Type", MediaType.APPLICATION_JSON);
+        invocationBuilder.header("Accept", MediaType.APPLICATION_JSON);
         invocationBuilder.cookie(this.getCookie());
         
         Response response = invocationBuilder.delete();
@@ -717,13 +715,13 @@ public class OparuSix implements DSpace {
     }
     
     
-    public String itemGetAllBitstreams(String itemID){
+    public String getItemBitstreams(String itemID){
         System.out.println("--- OPARU-6, get all bitstreams of the item ---");
         
         WebTarget itemBitstreamsWebTarget = itemsWebTarget.path(itemID).path("bitstreams");
         Invocation.Builder invocationBuilder = itemBitstreamsWebTarget.request();
-        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_APPLICATION_JSON);
-        invocationBuilder.header("Accept", DSpaceConfig.HEADER_ACCEPT_OPARU);
+        invocationBuilder.header("Content-Type", MediaType.APPLICATION_JSON);
+        invocationBuilder.header("Accept", MediaType.APPLICATION_JSON);
         Response response = invocationBuilder.get();
         
         if (response.getStatus() != this.responseStatusOK){
@@ -733,15 +731,15 @@ public class OparuSix implements DSpace {
     }
     
     @Override
-    public String itemAddBitstream(String itemID, String bitstreamDescription) {
+    public String addItemBitstream(String itemID, String bitstreamDescription) {
         System.out.println("--- OPARU-6, add bitstream to the item ---");
         
         WebTarget itemBitstreamWebTarget = itemsWebTarget;
         itemBitstreamWebTarget = itemsWebTarget.path(itemID).path("bitstreams");
         
         Invocation.Builder invocationBuilder = itemBitstreamWebTarget.request();
-        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_APPLICATION_JSON);
-        invocationBuilder.header("Accept", DSpaceConfig.HEADER_ACCEPT_OPARU);
+        invocationBuilder.header("Content-Type", MediaType.APPLICATION_JSON);
+        invocationBuilder.header("Accept", MediaType.APPLICATION_JSON);
         invocationBuilder.cookie(this.getCookie());
         
         String data = bitstreamDescription;
@@ -762,7 +760,7 @@ public class OparuSix implements DSpace {
     }
 
     @Override
-    public String itemDeleteBitstream(String itemID, String bitstreamToDelete) {
+    public String deleteItemBitstream(String itemID, String bitstreamToDelete) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
@@ -777,8 +775,8 @@ public class OparuSix implements DSpace {
         System.out.println("--- OPARU-6, get all bitstreams ---");
         
         Invocation.Builder invocationBuilder = bitstreamsWebTarget.request();
-        invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_APPLICATION_JSON);
-        invocationBuilder.header("Accept", DSpaceConfig.HEADER_ACCEPT_OPARU);
+        invocationBuilder.header("Content-Type", MediaType.APPLICATION_JSON);
+        invocationBuilder.header("Accept", MediaType.APPLICATION_JSON);
         Response response = invocationBuilder.get();
         
         if (response.getStatus() != this.responseStatusOK){

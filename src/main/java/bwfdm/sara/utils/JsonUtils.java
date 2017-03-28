@@ -5,8 +5,8 @@
  */
 package bwfdm.sara.utils;
 
-import bwfdm.sara.repositories.OparuSix;
-import bwfdm.sara.rest.CookieStatusResponseDto;
+import bwfdm.sara.publication.OparuSix;
+import bwfdm.sara.publication.dto.CookieStatusResponseDspace;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;

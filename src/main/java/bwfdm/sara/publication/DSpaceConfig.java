@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package bwfdm.sara.repositories;
+package bwfdm.sara.publication;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -45,23 +45,23 @@ public class DSpaceConfig {
      * OPARU-general config
      */
     public static final String EMAIL_OPARU = "project-sara@uni-konstanz.de";   
-    public static final String RESPONSE_TEST_OPARU = "REST api is running.";
+    public static final String RESPONSE_REST_TEST_OPARU = "REST api is running.";
     
     /**
      * General config
      */
-    public static final String HEADER_APPLICATION_JSON = "application/json";
-    public static final String HEADER_ACCEPT_OPARU = "application/json";
+    public static final String HEADER_CONTENT_TYPE_OPARU = "application/json";
+    public static final String HEADER_ACCEPT_TYPE_OPARU = "application/json";
     public static final String RESPONSE_ERROR_JSON = "{\"Error\":\"bad response status\"}";
     public static final String RESPONSE_EMPTY_JSON = "{\"\":\"\"}";
     
     
     
-//    public static final String HEADER_APPLICATION_JSON = 
+//    public static final String HEADER_CONTENT_TYPE_OPARU = 
 //            " {" + 
 //            " \"Content-Type\": \"application/" + REQUEST_TYPE_OPARU + "\"" + 
 //            " }";
-//    public static final String HEADER_ACCEPT_OPARU = 
+//    public static final String HEADER_ACCEPT_TYPE_OPARU = 
 //            " {" + 
 //            " \"Accept\": \"application/" + REQUEST_TYPE_OPARU + "\"" + 
 //            " }";

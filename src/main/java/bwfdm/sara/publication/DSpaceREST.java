@@ -3,9 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package bwfdm.sara.repositories;
+package bwfdm.sara.publication;
 
-import bwfdm.sara.metadata.MetadataCollection;
+//import bwfdm.sara.metadata.MetadataCollection;
 import javax.ws.rs.core.Cookie;
 
 /**
@@ -29,6 +29,8 @@ public interface DSpaceREST {
     public String createCommunity(String communityName, String parentCommunityID);
     public String deleteCommunity(String communityID);
     public String updateCommunity(String communityName, String communityID);
+    public String getAllCommunities(); // not important
+    public String getCommunityById(String id); // not important
     
     public String getObjectProperties(String objectName, String objectID);
     
@@ -36,16 +38,21 @@ public interface DSpaceREST {
     public String createCollection(String collectionName, String parentCommunityID);
     public String deleteCollection(String collectionID);
     public String updateCollection(String collectionName, String collectionID);
+    public String getAllCollections(); // not important
+    public String getCollectionById(String id); // not important
     
     /* Item */
     public String createItem(String itemName, String itemTitle, String collectionID);
     public String deleteItem(String itemID);
-    public String itemAddMetadata(String itemID, String metadata);
-    public String itemUpdateMetadata(String itemID, String metadata);
-    public String itemClearMetadata(String itemID);
-    public String itemGetAllBitstreams(String itemID);
-    public String itemAddBitstream(String itemID, String bitstreamDescription);
-    public String itemDeleteBitstream(String itemID, String bitstreamToDelete);
+    public String addItemMetadata(String itemID, String metadata);
+    public String updateItemMetadata(String itemID, String metadata);
+    public String clearItemMetadata(String itemID);
+    public String getItemBitstreams(String itemID);
+    public String addItemBitstream(String itemID, String bitstreamDescription);
+    public String deleteItemBitstream(String itemID, String bitstreamToDelete);
+    public String getAllItems(); // not important
+    public String getItemById(String id); // not important
+    public String getItemMetadataById(String id); // not important
     
     
     /* Bitstreams */
@@ -53,13 +60,10 @@ public interface DSpaceREST {
     public String downloadBitstream(String bitstreamID, String filenameToSave);
     
     // Not important methods
-    public String getAllCommunities();
-    public String getCommunityById(String id);
-    public String getAllCollections();
-    public String getCollectionById(String id);
-    public String getAllItems();
-    public String getItemById(String id);
-    public String getItemMetadataById(String id);
+    
+    
+    
+    
     
     
     

@@ -3,13 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package bwfdm.sara.core;
+package bwfdm.sara.gui;
 
-import bwfdm.sara.metadata.ItemMetadataDto;
-import bwfdm.sara.metadata.ItemMetadataFieldDto;
-import bwfdm.sara.metadata.MetadataConstants;
-import bwfdm.sara.repositories.DSpaceConfig;
-import bwfdm.sara.repositories.OparuFive;
+import bwfdm.sara.publication.dto.ItemMetadataEntryDspace;
+import bwfdm.sara.publication.dto.MetadataConstants;
+import bwfdm.sara.publication.DSpaceConfig;
+import bwfdm.sara.publication.OparuFive;
 import bwfdm.sara.utils.JsonUtils;
 
 /**
@@ -86,7 +85,6 @@ public class TestForm extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setMinimumSize(new java.awt.Dimension(800, 900));
-        setPreferredSize(new java.awt.Dimension(800, 900));
         getContentPane().setLayout(new java.awt.GridBagLayout());
 
         jPanelButtons.setLayout(new java.awt.GridBagLayout());
@@ -411,7 +409,6 @@ public class TestForm extends javax.swing.JFrame {
         panelItems.add(btnAddItemMetadata, gridBagConstraints);
 
         btnUpdateItemMetadata.setText("update Item metadata");
-        btnUpdateItemMetadata.setActionCommand("update Item metadata");
         btnUpdateItemMetadata.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         btnUpdateItemMetadata.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -442,7 +439,6 @@ public class TestForm extends javax.swing.JFrame {
         panelItems.add(btnClearItemMetadata, gridBagConstraints);
 
         btnDeleteItem1.setText("delete Item");
-        btnDeleteItem1.setActionCommand("delete Item");
         btnDeleteItem1.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         btnDeleteItem1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -776,8 +772,8 @@ public class TestForm extends javax.swing.JFrame {
         String metadata = getDataFromDialog(JsonUtils.jsonStringPrettyPrint(MetadataConstants.ITEM_METADATA_EXAMPLE));
         
         // Convert String metadata to Object
-        ItemMetadataFieldDto[] metadataObj;
-        metadataObj = JsonUtils.jsonStringToObject(metadata, ItemMetadataFieldDto[].class);
+        ItemMetadataEntryDspace[] metadataObj;
+        metadataObj = JsonUtils.jsonStringToObject(metadata, ItemMetadataEntryDspace[].class);
         // Convert Object with metadata to the String
         String metadataConverted = JsonUtils.objectToJsonString(metadataObj);
         System.out.println(JsonUtils.jsonStringPrettyPrint(metadataConverted));
@@ -792,8 +788,8 @@ public class TestForm extends javax.swing.JFrame {
         String metadata = getDataFromDialog(JsonUtils.jsonStringPrettyPrint(MetadataConstants.ITEM_METADATA_EXAMPLE));
         
         // Convert String metadata to Object
-        ItemMetadataFieldDto[] metadataObj;
-        metadataObj = JsonUtils.jsonStringToObject(metadata, ItemMetadataFieldDto[].class);
+        ItemMetadataEntryDspace[] metadataObj;
+        metadataObj = JsonUtils.jsonStringToObject(metadata, ItemMetadataEntryDspace[].class);
         // Convert Object with metadata to the String
         String metadataConverted = JsonUtils.objectToJsonString(metadataObj);
         System.out.println(JsonUtils.jsonStringPrettyPrint(metadataConverted));
