@@ -9,6 +9,6 @@ package bwfdm.sara.publication;
  *
  * @author vk
  */
-public interface DSpace extends DSpaceREST, PublicationRepository{
+public interface DSpaceRepository extends DSpaceREST, PublicationRepository{
     
 }

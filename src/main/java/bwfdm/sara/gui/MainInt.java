@@ -5,13 +5,13 @@
  */
 package bwfdm.sara.gui;
 
-import bwfdm.sara.publication.DSpace;
 import bwfdm.sara.publication.DSpaceConfig;
 import bwfdm.sara.publication.OparuFive;
 import bwfdm.sara.publication.OparuSix;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import bwfdm.sara.publication.DSpaceRepository;
 
 /**
  *
@@ -20,10 +20,10 @@ import java.util.logging.Logger;
 public class MainInt {
     
     //public static OparuFive oparu = new OparuFive();
-    public static DSpace oparu;
+    public static DSpaceRepository oparu;
     
-    public static DSpace oparuFive = new OparuFive();
-    public static DSpace oparuSix = new OparuSix();
+    public static DSpaceRepository oparuFive = new OparuFive();
+    public static DSpaceRepository oparuSix = new OparuSix();
    
     
     

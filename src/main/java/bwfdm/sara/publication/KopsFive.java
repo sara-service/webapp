@@ -9,6 +9,17 @@ package bwfdm.sara.publication;
  *
  * @author vk
  */
-public class KopsFive extends OparuFive{
-    
+public class KopsFive extends DSpaceVersionFive{
+
+    // Constructor
+    public KopsFive() {
+        
+        super(  "OPARU-5", 
+                DSpaceConfig.URL_OPARU_FIVE, 
+                DSpaceConfig.URL_OPARU_FIVE_REST, 
+                DSpaceConfig.SSL_VERIFY_OPARU_FIVE,
+                DSpaceConfig.RESPONSE_STATUS_OK_OPARU_FIVE);
+        
+        System.out.println("Constructor oparu-5.");      
+    }
 }

@@ -15,6 +15,8 @@ package bwfdm.sara.publication;
  * - OPARU (Uni Ulm)
  * - KOPS (Uni Konstanz)
  * 
+ * TODO: implement all communication with the real repositories via these methods. 
+ * 
  * @author vk
  */
 public interface PublicationRepository {
