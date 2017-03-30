@@ -3,16 +3,16 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package bwfdm.sara.publication;
+package bwfdm.sara.publication.dspace;
 
 /**
  *
  * @author vk
  */
-public class OparuFive extends DSpaceVersionFive {
-       
+public class KopsFive extends DSpaceVersionFive{
+
     // Constructor
-    public OparuFive() {
+    public KopsFive() {
         
         super(  "OPARU-5", 
                 DSpaceConfig.URL_OPARU_FIVE, 
@@ -20,6 +20,6 @@ public class OparuFive extends DSpaceVersionFive {
                 DSpaceConfig.SSL_VERIFY_OPARU_FIVE,
                 DSpaceConfig.RESPONSE_STATUS_OK_OPARU_FIVE);
         
-        System.out.println("--- OPARU-5, constructor ---");      
+        System.out.println("Constructor oparu-5.");      
     }
 }

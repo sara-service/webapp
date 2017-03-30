@@ -3,9 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package bwfdm.sara.publication;
+package bwfdm.sara.publication.dspace;
 
-import bwfdm.sara.publication.dto.CookieStatusResponseDspace;
+import bwfdm.sara.publication.dspace.dto.StatusObjectDSpaceSix;
 import bwfdm.sara.utils.JsonUtils;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation;
@@ -100,7 +100,7 @@ abstract public class DSpaceVersionSix extends DSpaceGeneral {
         System.out.println("--- " + repoType + ", is authenticated ---");
         
         String status = this.getConnectionStatus();
-        CookieStatusResponseDspace cookieStatus = JsonUtils.jsonStringToObject(status, CookieStatusResponseDspace.class);
+        StatusObjectDSpaceSix cookieStatus = JsonUtils.jsonStringToObject(status, StatusObjectDSpaceSix.class);
         return cookieStatus.isAuthenticated();
     }
     
@@ -548,42 +548,6 @@ abstract public class DSpaceVersionSix extends DSpaceGeneral {
 
      
 
-    /* PUBLICATION REPOSITORY methods */
-    
-
-    @Override
-    public boolean loginPublicationRepository() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public boolean logoutPublicationRepository() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public void publishElement() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public void changeElement() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public void deleteElement() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public void changeElementMetadata() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-    
-    @Override
-    public String getRepositoryUrl(){
-        return this.urlServer;
-    }
+   
     
 }

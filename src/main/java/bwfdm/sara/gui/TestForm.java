@@ -5,10 +5,13 @@
  */
 package bwfdm.sara.gui;
 
-import bwfdm.sara.publication.dto.ItemMetadataEntryDspace;
-import bwfdm.sara.publication.dto.MetadataConstants;
-import bwfdm.sara.publication.DSpaceConfig;
-import bwfdm.sara.publication.OparuFive;
+import bwfdm.sara.publication.dspace.dto.MetadataEntryObjectDSpace;
+import bwfdm.sara.publication.dspace.dto.MetadataConstantsDSpace;
+import bwfdm.sara.publication.dspace.DSpaceConfig;
+import bwfdm.sara.publication.dspace.OparuFive;
+import bwfdm.sara.publication.dspace.dto.CollectionObjectDSpaceSix;
+import bwfdm.sara.publication.dspace.dto.CommunityObjectDSpaceSix;
+import bwfdm.sara.publication.dspace.dto.ItemObjectDSpaceSix;
 import bwfdm.sara.utils.JsonUtils;
 
 /**
@@ -69,6 +72,9 @@ public class TestForm extends javax.swing.JFrame {
         btnGetAllBitstreamsItem = new javax.swing.JButton();
         btnAdditemBitstream = new javax.swing.JButton();
         btnDeleteItemBitstream = new javax.swing.JButton();
+        panelPublicationRepo = new javax.swing.JPanel();
+        btnLoginPubRepo = new javax.swing.JButton();
+        btnLogoutPubRepo = new javax.swing.JButton();
         panelBitstreams = new javax.swing.JPanel();
         btnGetAllBitstreams = new javax.swing.JButton();
         btnGetBitstreamById = new javax.swing.JButton();
@@ -505,6 +511,46 @@ public class TestForm extends javax.swing.JFrame {
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanelButtons.add(panelItems, gridBagConstraints);
 
+        panelPublicationRepo.setBorder(javax.swing.BorderFactory.createTitledBorder("Publication Repository"));
+        panelPublicationRepo.setLayout(new java.awt.GridBagLayout());
+
+        btnLoginPubRepo.setText("Login");
+        btnLoginPubRepo.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        btnLoginPubRepo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnLoginPubRepoActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 0.5;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        panelPublicationRepo.add(btnLoginPubRepo, gridBagConstraints);
+
+        btnLogoutPubRepo.setText("Logout");
+        btnLogoutPubRepo.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        btnLogoutPubRepo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnLogoutPubRepoActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 0.5;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        panelPublicationRepo.add(btnLogoutPubRepo, gridBagConstraints);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 5;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        jPanelButtons.add(panelPublicationRepo, gridBagConstraints);
+
         panelBitstreams.setBorder(javax.swing.BorderFactory.createTitledBorder("Bitstream"));
         panelBitstreams.setLayout(new java.awt.GridBagLayout());
 
@@ -667,14 +713,24 @@ public class TestForm extends javax.swing.JFrame {
     }//GEN-LAST:event_btnConnectionStatusActionPerformed
 
     private void btnGetAllCommunitiesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGetAllCommunitiesActionPerformed
-        String str = MainInt.getAllCommunities();
+        String str = MainInt.getAllCommunities();       
         textAreaOutput.setText(JsonUtils.jsonStringPrettyPrint(str));
+        
+        // Convert String-Object-String (test)
+        CommunityObjectDSpaceSix[] obj = JsonUtils.jsonStringToObject(str, CommunityObjectDSpaceSix[].class);
+        String strConverted = JsonUtils.objectToJsonString(obj);
+        System.out.println(JsonUtils.jsonStringPrettyPrint(strConverted));
     }//GEN-LAST:event_btnGetAllCommunitiesActionPerformed
 
     private void btnGetCommunityByIdActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGetCommunityByIdActionPerformed
         String id = tfID.getText();
         String str = MainInt.getCommunityById(id);
         textAreaOutput.setText(JsonUtils.jsonStringPrettyPrint(str));
+        
+        // Convert String-Object-String (test)
+        CommunityObjectDSpaceSix obj = JsonUtils.jsonStringToObject(str, CommunityObjectDSpaceSix.class);
+        String strConverted = JsonUtils.objectToJsonString(obj);
+        System.out.println(JsonUtils.jsonStringPrettyPrint(strConverted));
     }//GEN-LAST:event_btnGetCommunityByIdActionPerformed
 
     private void btnCreateCommunityActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCreateCommunityActionPerformed
@@ -687,6 +743,11 @@ public class TestForm extends javax.swing.JFrame {
     private void btnGetAllCollectionsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGetAllCollectionsActionPerformed
         String str = MainInt.getAllCollections();
         textAreaOutput.setText(JsonUtils.jsonStringPrettyPrint(str));
+        
+        // Convert String-Object-String (test)
+        CollectionObjectDSpaceSix[] obj = JsonUtils.jsonStringToObject(str, CollectionObjectDSpaceSix[].class);
+        String strConverted = JsonUtils.objectToJsonString(obj);
+        System.out.println(JsonUtils.jsonStringPrettyPrint(strConverted));
     }//GEN-LAST:event_btnGetAllCollectionsActionPerformed
 
     private void btnGetCollectionByIdActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGetCollectionByIdActionPerformed
@@ -712,6 +773,11 @@ public class TestForm extends javax.swing.JFrame {
     private void btnGetAllItemsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGetAllItemsActionPerformed
         String str = MainInt.getAllItems();
         textAreaOutput.setText(JsonUtils.jsonStringPrettyPrint(str));
+        
+        // Convert String-Object-String (test)
+        ItemObjectDSpaceSix[] obj = JsonUtils.jsonStringToObject(str, ItemObjectDSpaceSix[].class);
+        String strConverted = JsonUtils.objectToJsonString(obj);
+        System.out.println(JsonUtils.jsonStringPrettyPrint(strConverted));
     }//GEN-LAST:event_btnGetAllItemsActionPerformed
 
     private void btnGetItemByIdActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGetItemByIdActionPerformed
@@ -769,11 +835,11 @@ public class TestForm extends javax.swing.JFrame {
         
         // test item: 70dd4e09-0148-499e-b772-06e88414c16a
         
-        String metadata = getDataFromDialog(JsonUtils.jsonStringPrettyPrint(MetadataConstants.ITEM_METADATA_EXAMPLE));
+        String metadata = getDataFromDialog(JsonUtils.jsonStringPrettyPrint(MetadataConstantsDSpace.ITEM_METADATA_EXAMPLE));
         
         // Convert String metadata to Object
-        ItemMetadataEntryDspace[] metadataObj;
-        metadataObj = JsonUtils.jsonStringToObject(metadata, ItemMetadataEntryDspace[].class);
+        MetadataEntryObjectDSpace[] metadataObj;
+        metadataObj = JsonUtils.jsonStringToObject(metadata, MetadataEntryObjectDSpace[].class);
         // Convert Object with metadata to the String
         String metadataConverted = JsonUtils.objectToJsonString(metadataObj);
         System.out.println(JsonUtils.jsonStringPrettyPrint(metadataConverted));
@@ -785,11 +851,11 @@ public class TestForm extends javax.swing.JFrame {
     }//GEN-LAST:event_btnAddItemMetadataActionPerformed
 
     private void btnUpdateItemMetadataActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdateItemMetadataActionPerformed
-        String metadata = getDataFromDialog(JsonUtils.jsonStringPrettyPrint(MetadataConstants.ITEM_METADATA_EXAMPLE));
+        String metadata = getDataFromDialog(JsonUtils.jsonStringPrettyPrint(MetadataConstantsDSpace.ITEM_METADATA_EXAMPLE));
         
         // Convert String metadata to Object
-        ItemMetadataEntryDspace[] metadataObj;
-        metadataObj = JsonUtils.jsonStringToObject(metadata, ItemMetadataEntryDspace[].class);
+        MetadataEntryObjectDSpace[] metadataObj;
+        metadataObj = JsonUtils.jsonStringToObject(metadata, MetadataEntryObjectDSpace[].class);
         // Convert Object with metadata to the String
         String metadataConverted = JsonUtils.objectToJsonString(metadataObj);
         System.out.println(JsonUtils.jsonStringPrettyPrint(metadataConverted));
@@ -823,7 +889,7 @@ public class TestForm extends javax.swing.JFrame {
     }//GEN-LAST:event_btnGetAllBitstreamsItemActionPerformed
 
     private void btnAdditemBitstreamActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAdditemBitstreamActionPerformed
-        String bitstreamDescription = getDataFromDialog(JsonUtils.jsonStringPrettyPrint(MetadataConstants.ITEM_BITSTREAM_DESCRIPTION_EXAMPLE));
+        String bitstreamDescription = getDataFromDialog(JsonUtils.jsonStringPrettyPrint(MetadataConstantsDSpace.ITEM_BITSTREAM_DESCRIPTION_EXAMPLE));
         String itemId = tfID.getText();
         String str = MainInt.itemAddBitstream(itemId, bitstreamDescription);
         textAreaOutput.setText(JsonUtils.jsonStringPrettyPrint(str));
@@ -832,6 +898,14 @@ public class TestForm extends javax.swing.JFrame {
     private void btnDeleteItemBitstreamActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteItemBitstreamActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_btnDeleteItemBitstreamActionPerformed
+
+    private void btnLoginPubRepoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLoginPubRepoActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_btnLoginPubRepoActionPerformed
+
+    private void btnLogoutPubRepoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLogoutPubRepoActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_btnLogoutPubRepoActionPerformed
 
     
     private String getDataFromDialog(String text){
@@ -869,7 +943,9 @@ public class TestForm extends javax.swing.JFrame {
     private javax.swing.JButton btnGetItemById;
     private javax.swing.JButton btnGetItemIdMetadata;
     private javax.swing.JButton btnLogin;
+    private javax.swing.JButton btnLoginPubRepo;
     private javax.swing.JButton btnLogout;
+    private javax.swing.JButton btnLogoutPubRepo;
     private javax.swing.JButton btnRestTest;
     private javax.swing.JButton btnUpdateCollection;
     private javax.swing.JButton btnUpdateCommunity;
@@ -885,6 +961,7 @@ public class TestForm extends javax.swing.JFrame {
     private javax.swing.JPanel panelCollections;
     private javax.swing.JPanel panelCommunity;
     private javax.swing.JPanel panelItems;
+    private javax.swing.JPanel panelPublicationRepo;
     private javax.swing.JPanel panelRest;
     private javax.swing.JRadioButton rbtnOparuFive;
     private javax.swing.JRadioButton rbtnOparuSix;

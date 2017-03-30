@@ -3,10 +3,10 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package bwfdm.sara.publication;
+package bwfdm.sara.publication.dspace;
 
 import bwfdm.sara.gui.MainInt;
-import bwfdm.sara.publication.dto.CookieStatusResponseDspace;
+import bwfdm.sara.publication.dspace.dto.StatusObjectDSpaceSix;
 import bwfdm.sara.utils.JsonUtils;
 import bwfdm.sara.utils.WebUtils;
 import java.util.logging.Level;

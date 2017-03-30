@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package bwfdm.sara.publication;
+package bwfdm.sara.publication.dspace;
 
 //import bwfdm.sara.metadata.MetadataCollection;
 import javax.ws.rs.core.Cookie;

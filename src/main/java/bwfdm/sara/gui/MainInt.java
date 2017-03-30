@@ -5,13 +5,13 @@
  */
 package bwfdm.sara.gui;
 
-import bwfdm.sara.publication.DSpaceConfig;
-import bwfdm.sara.publication.OparuFive;
-import bwfdm.sara.publication.OparuSix;
+import bwfdm.sara.publication.dspace.DSpaceConfig;
+import bwfdm.sara.publication.dspace.OparuFive;
+import bwfdm.sara.publication.dspace.OparuSix;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import bwfdm.sara.publication.DSpaceRepository;
+import bwfdm.sara.publication.dspace.DSpaceRepository;
 
 /**
  *
