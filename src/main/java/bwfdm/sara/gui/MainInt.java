@@ -6,12 +6,15 @@
 package bwfdm.sara.gui;
 
 import bwfdm.sara.publication.dspace.DSpaceConfig;
-import bwfdm.sara.publication.dspace.OparuFive;
-import bwfdm.sara.publication.dspace.OparuSix;
+import bwfdm.sara.publication.OparuFive;
+import bwfdm.sara.publication.OparuSix;
+import bwfdm.sara.publication.PublicationRepository;
+import bwfdm.sara.publication.dspace.DSpaceRest;
+import bwfdm.sara.publication.dspace.DSpaceVersionFive;
+import bwfdm.sara.publication.dspace.DSpaceVersionSix;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import bwfdm.sara.publication.dspace.DSpaceRepository;
 
 /**
  *
@@ -20,18 +23,29 @@ import bwfdm.sara.publication.dspace.DSpaceRepository;
 public class MainInt {
     
     //public static OparuFive oparu = new OparuFive();
-    public static DSpaceRepository oparu;
-    
-    public static DSpaceRepository oparuFive = new OparuFive();
-    public static DSpaceRepository oparuSix = new OparuSix();
-   
     
     
+    public static DSpaceRest oparu;
+    public static DSpaceRest oparuFive = new DSpaceVersionFive(
+                                                "OPARU-5", 
+                                                DSpaceConfig.URL_OPARU_FIVE, 
+                                                DSpaceConfig.URL_OPARU_FIVE_REST, 
+                                                DSpaceConfig.SSL_VERIFY_OPARU_FIVE,
+                                                DSpaceConfig.RESPONSE_STATUS_OK_OPARU_FIVE);
+    public static DSpaceRest oparuSix = new DSpaceVersionSix(
+                                                "OPARU-6", 
+                                                DSpaceConfig.URL_OPARU_SIX, 
+                                                DSpaceConfig.URL_OPARU_SIX_REST, 
+                                                DSpaceConfig.SSL_VERIFY_OPARU_SIX,
+                                                DSpaceConfig.RESPONSE_STATUS_OK_OPARU_SIX);
     
+    public static PublicationRepository pubRepo;
+    public static PublicationRepository pubRepoOparuFive = new OparuFive();
+    public static PublicationRepository pubRepoOparuSix = new OparuSix();
+       
     public static boolean isOK;
     
-   
-    
+      
     
     
     /**
@@ -67,6 +81,7 @@ public class MainInt {
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
                 oparu = oparuSix;
+                pubRepo = pubRepoOparuSix;
                 new TestForm().setVisible(true);
                 
             }
@@ -78,12 +93,14 @@ public class MainInt {
         //oparu = null;
         //oparu = new OparuFive();
         oparu = oparuFive;
+        pubRepo = pubRepoOparuFive;
     }
     
     public static void chooseOparuSix(){
         //oparu = null;
         //oparu = new OparuSix();
         oparu = oparuSix;
+        pubRepo = pubRepoOparuSix;
     }
     
     public static String testRest(){
@@ -95,7 +112,7 @@ public class MainInt {
     }
     
     public static String loginDspace(){
-        isOK = oparu.login(DSpaceConfig.EMAIL_OPARU, DSpaceConfig.getPassword(DSpaceConfig.EMAIL_OPARU, oparu));
+        isOK = oparu.login(DSpaceConfig.EMAIL_OPARU, DSpaceConfig.getPassword(DSpaceConfig.EMAIL_OPARU, pubRepo));
         String str = "login OK: " + isOK + "\n"; 
 //                +
 //                     "token login: " + oparu.getToken();

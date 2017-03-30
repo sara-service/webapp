@@ -46,15 +46,16 @@ public class DSpaceConfig {
      * OPARU-general config
      */
     public static final String EMAIL_OPARU = "project-sara@uni-konstanz.de";   
-    public static final String RESPONSE_REST_TEST_OPARU = "REST api is running.";
+    
     
     /**
-     * General config
+     * Common config
      */
     public static final String HEADER_CONTENT_TYPE_OPARU = "application/json";
     public static final String HEADER_ACCEPT_TYPE_OPARU = "application/json";
     public static final String RESPONSE_ERROR_JSON = "{\"Error\":\"bad response status\"}";
     public static final String RESPONSE_EMPTY_JSON = "{\"\":\"\"}";
+    public static final String RESPONSE_REST_TEST = "REST api is running.";
     
     
     
@@ -76,6 +77,12 @@ public class DSpaceConfig {
      * KOPS config
      * 
      */
+    public static final String URL_KOPS_FIVE = "https://vtstest.rz.uni-ulm.de";
+    public static final String URL_KOPS_FIVE_REST = "https://vtstest.rz.uni-ulm.de/rest";   
+    public static final String SSL_VERIFY_KOPS_FIVE = "false";
+    public static final int RESPONSE_STATUS_OK_KOPS_FIVE = 200;
+    public static final String PASSWORD_KOPS_FIVE = "SaraTest";
+    
     
     
     /**

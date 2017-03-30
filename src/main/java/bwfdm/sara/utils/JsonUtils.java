@@ -5,7 +5,7 @@
  */
 package bwfdm.sara.utils;
 
-import bwfdm.sara.publication.dspace.OparuSix;
+import bwfdm.sara.publication.OparuSix;
 import bwfdm.sara.publication.dspace.dto.StatusObjectDSpaceSix;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;

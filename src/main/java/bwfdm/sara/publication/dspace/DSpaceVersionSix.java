@@ -19,7 +19,7 @@ import javax.ws.rs.core.Response;
  *
  * @author vk
  */
-abstract public class DSpaceVersionSix extends DSpaceGeneral {
+public class DSpaceVersionSix extends DSpaceRestCommon {
     
     public DSpaceVersionSix(String repoType, String urlServer, String urlRest, String verify, int responseStatusOK) {
         
@@ -545,9 +545,5 @@ abstract public class DSpaceVersionSix extends DSpaceGeneral {
     public String downloadBitstream(String bitstreamID, String filenameToSave) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-
-     
-
-   
     
 }

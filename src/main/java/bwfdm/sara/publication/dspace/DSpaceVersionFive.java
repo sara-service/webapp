@@ -14,7 +14,7 @@ import javax.ws.rs.core.Response;
  *
  * @author vk
  */
-abstract public class DSpaceVersionFive extends DSpaceGeneral {
+public class DSpaceVersionFive extends DSpaceRestCommon {
     
     // Constructor
     public DSpaceVersionFive(String repoType, String urlServer, String urlRest, String verify, int responseStatusOK) {
@@ -24,13 +24,6 @@ abstract public class DSpaceVersionFive extends DSpaceGeneral {
     }
 
     
-    @Override
-    public boolean isRestEnable() {   
-        Invocation.Builder invocationBuilder = testWebTarget.request(); 
-        Response response = invocationBuilder.get();
-        return response.readEntity(String.class).equals(DSpaceConfig.RESPONSE_REST_TEST_OPARU); //connection will be closed automatically after the readEntity
-    }
-
     @Override
     public boolean login(String email, String password) {
         //Login command:
@@ -181,9 +174,9 @@ abstract public class DSpaceVersionFive extends DSpaceGeneral {
         Invocation.Builder invocationBuilder = newItemWebTarget.request();
         invocationBuilder.header("Content-Type", DSpaceConfig.HEADER_CONTENT_TYPE_OPARU);
         invocationBuilder.header("Accept", DSpaceConfig.HEADER_ACCEPT_TYPE_OPARU);
-        invocationBuilder.header("user", DSpaceConfig.EMAIL_OPARU);
-        invocationBuilder.header("pass", DSpaceConfig.getPassword(DSpaceConfig.EMAIL_OPARU, this));
-//        invocationBuilder.header("rest-dspace-token", this.getToken());
+        //invocationBuilder.header("user", DSpaceConfig.EMAIL_OPARU);
+        //invocationBuilder.header("pass", DSpaceConfig.getPassword(DSpaceConfig.EMAIL_OPARU, this));
+        invocationBuilder.header("rest-dspace-token", this.getToken());
 //        invocationBuilder.header("login", token);
         String data = "{"
                 + "\"name\":" + "\"" + itemName + "\""
@@ -238,46 +231,5 @@ abstract public class DSpaceVersionFive extends DSpaceGeneral {
     public String downloadBitstream(String bitstreamID, String filenameToSave) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-      
-    
-    /**
-     * Methods from the "PublicationRepository" Interface
-     */
-
-    @Override
-    public boolean loginPublicationRepository() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public boolean logoutPublicationRepository() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public void publishElement() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public void changeElement() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public void deleteElement() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public void changeElementMetadata() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public String getRepositoryUrl(){
-        return this.urlServer;
-    }
-
     
 }

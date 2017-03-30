@@ -27,7 +27,7 @@ import org.glassfish.jersey.logging.LoggingFeature;
  *
  * @author vk
  */
-abstract public class DSpaceGeneral implements DSpaceRepository{
+abstract public class DSpaceRestCommon implements DSpaceRest{
 
     protected final String urlServer;
     protected final String urlRest;
@@ -52,7 +52,7 @@ abstract public class DSpaceGeneral implements DSpaceRepository{
     protected Client client;
 
     // Constructor
-    public DSpaceGeneral(String repoType, String urlServer, String urlRest, String verify, int responseStatusOK) {
+    public DSpaceRestCommon(String repoType, String urlServer, String urlRest, String verify, int responseStatusOK) {
         
         System.out.println("--- OPARU general implementation, constructor. Configuration for: " + repoType + " ---");
         
@@ -108,7 +108,7 @@ abstract public class DSpaceGeneral implements DSpaceRepository{
         
         Invocation.Builder invocationBuilder = testWebTarget.request(); 
         Response response = invocationBuilder.get();
-        return response.readEntity(String.class).equals(DSpaceConfig.RESPONSE_REST_TEST_OPARU); //connection will be closed automatically after the readEntity
+        return response.readEntity(String.class).equals(DSpaceConfig.RESPONSE_REST_TEST); //connection will be closed automatically after the readEntity
     }
        
     

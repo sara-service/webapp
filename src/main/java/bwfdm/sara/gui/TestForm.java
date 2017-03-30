@@ -8,7 +8,7 @@ package bwfdm.sara.gui;
 import bwfdm.sara.publication.dspace.dto.MetadataEntryObjectDSpace;
 import bwfdm.sara.publication.dspace.dto.MetadataConstantsDSpace;
 import bwfdm.sara.publication.dspace.DSpaceConfig;
-import bwfdm.sara.publication.dspace.OparuFive;
+import bwfdm.sara.publication.OparuFive;
 import bwfdm.sara.publication.dspace.dto.CollectionObjectDSpaceSix;
 import bwfdm.sara.publication.dspace.dto.CommunityObjectDSpaceSix;
 import bwfdm.sara.publication.dspace.dto.ItemObjectDSpaceSix;
