@@ -11,6 +11,7 @@ import bwfdm.sara.utils.JsonUtils;
 import bwfdm.sara.utils.WebUtils;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
@@ -108,7 +109,9 @@ abstract public class DSpaceRestCommon implements DSpaceRest{
         
         Invocation.Builder invocationBuilder = testWebTarget.request(); 
         Response response = invocationBuilder.get();
-        return response.readEntity(String.class).equals(DSpaceConfig.RESPONSE_REST_TEST); //connection will be closed automatically after the readEntity
+        
+        return WebUtils.readResponseEntity(String.class, response).equals(DSpaceConfig.RESPONSE_REST_TEST);
+        //return response.readEntity(String.class).equals(DSpaceConfig.RESPONSE_REST_TEST); //connection will be closed automatically after the readEntity
     }
        
     
@@ -127,7 +130,9 @@ abstract public class DSpaceRestCommon implements DSpaceRest{
         invocationBuilder.header("Content-Type", MediaType.APPLICATION_JSON);
         invocationBuilder.header("Accept", MediaType.APPLICATION_JSON);
         Response response = invocationBuilder.get();
-        return response.readEntity(String.class); //Connection will be closed automatically after the "readEntity"
+        
+        return WebUtils.readResponseEntity(String.class, response);
+        //return response.readEntity(String.class); //Connection will be closed automatically after the "readEntity"
     }
 
     
@@ -145,7 +150,9 @@ abstract public class DSpaceRestCommon implements DSpaceRest{
         invocationBuilder.header("Content-Type", MediaType.APPLICATION_JSON);
         invocationBuilder.header("Accept", MediaType.APPLICATION_JSON);
         Response response = invocationBuilder.get();
-        return response.readEntity(String.class); //Connection will be closed automatically after the "readEntity"
+        
+        return WebUtils.readResponseEntity(String.class, response);
+        //return response.readEntity(String.class); //Connection will be closed automatically after the "readEntity"
     }
     
    
@@ -166,11 +173,12 @@ abstract public class DSpaceRestCommon implements DSpaceRest{
         invocationBuilder.header("Accept", MediaType.APPLICATION_JSON);
         Response response = invocationBuilder.get();
         
-        if (response.getStatus() != responseStatusOK){
-            return DSpaceConfig.RESPONSE_ERROR_JSON;
-        }
+//        if (response.getStatus() != responseStatusOK){
+//            return DSpaceConfig.RESPONSE_ERROR_JSON;
+//        }
         
-        return response.readEntity(String.class); //Connection will be closed automatically after the "readEntity"
+        return WebUtils.readResponseEntity(String.class, response);
+        //return response.readEntity(String.class); //Connection will be closed automatically after the "readEntity"
     }
 
     
@@ -190,11 +198,12 @@ abstract public class DSpaceRestCommon implements DSpaceRest{
         invocationBuilder.header("Accept", MediaType.APPLICATION_JSON);
         Response response = invocationBuilder.get();
         
-        if (response.getStatus() != responseStatusOK){
-            return DSpaceConfig.RESPONSE_ERROR_JSON;
-        }
+//        if (response.getStatus() != responseStatusOK){
+//            return DSpaceConfig.RESPONSE_ERROR_JSON;
+//        }
         
-        return response.readEntity(String.class); //Connection will be closed automatically after the "readEntity"
+        return WebUtils.readResponseEntity(String.class, response);
+        //return response.readEntity(String.class); //Connection will be closed automatically after the "readEntity"
     }
        
     
@@ -214,12 +223,15 @@ abstract public class DSpaceRestCommon implements DSpaceRest{
         invocationBuilder.header("Accept", MediaType.APPLICATION_JSON);
         Response response = invocationBuilder.get();
         
-        if (response.getStatus() != responseStatusOK){
-            return DSpaceConfig.RESPONSE_ERROR_JSON;
-        }
-        return response.readEntity(String.class);
+//        if (response.getStatus() != responseStatusOK){
+//            return DSpaceConfig.RESPONSE_ERROR_JSON;
+//        }
+        
+        return WebUtils.readResponseEntity(String.class, response);
+        //return response.readEntity(String.class);
     }
 
+    
     /**
      * Get item by the ID
      * 
@@ -236,10 +248,12 @@ abstract public class DSpaceRestCommon implements DSpaceRest{
         invocationBuilder.header("Accept", MediaType.APPLICATION_JSON);
         Response response = invocationBuilder.get();
         
-        if (response.getStatus() != responseStatusOK){
-            return DSpaceConfig.RESPONSE_ERROR_JSON;
-        }        
-        return response.readEntity(String.class);
+//        if (response.getStatus() != responseStatusOK){
+//            return DSpaceConfig.RESPONSE_ERROR_JSON;
+//        }        
+        
+        return WebUtils.readResponseEntity(String.class, response);
+        //return response.readEntity(String.class);
     }
     
     @Override
@@ -252,10 +266,11 @@ abstract public class DSpaceRestCommon implements DSpaceRest{
         invocationBuilder.header("Accept", MediaType.APPLICATION_JSON);
         Response response = invocationBuilder.get();
         
-        if (response.getStatus() != responseStatusOK){
-            return DSpaceConfig.RESPONSE_ERROR_JSON;
-        } 
-        return response.readEntity(String.class);
+//        if (response.getStatus() != responseStatusOK){
+//            return DSpaceConfig.RESPONSE_ERROR_JSON;
+//        } 
+        return WebUtils.readResponseEntity(String.class, response);
+        //return response.readEntity(String.class);
     }
     
    
@@ -269,10 +284,11 @@ abstract public class DSpaceRestCommon implements DSpaceRest{
         invocationBuilder.header("Accept", MediaType.APPLICATION_JSON);
         Response response = invocationBuilder.get();
         
-        if (response.getStatus() != responseStatusOK){
-            return DSpaceConfig.RESPONSE_ERROR_JSON;
-        } 
-        return response.readEntity(String.class);
+//        if (response.getStatus() != responseStatusOK){
+//            return DSpaceConfig.RESPONSE_ERROR_JSON;
+//        } 
+        return WebUtils.readResponseEntity(String.class, response);
+        //return response.readEntity(String.class);
     }
 
     
@@ -285,11 +301,11 @@ abstract public class DSpaceRestCommon implements DSpaceRest{
         invocationBuilder.header("Accept", MediaType.APPLICATION_JSON);
         Response response = invocationBuilder.get();
         
-        if (response.getStatus() != responseStatusOK){
-            return DSpaceConfig.RESPONSE_ERROR_JSON;
-        }
-        
-        return response.readEntity(String.class);
+//        if (response.getStatus() != responseStatusOK){
+//            return DSpaceConfig.RESPONSE_ERROR_JSON;
+//        }
+        return WebUtils.readResponseEntity(String.class, response);
+        //return response.readEntity(String.class);
     }
     
 }

@@ -11,6 +11,9 @@ package bwfdm.sara.archiving;
  */
 public class ArchivGitLab implements ArchivRepository{
 
+    private String linkCommit = "https://link.to.magic.commint";
+    private String linkHistory = "https://link.to.magic.commint.history";
+    
     @Override
     public boolean push() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
@@ -23,12 +26,12 @@ public class ArchivGitLab implements ArchivRepository{
 
     @Override
     public String getLinkHistory() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return linkHistory;
     }
 
     @Override
     public String getLinkCommit() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return linkCommit;
     }
     
 }

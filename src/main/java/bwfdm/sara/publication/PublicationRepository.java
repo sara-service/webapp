@@ -20,13 +20,13 @@ package bwfdm.sara.publication;
  * @author vk
  */
 public interface PublicationRepository {
-    
+       
     public boolean loginPublicationRepository();
     public boolean logoutPublicationRepository();
-    public void publishElement();
-    public void changeElement();
-    public void deleteElement();
-    public void changeElementMetadata();
+    public boolean publishElement(String publicationLink, String metadata);
+    public String changeElement();
+    public String deleteElement();
+    public String changeElementMetadata();
     public String getRepositoryUrl();
     
 }

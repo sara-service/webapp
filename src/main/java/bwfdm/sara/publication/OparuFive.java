@@ -44,22 +44,22 @@ public class OparuFive implements PublicationRepository {
     }
 
     @Override
-    public void publishElement() {
+    public boolean publishElement(String publicationLink, String metadata) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public void changeElement() {
+    public String changeElement() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public void deleteElement() {
+    public String deleteElement() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public void changeElementMetadata() {
+    public String changeElementMetadata() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
