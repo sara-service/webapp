@@ -3,12 +3,16 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package bwfdm.sara.repositories;
+package bwfdm.sara.publication.dspace.dto;
 
 /**
  *
  * @author vk
  */
-public class Kops extends Oparu{
+public class MetadataEntryObjectDSpace {
     
+    public String key;
+    public String language;
+    public String value;
+
 }
