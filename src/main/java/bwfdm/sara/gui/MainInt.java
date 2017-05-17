@@ -5,6 +5,7 @@
  */
 package bwfdm.sara.gui;
 
+import bwfdm.sara.publication.DemoDSpaceOrgSix;
 import bwfdm.sara.publication.dspace.DSpaceConfig;
 import bwfdm.sara.publication.OparuFive;
 import bwfdm.sara.publication.OparuSix;
@@ -39,9 +40,17 @@ public class MainInt {
                                                 DSpaceConfig.SSL_VERIFY_OPARU_SIX,
                                                 DSpaceConfig.RESPONSE_STATUS_OK_OPARU_SIX);
     
+    public static DSpaceRest demoDSpaceOrgSix = new DSpaceVersionSix(
+                                                "demoDSpaceOrg-6", 
+                                                DSpaceConfig.URL_DemoDSpaceOrg_SIX, 
+                                                DSpaceConfig.URL_DemoDSpaceOrg_SIX_REST, 
+                                                DSpaceConfig.SSL_VERIFY_DemoDSpaceOrg_SIX,
+                                                DSpaceConfig.RESPONSE_STATUS_OK_DemoDSpaceOrg_SIX);
+    
     public static PublicationRepository pubRepo;
     public static PublicationRepository pubRepoOparuFive = new OparuFive();
     public static PublicationRepository pubRepoOparuSix = new OparuSix();
+    public static PublicationRepository pubRepoDemoDSpaceOrgSix = new DemoDSpaceOrgSix();
        
     public static boolean isOK;
     
@@ -103,6 +112,13 @@ public class MainInt {
         pubRepo = pubRepoOparuSix;
     }
     
+    public static void chooseDemoDSpaceOrgSix(){
+        //oparu = null;
+        //oparu = new OparuSix();
+        oparu = demoDSpaceOrgSix;
+        pubRepo = pubRepoDemoDSpaceOrgSix;
+    }
+    
     public static String testRest(){
         return Boolean.toString(oparu.isRestEnable());
     }
@@ -112,7 +128,11 @@ public class MainInt {
     }
     
     public static String loginDspace(){
-        isOK = oparu.login(DSpaceConfig.EMAIL_OPARU, DSpaceConfig.getPassword(DSpaceConfig.EMAIL_OPARU, pubRepo));
+        if(pubRepo instanceof DemoDSpaceOrgSix){
+            isOK = oparu.login(DSpaceConfig.EMAIL_DemoDSpaceOrgSix, DSpaceConfig.getPassword(DSpaceConfig.EMAIL_DemoDSpaceOrgSix, pubRepo));
+        }else{
+            isOK = oparu.login(DSpaceConfig.EMAIL_OPARU, DSpaceConfig.getPassword(DSpaceConfig.EMAIL_OPARU, pubRepo));
+        }
         String str = "login OK: " + isOK + "\n"; 
 //                +
 //                     "token login: " + oparu.getToken();

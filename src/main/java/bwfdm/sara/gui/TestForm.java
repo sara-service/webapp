@@ -28,7 +28,8 @@ public class TestForm extends javax.swing.JFrame {
         textAreaOutput.setEditable(true);
         rbtnOparuSix.setSelected(true);
         buttonGroup1.add(rbtnOparuFive);
-        buttonGroup1.add(rbtnOparuSix);                
+        buttonGroup1.add(rbtnOparuSix);
+        buttonGroup1.add(rbtnDemoDSpaceOrgSix);
     }
 
     /**
@@ -85,6 +86,7 @@ public class TestForm extends javax.swing.JFrame {
         jLabel1 = new javax.swing.JLabel();
         rbtnOparuFive = new javax.swing.JRadioButton();
         rbtnOparuSix = new javax.swing.JRadioButton();
+        rbtnDemoDSpaceOrgSix = new javax.swing.JRadioButton();
         jLabel2 = new javax.swing.JLabel();
         tfID = new javax.swing.JTextField();
         tfName = new javax.swing.JTextField();
@@ -640,6 +642,7 @@ public class TestForm extends javax.swing.JFrame {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 3;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         jPanelOutput.add(rbtnOparuFive, gridBagConstraints);
 
         rbtnOparuSix.setText("OPARU-6");
@@ -651,7 +654,20 @@ public class TestForm extends javax.swing.JFrame {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 4;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         jPanelOutput.add(rbtnOparuSix, gridBagConstraints);
+
+        rbtnDemoDSpaceOrgSix.setText("DemoDSpaceOrg-6");
+        rbtnDemoDSpaceOrgSix.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                rbtnDemoDSpaceOrgSixActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 5;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        jPanelOutput.add(rbtnDemoDSpaceOrgSix, gridBagConstraints);
 
         jLabel2.setText("Name:");
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -907,6 +923,10 @@ public class TestForm extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_btnLogoutPubRepoActionPerformed
 
+    private void rbtnDemoDSpaceOrgSixActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_rbtnDemoDSpaceOrgSixActionPerformed
+        MainInt.chooseDemoDSpaceOrgSix();
+    }//GEN-LAST:event_rbtnDemoDSpaceOrgSixActionPerformed
+
     
     private String getDataFromDialog(String text){
         ChangeDataDialog metadataDialog = new ChangeDataDialog(this, true, text);
@@ -963,6 +983,7 @@ public class TestForm extends javax.swing.JFrame {
     private javax.swing.JPanel panelItems;
     private javax.swing.JPanel panelPublicationRepo;
     private javax.swing.JPanel panelRest;
+    private javax.swing.JRadioButton rbtnDemoDSpaceOrgSix;
     private javax.swing.JRadioButton rbtnOparuFive;
     private javax.swing.JRadioButton rbtnOparuSix;
     private javax.swing.JTextArea textAreaOutput;

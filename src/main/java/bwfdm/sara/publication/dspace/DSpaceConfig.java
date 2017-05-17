@@ -41,6 +41,21 @@ public class DSpaceConfig {
     public static final int RESPONSE_STATUS_OK_OPARU_SIX = 200;
     public static final String PASSWORD_OPARU_SIX = "Sara+Test"; 
     
+    
+    /** 
+     * DemoDSpaceOrg-6 config
+     */
+    public static final String URL_DemoDSpaceOrg_SIX = "https://demo.dspace.org";
+    public static final String URL_DemoDSpaceOrg_SIX_REST = "https://demo.dspace.org/rest";
+    public static final String SSL_VERIFY_DemoDSpaceOrg_SIX = "false";
+    public static final String COOKIE_KEY_DemoDSpaceOrg_SIX = "JSESSIONID";
+    public static final int RESPONSE_STATUS_OK_DemoDSpaceOrg_SIX = 200;
+    public static final String PASSWORD_DemoDSpaceOrg_SIX = "dspace";//"Sara2017"; 
+    
+    public static final String EMAIL_DemoDSpaceOrgSix = "dspacedemo+admin@gmail.com";//"volodymyr.kushnarenko@uni-ulm.de";   
+    
+    
+    
        
     /** 
      * OPARU-general config
@@ -102,7 +117,12 @@ public class DSpaceConfig {
                 if (obj.getRepositoryUrl().equals(URL_OPARU_SIX))
                     return PASSWORD_OPARU_SIX;
                 if (obj.getRepositoryUrl().equals(URL_OPARU_FIVE))
-                    return PASSWORD_OPARU_FIVE;
+                    return PASSWORD_OPARU_FIVE; 
+            
+            case EMAIL_DemoDSpaceOrgSix:    
+                if (obj.getRepositoryUrl().equals(URL_DemoDSpaceOrg_SIX))
+                    return PASSWORD_DemoDSpaceOrg_SIX;
+                
             default: 
                 return "some_default_password";
         }
