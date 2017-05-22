@@ -11,23 +11,33 @@
 	<script src="jquery.min.js"></script>
 	<script src="uri.min.js"></script>
 	<script src="bootstrap.min.js"></script>
-	<script src="branches.js"></script>
+	<script src="notbranches.js"></script>
 	<title>SARA</title>
 </head>
 <body><div class="container">
-	<div class="row"><div class="col-xs-12">
-		<img src="header.svg" class="logo-header" />
-	</div></div>
-	<div class="row"><div class="col-sm-12">
-		<h1>Select something to publish!</h1>
-	</div></div>
+	<div class="row">
+		<div class="col-xs-12">
+			<img src="header.svg" class="logo-header" />
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-xs-6">
+			<h1>Select something to publish!</h1>
+		</div>
+		<div class="col-xs-3">
+			<h2>You are about to publish in: KOPS</h2>
+		</div>
+		<div class="col-xs-3">
+			<img src="lame-duck.png" class="logo-header" />
+		</div>
+	</div>
 	<div class="row panel-group" id="accordion" role="tablist" aria-multiselectable="true"><div class="panel panel-default">
 		<div class="panel-heading" role="tab" id="headingOne"><h4 class="panel-title">
 			<a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne"><img src="info.svg" style="height:2ex;width:2ex;vertical-align:bottom" />&nbsp; What will the options do?</a>
 		</h4></div>
 		<div id="collapseOne" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne"><div class="panel-body"><div class="row">
 			<div class="col-sm-4"><img src="graph.svg" style="width:100%" /></div>
-			<ul class="col-sm-8">
+			<div class="col-sm-8"><ul>
 				<li class="sara-green">"<strong>Publish full history</strong>"
 					will publish the <strong>entire history</strong> of a branch as-is.
 					This is the <strong>most useful format</strong> for others
@@ -42,7 +52,7 @@
 				<li class="sara-blue">"<strong>Publish abbreviated history</strong>"
 					will publish only the <strong>significant points (tags &amp; merges)</strong>
 					of a branch's history. Only merge commits and
-					commits that have been tagged with <code>git tag</code>
+					commits that have been tagged with <kbd>git tag</kbd>
 					will be retained in the abbreviated history,
 					as well as the HEAD revision of the branch.
 					This option will <strong>change the commit IDs,
@@ -65,45 +75,69 @@
 					This option is <strong>not recommended</strong>
 					unless you don't have any other options.
 				</li>
-				<li class="sara-orange">"<strong>Archive only, don't publish</strong>"
+				<li class="sara-orange">"<strong>Private access, public record</strong>"
+					will non-publicly archive the full history of a branch.
+					A public bibliographical record will be created for the archival record.
+					This is suitable for data that you want to (or have to) keep private.
+				</li>
+				<li class="sara-cyan">"<strong>Private access, don't publish</strong>"
 					will not publish anything (obviously),
 					but will non-publicly archive the full history of a branch.
 					This is suitable for data that you want to (or have to) keep private.
-					Please note that this is not suitable for highly sensitive data;
-					in particular, it must never be used for medical data!
 				</li>
-				<li class="sara-cyan">"<strong>Ignore, do not archive</strong>"
-					will completely ignore a branch.
-					It will not be copied to the archive at all,
-					and will thus not be preserved:
-					If you delete it from GitLab,
-					it will be gone for good.
-					Choose this option for any highly private data
-					that you are storing on GitLab
-					(in violation of its terms of service).
-				</li>
-			</ul>
+			</ul><p>Please note that none of these options
+				are suitable for highly sensitive data.
+				In particular, never archive medical data using this service!
+			</p></div>
 		</div></div></div>
 	</div></div>
-	<form class="form-horizontal row" id="branches">
-		<div class="form-group" id="template" style="display:none">
-			<label id="template_label" class="col-sm-3 control-label">master</label>
-			<div class="col-sm-9">
+	<form class="form-horizontal" id="branches">
+		<div class="form-group" id="template" notstyle="display:none">
+			<div class="col-sm-2">
+				<select class="form-control" id="template_branch">
+					<option value="heads/master" selected>master</option>
+					<option value="heads/webapp">webapp</option>
+					<option value="tag/v0.0.1">tag v0.0.1</option>
+					<option value="tag/yawe35">tag yawe35</option>
+				</select>
+			</div>
+			<div class="col-sm-6">
+				<select class="form-control" id="template_commit">
+					<option value="HEAD" selected>starting at most recent commit (HEAD of this branch)</option>
+					<option value="deadbeeflong">deadbeef and before: (2017-01-01) another stupid change</option>
+					<option value="deadbeeflong">deadbeef and before (2017-01-01: another stupid change)</option>
+					<option value="f00ba6long">f00ba600 (1994-03-21) and before: maybe this will help???</option>
+				</select>
+			</div>
+			<div class="col-sm-3">
 				<select class="form-control" id="template_form">
 					<option value="full" selected class="sara-green">publish full history (recommended)</option>
 					<option value="abbrev" class="sara-blue">publish abbreviated history</option>
 					<option value="latest" class="sara-red">publish latest version only</option>
-					<option value="archive" class="sara-orange">archive only, don't publish</option>
-					<option value="ignore" class="sara-cyan">ignore, do not archive</option>
+					<option value="archive" class="sara-orange">private access, public record</option>
+					<option value="archive" class="sara-cyan">private access, don't publish</option>
 				</select>
 			</div>
+			<button type="button" class="btn btn-warning col-sm-1">remove</button>
 		</div>
-		<div id="loading" class="loading"></div>
+		<div class="form-group">
+			<div class="col-sm-2">
+				<select class="form-control" id="add_branch">
+					<option value="heads/master" selected>master</option>
+					<option value="heads/webapp">webapp</option>
+					<option value="tag/v0.0.1">tag v0.0.1</option>
+					<option value="tag/yawe35">tag yawe35</option>
+				</select>
+			</div>
+			<button type="button" class="btn btn-success col-sm-1" id="add_button">add</button>
+		</div>
 	</form>
+	<div id="loading" class="loading"><span class="sr-only">loading, please wait...</span></div>
+
 	<p style="height:3ex"></p>
 	<div class="row">
-		<button class="btn btn-default col-sm-3" id="return">← save and return to GitLab</button>
-		<button class="btn btn-primary col-sm-2 col-sm-offset-7" id="next">next →</button>
+		<button type="button" class="btn btn-default col-sm-3" id="return">← save and return to GitLab</button>
+		<button type="button" class="btn btn-primary col-sm-2 col-sm-offset-7" id="next">next →</button>
 	</div>
 	<p style="height:3ex"></p>
 </div></body>
