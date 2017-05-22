@@ -27,7 +27,7 @@ public class Auth {
 	public RedirectView redirectToLogin(
 			@RequestParam("project") final String project,
 			final RedirectAttributes redir, final HttpSession session) {
-		final byte[] random = new byte[16];
+		final byte[] random = new byte[10];
 		rng.nextBytes(random);
 		final String state = DatatypeConverter.printBase64Binary(random);
 		session.setAttribute("oauth_state", state);
