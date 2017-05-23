@@ -32,21 +32,20 @@ public class REST {
 		final String token = (String) session.getAttribute("gitlab_token");
 		final GitLab gl = new GitLab(Temp.GITLAB, project, token);
 		final List<Ref> refs = getAllRefs(gl);
-		final ProjectInfo projectInfo = gl.getProjectInfo();
-		sortRefs(refs, projectInfo.master);
+		sortRefs(refs);
 		loadActions(refs, session);
 		return refs;
 	}
 
-	private void sortRefs(final List<Ref> refs, final String master) {
+	private void sortRefs(final List<Ref> refs) {
 		refs.sort(new Comparator<Ref>() {
 			@Override
 			public int compare(final Ref a, final Ref b) {
 				// put default branch first so that it's the one selected by
 				// default
-				if (a.name.equals(master))
+				if (a.isDefault)
 					return -1;
-				if (b.name.equals(master))
+				if (b.isDefault)
 					return +1;
 				// branches before tags
 				if (a.type.equals("branch") && !b.type.equals("branch"))
@@ -55,9 +54,9 @@ public class REST {
 					return +1;
 				// protected branches are more likely to be the "main" branches,
 				// so put them before unprotected (likely "side") branches
-				if (a.prot && !b.prot)
+				if (a.isProtected && !b.isProtected)
 					return -1;
-				if (b.prot && !a.prot)
+				if (b.isProtected && !a.isProtected)
 					return +1;
 				// tiebreaker within those groups: lexicographic ordering
 				return a.name.compareTo(b.name);
@@ -67,8 +66,9 @@ public class REST {
 
 	private List<Ref> getAllRefs(final GitLab gl) {
 		final List<Ref> refs = new ArrayList<Ref>();
+		final ProjectInfo projectInfo = gl.getProjectInfo();
 		for (final Branch b : gl.getBranches())
-			refs.add(new Ref(b));
+			refs.add(new Ref(b, b.name.equals(projectInfo.master)));
 		for (final Tag t : gl.getTags())
 			refs.add(new Ref(t));
 		return refs;
@@ -81,7 +81,7 @@ public class REST {
 			// default to publishing protected branches (assumed to be the main
 			// branches), while only archiving everything else.
 			for (final Ref r : refs) {
-				if (r.prot)
+				if (r.isProtected || r.isDefault)
 					r.action = Action.PUBLISH_FULL;
 				map.put(r.ref, r.action);
 			}
@@ -119,15 +119,18 @@ public class REST {
 		@JsonProperty("type")
 		private final String type;
 		@JsonProperty("protected")
-		private final boolean prot;
+		private final boolean isProtected;
+		@JsonProperty("default")
+		private final boolean isDefault;
 		@JsonProperty("action")
 		private Action action;
 
-		private Ref(final Branch b) {
+		private Ref(final Branch b, final boolean isDefault) {
+			this.isDefault = isDefault;
 			type = "branch";
 			ref = "heads/" + b.name;
 			name = b.name;
-			prot = b.prot;
+			isProtected = b.isProtected;
 		}
 
 		private Ref(final Tag t) {
@@ -135,12 +138,13 @@ public class REST {
 			ref = "tags/" + t.name;
 			name = t.name;
 			// branches CAN be protected, but the API doesn't return that field
-			prot = false;
+			isProtected = false;
+			isDefault = false;
 		}
 
 		@Override
 		public String toString() {
-			return "Ref{" + ref + ", " + (prot ? "protected, " : "")
+			return "Ref{" + ref + ", " + (isProtected ? "protected, " : "")
 					+ "action=" + action + "}";
 		}
 	}

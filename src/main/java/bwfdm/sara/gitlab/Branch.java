@@ -13,5 +13,5 @@ public class Branch {
 	 * <code>false</code>.
 	 */
 	@JsonProperty("protected")
-	public boolean prot;
+	public boolean isProtected;
 }
