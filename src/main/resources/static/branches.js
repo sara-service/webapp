@@ -5,9 +5,9 @@ function template(name)  {
 	template.index++;
 	root.attr("id", "form_" + template.index);
 	var form = { root: root };
-	// for all .form-control's, change their ID to be unique, but also
-	// collect them in the object that gets returned.
-	var elements = $(".form-control", root);
+	// for all .form-control's and named labels, change their ID to be
+	// unique, but also collect them in the object that gets returned.
+	var elements = $(".form-control, label[name]", root);
 	elements.each(function() {
 		var id = $(this).attr("name");
 		var name = id + "_" + template.index;

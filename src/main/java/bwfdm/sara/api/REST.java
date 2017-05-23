@@ -83,8 +83,6 @@ public class REST {
 			for (final Ref r : refs) {
 				if (r.prot)
 					r.action = Action.PUBLISH_FULL;
-				else if (r.type.equals("branch"))
-					r.action = Action.ARCHIVE_HIDDEN;
 				map.put(r.ref, r.action);
 			}
 			session.setAttribute("branch_actions", map);

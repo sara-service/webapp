@@ -95,20 +95,19 @@
 
 	<form class="form-horizontal" id="branches">
 		<div class="form-group" id="template" style="display:none">
-			<div class="col-sm-2 nopad">
-				<label class="form-control" name="branch_label">branch master</label>
-			</div>
+			<label class="col-sm-2 control-label" name="branch_label">branch master</label>
 			<div class="col-sm-6 nopad">
-				<label for="template_commit" class="sr-only">starting point</label>
+				<label for="template_commit" class="control-label sr-only">starting point</label>
 				<select class="form-control" name="commit">
 					<option value="HEAD" selected>starting at most recent commit (HEAD of this branch)</option>
 					<option value="deadbeeflong">deadbeef and before: (2017-01-01) another stupid change</option>
 					<option value="deadbeeflong">deadbeef and before (2017-01-01: another stupid change)</option>
 					<option value="f00ba6long">f00ba600 (1994-03-21) and before: maybe this will help???</option>
+					<option value="f00ba6long">f00ba600 and before: maybe this will help??? (1994-03-21)</option>
 				</select>
 			</div>
 			<div class="col-sm-3 nopad">
-				<label for="template_action" class="sr-only">action</label>
+				<label for="template_action" class="control-label sr-only">action</label>
 				<select class="form-control" name="action">
 					<option value="PUBLISH_FULL" selected class="sara-green">publish full history (recommended)</option>
 					<option value="PUBLISH_ABBREV" class="sara-blue">publish abbreviated history</option>
