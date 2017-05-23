@@ -6,38 +6,39 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="icon" href="icon.png" type="image/png"/>
 	<link rel="shortcut icon" href="icon.png" type="image/png"/>
-	<link rel="stylesheet" href="sara.css" />
 	<link rel="stylesheet" href="bootstrap.min.css" />
+	<link rel="stylesheet" href="sara.css" />
 	<script src="jquery.min.js"></script>
 	<script src="uri.min.js"></script>
 	<script src="bootstrap.min.js"></script>
-	<script src="notbranches.js"></script>
+	<script src="branches.js"></script>
 	<title>SARA</title>
 </head>
-<body><div class="container">
+<body><div class="fluid-container">
 	<div class="row">
 		<div class="col-xs-12">
 			<img src="header.svg" class="logo-header" />
 		</div>
 	</div>
+
 	<div class="row">
-		<div class="col-xs-6">
+		<div class="col-sm-6">
 			<h1>Select something to publish!</h1>
 		</div>
-		<div class="col-xs-3">
+		<div class="col-sm-3 col-xs-8">
 			<h2>You are about to publish in: KOPS</h2>
 		</div>
-		<div class="col-xs-3">
+		<div class="col-sm-3 col-xs-4">
 			<img src="lame-duck.png" class="logo-header" />
 		</div>
 	</div>
 	<div class="row panel-group" id="accordion" role="tablist" aria-multiselectable="true"><div class="panel panel-default">
 		<div class="panel-heading" role="tab" id="headingOne"><h4 class="panel-title">
-			<a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne"><img src="info.svg" style="height:2ex;width:2ex;vertical-align:bottom" />&nbsp; What will the options do?</a>
+			<a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne" class="infoicon">What will the options do?</a>
 		</h4></div>
 		<div id="collapseOne" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne"><div class="panel-body"><div class="row">
-			<div class="col-sm-4"><img src="graph.svg" style="width:100%" /></div>
-			<div class="col-sm-8"><ul>
+			<div class="col-sm-6 col-md-4"><img src="graph.svg" class="hfill" /></div>
+			<div class="col-sm-6 col-md-8"><ul>
 				<li class="sara-green">"<strong>Publish full history</strong>"
 					will publish the <strong>entire history</strong> of a branch as-is.
 					This is the <strong>most useful format</strong> for others
@@ -91,48 +92,50 @@
 			</p></div>
 		</div></div></div>
 	</div></div>
+
 	<form class="form-horizontal" id="branches">
-		<div class="form-group" id="template" notstyle="display:none">
-			<div class="col-sm-2">
-				<select class="form-control" id="template_branch">
-					<option value="heads/master" selected>master</option>
-					<option value="heads/webapp">webapp</option>
-					<option value="tag/v0.0.1">tag v0.0.1</option>
-					<option value="tag/yawe35">tag yawe35</option>
-				</select>
+		<div class="form-group" id="template" style="display:none">
+			<div class="col-sm-2 nopad">
+				<label class="form-control" name="branch_label">branch master</label>
 			</div>
-			<div class="col-sm-6">
-				<select class="form-control" id="template_commit">
+			<div class="col-sm-6 nopad">
+				<label for="template_commit" class="sr-only">starting point</label>
+				<select class="form-control" name="commit">
 					<option value="HEAD" selected>starting at most recent commit (HEAD of this branch)</option>
 					<option value="deadbeeflong">deadbeef and before: (2017-01-01) another stupid change</option>
 					<option value="deadbeeflong">deadbeef and before (2017-01-01: another stupid change)</option>
 					<option value="f00ba6long">f00ba600 (1994-03-21) and before: maybe this will help???</option>
 				</select>
 			</div>
-			<div class="col-sm-3">
-				<select class="form-control" id="template_form">
-					<option value="full" selected class="sara-green">publish full history (recommended)</option>
-					<option value="abbrev" class="sara-blue">publish abbreviated history</option>
-					<option value="latest" class="sara-red">publish latest version only</option>
-					<option value="archive" class="sara-orange">private access, public record</option>
-					<option value="archive" class="sara-cyan">private access, don't publish</option>
+			<div class="col-sm-3 nopad">
+				<label for="template_action" class="sr-only">action</label>
+				<select class="form-control" name="action">
+					<option value="PUBLISH_FULL" selected class="sara-green">publish full history (recommended)</option>
+					<option value="PUBLISH_ABBREV" class="sara-blue">publish abbreviated history</option>
+					<option value="PUBLISH_LATEST" class="sara-red">publish latest version only</option>
+					<option value="ARCHIVE_PUBLIC" class="sara-orange">private access, public record</option>
+					<option value="ARCHIVE_HIDDEN" class="sara-cyan">private access, don't publish</option>
 				</select>
 			</div>
-			<button type="button" class="btn btn-warning col-sm-1">remove</button>
-		</div>
-		<div class="form-group">
-			<div class="col-sm-2">
-				<select class="form-control" id="add_branch">
-					<option value="heads/master" selected>master</option>
-					<option value="heads/webapp">webapp</option>
-					<option value="tag/v0.0.1">tag v0.0.1</option>
-					<option value="tag/yawe35">tag yawe35</option>
-				</select>
+			<div class="col-sm-1 nopad">
+				<button type="button" class="btn btn-warning form-control" name="remove">remove</button>
 			</div>
-			<button type="button" class="btn btn-success col-sm-1" id="add_button">add</button>
 		</div>
 	</form>
 	<div id="loading" class="loading"><span class="sr-only">loading, please wait...</span></div>
+	<form class="form-horizontal"><div class="form-group">
+		<div class="col-sm-2 nopad">
+			<select class="form-control" id="add_branch">
+				<option value="heads/master" selected>master</option>
+				<option value="heads/webapp">webapp</option>
+				<option value="tag/v0.0.1">tag v0.0.1</option>
+				<option value="tag/yawe35">tag yawe35</option>
+			</select>
+		</div>
+		<div class="col-sm-1 nopad">
+			<button type="button" class="btn btn-success form-control" id="add_button">add</button>
+		</div>
+	</div></form>
 
 	<p style="height:3ex"></p>
 	<div class="row">

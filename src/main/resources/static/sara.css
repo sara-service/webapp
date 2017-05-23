@@ -10,11 +10,11 @@
 
 /* border width must be 6.9% to match the logo */
 .loading {
-  border: .345em solid #f9b10b;
   border-radius: 50%;
   border-top: .345em solid #b45865;
   border-right: .345em solid #bddd1f;
   border-bottom: .345em solid #809fb1;
+  border-left: .345em solid #f9b10b;
   width: 5em;
   height: 5em;
   margin: 1em auto 1em auto;
@@ -35,6 +35,35 @@
 .logo-header {
 	height: 10ex;
 	margin: 2ex 0ex 0ex 0ex;
+}
+
+body {
+	padding: 30px;
+}
+
+.nopad {
+	padding: 0px .25em;
+}
+
+.hfill {
+	width: 100%;
+}
+
+.infoicon {
+	margin-left: 1ex;
+}
+
+.infoicon:before {
+	content: "";
+	background-image: url(info.svg);
+	background-size: 2ex 2ex;
+	background-repeat: no-repeat;
+	display: inline-block;
+	height: 2ex;
+	width: 2ex;
+	vertical-align: bottom;
+	position: relative;
+	left: -1ex;
 }
 
 .sara-red {

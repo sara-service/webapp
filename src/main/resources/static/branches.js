@@ -1,13 +1,35 @@
+function template(name)  {
+	// clone whole subtree and change ID to be unique
+	var root = $("#" + name).clone();
+	root.removeAttr("style");
+	template.index++;
+	root.attr("id", "form_" + template.index);
+	var form = { root: root };
+	// for all .form-control's, change their ID to be unique, but also
+	// collect them in the object that gets returned.
+	var elements = $(".form-control", root);
+	elements.each(function() {
+		var id = $(this).attr("name");
+		var name = id + "_" + template.index;
+		$(this).attr("id", name).siblings("label").attr("for", name);
+		form[id] = $(this);
+	});
+	return form;
+}
+template.index = 0;
+
+var project = new URI(location).search(true).project;
 var forms = [];
 
-function save() {
-	var data = {};
-	for (var i = 0; i < forms.length; i++)
-		data[forms[i].data("branch_name")] = forms[i].val();
-	$.ajax("/api/actions", {
-		method: "PUT",
-		data: JSON.stringify(data),
-		contentType: "application/json",
+function save(branch) {
+	$.ajax("/api/refs", {
+		method: "POST",
+		data: {
+			project: project,
+			ref: branch.ref,
+			action: branch.action
+		},
+		//contentType: "application/json",
 		success: function() {
 			console.log("save ok");
 		},
@@ -17,62 +39,72 @@ function save() {
 	});
 }
 
-function addBranch(name, value) {
-	var el = $("#template").clone();
-	el.removeAttr("style");
-	var label = $("#template_label", el);
-	label.text(name);
-	label.attr("for", "branch_" + name);
-	label.attr("id", "label_" + name);
-	var form = $("#template_form", el);
-	form.data("branch_name", name);
-	form.attr("id", "branch_" + name);
-	form.val(value);
-	if (form.val() != value)
-		form.val("archive");
-	form.on("select change", save);
-	forms.push(form);
-	$("#branches").append(el);
+function addBranch(branch) {
+	if (forms[branch.ref]) {
+		// user trying to add a branch twice
+		forms[branch.ref].action.focus();
+		console.log("StupidUserException: ref " + branch.ref
+				+ " already in list");
+		return;
+	}
+
+	var form = template("template");
+	form.branch = branch;
+	form.branch_label.text(branch.type + " " + branch.name);
+	// default to publishing everything the user adds, because that's
+	// what we prefer.
+	if (!branch.action)
+		branch.action = "PUBLISH_FULL";
+	form.action.val(branch.action);
+
+	// event handler stuff
+	form.remove.click(function() {
+		branch.action = null;
+		delete forms[branch.ref];
+		form.root.remove();
+		save(branch);
+	});
+	form.action.on("select change", function() {
+		branch.action = $(this).val();
+		save(branch);
+	});
+	forms[branch.ref] = form;
+	$("#branches").append(form.root);
 }
 
-function addBranches(branches, actions) {
-	branches.sort(function(a, b) {
-		if (a == "master")
-			return -1;
-		if (b == "master")
-			return +1;
-		return a.localeCompare(b);
+function addBranches(branches) {
+	// update list of branches
+	var select = $("#add_branch");
+	select.empty();
+	$.each(branches, function(_, branch) {
+		var name = branch.type + " " + branch.name;
+		var option = $("<option>").attr("value", branch.ref).text(name)
+				.data("branch", branch);
+		select.append(option);
 	});
-	for (var i = 0; i < branches.length; i++) {
-		var branch = branches[i];
-		if (typeof actions[branch] == "undefined") {
-			if (branch == "master")
-				actions[branch] = "full";
-			else
-				actions[branch] = "ignore";
-		}
-		addBranch(branch, actions[branch]);
-	}
+	// add all branches which have an action set
+	$.each(branches, function(_, branch) {
+		if (branch.action)
+			addBranch(branch);
+	});
+	// event handler for "add" button
+	$("#add_button").click(function() {
+		var branch = $("#add_branch :selected").data("branch");
+		addBranch(branch);
+		// save immediately because the user might not change the
+		// selection before clicking next
+		save(branch);
+	});
 	$("#loading").remove();	
 }
 
 $(function() {
-	var project = new URI(location).search(true).project
 	$("title").text(project + " – SARA software publishing");
-
-	$.ajax("/api/branches", {
+	$.ajax("/api/refs", {
 		dataType: "json",
 		data: { "project": project },
 		success: function(branches) {
-			$.ajax("/api/actions", {
-				dataType: "json",
-				success: function(actions) {
-					addBranches(branches, actions);
-				},
-				error: function(xhr, status, error) {
-					alert(status);
-				}
-			});
+			addBranches(branches);
 		},
 		error: function(xhr, status, error) {
 			alert(status);

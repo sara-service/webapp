@@ -1,16 +1,15 @@
 package bwfdm.sara.api;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpSession;
 
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -35,6 +34,7 @@ public class REST {
 		final List<Ref> refs = getAllRefs(gl);
 		final ProjectInfo projectInfo = gl.getProjectInfo();
 		sortRefs(refs, projectInfo.master);
+		loadActions(refs, session);
 		return refs;
 	}
 
@@ -74,47 +74,80 @@ public class REST {
 		return refs;
 	}
 
-	@GetMapping("actions")
-	public Map<String, String> getActions(
-			@RequestParam("project") final String project,
-			final HttpSession session) {
+	private void loadActions(final List<Ref> refs, final HttpSession session) {
 		// FIXME load from database instead
+		if (session.getAttribute("branch_actions") == null) {
+			final HashMap<String, Action> map = new HashMap<String, Action>();
+			// default to publishing protected branches (assumed to be the main
+			// branches), while only archiving everything else.
+			for (final Ref r : refs) {
+				if (r.prot)
+					r.action = Action.PUBLISH_FULL;
+				else if (r.type.equals("branch"))
+					r.action = Action.ARCHIVE_HIDDEN;
+				map.put(r.ref, r.action);
+			}
+			session.setAttribute("branch_actions", map);
+		}
+
 		@SuppressWarnings("unchecked")
-		final Map<String, String> actions = (Map<String, String>) session
+		final Map<String, Action> actions = (Map<String, Action>) session
 				.getAttribute("branch_actions");
-		if (actions == null)
-			return Collections.emptyMap();
-		return actions;
+		for (final Ref r : refs)
+			r.action = actions.get(r.ref);
 	}
 
-	@PutMapping("actions")
+	@PostMapping("refs")
 	public void setActions(@RequestParam("project") final String project,
-			@RequestBody final Map<String, String> actions,
+			@RequestParam("ref") final String ref,
+			@RequestParam("action") final Action action,
 			final HttpSession session) {
 		// FIXME store in database instead
-		session.setAttribute("branch_actions", actions);
+		if (session.getAttribute("branch_actions") == null)
+			session.setAttribute("branch_actions",
+					new HashMap<String, Action>());
+		@SuppressWarnings("unchecked")
+		final Map<String, Action> actions = (Map<String, Action>) session
+				.getAttribute("branch_actions");
+		actions.put(ref, action);
 	}
 
 	@JsonInclude(Include.NON_NULL)
 	private static class Ref {
 		@JsonProperty("name")
 		private final String name;
+		@JsonProperty("ref")
+		private final String ref;
 		@JsonProperty("type")
 		private final String type;
 		@JsonProperty("protected")
 		private final boolean prot;
+		@JsonProperty("action")
+		private Action action;
 
 		private Ref(final Branch b) {
 			type = "branch";
+			ref = "heads/" + b.name;
 			name = b.name;
 			prot = b.prot;
 		}
 
 		private Ref(final Tag t) {
 			type = "tag";
+			ref = "tags/" + t.name;
 			name = t.name;
 			// branches CAN be protected, but the API doesn't return that field
 			prot = false;
 		}
+
+		@Override
+		public String toString() {
+			return "Ref{" + ref + ", " + (prot ? "protected, " : "")
+					+ "action=" + action + "}";
+		}
+	}
+
+	private enum Action {
+		PUBLISH_FULL, PUBLISH_ABBREV, PUBLISH_LATEST, ARCHIVE_PUBLIC, ARCHIVE_HIDDEN
 	}
 }
