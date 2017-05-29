@@ -45,6 +45,14 @@ class GitLabREST {
 	private final RestTemplate rest;
 	private final String root;
 
+	/**
+	 * @param gitlab
+	 *            URL to GitLab root
+	 * @param project
+	 *            name of project whose API to access
+	 * @param token
+	 *            GitLab OAuth token
+	 */
 	GitLabREST(final String gitlab, final String project, final String token) {
 		if (token == null)
 			throw new IllegalStateException("no GitLab token available");
@@ -65,17 +73,46 @@ class GitLabREST {
 		return UriComponentsBuilder.fromHttpUrl(root + endpoint);
 	}
 
+	/**
+	 * Convenience function for calling
+	 * {@link #get(UriComponentsBuilder, ParameterizedTypeReference)}.
+	 */
 	public <T> T get(final String endpoint,
 			final ParameterizedTypeReference<T> type) {
 		return get(uri(endpoint), type);
 	}
 
+	/**
+	 * Get a single item from GitLab. Works for lists, but will only return the
+	 * first page of 100 elements at most. Use
+	 * {@link #getList(String, ParameterizedTypeReference)} to get all elements.
+	 * 
+	 * @param endpoint
+	 *            API path, relative to project
+	 * @param type
+	 *            instance of {@link ParameterizedTypeReference} with correct
+	 *            type parameters
+	 * @return a list of all objects that GitLab returns
+	 */
 	public <T> T get(final UriComponentsBuilder ucb,
 			final ParameterizedTypeReference<T> type) {
 		return rest.exchange(ucb.build(true).toUri(), HttpMethod.GET, auth,
 				type).getBody();
 	}
 
+	/**
+	 * Get a list of items from GitLab, working around the pagination misfeature
+	 * by requesting pages one by one. If you need just a few, use
+	 * {@link #get(UriComponentsBuilder, ParameterizedTypeReference)} and set
+	 * {@code per_page} manually.
+	 * 
+	 * @param endpoint
+	 *            API path, relative to project
+	 * @param type
+	 *            instance of {@link ParameterizedTypeReference} with correct
+	 *            type parameters
+	 * @return a list of all objects that GitLab returns
+	 */
 	public <T> List<T> getList(final String endpoint,
 			final ParameterizedTypeReference<List<T>> type) {
 		return getList(uri(endpoint), type);
