@@ -30,8 +30,8 @@ public class Repo {
 	@GetMapping("refs")
 	public List<Ref> getBranches(@RequestParam("project") final String project,
 			final HttpSession session) {
-		final String token = (String) session.getAttribute("gitlab_token");
-		final GitLab gl = new GitLab(Temp.GITLAB, project, token);
+		final GitLab gl = new GitLab(Config.GITLAB, project,
+				Auth.getToken(session));
 		final List<Ref> refs = getAllRefs(gl);
 		sortRefs(refs);
 		loadActions(refs, session);
@@ -177,8 +177,8 @@ public class Repo {
 			@RequestParam("ref") final String ref,
 			@RequestParam(name = "limit", defaultValue = "20") final int limit,
 			final HttpSession session) {
-		final String token = (String) session.getAttribute("gitlab_token");
-		final GitLab gl = new GitLab(Temp.GITLAB, project, token);
+		final GitLab gl = new GitLab(Config.GITLAB, project,
+				Auth.getToken(session));
 		return gl.getCommits(ref, limit);
 	}
 }

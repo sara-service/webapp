@@ -1,3 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Context copyXML="true">
+	<Parameter name="sara.webroot"
+		value="https://sara.unikn.netfuture.ch"
+		description="publicly visible URL of servlet root" />
 </Context>

@@ -21,6 +21,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @RestController
 @RequestMapping("/api/auth")
 public class Auth {
+	private static final String STATE_ATTR = "oauth_state";
+	private static final String TOKEN_ATTR = "gitlab_token";
 	private static final SecureRandom rng = new SecureRandom();
 
 	@GetMapping("login")
@@ -30,14 +32,14 @@ public class Auth {
 		final byte[] random = new byte[10];
 		rng.nextBytes(random);
 		final String state = DatatypeConverter.printBase64Binary(random);
-		session.setAttribute("oauth_state", state);
+		session.setAttribute(STATE_ATTR, state);
 		session.setAttribute("project", project);
 
-		redir.addAttribute("client_id", Temp.APP_ID);
-		redir.addAttribute("redirect_uri", Temp.SARA + "/api/auth/redirect");
+		redir.addAttribute("client_id", Config.APP_ID);
+		redir.addAttribute("redirect_uri", getRedirectURI(session));
 		redir.addAttribute("response_type", "code");
 		redir.addAttribute("state", state);
-		return new RedirectView(Temp.GITLAB + "/oauth/authorize");
+		return new RedirectView(Config.GITLAB + "/oauth/authorize");
 	}
 
 	@GetMapping("redirect")
@@ -45,26 +47,36 @@ public class Auth {
 			@RequestParam("code") final String code,
 			@RequestParam("state") final String state,
 			final RedirectAttributes redir, final HttpSession session) {
-		final String correctState = (String) session
-				.getAttribute("oauth_state");
-		session.removeAttribute("oauth_state");
+		final String correctState = (String) session.getAttribute(STATE_ATTR);
+		session.removeAttribute(STATE_ATTR);
 		if (correctState == null)
 			throw new IllegalStateException("no oauth_state");
 		if (!correctState.equals(state))
 			throw new IllegalArgumentException("invalid oauth_state");
 
 		final Map<String, String> vars = new HashMap<String, String>();
-		vars.put("client_id", Temp.APP_ID);
-		vars.put("client_secret", Temp.APP_SECRET);
+		vars.put("client_id", Config.APP_ID);
+		vars.put("client_secret", Config.APP_SECRET);
 		vars.put("code", code);
-		vars.put("redirect_uri", Temp.SARA + "/api/auth/redirect");
+		vars.put("redirect_uri", getRedirectURI(session));
 		vars.put("grant_type", "authorization_code");
-		final AccessToken auth = new RestTemplate().postForObject(Temp.GITLAB
+		final AccessToken auth = new RestTemplate().postForObject(Config.GITLAB
 				+ "/oauth/token", vars, AccessToken.class);
-		session.setAttribute("gitlab_token", auth.token);
+		session.setAttribute(TOKEN_ATTR, auth.token);
 
 		redir.addAttribute("project", session.getAttribute("project"));
 		return new RedirectView("/branches.html");
+	}
+
+	private String getRedirectURI(final HttpSession session) {
+		return Config.getWebRoot(session) + "/api/auth/redirect";
+	}
+
+	public static String getToken(final HttpSession session) {
+		final Object attr = session.getAttribute(TOKEN_ATTR);
+		if (attr == null)
+			throw new IllegalStateException("not GitLab token available");
+		return (String) attr;
 	}
 
 	@JsonIgnoreProperties(ignoreUnknown = true)
