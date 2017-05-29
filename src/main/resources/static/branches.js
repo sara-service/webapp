@@ -1,41 +1,11 @@
-function template(name)  {
-	// clone whole subtree and change ID to be unique
-	var root = $("#" + name).clone();
-	root.removeAttr("style");
-	template.index++;
-	root.attr("id", "form_" + template.index);
-	var form = { root: root };
-	// for all .form-control's and named labels, change their ID to be
-	// unique, but also collect them in the object that gets returned.
-	var elements = $(".form-control, label[name]", root);
-	elements.each(function() {
-		var id = $(this).attr("name");
-		var name = id + "_" + template.index;
-		$(this).attr("id", name).siblings("label").attr("for", name);
-		form[id] = $(this);
-	});
-	return form;
-}
-template.index = 0;
-
 var project = new URI(location).search(true).project;
 var forms = [];
 
 function save(branch) {
-	$.ajax("/api/repo/refs", {
-		method: "POST",
-		data: {
-			project: project,
-			ref: branch.ref,
-			action: branch.action
-		},
-		//contentType: "application/json",
-		success: function() {
-			console.log("save ok");
-		},
-		error: function(xhr, status, error) {
-			console.log("save", status);
-		}
+	API.postAndForget("/api/repo/refs", {
+		project: project,
+		ref: branch.ref,
+		action: branch.action
 	});
 }
 
@@ -94,20 +64,12 @@ function addBranch(branch) {
 
 	// in the background, load list of commits and update starting point
 	// selection box
-	$.ajax("/api/repo/commits", {
-		dataType: "json",
-		data: {
-			project: project,
-			ref: branch.ref,
-			limit: 20,
-		},
-		success: function(commits) {
-			console.log(commits);
-			addCommits(branch, form.commit, commits);
-		},
-		error: function(xhr, status, error) {
-			alert(status);
-		}
+	API.get("/api/repo/commits", { 
+		project: project,
+		ref: branch.ref,
+		limit: 20,
+	}, function(commits) {
+		addCommits(branch, form.commit, commits);
 	});
 }
 
@@ -139,14 +101,5 @@ function addBranches(branches) {
 
 $(function() {
 	$("title").text(project + " – SARA software publishing");
-	$.ajax("/api/repo/refs", {
-		dataType: "json",
-		data: { project: project },
-		success: function(branches) {
-			addBranches(branches);
-		},
-		error: function(xhr, status, error) {
-			alert(status);
-		}
-	});
+	API.get("/api/repo/refs", { project: project }, addBranches);
 });

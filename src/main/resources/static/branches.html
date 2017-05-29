@@ -11,6 +11,7 @@
 	<script src="jquery.min.js"></script>
 	<script src="uri.min.js"></script>
 	<script src="bootstrap.min.js"></script>
+	<script src="common.js"></script>
 	<script src="branches.js"></script>
 	<title>SARA</title>
 </head>
@@ -101,13 +102,7 @@
 				<label for="template_commit" class="control-label sr-only">starting point</label>
 				<select class="form-control" name="commit">
 					<option value="HEAD" selected>starting at most recent commit (HEAD of this branch)</option>
-					<option value="IDIOT" disabled>… commits are being loaded …</option>
-<!--
-					<option value="deadbeeflong">deadbeef and before: (2017-01-01) another stupid change</option>
-					<option value="deadbeeflong">deadbeef and before (2017-01-01: another stupid change)</option>
-					<option value="f00ba6long">f00ba600 (1994-03-21) and before: maybe this will help???</option>
-					<option value="f00ba6long">f00ba600 and before: maybe this will help??? (1994-03-21)</option>
--->
+					<option value="IDIOT" disabled>… loading list of commits …</option>
 				</select>
 			</div>
 			<div class="col-sm-3 nopad">
@@ -129,12 +124,7 @@
 	<form class="form-horizontal"><div class="form-group">
 		<div class="col-sm-2 nopad">
 			<select class="form-control" id="add_branch">
-				<option value="heads/master" selected>master</option>
-<!--
-				<option value="heads/webapp">webapp</option>
-				<option value="tag/v0.0.1">tag v0.0.1</option>
-				<option value="tag/yawe35">tag yawe35</option>
--->
+				<option value="heads/master" disabled>… loading …</option>
 			</select>
 		</div>
 		<div class="col-sm-1 nopad">
