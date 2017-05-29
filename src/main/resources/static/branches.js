@@ -1,11 +1,10 @@
-var project = new URI(location).search(true).project;
 var forms = [];
 
 function save(branch) {
-	API.postAndForget("/api/repo/refs", {
-		project: project,
+	API.post("/api/repo/refs", {
 		ref: branch.ref,
-		action: branch.action
+		action: branch.action,
+		start: branch.start,
 	});
 }
 
@@ -19,6 +18,9 @@ function addCommits(branch, select, commits) {
 	});
 	// get rid of the placeholder
 	$("option:disabled", select).remove();
+	// select previously selected option
+	if (branch.start)
+		select.val(branch.start);
 }
 
 var reftype_names = {
@@ -43,6 +45,8 @@ function addBranch(branch) {
 	if (!branch.action)
 		branch.action = "PUBLISH_FULL";
 	form.action.val(branch.action);
+	if (!branch.start)
+		branch.start = "HEAD";
 
 	// event handler stuff
 	form.remove.click(function() {
@@ -65,7 +69,6 @@ function addBranch(branch) {
 	// in the background, load list of commits and update starting point
 	// selection box
 	API.get("/api/repo/commits", { 
-		project: project,
 		ref: branch.ref,
 		limit: 20,
 	}, function(commits) {
@@ -99,7 +102,11 @@ function addBranches(branches) {
 	$("#loading").remove();	
 }
 
-$(function() {
-	$("title").text(project + " – SARA software publishing");
-	API.get("/api/repo/refs", { project: project }, addBranches);
-});
+function initPage() {
+	API.get("/api/repo/refs", {}, addBranches);
+	$("#next").attr("href",
+			"/meta.html?project=" + encodeURIComponent(project));
+	API.get("/api/return-url", {}, function(base) {
+		$("#return").attr("href", base + "/" + encodeURI(project));
+	});
+}

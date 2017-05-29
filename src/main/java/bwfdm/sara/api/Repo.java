@@ -94,13 +94,20 @@ public class Repo {
 				.getAttribute("branch_actions");
 		for (final Ref r : refs)
 			r.action = actions.get(r.ref);
+
+		@SuppressWarnings("unchecked")
+		final Map<String, String> starts = (Map<String, String>) session
+				.getAttribute("branch_starts");
+		if (starts != null)
+			for (final Ref r : refs)
+				r.start = starts.get(r.ref);
 	}
 
 	@PostMapping("refs")
 	public void setActions(@RequestParam("project") final String project,
 			@RequestParam("ref") final String ref,
 			@RequestParam("action") final Action action,
-			final HttpSession session) {
+			@RequestParam("start") final String start, final HttpSession session) {
 		// FIXME store in database instead
 		if (session.getAttribute("branch_actions") == null)
 			session.setAttribute("branch_actions",
@@ -109,6 +116,13 @@ public class Repo {
 		final Map<String, Action> actions = (Map<String, Action>) session
 				.getAttribute("branch_actions");
 		actions.put(ref, action);
+
+		if (session.getAttribute("branch_starts") == null)
+			session.setAttribute("branch_starts", new HashMap<String, String>());
+		@SuppressWarnings("unchecked")
+		final Map<String, String> starts = (Map<String, String>) session
+				.getAttribute("branch_starts");
+		starts.put(ref, start);
 	}
 
 	/** data class for refs in the branch selection screen. */

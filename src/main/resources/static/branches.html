@@ -17,20 +17,19 @@
 </head>
 <body><div class="fluid-container">
 	<div class="row">
-		<div class="col-xs-12">
+		<div class="col-sm-9 col-xs-12">
 			<img src="header.svg" class="logo-header" />
+		</div>
+		<div class="col-sm-3 col-xs-12">
+			<a id="ir_link">
+				<img class="logo-header-right" />
+			</a>
 		</div>
 	</div>
 
 	<div class="row">
-		<div class="col-sm-6">
+		<div class="col-xs-12">
 			<h1>Select something to publish!</h1>
-		</div>
-		<div class="col-sm-3 col-xs-8">
-			<h2>You are about to publish in: KOPS</h2>
-		</div>
-		<div class="col-sm-3 col-xs-4">
-			<img src="lame-duck.png" class="logo-header" />
 		</div>
 	</div>
 	<div class="row panel-group" id="accordion" role="tablist" aria-multiselectable="true"><div class="panel panel-default">
@@ -90,7 +89,7 @@
 				</li>
 			</ul><p>Please note that none of these options
 				are suitable for highly sensitive data.
-				In particular, never archive medical data using this service!
+				If you have that kind of data, please archive it elsewhere.
 			</p></div>
 		</div></div></div>
 	</div></div>
@@ -134,8 +133,8 @@
 
 	<p style="height:3ex"></p>
 	<div class="row">
-		<button type="button" class="btn btn-default col-sm-3" id="return">← save and return to GitLab</button>
-		<button type="button" class="btn btn-primary col-sm-2 col-sm-offset-7" id="next">next →</button>
+		<a class="btn btn-default col-sm-3" id="return" href="/api/return-to-gitlab">← save and return to GitLab</a>
+		<a class="btn btn-primary col-sm-2 col-sm-offset-7" id="next">next →</a>
 	</div>
 	<p style="height:3ex"></p>
 </div></body>

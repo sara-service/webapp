@@ -25,22 +25,32 @@ function reportAPIError(xhr, status, error) {
 	location.reload();
 }
 
+var project = new URI(location).search(true).project;
+
 API = {};
 API.get = function(path, data, callback) {
+	data.project = project;
 	$.ajax(path, {
-		dataType: "json",
 		data: data,
 		success: callback,
 		error: reportAPIError,
 	});
 };
-API.postAndForget = function(path, data) {
+API.post = function(path, data, callback) {
+	data.project = project;
 	$.ajax(path, {
 		method: "POST",
 		data: data,
-		success: function() {
-			console.log("POST " + path + " ok");
-		},
+		success: callback,
 		error: reportAPIError,
 	});
 }
+
+$(function() {
+	$("title").text(project + " – SARA software publishing");
+	API.get("/api/ir-meta", {}, function(meta) {
+		$("#ir_link").attr("href", meta.url);
+		$("#ir_link img").attr("src", "/logos/" + meta.logo);
+	});
+	initPage();
+});
