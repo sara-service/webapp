@@ -22,7 +22,7 @@ var project = new URI(location).search(true).project;
 var forms = [];
 
 function save(branch) {
-	$.ajax("/api/refs", {
+	$.ajax("/api/repo/refs", {
 		method: "POST",
 		data: {
 			project: project,
@@ -39,6 +39,23 @@ function save(branch) {
 	});
 }
 
+function addCommits(branch, select, commits) {
+	$.each(commits, function(_, commit) {
+		var shortid = commit.id.substr(0, 7);
+		var title = shortid + " and before: " + commit.title + " ("
+				+ commit.date + ")";
+		var option = $("<option>").attr("value", commit.id).text(title);
+		select.append(option);
+	});
+	// get rid of the placeholder
+	$("option:disabled", select).remove();
+}
+
+var reftype_names = {
+	BRANCH: "branch ",
+	TAG: "tag ",
+};
+
 function addBranch(branch) {
 	if (forms[branch.ref]) {
 		// user trying to add a branch twice
@@ -50,7 +67,7 @@ function addBranch(branch) {
 
 	var form = template("template");
 	form.branch = branch;
-	form.branch_label.text(branch.type + " " + branch.name);
+	form.branch_label.text(reftype_names[branch.type] + branch.name);
 	// default to publishing everything the user adds, because that's
 	// what we prefer.
 	if (!branch.action)
@@ -68,8 +85,30 @@ function addBranch(branch) {
 		branch.action = $(this).val();
 		save(branch);
 	});
+	form.commit.on("select change", function() {
+		branch.start = $(this).val();
+		save(branch);
+	});
 	forms[branch.ref] = form;
 	$("#branches").append(form.root);
+
+	// in the background, load list of commits and update starting point
+	// selection box
+	$.ajax("/api/repo/commits", {
+		dataType: "json",
+		data: {
+			project: project,
+			ref: branch.ref,
+			limit: 20,
+		},
+		success: function(commits) {
+			console.log(commits);
+			addCommits(branch, form.commit, commits);
+		},
+		error: function(xhr, status, error) {
+			alert(status);
+		}
+	});
 }
 
 function addBranches(branches) {
@@ -77,7 +116,7 @@ function addBranches(branches) {
 	var select = $("#add_branch");
 	select.empty();
 	$.each(branches, function(_, branch) {
-		var name = branch.type + " " + branch.name;
+		var name = reftype_names[branch.type] + branch.name;
 		var option = $("<option>").attr("value", branch.ref).text(name)
 				.data("branch", branch);
 		select.append(option);
@@ -100,9 +139,9 @@ function addBranches(branches) {
 
 $(function() {
 	$("title").text(project + " – SARA software publishing");
-	$.ajax("/api/refs", {
+	$.ajax("/api/repo/refs", {
 		dataType: "json",
-		data: { "project": project },
+		data: { project: project },
 		success: function(branches) {
 			addBranches(branches);
 		},

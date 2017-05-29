@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import bwfdm.sara.gitlab.Branch;
+import bwfdm.sara.gitlab.Commit;
 import bwfdm.sara.gitlab.GitLab;
 import bwfdm.sara.gitlab.ProjectInfo;
 import bwfdm.sara.gitlab.Tag;
@@ -24,8 +25,8 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @RestController
-@RequestMapping("/api")
-public class REST {
+@RequestMapping("/api/repo")
+public class Repo {
 	@GetMapping("refs")
 	public List<Ref> getBranches(@RequestParam("project") final String project,
 			final HttpSession session) {
@@ -48,9 +49,9 @@ public class REST {
 				if (b.isDefault)
 					return +1;
 				// branches before tags
-				if (a.type.equals("branch") && !b.type.equals("branch"))
+				if (a.type == RefType.BRANCH && b.type != RefType.BRANCH)
 					return -1;
-				if (b.type.equals("branch") && !a.type.equals("branch"))
+				if (b.type == RefType.BRANCH && a.type != RefType.BRANCH)
 					return +1;
 				// protected branches are more likely to be the "main" branches,
 				// so put them before unprotected (likely "side") branches
@@ -110,31 +111,44 @@ public class REST {
 		actions.put(ref, action);
 	}
 
+	/** data class for refs in the branch selection screen. */
 	@JsonInclude(Include.NON_NULL)
 	private static class Ref {
+		/**
+		 * user-friendly name of ref, ie. {@code master} or {@code foo}. doesn't
+		 * identify whether it's a branch or tag.
+		 */
 		@JsonProperty("name")
 		private final String name;
+		/** ref in git syntax, ie. {@code heads/master} or {@code tags/foo} */
 		@JsonProperty("ref")
 		private final String ref;
+		/** ref type (branch or tag). */
 		@JsonProperty("type")
-		private final String type;
+		private final RefType type;
+		/** <code>true</code> if this is a protected branch */
 		@JsonProperty("protected")
 		private final boolean isProtected;
+		/** <code>true</code> if this is the default branch */
 		@JsonProperty("default")
 		private final boolean isDefault;
+		/** selected archival option. */
 		@JsonProperty("action")
 		private Action action;
+		/** ID of first commit to archive. */
+		@JsonProperty("start")
+		public String start;
 
 		private Ref(final Branch b, final boolean isDefault) {
 			this.isDefault = isDefault;
-			type = "branch";
+			type = RefType.BRANCH;
 			ref = "heads/" + b.name;
 			name = b.name;
 			isProtected = b.isProtected;
 		}
 
 		private Ref(final Tag t) {
-			type = "tag";
+			type = RefType.TAG;
 			ref = "tags/" + t.name;
 			name = t.name;
 			// branches CAN be protected, but the API doesn't return that field
@@ -151,5 +165,20 @@ public class REST {
 
 	private enum Action {
 		PUBLISH_FULL, PUBLISH_ABBREV, PUBLISH_LATEST, ARCHIVE_PUBLIC, ARCHIVE_HIDDEN
+	}
+
+	private enum RefType {
+		BRANCH, TAG
+	}
+
+	@GetMapping("commits")
+	public List<Commit> getCommits(
+			@RequestParam("project") final String project,
+			@RequestParam("ref") final String ref,
+			@RequestParam(name = "limit", defaultValue = "20") final int limit,
+			final HttpSession session) {
+		final String token = (String) session.getAttribute("gitlab_token");
+		final GitLab gl = new GitLab(Temp.GITLAB, project, token);
+		return gl.getCommits(ref, limit);
 	}
 }

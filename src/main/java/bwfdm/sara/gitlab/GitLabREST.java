@@ -5,6 +5,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -21,10 +22,23 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriUtils;
 
+/** low-level helper class for making REST calls to the GitLab API. */
 class GitLabREST {
-	private static final String MAX_PER_PAGE = "100";
-	private static final Pattern URL_FIELD = Pattern.compile("<(.*)>");
-	private static final Pattern REL_NEXT_FIELD = Pattern
+	/**
+	 * date format pattern used by GitLab, {@link SimpleDateFormat} style.
+	 * currently ISO8601 ({@code 2012-09-20T11:50:22.000+03:00}).
+	 */
+	public static final String DATE_FORMAT_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX";
+	/**
+	 * date format used by GitLab, as a {@link SimpleDateFormat}. currently
+	 * ISO8601 ({@code 2012-09-20T11:50:22.000+03:00}).
+	 */
+	public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat(
+			DATE_FORMAT_PATTERN);
+
+	private static final int MAX_PER_PAGE = 100;
+	private static final Pattern LINK_URL_FIELD = Pattern.compile("<(.*)>");
+	private static final Pattern LINK_REL_NEXT_FIELD = Pattern
 			.compile("rel=(\"?)next\\1");
 
 	private final HttpEntity<Void> auth;
@@ -47,12 +61,16 @@ class GitLabREST {
 		rest = new RestTemplate();
 	}
 
-	public <T> T get(final String endpoint,
-			final ParameterizedTypeReference<T> type) {
-		return get(UriComponentsBuilder.fromHttpUrl(root + endpoint), type);
+	public UriComponentsBuilder uri(final String endpoint) {
+		return UriComponentsBuilder.fromHttpUrl(root + endpoint);
 	}
 
-	private <T> T get(final UriComponentsBuilder ucb,
+	public <T> T get(final String endpoint,
+			final ParameterizedTypeReference<T> type) {
+		return get(uri(endpoint), type);
+	}
+
+	public <T> T get(final UriComponentsBuilder ucb,
 			final ParameterizedTypeReference<T> type) {
 		return rest.exchange(ucb.build(true).toUri(), HttpMethod.GET, auth,
 				type).getBody();
@@ -60,14 +78,15 @@ class GitLabREST {
 
 	public <T> List<T> getList(final String endpoint,
 			final ParameterizedTypeReference<List<T>> type) {
-		return getList(UriComponentsBuilder.fromHttpUrl(root + endpoint), type);
+		return getList(uri(endpoint), type);
 	}
 
 	private <T> List<T> getList(final UriComponentsBuilder ucb,
 			final ParameterizedTypeReference<List<T>> type) {
 		final List<T> list = new ArrayList<T>();
 		// 100 per page is the limit. use it for max efficiency.
-		URI uri = ucb.queryParam("per_page", MAX_PER_PAGE).build(true).toUri();
+		URI uri = ucb.queryParam("per_page", Integer.toString(MAX_PER_PAGE))
+				.build(true).toUri();
 		do {
 			final ResponseEntity<List<T>> resp = rest.exchange(uri,
 					HttpMethod.GET, auth, type);
@@ -88,14 +107,14 @@ class GitLabREST {
 		for (final String linkHeader : linkHeaders)
 			for (final String link : linkHeader.split(",\\s*")) {
 				final String[] fields = link.split(";\\s*");
-				final Matcher m = URL_FIELD.matcher(fields[0]);
+				final Matcher m = LINK_URL_FIELD.matcher(fields[0]);
 				if (!m.matches())
 					throw new IllegalArgumentException(
 							"malformed Link header: " + link);
 				final String url = m.group(1);
 
 				for (int i = 1; i < fields.length; i++) {
-					if (REL_NEXT_FIELD.matcher(fields[i]).matches())
+					if (LINK_REL_NEXT_FIELD.matcher(fields[i]).matches())
 						try {
 							// to handle relative URLs
 							return new URL(base.toURL(), url).toURI();

@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.core.ParameterizedTypeReference;
 
+/** high-level abstraction of the GitLab API. */
 public class GitLab {
 	private final GitLabREST rest;
 
@@ -26,6 +27,14 @@ public class GitLab {
 	public ProjectInfo getProjectInfo() {
 		return rest.get("" /* the project itself */,
 				new ParameterizedTypeReference<ProjectInfo>() {
+				});
+	}
+
+	public List<Commit> getCommits(final String ref, final int limit) {
+		return rest.get(
+				rest.uri("/repository/commits").queryParam("ref_name", ref)
+						.queryParam("per_page", Integer.toString(limit)),
+				new ParameterizedTypeReference<List<Commit>>() {
 				});
 	}
 }
