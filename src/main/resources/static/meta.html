@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="icon" href="icon.png" type="image/png"/>
+	<link rel="shortcut icon" href="icon.png" type="image/png"/>
+	<link rel="stylesheet" href="bootstrap.min.css" />
+	<link rel="stylesheet" href="sara.css" />
+	<script src="jquery.min.js"></script>
+	<script src="uri.min.js"></script>
+	<script src="bootstrap.min.js"></script>
+<!--
+	<script src="common.js"></script>
+-->
+<!--
+	<script src="branches.js"></script>
+-->
+	<title>SARA</title>
+</head>
+<body><div class="fluid-container">
+	<div class="row">
+		<div class="col-sm-9 col-xs-12">
+			<img src="header.svg" class="logo-header" />
+		</div>
+		<div class="col-sm-3 col-xs-12">
+			<a id="ir_link">
+				<img class="logo-header-right" />
+			</a>
+		</div>
+	</div>
+
+	<div class="row">
+		<div class="col-xs-12 action-header">
+			<h1>Describe your Publication!</h1>
+		</div>
+	</div>
+
+	<form class="form-horizontal" id="meta">
+		<div class="form-group">
+			<label class="col-sm-2 control-label" for="title">publication title</label>
+			<div class="col-sm-7 nopad">
+				<input type="text" class="form-control" id="title" placeholder="name of your software artefact" value="SARA-server">
+			</div>
+			<div class="col-sm-3 nopad">
+				<button type="button" class="btn btn-default form-control" name="update_title">update GitLab project name</button>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label" for="description">short description (optional)</label>
+			<div class="col-sm-7 nopad">
+				<textarea class="form-control" id="description" placeholder="short description of what your software does"></textarea>
+			</div>
+			<div class="col-sm-3 nopad">
+				<button type="button" class="btn btn-default form-control" name="update_description">update GitLab project description</button>
+			</div>
+		</div>
+	</div></form>
+
+	<div class="row">
+		<div class="col-xs-12 action-header">
+			<h1>Metadata?</h1>
+		</div>
+	</div>
+	<form class="form-horizontal" id="meta">
+		<div class="form-group">
+			<label class="col-sm-2 control-label" for="branch">autodetect from</label>
+			<div class="col-sm-2 nopad">
+				<select class="form-control" id="branch">
+					<option value="heads/master" selected>branch master</option>
+					<option value="IDIOT" disabled>… loading …</option>
+				</select>
+			</div>
+			<div class="col-sm-2 nopad">
+	<!--
+				<button type="button" class="btn btn-default form-control" id="add_button">extract metadata</button>
+	-->
+				<button type="button" class="btn btn-default form-control" id="add_button">I'm Feeling Lazy</button>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label" for="version">software version</label>
+			<div class="col-sm-7 nopad">
+				<input type="text" class="form-control" id="version" placeholder="version number" value="1.0-SNAPSHOT">
+			</div>
+			<div class="col-sm-3 nopad">
+				<button type="button" class="btn btn-default form-control" name="update_version">update file <tt>VERSION</tt> in branch master</button>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label" for="license">license</label>
+			<div class="col-sm-7 nopad">
+				<input type="text" class="form-control" id="license" placeholder="license" value="GNU GPL 3.0; GNU LGPL 2.1; Apache 2.0">
+				<p>Please make sure your choice is <a href="https://en.wikipedia.org/wiki/License_compatibility">compatible</a> with the license of any third-party code or libraries you are using!
+				You may otherwise be liable for copyright infringement.</p>
+			</div>
+			<div class="col-sm-3 nopad">
+				<button type="button" class="btn btn-warning form-control" name="edit_license">edit file <tt>LICENSE</tt> in GitLab</button>
+			</div>
+		</div>
+	</form>
+
+	<div class="row">
+		<div class="col-xs-12 action-header">
+			<h1>Who contributed?</h1>
+		</div>
+	</div>
+	<form class="form-horizontal" id="contributors">
+		<div class="form-group">
+			<label class="col-sm-4 control-label" for="author_deadbeef">John Doe &lt;john@doe.com&gt;</label>
+			<label class="sr-only" for="author_deadbeef">mapping</label>
+			<div class="col-sm-3 nopad">
+				<select class="form-control" id="author_deadbeef">
+					<option value="orcid" selected>ORCID ID</option>
+					<option value="IDIOT" disabled>… loading …</option>
+				</select>
+			</div>
+			<label class="sr-only" for="id_deadbeef">identifier</label>
+			<div class="col-sm-5 nopad">
+				<input type="text" class="form-control" id="version" placeholder="ORCID ID" value="orcid.org/0000-0002-6625-4420">
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-4 control-label" for="author_deadbeef">Darth Vader &lt;evil@empire.com&gt;</label>
+			<label class="sr-only" for="author_deadbeef">mapping</label>
+			<div class="col-sm-3 nopad">
+				<select class="form-control" id="author_deadbeef">
+					<option value="orcid" selected>ORCID ID</option>
+					<option value="IDIOT" disabled>… loading …</option>
+				</select>
+			</div>
+			<label class="sr-only" for="id_deadbeef">identifier</label>
+			<div class="col-sm-5 nopad">
+				<input type="text" class="form-control" id="version" placeholder="ORCID ID" value="orcid.org/0000-0002-2103-5304">
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-4 control-label" for="author_deadbeef">Anakin Skywalker &lt;good@empire.com&gt;</label>
+			<label class="sr-only" for="author_deadbeef">mapping</label>
+			<div class="col-sm-3 nopad">
+				<select class="form-control" id="author_deadbeef">
+					<option value="orcid" selected>is the same user as</option>
+					<option value="IDIOT" disabled>… loading …</option>
+				</select>
+			</div>
+			<label class="sr-only" for="id_deadbeef">identifier</label>
+			<div class="col-sm-5 nopad">
+				<select class="form-control" id="author_deadbeef">
+					<option value="orcid" selected>Darth Vader &lt;evil@empire.com&gt;</option>
+					<option value="IDIOT" disabled>… loading …</option>
+				</select>
+			</div>
+		</div>
+		<div class="form-group">
+			<div class="col-sm-3 nopad">
+				<button type="button" class="btn btn-warning form-control" name="edit_license">update file <tt>.mailmap</tt> in branch master</button>
+			</div>
+			<div class="col-sm-3 nopad">
+				<button type="button" class="btn btn-warning form-control" name="edit_license">update file <tt>.idmap</tt> in branch master</button>
+			</div>
+		</div>
+	</form>
+	<div id="loading" class="loading"><span class="sr-only">loading, please wait...</span></div>
+
+	<p style="height:3ex"></p>
+	<div class="row">
+		<a class="btn btn-default col-sm-3" id="return">← previous</a>
+		<a class="btn btn-primary col-sm-2 col-sm-offset-7" id="next">next →</a>
+	</div>
+	<p style="height:3ex"></p>
+</div></body>
+</html>

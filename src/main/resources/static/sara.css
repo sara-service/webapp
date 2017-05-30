@@ -44,6 +44,10 @@
 	display: block;
 }
 
+.action-header {
+	margin: 1ex auto 3ex 0ex;
+}
+
 body {
 	padding: 30px;
 }

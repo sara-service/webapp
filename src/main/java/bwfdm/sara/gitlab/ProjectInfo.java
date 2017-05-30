@@ -9,4 +9,8 @@ public class ProjectInfo {
 	/** default branch, <code>master</code> by default. */
 	@JsonProperty("default_branch")
 	public String master;
+	@JsonProperty("name")
+	public String name;
+	@JsonProperty("description")
+	public String description;
 }
