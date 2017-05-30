@@ -14,11 +14,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import bwfdm.sara.gitlab.Branch;
-import bwfdm.sara.gitlab.Commit;
-import bwfdm.sara.gitlab.GitLab;
-import bwfdm.sara.gitlab.ProjectInfo;
-import bwfdm.sara.gitlab.Tag;
+import bwfdm.sara.git.Branch;
+import bwfdm.sara.git.Commit;
+import bwfdm.sara.git.GitRepo;
+import bwfdm.sara.git.Tag;
+import bwfdm.sara.git.gitlab.GitLab;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -30,7 +30,7 @@ public class Repo {
 	@GetMapping("refs")
 	public List<Ref> getBranches(@RequestParam("project") final String project,
 			final HttpSession session) {
-		final GitLab gl = new GitLab(Config.GITLAB, project,
+		final GitRepo gl = new GitLab(Config.GITLAB, project,
 				Auth.getToken(session));
 		final List<Ref> refs = getAllRefs(gl);
 		sortRefs(refs);
@@ -65,11 +65,10 @@ public class Repo {
 		});
 	}
 
-	private List<Ref> getAllRefs(final GitLab gl) {
+	private List<Ref> getAllRefs(final GitRepo gl) {
 		final List<Ref> refs = new ArrayList<Ref>();
-		final ProjectInfo projectInfo = gl.getProjectInfo();
 		for (final Branch b : gl.getBranches())
-			refs.add(new Ref(b, b.name.equals(projectInfo.master)));
+			refs.add(new Ref(b));
 		for (final Tag t : gl.getTags())
 			refs.add(new Ref(t));
 		return refs;
@@ -153,20 +152,19 @@ public class Repo {
 		@JsonProperty("start")
 		public String start;
 
-		private Ref(final Branch b, final boolean isDefault) {
-			this.isDefault = isDefault;
+		private Ref(final Branch b) {
 			type = RefType.BRANCH;
-			ref = "heads/" + b.name;
-			name = b.name;
-			isProtected = b.isProtected;
+			ref = "heads/" + b.getName();
+			name = b.getName();
+			isProtected = b.isProtected();
+			isDefault = b.isDefault();
 		}
 
 		private Ref(final Tag t) {
 			type = RefType.TAG;
-			ref = "tags/" + t.name;
-			name = t.name;
-			// branches CAN be protected, but the API doesn't return that field
-			isProtected = false;
+			ref = "tags/" + t.getName();
+			name = t.getName();
+			isProtected = t.isProtected();
 			isDefault = false;
 		}
 
@@ -186,12 +184,12 @@ public class Repo {
 	}
 
 	@GetMapping("commits")
-	public List<Commit> getCommits(
+	public List<? extends Commit> getCommits(
 			@RequestParam("project") final String project,
 			@RequestParam("ref") final String ref,
 			@RequestParam(name = "limit", defaultValue = "20") final int limit,
 			final HttpSession session) {
-		final GitLab gl = new GitLab(Config.GITLAB, project,
+		final GitRepo gl = new GitLab(Config.GITLAB, project,
 				Auth.getToken(session));
 		return gl.getCommits(ref, limit);
 	}

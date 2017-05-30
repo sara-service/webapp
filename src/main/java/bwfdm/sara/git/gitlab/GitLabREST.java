@@ -1,4 +1,4 @@
-package bwfdm.sara.gitlab;
+package bwfdm.sara.git.gitlab;
 
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
@@ -28,12 +28,12 @@ class GitLabREST {
 	 * date format pattern used by GitLab, {@link SimpleDateFormat} style.
 	 * currently ISO8601 ({@code 2012-09-20T11:50:22.000+03:00}).
 	 */
-	public static final String DATE_FORMAT_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX";
+	static final String DATE_FORMAT_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX";
 	/**
 	 * date format used by GitLab, as a {@link SimpleDateFormat}. currently
 	 * ISO8601 ({@code 2012-09-20T11:50:22.000+03:00}).
 	 */
-	public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat(
+	static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat(
 			DATE_FORMAT_PATTERN);
 
 	private static final int MAX_PER_PAGE = 100;
@@ -69,7 +69,7 @@ class GitLabREST {
 		rest = new RestTemplate();
 	}
 
-	public UriComponentsBuilder uri(final String endpoint) {
+	UriComponentsBuilder uri(final String endpoint) {
 		return UriComponentsBuilder.fromHttpUrl(root + endpoint);
 	}
 
@@ -77,8 +77,7 @@ class GitLabREST {
 	 * Convenience function for calling
 	 * {@link #get(UriComponentsBuilder, ParameterizedTypeReference)}.
 	 */
-	public <T> T get(final String endpoint,
-			final ParameterizedTypeReference<T> type) {
+	<T> T get(final String endpoint, final ParameterizedTypeReference<T> type) {
 		return get(uri(endpoint), type);
 	}
 
@@ -94,7 +93,7 @@ class GitLabREST {
 	 *            type parameters
 	 * @return a list of all objects that GitLab returns
 	 */
-	public <T> T get(final UriComponentsBuilder ucb,
+	<T> T get(final UriComponentsBuilder ucb,
 			final ParameterizedTypeReference<T> type) {
 		return rest.exchange(ucb.build(true).toUri(), HttpMethod.GET, auth,
 				type).getBody();
@@ -113,7 +112,7 @@ class GitLabREST {
 	 *            type parameters
 	 * @return a list of all objects that GitLab returns
 	 */
-	public <T> List<T> getList(final String endpoint,
+	<T> List<? extends T> getList(final String endpoint,
 			final ParameterizedTypeReference<List<T>> type) {
 		return getList(uri(endpoint), type);
 	}

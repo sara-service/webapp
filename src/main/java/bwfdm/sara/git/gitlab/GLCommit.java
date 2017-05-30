@@ -1,34 +1,39 @@
-package bwfdm.sara.gitlab;
+package bwfdm.sara.git.gitlab;
 
 import java.util.Date;
 
+import bwfdm.sara.git.Commit;
+
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /** data class for commits returned from GitLab. */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Commit {
+class GLCommit implements Commit {
 	/** commit hash */
 	@JsonProperty("id")
-	public String id;
+	private String id;
 	/** first (summary) line of commit message. */
 	@JsonProperty("title")
-	public String title;
+	private String title;
 	/** commit timestamp. */
-	@JsonIgnore
-	public Date date;
-
 	@JsonProperty("committed_date")
 	@JsonFormat(pattern = GitLabREST.DATE_FORMAT_PATTERN)
-	public void setDate(final Date date) {
-		this.date = date;
-	}
+	private Date date;
 
-	@JsonProperty("date")
-	@JsonFormat(pattern = "yyyy-MM-dd")
+	@Override
 	public Date getDate() {
 		return date;
+	}
+
+	@Override
+	public String getID() {
+		return id;
+	}
+
+	@Override
+	public String getTitle() {
+		return title;
 	}
 }
