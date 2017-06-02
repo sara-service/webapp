@@ -1,114 +1,93 @@
 package bwfdm.sara.api;
 
-import java.security.SecureRandom;
-import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.http.HttpSession;
-import javax.xml.bind.DatatypeConverter;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import bwfdm.sara.git.GitRepo;
+import bwfdm.sara.git.GitRepoFactory;
 
 @RestController
 @RequestMapping("/api/auth")
 public class Auth {
-	private static final String PROJECT_ATTR = "project";
-	private static final String STATE_ATTR = "oauth_state";
-	private static final String TOKEN_ATTR = "gitlab_token";
-	private static final SecureRandom rng = new SecureRandom();
-
 	@GetMapping("login")
-	public RedirectView triggerOAuth(
-			@RequestParam(PROJECT_ATTR) final String project,
+	public RedirectView triggerLogin(
+			@RequestParam("repo") final String gitRepo,
+			@RequestParam("project") final String project,
 			final RedirectAttributes redir, final HttpSession session) {
-		// if we already have a token, don't trigger authentication again
-		if (session.getAttribute(TOKEN_ATTR) != null)
-			return redirectToBranches(redir, session);
+		// user not yet signed in, so create a new session
+		if (!GitRepoFactory.hasInstance(session))
+			return newLogin(gitRepo, project, redir, session);
 
-		// some randomness to avoid CSRF
-		final byte[] random = new byte[10];
-		rng.nextBytes(random);
-		final String state = DatatypeConverter.printBase64Binary(random);
-		session.setAttribute(STATE_ATTR, state);
-		// remember project in session to preserve it across login. not
-		// otherwise used so the user can have more than one active tab.
-		session.setAttribute(PROJECT_ATTR, project);
+		// check whether the user is pushy and tries to archive two projects at
+		// once. if so, make sure he knows it won't work.
+		final GitRepo repo = GitRepoFactory.getInstance(session);
+		if (!repo.getID().equals(gitRepo)
+				|| (repo.getProject() != null && !repo.getProject().equals(
+						project))) {
+			redir.addAttribute("repo", gitRepo);
+			redir.addAttribute("project", project);
+			return new RedirectView("/pushy.html");
+		}
 
-		// standard OAuth query
-		redir.addAttribute("client_id", Config.APP_ID);
-		redir.addAttribute("redirect_uri", getRedirectURI(session));
-		redir.addAttribute("response_type", "code");
-		redir.addAttribute("state", state);
-		return new RedirectView(Config.GITLAB + "/oauth/authorize");
+		if (repo.hasWorkingToken())
+			// user already has a working session for that project; no need to
+			// go through authorization again
+			return redirectToBranches();
+
+		// token has expired. trigger authorization again.
+		return repo.triggerLogin(getLoginRedirectURI(session), redir, session);
+	}
+
+	@GetMapping("new")
+	public RedirectView newLogin(final String gitRepo, final String project,
+			final RedirectAttributes redir, final HttpSession session) {
+		final GitRepo repo;
+		if (!GitRepoFactory.hasInstance(session)
+				|| !GitRepoFactory.getInstance(session).getID().equals(gitRepo))
+			// user has no session for this repo, so create one
+			repo = GitRepoFactory.createInstance(session, gitRepo);
+		else
+			repo = GitRepoFactory.getInstance(session);
+
+		repo.setProject(project);
+		final RedirectView target = repo.triggerLogin(
+				getLoginRedirectURI(session), redir, session);
+		if (target == null)
+			return redirectToBranches();
+		return target;
 	}
 
 	@GetMapping("redirect")
-	public RedirectView getOAuthToken(@RequestParam("code") final String code,
-			@RequestParam("state") final String state,
+	public RedirectView getOAuthToken(
+			@RequestParam final Map<String, String> args,
 			final RedirectAttributes redir, final HttpSession session) {
-		// if we already have a token, we're done here. could happen if the user
-		// somehow reloads this URL.
-		if (session.getAttribute(TOKEN_ATTR) != null)
-			return redirectToBranches(redir, session);
+		if (!GitRepoFactory.hasInstance(session))
+			// session has timed out before user returned. this should never
+			// happen.
+			return new RedirectView("/autherror.html");
 
-		// check state to avoid CSRF and replay attacks
-		final String correctState = (String) session.getAttribute(STATE_ATTR);
-		session.removeAttribute(STATE_ATTR);
-		if (correctState == null)
-			throw new IllegalStateException("no oauth_state");
-		if (!correctState.equals(state))
-			throw new IllegalArgumentException("invalid oauth_state");
+		final GitRepo repo = GitRepoFactory.getInstance(session);
+		if (repo.parseLoginResponse(args, session))
+			return redirectToBranches();
 
-		// use OAuth code to obtain a token from GitLab
-		final Map<String, String> vars = new HashMap<String, String>();
-		vars.put("client_id", Config.APP_ID);
-		vars.put("client_secret", Config.APP_SECRET);
-		vars.put("code", code);
-		vars.put("redirect_uri", getRedirectURI(session));
-		vars.put("grant_type", "authorization_code");
-		final AccessToken auth = new RestTemplate().postForObject(Config.GITLAB
-				+ "/oauth/token", vars, AccessToken.class);
-		session.setAttribute(TOKEN_ATTR, auth.token);
-
-		return redirectToBranches(redir, session);
+		// authorization failed. there isn't much we can do here; we definitely
+		// cannot restart it because we don't know the project or gitrepo.
+		return new RedirectView("/autherror.html");
 	}
 
-	private RedirectView redirectToBranches(final RedirectAttributes redir,
-			final HttpSession session) {
-		redir.addAttribute(PROJECT_ATTR, session.getAttribute(PROJECT_ATTR));
+	private RedirectView redirectToBranches() {
 		return new RedirectView("/branches.html");
 	}
 
-	private String getRedirectURI(final HttpSession session) {
+	private static String getLoginRedirectURI(final HttpSession session) {
 		return Config.getWebRoot(session) + "/api/auth/redirect";
-	}
-
-	public static String getToken(final HttpSession session) {
-		final Object attr = session.getAttribute(TOKEN_ATTR);
-		if (attr == null)
-			throw new IllegalStateException("not GitLab token available");
-		return (String) attr;
-	}
-
-	/** data class for OAuth response. */
-	@JsonIgnoreProperties(ignoreUnknown = true)
-	private static class AccessToken {
-		@JsonProperty("access_token")
-		private String token;
-		@JsonProperty("token_type")
-		private String type;
-		@JsonProperty("refresh_token")
-		private String refresh;
-		@JsonProperty("exires_in")
-		private int expiry;
 	}
 }

@@ -9,7 +9,6 @@
 	<link rel="stylesheet" href="bootstrap.min.css" />
 	<link rel="stylesheet" href="sara.css" />
 	<script src="jquery.min.js"></script>
-	<script src="uri.min.js"></script>
 	<script src="bootstrap.min.js"></script>
 	<script src="common.js"></script>
 	<script src="branches.js"></script>
@@ -123,7 +122,7 @@
 	<form class="form-horizontal"><div class="form-group">
 		<div class="col-sm-2 nopad">
 			<select class="form-control" id="add_branch">
-				<option value="IDIOT" disabled>… loading …</option>
+				<option value="IDIOT" disabled selected>… loading …</option>
 			</select>
 		</div>
 		<div class="col-sm-1 nopad">
@@ -133,8 +132,8 @@
 
 	<p style="height:3ex"></p>
 	<div class="row">
-		<a class="btn btn-default col-sm-3" id="return" href="/api/return-to-gitlab">← save and return to GitLab</a>
-		<a class="btn btn-primary col-sm-2 col-sm-offset-7" id="next">next →</a>
+		<a class="btn btn-default col-sm-3" href="/api/return-to-repo">← save and return to GitLab</a>
+		<a class="btn btn-primary col-sm-2 col-sm-offset-7" href="meta.html">next →</a>
 	</div>
 	<p style="height:3ex"></p>
 </div></body>

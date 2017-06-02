@@ -34,13 +34,13 @@
 
 .logo-header {
 	height: 10ex;
-	margin: 2ex 0ex 0ex 0ex;
+	margin: 0ex 0ex 0ex 0ex;
 	display: block;
 }
 
 .logo-header-right {
 	height: 8ex;
-	margin: 4ex 0ex 0ex auto;
+	margin: 2ex 0ex 0ex auto;
 	display: block;
 }
 

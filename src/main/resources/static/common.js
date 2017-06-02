@@ -25,11 +25,8 @@ function reportAPIError(xhr, status, error) {
 	location.reload();
 }
 
-var project = new URI(location).search(true).project;
-
 API = {};
 API.get = function(path, data, callback) {
-	data.project = project;
 	$.ajax(path, {
 		data: data,
 		success: callback,
@@ -37,7 +34,6 @@ API.get = function(path, data, callback) {
 	});
 };
 API.post = function(path, data, callback) {
-	data.project = project;
 	$.ajax(path, {
 		method: "POST",
 		data: data,
@@ -47,10 +43,10 @@ API.post = function(path, data, callback) {
 }
 
 $(function() {
-	$("title").text(project + " – SARA software publishing");
-	API.get("/api/ir-meta", {}, function(meta) {
-		$("#ir_link").attr("href", meta.url);
-		$("#ir_link img").attr("src", "/logos/" + meta.logo);
+	API.get("/api/session-info", {}, function(info) {
+		$("title").text(info.project + " – SARA software publishing");
+		$("#ir_link").attr("href", info.ir.url);
+		$("#ir_link img").attr("src", "/logos/" + info.ir.logo);
+		initPage(info);
 	});
-	initPage();
 });

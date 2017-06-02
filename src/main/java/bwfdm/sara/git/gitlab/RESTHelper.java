@@ -23,7 +23,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriUtils;
 
 /** low-level helper class for making REST calls to the GitLab API. */
-class GitLabREST {
+class RESTHelper {
 	/**
 	 * date format pattern used by GitLab, {@link SimpleDateFormat} style.
 	 * currently ISO8601 ({@code 2012-09-20T11:50:22.000+03:00}).
@@ -41,32 +41,39 @@ class GitLabREST {
 	private static final Pattern LINK_REL_NEXT_FIELD = Pattern
 			.compile("rel=(\"?)next\\1");
 
-	private final HttpEntity<Void> auth;
-	private final RestTemplate rest;
 	private final String root;
+	private final RestTemplate rest;
+	private HttpEntity<Void> auth;
 
 	/**
-	 * @param gitlab
+	 * @param root
 	 *            URL to GitLab root
 	 * @param project
 	 *            name of project whose API to access
-	 * @param token
-	 *            GitLab OAuth token
 	 */
-	GitLabREST(final String gitlab, final String project, final String token) {
-		if (token == null)
-			throw new IllegalStateException("no GitLab token available");
-
+	RESTHelper(final String root, final String project) {
 		try {
-			root = gitlab + "/api/v4/projects/"
+			this.root = root + "/api/v4/projects/"
 					+ UriUtils.encodePathSegment(project, "UTF-8");
 		} catch (final UnsupportedEncodingException e) {
 			throw new RuntimeException("UTF-8 unsupported?!", e);
 		}
+		rest = new RestTemplate();
+	}
+
+	void setToken(final String token) {
+		if (token == null) {
+			auth = null;
+			return;
+		}
+
 		final MultiValueMap<String, String> map = new LinkedMultiValueMap<String, String>();
 		map.set("Authorization", "Bearer " + token);
 		auth = new HttpEntity<Void>(map);
-		rest = new RestTemplate();
+	}
+
+	boolean hasToken() {
+		return auth != null;
 	}
 
 	UriComponentsBuilder uri(final String endpoint) {

@@ -104,9 +104,4 @@ function addBranches(branches) {
 
 function initPage() {
 	API.get("/api/repo/refs", {}, addBranches);
-	$("#next").attr("href",
-			"/meta.html?project=" + encodeURIComponent(project));
-	API.get("/api/return-url", {}, function(base) {
-		$("#return").attr("href", base + "/" + encodeURI(project));
-	});
 }

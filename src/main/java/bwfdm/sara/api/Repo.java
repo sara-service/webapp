@@ -1,7 +1,7 @@
 package bwfdm.sara.api;
 
 import java.util.ArrayList;
-import java.util.Comparator;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,8 +17,8 @@ import org.springframework.web.bind.annotation.RestController;
 import bwfdm.sara.git.Branch;
 import bwfdm.sara.git.Commit;
 import bwfdm.sara.git.GitRepo;
+import bwfdm.sara.git.GitRepoFactory;
 import bwfdm.sara.git.Tag;
-import bwfdm.sara.git.gitlab.GitLab;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -28,41 +28,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @RequestMapping("/api/repo")
 public class Repo {
 	@GetMapping("refs")
-	public List<Ref> getBranches(@RequestParam("project") final String project,
-			final HttpSession session) {
-		final GitRepo gl = new GitLab(Config.GITLAB, project,
-				Auth.getToken(session));
-		final List<Ref> refs = getAllRefs(gl);
-		sortRefs(refs);
+	public List<Ref> getBranches(final HttpSession session) {
+		final List<Ref> refs = getAllRefs(GitRepoFactory.getInstance(session));
+		Collections.sort(refs);
 		loadActions(refs, session);
 		return refs;
-	}
-
-	private void sortRefs(final List<Ref> refs) {
-		refs.sort(new Comparator<Ref>() {
-			@Override
-			public int compare(final Ref a, final Ref b) {
-				// put default branch first so that it's the one selected by
-				// default
-				if (a.isDefault)
-					return -1;
-				if (b.isDefault)
-					return +1;
-				// branches before tags
-				if (a.type == RefType.BRANCH && b.type != RefType.BRANCH)
-					return -1;
-				if (b.type == RefType.BRANCH && a.type != RefType.BRANCH)
-					return +1;
-				// protected branches are more likely to be the "main" branches,
-				// so put them before unprotected (likely "side") branches
-				if (a.isProtected && !b.isProtected)
-					return -1;
-				if (b.isProtected && !a.isProtected)
-					return +1;
-				// tiebreaker within those groups: lexicographic ordering
-				return a.name.compareTo(b.name);
-			}
-		});
 	}
 
 	private List<Ref> getAllRefs(final GitRepo gl) {
@@ -103,8 +73,7 @@ public class Repo {
 	}
 
 	@PostMapping("refs")
-	public void setActions(@RequestParam("project") final String project,
-			@RequestParam("ref") final String ref,
+	public void setActions(@RequestParam("ref") final String ref,
 			@RequestParam("action") final Action action,
 			@RequestParam("start") final String start, final HttpSession session) {
 		// FIXME store in database instead
@@ -126,7 +95,7 @@ public class Repo {
 
 	/** data class for refs in the branch selection screen. */
 	@JsonInclude(Include.NON_NULL)
-	private static class Ref {
+	private static class Ref implements Comparable<Ref> {
 		/**
 		 * user-friendly name of ref, ie. {@code master} or {@code foo}. doesn't
 		 * identify whether it's a branch or tag.
@@ -169,6 +138,29 @@ public class Repo {
 		}
 
 		@Override
+		public int compareTo(final Ref other) {
+			// put default branch first so that it's the one selected by
+			// default
+			if (isDefault)
+				return -1;
+			if (other.isDefault)
+				return +1;
+			// branches before tags
+			if (type == RefType.BRANCH && other.type != RefType.BRANCH)
+				return -1;
+			if (other.type == RefType.BRANCH && type != RefType.BRANCH)
+				return +1;
+			// protected branches are more likely to be the "main" branches,
+			// so put them before unprotected (likely "side") branches
+			if (isProtected && !other.isProtected)
+				return -1;
+			if (other.isProtected && !isProtected)
+				return +1;
+			// tiebreaker within those groups: lexicographic ordering
+			return name.compareTo(other.name);
+		}
+
+		@Override
 		public String toString() {
 			return "Ref{" + ref + ", " + (isProtected ? "protected, " : "")
 					+ "action=" + action + "}";
@@ -185,12 +177,9 @@ public class Repo {
 
 	@GetMapping("commits")
 	public List<? extends Commit> getCommits(
-			@RequestParam("project") final String project,
 			@RequestParam("ref") final String ref,
 			@RequestParam(name = "limit", defaultValue = "20") final int limit,
 			final HttpSession session) {
-		final GitRepo gl = new GitLab(Config.GITLAB, project,
-				Auth.getToken(session));
-		return gl.getCommits(ref, limit);
+		return GitRepoFactory.getInstance(session).getCommits(ref, limit);
 	}
 }
