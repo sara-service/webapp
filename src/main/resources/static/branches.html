@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="icon" href="icon.png" type="image/png"/>
+	<link rel="shortcut icon" href="icon.png" type="image/png"/>
+	<link rel="stylesheet" href="bootstrap.min.css" />
+	<link rel="stylesheet" href="sara.css" />
+	<script src="jquery.min.js"></script>
+	<script src="bootstrap.min.js"></script>
+	<script src="common.js"></script>
+	<script src="branches.js"></script>
+	<title>SARA</title>
+</head>
+<body><div class="fluid-container">
+	<div class="row">
+		<div class="col-sm-9 col-xs-12">
+			<img src="header.svg" class="logo-header" />
+		</div>
+		<div class="col-sm-3 col-xs-12">
+			<a id="ir_link">
+				<img class="logo-header-right" />
+			</a>
+		</div>
+	</div>
+
+	<div class="row">
+		<div class="col-xs-12 action-header">
+			<h1>Select something to publish!</h1>
+		</div>
+	</div>
+	<div class="row panel-group" id="accordion" role="tablist" aria-multiselectable="true"><div class="panel panel-default">
+		<div class="panel-heading" role="tab" id="headingOne"><h4 class="panel-title">
+			<a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne" class="infoicon">What will the options do?</a>
+		</h4></div>
+		<div id="collapseOne" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne"><div class="panel-body"><div class="row">
+			<div class="col-sm-6 col-md-4"><img src="graph.svg" class="hfill" /></div>
+			<div class="col-sm-6 col-md-8"><ul>
+				<li class="sara-green">"<strong>Publish full history</strong>"
+					will publish the <strong>entire history</strong> of a branch as-is.
+					This is the <strong>most useful format</strong> for others
+					to continue working with your project,
+					and thus the <strong>recommended option</strong>.
+					Note that this will publish the entire project history
+					of the selected branch, including anything
+					you might have excluded on previous publications.
+					This is the only option that <strong>retains the commit IDs</strong>,
+					keeping your work fully replicable.
+				</li>
+				<li class="sara-blue">"<strong>Publish abbreviated history</strong>"
+					will publish only the <strong>significant points (tags &amp; merges)</strong>
+					of a branch's history. Only merge commits and
+					commits that have been tagged with <kbd>git tag</kbd>
+					will be retained in the abbreviated history,
+					as well as the HEAD revision of the branch.
+					This option will <strong>change the commit IDs,
+					reducing the replicability</strong> of your work,
+					but mention the original commit ID in the commit message.
+					The full history will be archived non-publicly.
+					This is the recommended option
+					<strike>if your development process is so shoddy
+					that you are ashamed of it</strike>
+					if you need to hide parts of your development process.
+				</li>
+				<li class="sara-red">"<strong>Publish latest version only</strong>"
+					will publish only the HEAD revision of the branch.
+					If you have previously archived this project,
+					the previously published version(s) will be listed
+					as previous commit(s).
+					This option will change the commit ID,
+					but mention the original commit ID in the commit message.
+					The full history will be archived non-publicly.
+					This option is <strong>not recommended</strong>
+					unless you don't have any other options.
+				</li>
+				<li class="sara-orange">"<strong>Private access, public record</strong>"
+					will non-publicly archive the full history of a branch.
+					A public bibliographical record will be created for the archival record.
+					This is suitable for data that you want to (or have to) keep private.
+				</li>
+				<li class="sara-cyan">"<strong>Private access, no record</strong>"
+					will not publish anything (obviously),
+					but will non-publicly archive the full history of a branch.
+					The existence of the archived data will not be publicly disclosed.
+					This is suitable for data that you want to (or have to) keep private.
+				</li>
+			</ul><p>Please note that none of these options
+				are suitable for highly sensitive data.
+				If you have that kind of data, please archive it elsewhere.
+			</p></div>
+		</div></div></div>
+	</div></div>
+
+	<form class="form-horizontal" id="branches">
+		<div class="form-group" id="template" style="display:none">
+			<label class="col-sm-2 control-label" name="branch_label">branch master</label>
+			<div class="col-sm-6 nopad">
+				<label for="template_commit" class="control-label sr-only">starting point</label>
+				<select class="form-control" name="commit">
+					<option value="HEAD" selected>starting at most recent commit (HEAD of this branch)</option>
+					<option value="IDIOT" disabled>… loading list of commits …</option>
+				</select>
+			</div>
+			<div class="col-sm-3 nopad">
+				<label for="template_action" class="control-label sr-only">action</label>
+				<select class="form-control" name="action">
+					<option value="PUBLISH_FULL" selected class="sara-green">publish full history (recommended)</option>
+					<option value="PUBLISH_ABBREV" class="sara-blue">publish abbreviated history</option>
+					<option value="PUBLISH_LATEST" class="sara-red">publish latest version only</option>
+					<option value="ARCHIVE_PUBLIC" class="sara-orange">private access, public record</option>
+					<option value="ARCHIVE_HIDDEN" class="sara-cyan">private access, no record</option>
+				</select>
+			</div>
+			<div class="col-sm-1 nopad">
+				<button type="button" class="btn btn-warning form-control" name="remove">remove</button>
+			</div>
+		</div>
+	</form>
+	<div id="loading" class="loading"><span class="sr-only">loading, please wait...</span></div>
+	<form class="form-horizontal"><div class="form-group">
+		<div class="col-sm-2 nopad">
+			<select class="form-control" id="add_branch">
+				<option value="IDIOT" disabled selected>… loading …</option>
+			</select>
+		</div>
+		<div class="col-sm-1 nopad">
+			<button type="button" class="btn btn-success form-control" id="add_button">add</button>
+		</div>
+	</div></form>
+
+	<p style="height:3ex"></p>
+	<div class="row">
+		<a class="btn btn-default col-sm-3" href="/api/return-to-repo">← save and return to GitLab</a>
+		<a class="btn btn-primary col-sm-2 col-sm-offset-7" href="meta.html">next →</a>
+	</div>
+	<p style="height:3ex"></p>
+</div></body>
+</html>

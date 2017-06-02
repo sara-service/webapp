@@ -5,7 +5,6 @@
  */
 package bwfdm.sara.publication;
 
-import bwfdm.sara.archiving.ArchivGitLab;
 import bwfdm.sara.publication.dspace.DSpaceConfig;
 import bwfdm.sara.publication.dspace.DSpaceVersionFive;
 import bwfdm.sara.publication.dspace.DSpaceVersionSix;
@@ -20,8 +19,6 @@ public class OparuSix implements PublicationRepository{
 
     private DSpaceVersionSix dspaceRepo;
     private final String urlServer;
-    
-    private ArchivGitLab gitlabArchive = new ArchivGitLab();
      
             
     // Constructor

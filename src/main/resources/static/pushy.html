@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="icon" href="icon.png" type="image/png"/>
+	<link rel="shortcut icon" href="icon.png" type="image/png"/>
+	<link rel="stylesheet" href="bootstrap.min.css" />
+	<link rel="stylesheet" href="sara.css" />
+	<script src="jquery.min.js"></script>
+	<script src="uri.min.js"></script>
+	<script src="common.js"></script>
+	<script src="pushy.js"></script>
+	<title>SARA</title>
+</head>
+<body><div class="fluid-container">
+	<div class="row">
+		<div class="col-sm-9 col-xs-12">
+			<img src="header.svg" class="logo-header" />
+		</div>
+		<div class="col-sm-3 col-xs-12">
+			<a id="ir_link">
+				<img class="logo-header-right" />
+			</a>
+		</div>
+	</div>
+
+	<div class="row">
+		<div class="col-xs-12 action-header">
+			<h1>One at a time, please!</h1>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-xs-12">
+			<p>You are about to start the publishing workflow for
+			project <tt class="text-primary" data-new>foo</tt>, but haven't finished
+			it for project <tt class="text-muted" data-old>bar</tt> yet.
+			Going ahead will save your progress
+			in project <tt class="text-muted" data-old>bar</tt>
+			so that you can resume it at a later time.
+			To do so, just open project <tt class="text-muted" data-old>bar</tt>
+			and click the "publish" button again.</p>
+		</div>
+	</div>
+
+	<p style="height:3ex"></p>
+	<div class="row">
+		<a class="btn btn-default col-sm-4" href="/branches.html">resume publication workflow for <tt class="text-muted" data-old>bar</tt></a>
+		<a class="btn btn-primary col-sm-5 col-sm-offset-3" id="change_project">continue to publication workflow for <tt data-new>foo</tt></a>
+	</div>
+	<p style="height:3ex"></p>
+</div></body>
+</html>

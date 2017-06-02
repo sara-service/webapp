@@ -1,0 +1,103 @@
+/* colors:
+ logo    light   dark    color
+ #bddd1f         #a3be1a logo-green
+ #809fb1 		 #4c6a7c logo-blue
+ #b45865		 #8a3e49 logo-red
+ #00aaa7		 #007876 cyan (from poster heading)
+ #f9b10b		 #c38a05 orange (from poster heading)
+ #b9b9b9         #8c8c8c gray (from poster footer)
+*/
+
+/* border width must be 6.9% to match the logo */
+.loading {
+  border-radius: 50%;
+  border-top: .345em solid #b45865;
+  border-right: .345em solid #bddd1f;
+  border-bottom: .345em solid #809fb1;
+  border-left: .345em solid #f9b10b;
+  width: 5em;
+  height: 5em;
+  margin: 1em auto 1em auto;
+  -webkit-animation: spin 2s linear infinite;
+  animation: spin 2s linear infinite;
+}
+
+@-webkit-keyframes spin {
+  0% { -webkit-transform: rotate(0deg); }
+  100% { -webkit-transform: rotate(360deg); }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.logo-header {
+	height: 10ex;
+	margin: 0ex 0ex 0ex 0ex;
+	display: block;
+}
+
+.logo-header-right {
+	height: 8ex;
+	margin: 2ex 0ex 0ex auto;
+	display: block;
+}
+
+.action-header {
+	margin: 1ex auto 3ex 0ex;
+}
+
+body {
+	padding: 30px;
+}
+
+.nopad {
+	padding: 0px .25em;
+}
+
+.hfill {
+	width: 100%;
+}
+
+.infoicon {
+	margin-left: 1ex;
+}
+
+.infoicon:before {
+	content: "";
+	background-image: url(info.svg);
+	background-size: 2ex 2ex;
+	background-repeat: no-repeat;
+	display: inline-block;
+	height: 2ex;
+	width: 2ex;
+	vertical-align: bottom;
+	position: relative;
+	left: -1ex;
+}
+
+.sara-red {
+	color: #8a3e49;
+	background-color: white;
+}
+
+.sara-blue {
+	color: #4c6a7c;
+	background-color: white;
+}
+
+.sara-green {
+	color: #798d13;
+	background-color: white;
+}
+
+.sara-cyan {
+	color: #007876;
+	background-color: white;
+}
+
+.sara-orange {
+	color: #c38a05;
+	background-color: white;
+}

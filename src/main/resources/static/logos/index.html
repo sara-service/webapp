@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Apache is misconfigured</title>
+</head>
+<body>
+<h1>You are seeing this because the admin failed to map the <tt>logos</tt> directory.</h1>
+<p>If you are the admin, put the following in <tt>/etc/apache2/sites-available/default-ssl.conf</tt>:</p>
+<pre>
+Alias "/logos" "/var/www/logos"
+&lt;Directory /var/www/logos&gt;
+	Options -MultiViews
+	Require all granted
+&lt;/Directory&gt;
+</pre>
+</body>
+</html>
