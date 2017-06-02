@@ -7,7 +7,10 @@ package bwfdm.sara.utils;
 
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+
+import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import javax.ws.rs.BadRequestException;
@@ -42,7 +45,12 @@ public class WebUtils {
         public X509Certificate[] getAcceptedIssuers() { return new X509Certificate[0]; }
 
     }}, new java.security.SecureRandom());
-    return ClientBuilder.newBuilder().sslContext(sslcontext).hostnameVerifier((s1, s2) -> true).build();
+    return ClientBuilder.newBuilder().sslContext(sslcontext).hostnameVerifier(new HostnameVerifier() {
+		@Override
+		public boolean verify(String hostname, SSLSession session) {
+			return true;
+			}
+		}).build();
     }
     
     /**
