@@ -2,6 +2,7 @@ package bwfdm.sara.git.gitlab;
 
 import java.io.UnsupportedEncodingException;
 import java.util.List;
+import java.util.Properties;
 
 import javax.servlet.http.HttpSession;
 
@@ -15,8 +16,8 @@ import bwfdm.sara.git.Branch;
 import bwfdm.sara.git.GitRepo;
 import bwfdm.sara.git.Tag;
 
-/** high-level abstraction of the GitLab API. */
-public class GitLab extends GitRepo {
+/** high-level abstraction of the GitLab REST API. */
+public class GitLabREST extends GitRepo {
 	private final String root;
 	private final String appID;
 	private final String appSecret;
@@ -26,17 +27,27 @@ public class GitLab extends GitRepo {
 
 	/**
 	 * @param id
+	 *            ID of this GitLab instance in {@code repos.properties}
 	 * @param gitlab
 	 *            URL to GitLab root
 	 * @param appID
+	 *            OAuth application ID
 	 * @param appSecret
+	 *            OAuth application secret
 	 */
-	public GitLab(final String id, final String root, final String appID,
+	public GitLabREST(final String id, final String root, final String appID,
 			final String appSecret) {
 		super(id);
 		this.root = root;
 		this.appID = appID;
 		this.appSecret = appSecret;
+	}
+
+	public GitLabREST(final String id, final Properties args) {
+		super(id);
+		root = args.getProperty("root");
+		appID = args.getProperty("oauth.id");
+		appSecret = args.getProperty("oauth.secret");
 	}
 
 	@Override

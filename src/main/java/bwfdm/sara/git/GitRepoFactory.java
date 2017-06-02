@@ -1,9 +1,11 @@
 package bwfdm.sara.git;
 
+import java.lang.reflect.InvocationTargetException;
+import java.util.Properties;
+
 import javax.servlet.http.HttpSession;
 
 import bwfdm.sara.api.Config;
-import bwfdm.sara.git.gitlab.GitLab;
 
 public class GitRepoFactory {
 	private static final String GITREPO_ATTR = GitRepo.class.getCanonicalName();
@@ -32,9 +34,30 @@ public class GitRepoFactory {
 	 */
 	public static GitRepo createInstance(final HttpSession session,
 			final String gitRepo) {
-		// TODO should read root URL and secrets from config here
-		final GitLab repo = new GitLab(gitRepo, Config.GITLAB, Config.APP_ID,
-				Config.APP_SECRET);
+		final Properties config = Config.getGitRepoConfig(session);
+
+		final Properties args = new Properties();
+		final String prefix = gitRepo + ".";
+		for (final String name : config.stringPropertyNames())
+			if (name.startsWith(prefix)) {
+				final String localName = name.substring(prefix.length());
+				args.setProperty(localName, config.getProperty(name));
+			}
+
+		String className = args.getProperty("class");
+		if (className == null)
+			className = config.getProperty("default.class");
+		final GitRepo repo;
+		try {
+			repo = (GitRepo) Class.forName(className)
+					.getConstructor(String.class, Properties.class)
+					.newInstance(gitRepo, args);
+		} catch (final ClassNotFoundException | InstantiationException
+				| IllegalAccessException | InvocationTargetException
+				| NoSuchMethodException | SecurityException e) {
+			throw new Config.ConfigurationException("cannot instantiate "
+					+ className + " for " + gitRepo, e);
+		}
 		session.setAttribute(GITREPO_ATTR, repo);
 		return repo;
 	}
