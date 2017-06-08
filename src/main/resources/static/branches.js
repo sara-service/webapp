@@ -23,11 +23,6 @@ function addCommits(branch, select, commits) {
 		select.val(branch.start);
 }
 
-var reftype_names = {
-	BRANCH: "branch ",
-	TAG: "tag ",
-};
-
 function addBranch(branch) {
 	if (forms[branch.ref]) {
 		// user trying to add a branch twice

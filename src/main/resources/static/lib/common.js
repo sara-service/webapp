@@ -115,8 +115,13 @@ autosave.init = function(id, saver, validator) {
 	elem.on("focus", function() {
 		autosave.feedback(id, autosave.msg.none);
 	});
+	autosave.validate(id);
+};
 
-	if (!validator || validator(elem.val(), id))
+autosave.validate = function(id) {
+	var elem = $("#" + id);
+	var save = elem.data("autosave");
+	if (!save.validator || save.validator(elem.val(), id))
 		autosave.feedback(id, autosave.msg.none);
 	else
 		autosave.feedback(id, autosave.msg.invalid);
@@ -129,6 +134,7 @@ autosave.value = function(id, value) {
 	autosave._cancelTimeout(save);
 	elem.val(value);
 	save.value = value;
+	autosave.validate(id);
 };
 // sets the control value while saving null, ie. deletes the saved
 // value.
@@ -167,6 +173,11 @@ autosave.success = function(id) {
 	var elem = $("#" + id);
 	elem.data("autosave").value = elem.val();
 	autosave.feedback(id, autosave.msg.success);
+};
+
+var reftype_names = {
+	BRANCH: "branch ",
+	TAG: "tag ",
 };
 
 $(function() {

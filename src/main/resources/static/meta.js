@@ -34,6 +34,28 @@ function addUpdateHandler(id, field) {
 	});
 }
 
+function loadLazyBranches(branches) {
+	// update list of branches
+	var select = $("#lazy_branch");
+	select.empty();
+	$.each(branches, function(_, branch) {
+		if (!branch.action)
+			// don't allow selection of branches that the user doesn't
+			// want to publish
+			return;
+
+		var name = reftype_names[branch.type] + branch.name;
+		var option = $("<option>").attr("value", branch.ref).text(name)
+				.data("branch", branch);
+		select.append(option);
+	});
+	// event handler for "add" button
+	$("#lazy_button").click(function() {
+		//var branch = $("#lazy_branch :selected").data("branch");
+		//addBranch(branch);
+	});
+}
+
 function initPage(session) {
 	autosave.init("title", save, function(value, id) {
 		return value.trim() != "";
@@ -47,4 +69,6 @@ function initPage(session) {
 		$("#reset_title_loading").removeAttr("style");
 		API.get("/api/repo/project-info", {}, resetTitle);
 	});
+
+	API.get("/api/repo/refs", {}, loadLazyBranches);
 }

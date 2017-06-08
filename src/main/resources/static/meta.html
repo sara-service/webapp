@@ -70,15 +70,17 @@
 	</div>
 	<form class="form-horizontal" id="meta">
 		<div class="form-group">
-			<label class="col-sm-2 control-label" for="branch">autodetect metadata from</label>
+			<label class="col-sm-2 control-label" for="lazy_branch">autodetect metadata from</label>
 			<div class="col-sm-2 nopad">
-				<select class="form-control" id="branch">
-					<option value="heads/master" selected>branch master</option>
-					<option value="IDIOT" disabled>… loading …</option>
+				<select class="form-control" id="lazy_branch">
+					<option value="IDIOT" disabled selected>… loading …</option>
 				</select>
 			</div>
 			<div class="col-sm-2 nopad">
-				<button type="button" class="btn btn-default form-control" id="add_button">I'm Feeling Lazy</button>
+				<button type="button" class="btn btn-default form-control" id="lazy_button">I'm Feeling Lazy</button>
+			</div>
+			<div class="col-sm-6 nopad">
+				<div id="lazy_loading" class="loading-inline" style="display:none"><span class="sr-only">loading, please wait...</span></div>
 			</div>
 		</div>
 		<div class="form-group">

@@ -26,32 +26,31 @@ public class Meta {
 		String title = (String) session.getAttribute("title"); // TODO database
 		if (title == null)
 			title = info.name;
-		return new BasicMetaData(title, info.description, "1.0", "none");
+		String desc = (String) session.getAttribute("description");
+		if (desc == null)
+			desc = info.description;
+		return new BasicMetaData(title, desc, "1.0", "none");
 	}
 
 	@PutMapping("title")
 	public void setTitle(@RequestParam("value") final String title,
 			final HttpSession session) {
-		System.out.println("setTitle >" + title + "<");
 		session.setAttribute("title", title); // TODO database
 	}
 
 	@DeleteMapping("title")
 	public void unsetTitle(final HttpSession session) {
-		System.out.println("unsetTitle");
 		session.setAttribute("title", null); // TODO database
 	}
 
 	@PutMapping("description")
 	public void setDescription(@RequestParam("value") final String description,
 			final HttpSession session) {
-		System.out.println("setdescription >" + description + "<");
 		session.setAttribute("description", description); // TODO database
 	}
 
 	@DeleteMapping("description")
 	public void unsetDescription(final HttpSession session) {
-		System.out.println("unsetdescription");
 		session.setAttribute("description", null); // TODO database
 	}
 
