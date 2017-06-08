@@ -10,26 +10,41 @@
 
 /* border width must be 6.9% to match the logo */
 .loading {
-  border-radius: 50%;
-  border-top: .345em solid #b45865;
-  border-right: .345em solid #bddd1f;
-  border-bottom: .345em solid #809fb1;
-  border-left: .345em solid #f9b10b;
-  width: 5em;
-  height: 5em;
-  margin: 1em auto 1em auto;
-  -webkit-animation: spin 2s linear infinite;
-  animation: spin 2s linear infinite;
+	border-radius: 50%;
+	border-top: .345em solid #b45865;
+	border-right: .345em solid #bddd1f;
+	border-bottom: .345em solid #809fb1;
+	border-left: .345em solid #f9b10b;
+	width: 5em;
+	height: 5em;
+	margin: 1em auto 1em auto;
+	-webkit-animation: spin 2s linear infinite;
+	animation: spin 2s linear infinite;
+}
+
+.loading-inline {
+	border-radius: 50%;
+	border-top: .276em solid #b45865;
+	border-right: .276em solid #bddd1f;
+	border-bottom: .276em solid #809fb1;
+	border-left: .276em solid #f9b10b;
+	width: 2em;
+	height: 2em;
+	margin: 0em 0.5em;
+	display: inline-block;
+	vertical-align: bottom;
+	-webkit-animation: spin 2s linear infinite;
+	animation: spin 2s linear infinite;
 }
 
 @-webkit-keyframes spin {
-  0% { -webkit-transform: rotate(0deg); }
-  100% { -webkit-transform: rotate(360deg); }
+	0% { -webkit-transform: rotate(0deg); }
+	100% { -webkit-transform: rotate(360deg); }
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+	0% { transform: rotate(0deg); }
+	100% { transform: rotate(360deg); }
 }
 
 .logo-header {

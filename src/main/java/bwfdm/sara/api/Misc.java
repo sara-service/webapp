@@ -5,7 +5,6 @@ import javax.servlet.http.HttpSession;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.view.RedirectView;
 
 import bwfdm.sara.git.GitRepoFactory;
 
@@ -14,12 +13,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @RestController
 @RequestMapping("/api")
 public class Misc {
-	@GetMapping("return-to-repo")
-	public RedirectView getReturnURL(final HttpSession session) {
-		return new RedirectView(GitRepoFactory.getInstance(session)
-				.getProjectViewURL());
-	}
-
 	@GetMapping("session-info")
 	public SessionInfo getSessionInfo(final HttpSession session) {
 		return new SessionInfo(session);

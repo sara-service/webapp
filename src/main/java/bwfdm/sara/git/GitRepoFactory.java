@@ -6,6 +6,7 @@ import java.util.Properties;
 import javax.servlet.http.HttpSession;
 
 import bwfdm.sara.api.Config;
+import bwfdm.sara.api.Config.ConfigurationException;
 
 public class GitRepoFactory {
 	private static final String GITREPO_ATTR = GitRepo.class.getCanonicalName();
@@ -36,6 +37,7 @@ public class GitRepoFactory {
 			final String gitRepo) {
 		final Properties config = Config.getGitRepoConfig(session);
 
+		// collect all properties that start with the gitRepo's name
 		final Properties args = new Properties();
 		final String prefix = gitRepo + ".";
 		for (final String name : config.stringPropertyNames())
@@ -44,6 +46,7 @@ public class GitRepoFactory {
 				args.setProperty(localName, config.getProperty(name));
 			}
 
+		// try to instantiate the concrete gitRepo class
 		String className = args.getProperty("class");
 		if (className == null)
 			className = config.getProperty("default.class");
@@ -55,8 +58,8 @@ public class GitRepoFactory {
 		} catch (final ClassNotFoundException | InstantiationException
 				| IllegalAccessException | InvocationTargetException
 				| NoSuchMethodException | SecurityException e) {
-			throw new Config.ConfigurationException("cannot instantiate "
-					+ className + " for " + gitRepo, e);
+			throw new ConfigurationException("cannot instantiate " + className
+					+ " for " + gitRepo, e);
 		}
 		session.setAttribute(GITREPO_ATTR, repo);
 		return repo;

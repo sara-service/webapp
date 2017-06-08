@@ -1,9 +1,14 @@
 package bwfdm.sara.git;
 
 /** data class for tags returned from GitLab. */
-public interface Tag {
+public final class Tag {
 	/** name of the tag. */
-	public String getName();
+	public final String name;
 
-	public boolean isProtected();
+	public final boolean isProtected;
+
+	public Tag(final String name, final boolean isProtected) {
+		this.name = name;
+		this.isProtected = isProtected;
+	}
 }

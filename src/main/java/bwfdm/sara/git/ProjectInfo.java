@@ -3,10 +3,15 @@ package bwfdm.sara.git;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /** data class for GitLab project info. */
-public interface ProjectInfo {
+public final class ProjectInfo {
 	@JsonProperty("name")
-	public String getName();
+	public final String name;
 
 	@JsonProperty("description")
-	public String getDescription();
+	public final String description;
+
+	public ProjectInfo(final String name, final String description) {
+		this.name = name;
+		this.description = description;
+	}
 }

@@ -1,13 +1,11 @@
 package bwfdm.sara.git.gitlab;
 
-import bwfdm.sara.git.Branch;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /** data class for branches returned from GitLab. */
 @JsonIgnoreProperties(ignoreUnknown = true)
-class GLBranch implements Branch {
+class GLBranch {
 	/** branch name. */
 	@JsonProperty("name")
 	String name;
@@ -16,25 +14,10 @@ class GLBranch implements Branch {
 	 * <code>false</code>.
 	 */
 	@JsonProperty("protected")
-	private boolean isProtected;
+	boolean isProtected;
 	/**
 	 * <code>true</code> if the branch is the default branch (in GitLab), else
 	 * <code>false</code>.
 	 */
 	boolean isDefault;
-
-	@Override
-	public boolean isDefault() {
-		return isDefault;
-	}
-
-	@Override
-	public boolean isProtected() {
-		return isProtected;
-	}
-
-	@Override
-	public String getName() {
-		return name;
-	}
 }

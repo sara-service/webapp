@@ -4,25 +4,20 @@
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<link rel="icon" href="icon.png" type="image/png"/>
-	<link rel="shortcut icon" href="icon.png" type="image/png"/>
-	<link rel="stylesheet" href="bootstrap.min.css" />
-	<link rel="stylesheet" href="sara.css" />
-	<script src="jquery.min.js"></script>
-	<script src="uri.min.js"></script>
-	<script src="bootstrap.min.js"></script>
-<!--
-	<script src="common.js"></script>
--->
-<!--
-	<script src="branches.js"></script>
--->
+	<link rel="icon" href="lib/icon.png" type="image/png"/>
+	<link rel="shortcut icon" href="lib/icon.png" type="image/png"/>
+	<link rel="stylesheet" href="lib/bootstrap.min.css" />
+	<link rel="stylesheet" href="lib/sara.css" />
+	<script src="lib/jquery.min.js"></script>
+	<script src="lib/bootstrap.min.js"></script>
+	<script src="lib/common.js"></script>
+	<script src="meta.js"></script>
 	<title>SARA</title>
 </head>
 <body><div class="fluid-container">
 	<div class="row">
 		<div class="col-sm-9 col-xs-12">
-			<img src="header.svg" class="logo-header" />
+			<img src="lib/header.svg" class="logo-header" />
 		</div>
 		<div class="col-sm-3 col-xs-12">
 			<a id="ir_link">
@@ -36,36 +31,46 @@
 			<h1>Describe your Publication!</h1>
 		</div>
 	</div>
-
-	<form class="form-horizontal" id="meta">
-		<div class="form-group">
+	<div id="title_loading" class="loading"><span class="sr-only">loading, please wait...</span></div>
+	<form class="form-horizontal" id="title_block" style="display:none">
+		<div class="form-group has-feedback" id="title_group">
 			<label class="col-sm-2 control-label" for="title">publication title</label>
 			<div class="col-sm-7 nopad">
-				<input type="text" class="form-control" id="title" placeholder="name of your software artefact" value="SARA-server">
+				<input type="text" class="form-control" id="title" placeholder="name of your software artefact" aria-describedby="title_status_text">
+				<span id="title_status" class="glyphicon form-control-feedback" aria-hidden="true"></span>
+				<span id="title_status_text" class="sr-only"></span>
+  			</div>
+			<div class="col-sm-3 nopad">
+				<button type="button" class="btn btn-default form-control" id="update_title">update GitLab project name</button>
+			</div>
+		</div>
+		<div class="form-group has-feedback" id="description_group">
+			<label class="col-sm-2 control-label" for="description">short description (optional)</label>
+			<div class="col-sm-7 nopad">
+				<textarea class="form-control" id="description" placeholder="short description of what your software does" aria-describedby="description_status_text"></textarea>
+				<span id="description_status" class="glyphicon form-control-feedback" aria-hidden="true"></span>
+				<span id="description_status_text" class="sr-only"></span>
 			</div>
 			<div class="col-sm-3 nopad">
-				<button type="button" class="btn btn-default form-control" name="update_title">update GitLab project name</button>
+				<button type="button" class="btn btn-default form-control" id="update_description">update GitLab project description</button>
 			</div>
 		</div>
 		<div class="form-group">
-			<label class="col-sm-2 control-label" for="description">short description (optional)</label>
-			<div class="col-sm-7 nopad">
-				<textarea class="form-control" id="description" placeholder="short description of what your software does"></textarea>
-			</div>
-			<div class="col-sm-3 nopad">
-				<button type="button" class="btn btn-default form-control" name="update_description">update GitLab project description</button>
+			<div class="col-sm-7 col-sm-offset-2 nopad">
+				<button type="button" class="btn btn-sm btn-danger" id="reset_title">reset title and description to GitLab project name and description</button>
+				<div id="reset_title_loading" class="loading-inline" style="display:none"><span class="sr-only">loading, please wait...</span></div>
 			</div>
 		</div>
 	</div></form>
 
 	<div class="row">
 		<div class="col-xs-12 action-header">
-			<h1>Metadata?</h1>
+			<h1>Provide the required Metadata</h1>
 		</div>
 	</div>
 	<form class="form-horizontal" id="meta">
 		<div class="form-group">
-			<label class="col-sm-2 control-label" for="branch">autodetect from</label>
+			<label class="col-sm-2 control-label" for="branch">autodetect metadata from</label>
 			<div class="col-sm-2 nopad">
 				<select class="form-control" id="branch">
 					<option value="heads/master" selected>branch master</option>
@@ -73,9 +78,6 @@
 				</select>
 			</div>
 			<div class="col-sm-2 nopad">
-	<!--
-				<button type="button" class="btn btn-default form-control" id="add_button">extract metadata</button>
-	-->
 				<button type="button" class="btn btn-default form-control" id="add_button">I'm Feeling Lazy</button>
 			</div>
 		</div>
@@ -85,14 +87,18 @@
 				<input type="text" class="form-control" id="version" placeholder="version number" value="1.0-SNAPSHOT">
 			</div>
 			<div class="col-sm-3 nopad">
-				<button type="button" class="btn btn-default form-control" name="update_version">update file <tt>VERSION</tt> in branch master</button>
+				<button type="button" class="btn btn-default form-control" name="update_version">update file <tt data-versionfile>VERSION</tt> in <span data-branch>branch master</span></button>
 			</div>
 		</div>
 		<div class="form-group">
 			<label class="col-sm-2 control-label" for="license">license</label>
 			<div class="col-sm-7 nopad">
 				<input type="text" class="form-control" id="license" placeholder="license" value="GNU GPL 3.0; GNU LGPL 2.1; Apache 2.0">
-				<p>Please make sure your choice is <a href="https://en.wikipedia.org/wiki/License_compatibility">compatible</a> with the license of any third-party code or libraries you are using!
+				<p>Please make sure your choice is applicable to all branches.
+				If you have copied third-party code or if you are using libraries,
+				make sure your choice is
+				<a href="https://en.wikipedia.org/wiki/License_compatibility">compatible</a>
+				with their license(s) as well!
 				You may otherwise be liable for copyright infringement.</p>
 			</div>
 			<div class="col-sm-3 nopad">
@@ -154,10 +160,7 @@
 		</div>
 		<div class="form-group">
 			<div class="col-sm-3 nopad">
-				<button type="button" class="btn btn-warning form-control" name="edit_license">update file <tt>.mailmap</tt> in branch master</button>
-			</div>
-			<div class="col-sm-3 nopad">
-				<button type="button" class="btn btn-warning form-control" name="edit_license">update file <tt>.idmap</tt> in branch master</button>
+				<button type="button" class="btn btn-warning form-control" name="edit_license">update file <tt>.mailmap</tt> in <span data-branch>branch master</span></button>
 			</div>
 		</div>
 	</form>

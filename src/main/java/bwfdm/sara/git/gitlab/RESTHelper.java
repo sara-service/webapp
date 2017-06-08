@@ -44,6 +44,7 @@ class RESTHelper {
 	private final String root;
 	private final RestTemplate rest;
 	private HttpEntity<Void> auth;
+	private MultiValueMap<String, String> authMap;
 
 	/**
 	 * @param root
@@ -67,9 +68,9 @@ class RESTHelper {
 			return;
 		}
 
-		final MultiValueMap<String, String> map = new LinkedMultiValueMap<String, String>();
-		map.set("Authorization", "Bearer " + token);
-		auth = new HttpEntity<Void>(map);
+		authMap = new LinkedMultiValueMap<String, String>();
+		authMap.set("Authorization", "Bearer " + token);
+		auth = new HttpEntity<Void>(authMap);
 	}
 
 	boolean hasToken() {
@@ -106,6 +107,11 @@ class RESTHelper {
 				type).getBody();
 	}
 
+	byte[] getBlob(final UriComponentsBuilder ucb) {
+		return rest.exchange(ucb.build(true).toUri(), HttpMethod.GET, auth,
+				byte[].class).getBody();
+	}
+
 	/**
 	 * Get a list of items from GitLab, working around the pagination misfeature
 	 * by requesting pages one by one. If you need just a few, use
@@ -119,7 +125,7 @@ class RESTHelper {
 	 *            type parameters
 	 * @return a list of all objects that GitLab returns
 	 */
-	<T> List<? extends T> getList(final String endpoint,
+	<T> List<T> getList(final String endpoint,
 			final ParameterizedTypeReference<List<T>> type) {
 		return getList(uri(endpoint), type);
 	}
@@ -168,5 +174,19 @@ class RESTHelper {
 				}
 			}
 		return null; // header present but no "next" link, ie. last page
+	}
+
+	/**
+	 * Convenience function for calling
+	 * {@link #put(UriComponentsBuilder, Object)}.
+	 */
+	void put(final String endpoint, final Object args) {
+		put(uri(endpoint), args);
+	}
+
+	void put(final UriComponentsBuilder ucb, final Object args) {
+		final HttpEntity<Object> data = new HttpEntity<>(args, authMap);
+		rest.exchange(ucb.build(true).toUri(), HttpMethod.PUT, data,
+				(Class<?>) null);
 	}
 }

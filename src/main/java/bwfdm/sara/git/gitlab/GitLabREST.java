@@ -1,29 +1,39 @@
 package bwfdm.sara.git.gitlab;
 
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
 import javax.servlet.http.HttpSession;
 
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 import org.springframework.web.util.UriUtils;
 
 import bwfdm.sara.auth.OAuthCode;
 import bwfdm.sara.git.Branch;
+import bwfdm.sara.git.Commit;
 import bwfdm.sara.git.GitRepo;
+import bwfdm.sara.git.ProjectInfo;
 import bwfdm.sara.git.Tag;
 
 /** high-level abstraction of the GitLab REST API. */
 public class GitLabREST extends GitRepo {
+	private static final List<String> LICENSE_FILE_NAMES = Arrays.asList(
+			"LICENSE", "COPYING");
+
 	private final String root;
 	private final String appID;
 	private final String appSecret;
 	private RESTHelper rest;
 	private OAuthCode auth;
-	private String project;
+	private String apiProject;
+	private String guiProject;
 
 	/**
 	 * @param id
@@ -52,13 +62,18 @@ public class GitLabREST extends GitRepo {
 
 	@Override
 	public void setProject(final String project) {
-		this.project = project;
+		apiProject = project;
 		rest = new RESTHelper(root, project);
+		try {
+			guiProject = UriUtils.decode(project, "UTF-8");
+		} catch (final UnsupportedEncodingException e) {
+			throw new RuntimeException("UTF-8 not supported?!", e);
+		}
 	}
 
 	@Override
 	public String getProject() {
-		return project;
+		return apiProject;
 	}
 
 	@Override
@@ -99,46 +114,90 @@ public class GitLabREST extends GitRepo {
 
 	@Override
 	public String getProjectViewURL() {
+		return root + "/" + guiProject;
+	}
+
+	@Override
+	public String getEditLicenseURL(final String branch) {
+		for (final String name : LICENSE_FILE_NAMES) {
+			final byte[] license = getLicenseBlob(branch, name);
+			if (license != null)
+				// some LICENSE file already exists → go to the edit view
+				return root + "/" + guiProject + "/edit/" + branch + "/" + name;
+		}
+
+		// file doesn't yet exist → go to commit view creating a LICENSE file
+		return root + "/" + guiProject + "/new/" + branch
+				+ "/?commit_message=Add+license&file_name=LICENSE";
+	}
+
+	private byte[] getLicenseBlob(final String ref, final String filename) {
 		try {
-			return root + "/" + UriUtils.decode(project, "UTF-8");
-		} catch (final UnsupportedEncodingException e) {
-			throw new RuntimeException("UTF-8 not supported?!", e);
+			return rest.getBlob(rest.uri(
+					"/repository/files/" + filename + "/raw").queryParam("ref",
+					ref));
+		} catch (final HttpClientErrorException e) {
+			if (e.getStatusCode() == HttpStatus.NOT_FOUND)
+				return null; // file just doesn't exist
+			throw e; // something serious
 		}
 	}
 
 	@Override
-	public List<? extends Branch> getBranches() {
-		final GLProjectInfo projectInfo = getProjectInfo();
-		final List<? extends GLBranch> list = rest.getList(
-				"/repository/branches",
+	public List<Branch> getBranches() {
+		final GLProjectInfo projectInfo = getGitLabProjectInfo();
+		final List<GLBranch> list = rest.getList("/repository/branches",
 				new ParameterizedTypeReference<List<GLBranch>>() {
 				});
-		for (final GLBranch branch : list)
-			if (branch.name.equals(projectInfo.master))
-				branch.isDefault = true;
-		return list;
+		final ArrayList<Branch> branches = new ArrayList<>(list.size());
+		for (final GLBranch branch : list) {
+			final boolean isDefault = branch.name.equals(projectInfo.master);
+			branches.add(new Branch(branch.name, branch.isProtected, isDefault));
+		}
+		return branches;
 	}
 
 	@Override
-	public List<? extends Tag> getTags() {
-		return rest.getList("/repository/tags",
+	public List<Tag> getTags() {
+		final List<GLTag> list = rest.getList("/repository/tags",
 				new ParameterizedTypeReference<List<GLTag>>() {
 				});
+		final ArrayList<Tag> tags = new ArrayList<>(list.size());
+		for (final GLTag tag : list)
+			// branches CAN be protected, but the GitLab API doesn't return that
+			// field...
+			tags.add(new Tag(tag.name, false));
+		return tags;
 	}
 
 	@Override
-	public GLProjectInfo getProjectInfo() {
+	public List<Commit> getCommits(final String ref, final int limit) {
+		final List<GLCommit> list = rest.get(
+				rest.uri("/repository/commits").queryParam("ref_name", ref)
+						.queryParam("per_page", Integer.toString(limit)),
+				new ParameterizedTypeReference<List<GLCommit>>() {
+				});
+		final ArrayList<Commit> tags = new ArrayList<>(list.size());
+		for (final GLCommit commit : list)
+			tags.add(new Commit(commit.id, commit.title, commit.date));
+		return tags;
+	}
+
+	private GLProjectInfo getGitLabProjectInfo() {
 		return rest.get("" /* the project itself */,
 				new ParameterizedTypeReference<GLProjectInfo>() {
 				});
 	}
 
 	@Override
-	public List<GLCommit> getCommits(final String ref, final int limit) {
-		return rest.get(
-				rest.uri("/repository/commits").queryParam("ref_name", ref)
-						.queryParam("per_page", Integer.toString(limit)),
-				new ParameterizedTypeReference<List<GLCommit>>() {
-				});
+	public ProjectInfo getProjectInfo() {
+		final GLProjectInfo info = getGitLabProjectInfo();
+		return new ProjectInfo(info.name, info.description);
+	}
+
+	@Override
+	public void updateProjectInfo(final String name, final String description) {
+		final GLProjectInfo info = new GLProjectInfo(name, description);
+		rest.put("" /* the project itself */, info);
 	}
 }

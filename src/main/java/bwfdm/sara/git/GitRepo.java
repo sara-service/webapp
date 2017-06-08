@@ -39,14 +39,35 @@ public abstract class GitRepo {
 	/** @return the url of the "main" page to view a project */
 	public abstract String getProjectViewURL();
 
+	/**
+	 * @param ref
+	 *            the branch or tag containing the {@code LICENSE} file to edit,
+	 *            in git ref format (ie. {@code heads/master} or
+	 *            {@code tags/v1.0})
+	 * @return the url of a page where the user can edit the {@code LICENSE}
+	 *         file
+	 */
+	public abstract String getEditLicenseURL(final String ref);
+
 	/** @return a list of all branches in the given project */
-	public abstract List<? extends Branch> getBranches();
+	public abstract List<Branch> getBranches();
 
 	/** @return a list of all tags in the given project */
-	public abstract List<? extends Tag> getTags();
+	public abstract List<Tag> getTags();
 
 	/** @return the project metadata */
 	public abstract ProjectInfo getProjectInfo();
+
+	/**
+	 * Updates the project metadata with the fields provided. <code>null</code>
+	 * means to keep the current value.
+	 * 
+	 * @param name
+	 *            new project name, or <code>null</code>
+	 * @param description
+	 *            new project description, or <code>null</code>
+	 */
+	public abstract void updateProjectInfo(String name, String description);
 
 	/**
 	 * @param ref
@@ -56,8 +77,7 @@ public abstract class GitRepo {
 	 *            max
 	 * @return a list of the first few commits in a given branch or tag
 	 */
-	public abstract List<? extends Commit> getCommits(final String ref,
-			final int limit);
+	public abstract List<Commit> getCommits(final String ref, final int limit);
 
 	/**
 	 * @return <code>true</code> if we already have a token for GitLab,

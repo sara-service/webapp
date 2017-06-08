@@ -47,7 +47,8 @@ public class Auth {
 	}
 
 	@GetMapping("new")
-	public RedirectView newLogin(final String gitRepo, final String project,
+	public RedirectView newLogin(@RequestParam("repo") final String gitRepo,
+			@RequestParam("project") final String project,
 			final RedirectAttributes redir, final HttpSession session) {
 		final GitRepo repo;
 		if (!GitRepoFactory.hasInstance(session)
