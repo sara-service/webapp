@@ -68,7 +68,8 @@
 			<h1>Provide the required Metadata</h1>
 		</div>
 	</div>
-	<form class="form-horizontal" id="meta">
+	<div id="version_loading" class="loading"><span class="sr-only">loading, please wait...</span></div>
+	<form class="form-horizontal" id="version_block" style="display:none">
 		<div class="form-group">
 			<label class="col-sm-2 control-label" for="lazy_branch">autodetect metadata from</label>
 			<div class="col-sm-2 nopad">
@@ -83,28 +84,32 @@
 				<div id="lazy_loading" class="loading-inline" style="display:none"><span class="sr-only">loading, please wait...</span></div>
 			</div>
 		</div>
-		<div class="form-group">
+		<div class="form-group has-feedback" id="version_group">
 			<label class="col-sm-2 control-label" for="version">software version</label>
 			<div class="col-sm-7 nopad">
-				<input type="text" class="form-control" id="version" placeholder="version number" value="1.0-SNAPSHOT">
+				<input type="text" class="form-control" id="version" placeholder="version number" aria-describedby="version_status_text">
+				<span id="version_status" class="glyphicon form-control-feedback" aria-hidden="true"></span>
+				<span id="version_status_text" class="sr-only"></span>
 			</div>
 			<div class="col-sm-3 nopad">
-				<button type="button" class="btn btn-default form-control" name="update_version">update file <tt data-versionfile>VERSION</tt> in <span data-branch>branch master</span></button>
+				<button type="button" class="btn btn-default form-control" name="update_version" disabled>update file <tt data-versionfile>VERSION</tt> in <span data-branch>branch master</span></button>
 			</div>
 		</div>
-		<div class="form-group">
+		<div class="form-group has-feedback" id="license_group">
 			<label class="col-sm-2 control-label" for="license">license</label>
 			<div class="col-sm-7 nopad">
-				<input type="text" class="form-control" id="license" placeholder="license" value="GNU GPL 3.0; GNU LGPL 2.1; Apache 2.0">
+				<input type="text" class="form-control" id="license" placeholder="name of a well-known license, eg. GNU GPL 3.0">
+				<span id="license_status" class="glyphicon form-control-feedback" aria-hidden="true"></span>
+				<span id="license_status_text" class="sr-only"></span>
 				<p>Please make sure your choice is applicable to all branches.
 				If you have copied third-party code or if you are using libraries,
 				make sure your choice is
-				<a href="https://en.wikipedia.org/wiki/License_compatibility">compatible</a>
+				<a href="https://en.wikipedia.org/wiki/License_compatibility#Compatibility_of_FOSS_licenses">compatible</a>
 				with their license(s) as well!
 				You may otherwise be liable for copyright infringement.</p>
 			</div>
 			<div class="col-sm-3 nopad">
-				<button type="button" class="btn btn-warning form-control" name="edit_license">edit file <tt>LICENSE</tt> in GitLab</button>
+				<button type="button" class="btn btn-warning form-control" name="edit_license" disabled>edit file <tt>LICENSE</tt> in GitLab</button>
 			</div>
 		</div>
 	</form>
@@ -161,8 +166,8 @@
 			</div>
 		</div>
 		<div class="form-group">
-			<div class="col-sm-3 nopad">
-				<button type="button" class="btn btn-warning form-control" name="edit_license">update file <tt>.mailmap</tt> in <span data-branch>branch master</span></button>
+			<div class="col-sm-3 col-sm-offset-9 nopad">
+				<button type="button" class="btn btn-default form-control" id="update_mailmap" disabled>update file <tt>.mailmap</tt> in <span data-branch>branch master</span></button>
 			</div>
 		</div>
 	</form>

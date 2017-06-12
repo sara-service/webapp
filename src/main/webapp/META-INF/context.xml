@@ -3,7 +3,7 @@
 	<Parameter name="sara.webroot"
 		value="https://sara.unikn.netfuture.ch"
 		description="publicly visible URL of servlet root" />
-	<Parameter name="gitlabs.properties"
+	<Parameter name="repos.properties"
 		value="gitlabs.properties"
 		description="path to properties file listing all git repos" />
 </Context>

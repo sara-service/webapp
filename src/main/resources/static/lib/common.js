@@ -136,13 +136,12 @@ autosave.value = function(id, value) {
 	save.value = value;
 	autosave.validate(id);
 };
-// sets the control value while saving null, ie. deletes the saved
-// value.
+// sets the control value, saving with autoset=true
 autosave.reset = function(id, value) {
 	autosave.value(id, value);
 	var elem = $("#" + id);
 	var save = elem.data("autosave");
-	save.saver(null, id);
+	save.saver(value, id, true);
 };
 
 autosave.cancelTimeout = function(id) {
@@ -167,7 +166,7 @@ autosave.save = function(id) {
 	}
 	autosave.feedback(id, autosave.msg.saving);
 	save.value = elem.val();
-	save.saver(elem.val(), id);
+	save.saver(elem.val(), id, false);
 };
 autosave.success = function(id) {
 	var elem = $("#" + id);

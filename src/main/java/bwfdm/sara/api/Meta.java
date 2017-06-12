@@ -2,56 +2,72 @@ package bwfdm.sara.api;
 
 import javax.servlet.http.HttpSession;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import bwfdm.sara.git.ProjectInfo;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @RestController
 @RequestMapping("/api/meta")
 public class Meta {
-	@Autowired
-	private Repo repo;
+	private String get(final HttpSession session, final String name,
+			final boolean maskAuto) {
+		final Object auto = session.getAttribute(name + ".auto");
+		if (auto == null || ((boolean) auto && maskAuto))
+			return null;
+		return (String) session.getAttribute(name); // TODO database
+	}
+
+	private void set(final HttpSession session, final String name,
+			final String value, final boolean auto) {
+		session.setAttribute(name, value); // TODO database
+		session.setAttribute(name + ".auto", auto); // TODO database
+	}
 
 	@GetMapping("")
-	public BasicMetaData getBasicMetaData(final HttpSession session) {
-		final ProjectInfo info = repo.getProjectInfo(session);
-		String title = (String) session.getAttribute("title"); // TODO database
-		if (title == null)
-			title = info.name;
-		String desc = (String) session.getAttribute("description");
-		if (desc == null)
-			desc = info.description;
-		return new BasicMetaData(title, desc, "1.0", "none");
+	public BasicMetaData getBasicMetaData(
+			@RequestParam(name = "mask-autodetected", defaultValue = "true") final boolean maskAuto,
+			final HttpSession session) {
+		final String title = get(session, "title", maskAuto);
+		final String desc = get(session, "description", maskAuto);
+		final String ver = get(session, "version", maskAuto);
+		final String lic = get(session, "license", maskAuto);
+		return new BasicMetaData(title, desc, ver, lic);
 	}
 
 	@PutMapping("title")
-	public void setTitle(@RequestParam("value") final String title,
+	public void setTitle(
+			@RequestParam("value") final String title,
+			@RequestParam(name = "autodetected", defaultValue = "false") final boolean auto,
 			final HttpSession session) {
-		session.setAttribute("title", title); // TODO database
-	}
-
-	@DeleteMapping("title")
-	public void unsetTitle(final HttpSession session) {
-		session.setAttribute("title", null); // TODO database
+		set(session, "title", title, auto);
 	}
 
 	@PutMapping("description")
-	public void setDescription(@RequestParam("value") final String description,
+	public void setDescription(
+			@RequestParam("value") final String description,
+			@RequestParam(name = "autodetected", defaultValue = "false") final boolean auto,
 			final HttpSession session) {
-		session.setAttribute("description", description); // TODO database
+		set(session, "description", description, auto);
 	}
 
-	@DeleteMapping("description")
-	public void unsetDescription(final HttpSession session) {
-		session.setAttribute("description", null); // TODO database
+	@PutMapping("version")
+	public void setVersion(
+			@RequestParam("value") final String version,
+			@RequestParam(name = "autodetected", defaultValue = "false") final boolean auto,
+			final HttpSession session) {
+		set(session, "version", version, auto);
+	}
+
+	@PutMapping("license")
+	public void setLicense(
+			@RequestParam("value") final String license,
+			@RequestParam(name = "autodetected", defaultValue = "false") final boolean auto,
+			final HttpSession session) {
+		set(session, "license", license, auto);
 	}
 
 	private static class BasicMetaData {
