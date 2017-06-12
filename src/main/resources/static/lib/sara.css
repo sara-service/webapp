@@ -1,11 +1,11 @@
 /* colors:
  logo    light   dark    color
- #bddd1f         #a3be1a logo-green
- #809fb1 		 #4c6a7c logo-blue
- #b45865		 #8a3e49 logo-red
- #00aaa7		 #007876 cyan (from poster heading)
- #f9b10b		 #c38a05 orange (from poster heading)
- #b9b9b9         #8c8c8c gray (from poster footer)
+ #bddd1f #f7fbe5 #a3be1a logo-green
+ #809fb1 #ecf1f4 #4c6a7c logo-blue
+ #b45865 #f6eaec #8a3e49 logo-red
+ #00aaa7 #e1fffe #007876 cyan (from poster heading)
+ #f9b10b #feefce #c38a05 orange (from poster heading)
+ #b9b9b9 #f0f0f0 #8c8c8c gray (from poster footer)
 */
 
 /* border width must be 6.9% to match the logo */
@@ -75,23 +75,7 @@ body {
 	width: 100%;
 }
 
-.infoicon {
-	margin-left: 1ex;
-}
-
-.infoicon:before {
-	content: "";
-	background-image: url(info.svg);
-	background-size: 2ex 2ex;
-	background-repeat: no-repeat;
-	display: inline-block;
-	height: 2ex;
-	width: 2ex;
-	vertical-align: bottom;
-	position: relative;
-	left: -1ex;
-}
-
+/* these are actually the dark colors so they are readable on white */
 .sara-red {
 	color: #8a3e49;
 	background-color: white;
