@@ -1,3 +1,5 @@
+"use strict";
+
 function template(name) {
 	// clone whole subtree and change ID to be unique
 	var root = $("#" + name).clone();
@@ -26,7 +28,7 @@ function reportAPIError(xhr, status, error) {
 		location.reload();
 }
 
-API = {};
+var API = {};
 API.get = function(path, data, callback) {
 	$.ajax(path, {
 		data: data,
@@ -58,7 +60,7 @@ API.delete = function(path, callback) {
 	});
 }
 
-autosave = {};
+var autosave = {};
 autosave.msg = {
 	saving: {
 		glyphicon: "glyphicon-refresh",
@@ -98,8 +100,8 @@ autosave.feedback = function(id, st) {
 }
 
 autosave.init = function(id, saver, validator) {
-	var save = {
-		saver: saver, validator: validator, value: null, timer: null };
+	var save = { saver: saver, validator: validator, value: null,
+		timer: null, update: null, updateEnabled: false };
 	var elem = $("#" + id);
 	elem.data("autosave", save);
 
@@ -118,13 +120,20 @@ autosave.init = function(id, saver, validator) {
 	autosave.validate(id);
 };
 
+autosave.isValid = function(id) {
+	var elem = $("#" + id);
+	var save = elem.data("autosave");
+	return !save.validator || save.validator(elem.val(), id);
+};
 autosave.validate = function(id) {
 	var elem = $("#" + id);
 	var save = elem.data("autosave");
-	if (!save.validator || save.validator(elem.val(), id))
-		autosave.feedback(id, autosave.msg.none);
-	else
-		autosave.feedback(id, autosave.msg.invalid);
+	var valid = autosave.isValid(id);
+	autosave.feedback(id, valid ? autosave.msg.none :
+			autosave.msg.invalid);
+	if (save.update)
+		save.update.prop("disabled", !valid || !save.updateEnabled);
+	return valid;
 };
 
 // sets the control value, without saving
@@ -156,10 +165,8 @@ autosave.save = function(id) {
 	var elem = $("#" + id);
 	var save = elem.data("autosave");
 	autosave._cancelTimeout(save);
-	if (save.validator && !save.validator(elem.val(), id)) {
-		autosave.feedback(id, autosave.msg.invalid);
+	if (!autosave.validate(id))
 		return;
-	}
 	if (elem.val() == save.value) {
 		autosave.feedback(id, autosave.msg.none);
 		return; // not changed, nothing to do
@@ -173,6 +180,23 @@ autosave.success = function(id) {
 	elem.data("autosave").value = elem.val();
 	autosave.feedback(id, autosave.msg.success);
 };
+
+autosave.configureUpdateButton = function(id, updater) {
+	var elem = $("#" + id);
+	var save = elem.data("autosave");
+	save.update = $("#update_" + id);
+	save.update.off("click");
+	save.updateEnabled = !!updater;
+	if (save.updateEnabled) {
+		save.update.click(function() {
+			autosave.cancelTimeout(id);
+			if (autosave.validate(id))
+				updater(elem.val(), id);
+		});
+		autosave.validate(id); // to enable / disable button initially
+	} else
+		save.update.prop("disabled", true);
+}
 
 var reftype_names = {
 	BRANCH: "branch ",

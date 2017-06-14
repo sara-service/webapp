@@ -16,7 +16,7 @@ import bwfdm.sara.git.GitRepoFactory;
 
 @RestController
 @RequestMapping("/api/auth")
-public class Auth {
+public class Authentication {
 	@GetMapping("login")
 	public RedirectView triggerLogin(
 			@RequestParam("repo") final String gitRepo,

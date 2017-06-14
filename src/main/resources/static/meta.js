@@ -1,3 +1,5 @@
+"use strict";
+
 function resetTitle(info) {
 	autosave.reset("title", info.name);
 	autosave.reset("description", info.description);
@@ -11,21 +13,16 @@ function setTitleDescription(title, description) {
 	$("#title_loading").css("display", "none");
 }
 
-function initTitle(info) {
-	if (info.title === null || info.description === null) {
-		API.get("/api/repo/project-info", {}, function(data) {
-			var title = info.title !== null ? info.title : data.name;
-			var description = info.description !== null
-					? info.description : data.description;
-			setTitleDescription(title, description);
-		});
-	} else
-		setTitleDescription(info.title, info.description);
-
-	autosave.value("version", info.version);
-	autosave.value("license", info.license);
-	$("#version_block").removeAttr("style");
-	$("#version_loading").css("display", "none");
+function resetVersion(branch) {
+	API.get("/api/extract/version", { ref: branch.ref }, function(ex) {
+		if (ex.version === null)
+			ex.version = "";
+		autosave.value("version", ex.version);
+		$("[data-versionfile]").text(ex.path);
+		$("#update_version").data("can-update", ex.canUpdate)
+		branchChanged();
+		// TODO remember that branch somewhere
+	});
 }
 
 function save(value, id, autoset) {
@@ -35,16 +32,21 @@ function save(value, id, autoset) {
 		});
 }
 
-function addUpdateHandler(id, endpoint, field) {
-	$("#update_" + id).click(function() {
-		autosave.cancelTimeout(id);
-		var value = $("#" + id).val();
-		var data = {};
-		data[field] = value;
-		API.post(endpoint, data, function() {
-			autosave.reset(id, value);
+function branchChanged() {
+	var branch = $("#lazy_branch :selected").data("branch");
+	$("[data-branch]").text(reftype_names[branch.type] + branch.name);
+
+	var update = $("#update_version");
+	if (autosave.isValid("version") && branch.type == "BRANCH")
+		autosave.configureUpdateButton("version", function(value, id) {
+		API.post("/api/extract/version", { version: value },
+			function() {
+				autosave.reset(id, value);
+				// TODO remember that branch somewhere
+			});
 		});
-	});
+	else
+		autosave.configureUpdateButton("version", null);
 }
 
 function loadLazyBranches(branches) {
@@ -64,9 +66,32 @@ function loadLazyBranches(branches) {
 	});
 	// event handler for "lazy" button
 	$("#lazy_button").click(function() {
-		//var branch = $("#lazy_branch :selected").data("branch");
-		//addBranch(branch);
+		var branch = $("#lazy_branch :selected").data("branch");
+		resetVersion(branch);
+		//resetLicenses(); // TODO
 	});
+	$("#lazy_branch").on("select change", branchChanged);
+	branchChanged();
+}
+
+function initFields(info) {
+	if (info.title === null || info.description === null) {
+		API.get("/api/repo/project-info", {}, function(data) {
+			if (info.title === null)
+				info.title = data.name;
+			if (info.description === null)
+				info.description = data.description;
+			setTitleDescription(info.title, info.description);
+		});
+	} else
+		setTitleDescription(info.title, info.description);
+
+	// these cannot be autodetected at startup because no branch has
+	// been selected yet
+	autosave.value("version", info.version);
+	autosave.value("license", info.license);
+	$("#version_block").removeAttr("style");
+	$("#version_loading").css("display", "none");
 }
 
 function validateNotEmpty(value) {
@@ -75,19 +100,26 @@ function validateNotEmpty(value) {
 
 function initPage(session) {
 	autosave.init("title", save, validateNotEmpty);
-	addUpdateHandler("title", "/api/repo/project-info", "name");
+	autosave.configureUpdateButton("title", function(value, id) {
+		API.post("/api/repo/project-info", { name: value }, function() {
+			autosave.reset(id, value);
+		});
+	});
 	autosave.init("description", save);
-	addUpdateHandler("description", "/api/repo/project-info",
-			"description");
+	autosave.configureUpdateButton("description", function(value, id) {
+		API.post("/api/repo/project-info", { description: value },
+			function() {
+				autosave.reset(id, value);
+			});
+	});
 	autosave.init("version", save, validateNotEmpty);
-	addUpdateHandler("version", "/api/repo/version", "version");
 	autosave.init("license", save, validateNotEmpty);
 
-	API.get("/api/meta", {}, initTitle);
+	API.get("/api/meta", {}, initFields);
 	$("#reset_title").click(function() {
 		$("#reset_title_loading").removeAttr("style");
 		API.get("/api/repo/project-info", {}, resetTitle);
 	});
-
+	$("#update_version").data("can-update", false)
 	API.get("/api/repo/refs", {}, loadLazyBranches);
 }

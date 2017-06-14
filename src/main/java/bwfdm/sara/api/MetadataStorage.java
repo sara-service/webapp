@@ -12,7 +12,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 @RestController
 @RequestMapping("/api/meta")
-public class Meta {
+public class MetadataStorage {
 	private String get(final HttpSession session, final String name,
 			final boolean maskAuto) {
 		final Object auto = session.getAttribute(name + ".auto");

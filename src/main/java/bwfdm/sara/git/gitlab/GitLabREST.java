@@ -1,8 +1,8 @@
 package bwfdm.sara.git.gitlab;
 
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
 
@@ -10,10 +10,10 @@ import javax.servlet.http.HttpSession;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpStatus;
+import org.springframework.util.Base64Utils;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
-import org.springframework.web.util.UriUtils;
 
 import bwfdm.sara.auth.OAuthCode;
 import bwfdm.sara.git.Branch;
@@ -24,9 +24,6 @@ import bwfdm.sara.git.Tag;
 
 /** high-level abstraction of the GitLab REST API. */
 public class GitLabREST extends GitRepo {
-	private static final List<String> LICENSE_FILE_NAMES = Arrays.asList(
-			"LICENSE", "COPYING");
-
 	private final String root;
 	private final String appID;
 	private final String appSecret;
@@ -64,11 +61,7 @@ public class GitLabREST extends GitRepo {
 	public void setProject(final String project) {
 		apiProject = project;
 		rest = new RESTHelper(root, project);
-		try {
-			guiProject = UriUtils.decode(project, "UTF-8");
-		} catch (final UnsupportedEncodingException e) {
-			throw new RuntimeException("UTF-8 not supported?!", e);
-		}
+		guiProject = UrlEncode.decode(project);
 	}
 
 	@Override
@@ -118,29 +111,15 @@ public class GitLabREST extends GitRepo {
 	}
 
 	@Override
-	public String getEditLicenseURL(final String branch) {
-		for (final String name : LICENSE_FILE_NAMES) {
-			final byte[] license = getLicenseBlob(branch, name);
-			if (license != null)
-				// some LICENSE file already exists → go to the edit view
-				return root + "/" + guiProject + "/edit/" + branch + "/" + name;
-		}
-
-		// file doesn't yet exist → go to commit view creating a LICENSE file
-		return root + "/" + guiProject + "/new/" + branch
-				+ "/?commit_message=Add+license&file_name=LICENSE";
+	public String getEditURL(final String branch, final String path) {
+		return root + "/" + guiProject + "/edit/" + branch + "/" + path;
 	}
 
-	private byte[] getLicenseBlob(final String ref, final String filename) {
-		try {
-			return rest.getBlob(rest.uri(
-					"/repository/files/" + filename + "/raw").queryParam("ref",
-					ref));
-		} catch (final HttpClientErrorException e) {
-			if (e.getStatusCode() == HttpStatus.NOT_FOUND)
-				return null; // file just doesn't exist
-			throw e; // something serious
-		}
+	@Override
+	public String getCreateURL(final String branch, final String path) {
+		return root + "/" + guiProject + "/new/" + branch
+				+ "/?commit_message=Add+" + UrlEncode.encodeQueryParam(path)
+				+ "&file_name=" + UrlEncode.encodeQueryParam(path);
 	}
 
 	@Override
@@ -181,6 +160,43 @@ public class GitLabREST extends GitRepo {
 		for (final GLCommit commit : list)
 			tags.add(new Commit(commit.id, commit.title, commit.date));
 		return tags;
+	}
+
+	@Override
+	public byte[] getBlob(final String ref, final String path) {
+		try {
+			return rest.getBlob(rest.uri(
+					"/repository/files/" + UrlEncode.encodePathSegment(path)
+							+ "/raw").queryParam("ref", ref));
+		} catch (final HttpClientErrorException e) {
+			if (e.getStatusCode() == HttpStatus.NOT_FOUND)
+				return null; // file just doesn't exist
+			throw e; // something serious
+		}
+	}
+
+	@Override
+	public void putBlob(final String branch, final String path,
+			final String commitMessage, final byte[] data) {
+		final String endpoint = "/repository/files/"
+				+ UrlEncode.encodePathSegment(path);
+		final HashMap<String, String> args = new HashMap<>();
+		args.put("branch", branch);
+		args.put("commit_message", commitMessage);
+		args.put("encoding", "base64");
+		args.put("content", Base64Utils.encodeToString(data));
+
+		final byte[] existing = getBlob("heads/" + branch, path);
+		if (existing == null)
+			// file doesn't exist; send create query.
+			rest.post(endpoint, args);
+		else if (!Arrays.equals(data, existing))
+			// file exists, and has actually been changed. (gitlab doesn't like
+			// no-change writes because they create an empty commit.) send
+			// update query.
+			// note the different request method; it's otherwise identical to a
+			// create query.
+			rest.put(endpoint, args);
 	}
 
 	private GLProjectInfo getGitLabProjectInfo() {

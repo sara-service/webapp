@@ -1,6 +1,5 @@
 package bwfdm.sara.git.gitlab;
 
-import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -20,7 +19,6 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
-import org.springframework.web.util.UriUtils;
 
 /** low-level helper class for making REST calls to the GitLab API. */
 class RESTHelper {
@@ -53,12 +51,8 @@ class RESTHelper {
 	 *            name of project whose API to access
 	 */
 	RESTHelper(final String root, final String project) {
-		try {
-			this.root = root + "/api/v4/projects/"
-					+ UriUtils.encodePathSegment(project, "UTF-8");
-		} catch (final UnsupportedEncodingException e) {
-			throw new RuntimeException("UTF-8 unsupported?!", e);
-		}
+		this.root = root + "/api/v4/projects/"
+				+ UrlEncode.encodePathSegment(project);
 		rest = new RestTemplate();
 	}
 
@@ -187,6 +181,20 @@ class RESTHelper {
 	void put(final UriComponentsBuilder ucb, final Object args) {
 		final HttpEntity<Object> data = new HttpEntity<>(args, authMap);
 		rest.exchange(ucb.build(true).toUri(), HttpMethod.PUT, data,
+				(Class<?>) null);
+	}
+
+	/**
+	 * Convenience function for calling
+	 * {@link #post(UriComponentsBuilder, Object)}.
+	 */
+	void post(final String endpoint, final Object args) {
+		post(uri(endpoint), args);
+	}
+
+	void post(final UriComponentsBuilder ucb, final Object args) {
+		final HttpEntity<Object> data = new HttpEntity<>(args, authMap);
+		rest.exchange(ucb.build(true).toUri(), HttpMethod.POST, data,
 				(Class<?>) null);
 	}
 }

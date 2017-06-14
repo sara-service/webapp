@@ -1,4 +1,4 @@
-package bwfdm.sara.api;
+package bwfdm.sara;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

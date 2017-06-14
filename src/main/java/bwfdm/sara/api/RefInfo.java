@@ -7,9 +7,12 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-/** data class for refs in the branch selection screen. */
+/**
+ * data class for refs in the branch selection screen. used by
+ * {@link Repository#getBranches(javax.servlet.http.HttpSession)} mostly.
+ */
 @JsonInclude(Include.NON_NULL)
-class Ref implements Comparable<Ref> {
+class RefInfo implements Comparable<RefInfo> {
 	/**
 	 * user-friendly name of ref, ie. {@code master} or {@code foo}. doesn't
 	 * identify whether it's a branch or tag.
@@ -36,7 +39,7 @@ class Ref implements Comparable<Ref> {
 	@JsonProperty("start")
 	String start;
 
-	Ref(final Branch b) {
+	RefInfo(final Branch b) {
 		type = RefType.BRANCH;
 		ref = "heads/" + b.name;
 		name = b.name;
@@ -44,7 +47,7 @@ class Ref implements Comparable<Ref> {
 		isDefault = b.isDefault;
 	}
 
-	Ref(final Tag t) {
+	RefInfo(final Tag t) {
 		type = RefType.TAG;
 		ref = "tags/" + t.name;
 		name = t.name;
@@ -53,7 +56,7 @@ class Ref implements Comparable<Ref> {
 	}
 
 	@Override
-	public int compareTo(final Ref other) {
+	public int compareTo(final RefInfo other) {
 		// put default branch first so that it's the one selected by
 		// default
 		if (isDefault)

@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.view.RedirectView;
 
-import bwfdm.sara.api.Ref.Action;
+import bwfdm.sara.api.RefInfo.Action;
 import bwfdm.sara.git.Branch;
 import bwfdm.sara.git.Commit;
 import bwfdm.sara.git.GitRepo;
@@ -25,31 +25,31 @@ import bwfdm.sara.git.Tag;
 
 @RestController
 @RequestMapping("/api/repo")
-public class Repo {
+public class Repository {
 	@GetMapping("refs")
-	public List<Ref> getBranches(final HttpSession session) {
-		final List<Ref> refs = getAllRefs(GitRepoFactory.getInstance(session));
+	public List<RefInfo> getBranches(final HttpSession session) {
+		final List<RefInfo> refs = getAllRefs(GitRepoFactory.getInstance(session));
 		Collections.sort(refs);
 		loadActions(refs, session);
 		return refs;
 	}
 
-	private List<Ref> getAllRefs(final GitRepo gl) {
-		final List<Ref> refs = new ArrayList<Ref>();
+	private List<RefInfo> getAllRefs(final GitRepo gl) {
+		final List<RefInfo> refs = new ArrayList<RefInfo>();
 		for (final Branch b : gl.getBranches())
-			refs.add(new Ref(b));
+			refs.add(new RefInfo(b));
 		for (final Tag t : gl.getTags())
-			refs.add(new Ref(t));
+			refs.add(new RefInfo(t));
 		return refs;
 	}
 
-	private void loadActions(final List<Ref> refs, final HttpSession session) {
+	private void loadActions(final List<RefInfo> refs, final HttpSession session) {
 		// FIXME load from database instead
 		if (session.getAttribute("branch_actions") == null) {
 			final HashMap<String, Action> map = new HashMap<String, Action>();
 			// default to publishing protected branches (assumed to be the main
 			// branches), while only archiving everything else.
-			for (final Ref r : refs) {
+			for (final RefInfo r : refs) {
 				if (r.isProtected || r.isDefault)
 					r.action = Action.PUBLISH_FULL;
 				map.put(r.ref, r.action);
@@ -60,14 +60,14 @@ public class Repo {
 		@SuppressWarnings("unchecked")
 		final Map<String, Action> actions = (Map<String, Action>) session
 				.getAttribute("branch_actions");
-		for (final Ref r : refs)
+		for (final RefInfo r : refs)
 			r.action = actions.get(r.ref);
 
 		@SuppressWarnings("unchecked")
 		final Map<String, String> starts = (Map<String, String>) session
 				.getAttribute("branch_starts");
 		if (starts != null)
-			for (final Ref r : refs)
+			for (final RefInfo r : refs)
 				r.start = starts.get(r.ref);
 	}
 
@@ -120,11 +120,12 @@ public class Repo {
 				.getProjectViewURL());
 	}
 
-	@GetMapping("edit-license")
-	public RedirectView getEditLicenseURL(
-			@RequestParam("branch") final String branch,
-			final HttpSession session) {
-		return new RedirectView(GitRepoFactory.getInstance(session)
-				.getEditLicenseURL(branch));
+	@GetMapping("edit-file")
+	public RedirectView getEditURL(@RequestParam("branch") final String branch,
+			@RequestParam("path") final String path, final HttpSession session) {
+		final GitRepo repo = GitRepoFactory.getInstance(session);
+		if (repo.getBlob("heads/" + branch, path) != null)
+			return new RedirectView(repo.getEditURL(branch, path));
+		return new RedirectView(repo.getCreateURL(branch, path));
 	}
 }

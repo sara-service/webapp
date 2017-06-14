@@ -40,14 +40,22 @@ public abstract class GitRepo {
 	public abstract String getProjectViewURL();
 
 	/**
-	 * @param ref
-	 *            the branch or tag containing the {@code LICENSE} file to edit,
-	 *            in git ref format (ie. {@code heads/master} or
-	 *            {@code tags/v1.0})
-	 * @return the url of a page where the user can edit the {@code LICENSE}
-	 *         file
+	 * @param branch
+	 *            the name of the branch containing the file to edit
+	 * @param path
+	 *            full, absolute path to file in repo
+	 * @return the url of a page where the user can edit the file
 	 */
-	public abstract String getEditLicenseURL(final String ref);
+	public abstract String getEditURL(final String branch, String path);
+
+	/**
+	 * @param branch
+	 *            the name of the branch in which the file is to be created
+	 * @param path
+	 *            full, absolute path to file in repo
+	 * @return the url of a page where the user can create such a file
+	 */
+	public abstract String getCreateURL(String branch, String path);
 
 	/** @return a list of all branches in the given project */
 	public abstract List<Branch> getBranches();
@@ -78,6 +86,34 @@ public abstract class GitRepo {
 	 * @return a list of the first few commits in a given branch or tag
 	 */
 	public abstract List<Commit> getCommits(final String ref, final int limit);
+
+	/**
+	 * @param ref
+	 *            branch or tag containing the file, in git ref format (ie.
+	 *            {@code heads/master} or {@code tags/test})
+	 * @param path
+	 *            full path to a file in the repo, without the initial slash
+	 * @return the contents of the file as a byte array, or <code>null</code> if
+	 *         the file doesn't exist
+	 */
+	public abstract byte[] getBlob(String ref, String path);
+
+	/**
+	 * Commits a file to the repo, either updating or creating it. This
+	 * obviously only works for branches.
+	 * 
+	 * @param branch
+	 *            name of the branch to modify (ie. {@code master})
+	 * @param path
+	 *            full path to a file in the repo, without the initial slash
+	 * @param commitMessage
+	 *            message for the commit that creates or modifies the file
+	 * @param data
+	 *            the contents of the file as a byte array (non-
+	 *            <code>null</code>)
+	 */
+	public abstract void putBlob(String branch, String path,
+			String commitMessage, byte[] data);
 
 	/**
 	 * @return <code>true</code> if we already have a token for GitLab,

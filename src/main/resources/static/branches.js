@@ -1,3 +1,5 @@
+"use strict";
+
 var forms = [];
 
 function save(branch) {
