@@ -3,6 +3,7 @@ package bwfdm.sara.api;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -28,9 +29,19 @@ import bwfdm.sara.git.Tag;
 public class Repository {
 	@GetMapping("refs")
 	public List<RefInfo> getBranches(final HttpSession session) {
-		final List<RefInfo> refs = getAllRefs(GitRepoFactory.getInstance(session));
+		final List<RefInfo> refs = getAllRefs(GitRepoFactory
+				.getInstance(session));
 		Collections.sort(refs);
 		loadActions(refs, session);
+		return refs;
+	}
+
+	@GetMapping("selected-refs")
+	public List<RefInfo> getSelectedBranches(final HttpSession session) {
+		final List<RefInfo> refs = getBranches(session);
+		for (final Iterator<RefInfo> i = refs.iterator(); i.hasNext();)
+			if (i.next().action == null)
+				i.remove();
 		return refs;
 	}
 

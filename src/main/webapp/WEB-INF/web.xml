@@ -12,7 +12,7 @@
 		</init-param>
 		<init-param>
 			<param-name>contextConfigLocation</param-name>
-			<param-value>bwfdm.sara</param-value>
+			<param-value>bwfdm.sara.Application</param-value>
 		</init-param>
         <load-on-startup>1</load-on-startup>
 	</servlet>

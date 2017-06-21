@@ -2,19 +2,25 @@ package bwfdm.sara.api;
 
 import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import javax.servlet.http.HttpSession;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import bwfdm.sara.extractor.LazyFile;
+import bwfdm.sara.extractor.LicenseExtractor;
+import bwfdm.sara.extractor.LicenseFile;
+import bwfdm.sara.extractor.licensee.LicenseeExtractor;
 import bwfdm.sara.git.GitRepo;
 import bwfdm.sara.git.GitRepoFactory;
+import bwfdm.sara.git.RepoFile;
+import bwfdm.sara.git.RepoFile.FileType;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -23,22 +29,41 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class MetadataExtractor {
 	private static final String VERSION_FILE = "VERSION";
 	private static final Charset UTF8 = Charset.forName("UTF-8");
-	private static final List<String> LICENSE_FILE_NAMES = Arrays.asList(
-			"LICENSE", "COPYING");
+
+	@Autowired
+	private Repository repository;
+
+	private final LicenseExtractor licenseExtractor;
+
+	public MetadataExtractor() {
+		licenseExtractor = new LicenseeExtractor();
+	}
 
 	@GetMapping("licenses")
 	public List<LicenseInfo> detectLicenses(final HttpSession session) {
-		final String branch = "heads/master";// FIXME iterate all selected refs!
 		final GitRepo repo = GitRepoFactory.getInstance(session);
-
 		final List<LicenseInfo> licenses = new ArrayList<>();
-		for (final String name : LICENSE_FILE_NAMES) {
-			final byte[] blob = repo.getBlob(branch, name);
-			if (blob != null)
-				// TODO actually detect what license it is
-				licenses.add(new LicenseInfo(branch, name, null));
+		for (final RefInfo ref : repository.getSelectedBranches(session)) {
+			// TODO honor the branch starting point here
+			final LicenseFile license = detectLicense(ref.ref, repo);
+			if (license != null)
+				licenses.add(new LicenseInfo(ref, license));
 		}
 		return licenses;
+	}
+
+	private LicenseFile detectLicense(final String ref, final GitRepo repo) {
+		final List<RepoFile> files = repo.getFiles(ref, "");
+		final List<LazyFile> candidates = new ArrayList<LazyFile>(files.size());
+		for (final RepoFile file : files)
+			// TODO if we see something cached, return immediately
+			if (file.getType() == FileType.FILE)
+				candidates.add(new LazyFile(repo, ref, file));
+		if (candidates.isEmpty())
+			return null;
+		final LicenseFile res = licenseExtractor.detectLicense(candidates);
+		// TODO cache result
+		return res;
 	}
 
 	/** data class for autodetected license info. */
@@ -50,10 +75,10 @@ public class MetadataExtractor {
 		@JsonProperty
 		final String license;
 
-		LicenseInfo(final String ref, final String path, final String license) {
-			this.ref = ref;
-			this.path = path;
-			this.license = license;
+		LicenseInfo(final RefInfo ref, final LicenseFile lic) {
+			this.ref = ref.ref;
+			path = lic.getFile();
+			license = lic.getID();
 		}
 	}
 

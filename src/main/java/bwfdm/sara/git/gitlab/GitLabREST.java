@@ -20,6 +20,8 @@ import bwfdm.sara.git.Branch;
 import bwfdm.sara.git.Commit;
 import bwfdm.sara.git.GitRepo;
 import bwfdm.sara.git.ProjectInfo;
+import bwfdm.sara.git.RepoFile;
+import bwfdm.sara.git.RepoFile.FileType;
 import bwfdm.sara.git.Tag;
 
 /** high-level abstraction of the GitLab REST API. */
@@ -197,6 +199,21 @@ public class GitLabREST extends GitRepo {
 			// note the different request method; it's otherwise identical to a
 			// create query.
 			rest.put(endpoint, args);
+	}
+
+	@Override
+	public List<RepoFile> getFiles(final String ref, final String path) {
+		final List<GLRepoFile> list = rest.getList(rest.uri("/repository/tree")
+				.queryParam("path", path).queryParam("ref", ref),
+				new ParameterizedTypeReference<List<GLRepoFile>>() {
+				});
+		final ArrayList<RepoFile> files = new ArrayList<RepoFile>(list.size());
+		for (final GLRepoFile x : list)
+			if (x.type.equals("tree"))
+				files.add(new RepoFile(x.name, x.hash, FileType.DIRECTORY));
+			else if (x.type.equals("blob"))
+				files.add(new RepoFile(x.name, x.hash, FileType.FILE));
+		return files;
 	}
 
 	private GLProjectInfo getGitLabProjectInfo() {

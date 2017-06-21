@@ -5,8 +5,8 @@ import java.util.Properties;
 
 import javax.servlet.http.HttpSession;
 
-import bwfdm.sara.api.Config;
-import bwfdm.sara.api.Config.ConfigurationException;
+import bwfdm.sara.Config;
+import bwfdm.sara.Config.ConfigurationException;
 
 public class GitRepoFactory {
 	private static final String GITREPO_ATTR = GitRepo.class.getCanonicalName();

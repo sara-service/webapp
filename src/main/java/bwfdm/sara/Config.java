@@ -1,4 +1,4 @@
-package bwfdm.sara.api;
+package bwfdm.sara;
 
 import java.io.FileReader;
 import java.io.IOException;

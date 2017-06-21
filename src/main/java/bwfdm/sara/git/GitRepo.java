@@ -116,6 +116,17 @@ public abstract class GitRepo {
 			String commitMessage, byte[] data);
 
 	/**
+	 * @param ref
+	 *            branch or tag containing the directory to list, in git ref
+	 *            format (ie. {@code heads/master} or {@code tags/test})
+	 * @param path
+	 *            full path to a directory in the repo, without the initial
+	 *            slash (ie. the root directory is {@code ""})
+	 * @return a list of files in that directory
+	 */
+	public abstract List<RepoFile> getFiles(String branch, String path);
+
+	/**
 	 * @return <code>true</code> if we already have a token for GitLab,
 	 *         <i>and</i> that token actually works (IOW this method must test
 	 *         whether the token still works)

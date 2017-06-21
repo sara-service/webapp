@@ -124,7 +124,7 @@ class RESTHelper {
 		return getList(uri(endpoint), type);
 	}
 
-	private <T> List<T> getList(final UriComponentsBuilder ucb,
+	<T> List<T> getList(final UriComponentsBuilder ucb,
 			final ParameterizedTypeReference<List<T>> type) {
 		final List<T> list = new ArrayList<T>();
 		// 100 per page is the limit. use it for max efficiency.

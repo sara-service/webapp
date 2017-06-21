@@ -25,6 +25,17 @@ function resetVersion(branch) {
 	});
 }
 
+function resetLicenses() {
+	API.get("/api/extract/licenses", {}, function(list) {
+		var licenses = [];
+		$.each(list, function(_, lic) {
+			licenses.push(lic.license);
+		});
+		autosave.value("license", licenses.join(", "));
+		branchChanged();
+	});
+}
+
 function save(value, id, autoset) {
 	API.put("/api/meta/" + id, { value: value, autodetected: autoset },
 		function() {
@@ -54,11 +65,6 @@ function loadLazyBranches(branches) {
 	var select = $("#lazy_branch");
 	select.empty();
 	$.each(branches, function(_, branch) {
-		if (!branch.action)
-			// don't allow selection of branches that the user doesn't
-			// want to publish
-			return;
-
 		var name = reftype_names[branch.type] + branch.name;
 		var option = $("<option>").attr("value", branch.ref).text(name)
 				.data("branch", branch);
@@ -68,7 +74,7 @@ function loadLazyBranches(branches) {
 	$("#lazy_button").click(function() {
 		var branch = $("#lazy_branch :selected").data("branch");
 		resetVersion(branch);
-		//resetLicenses(); // TODO
+		resetLicenses();
 	});
 	$("#lazy_branch").on("select change", branchChanged);
 	branchChanged();
@@ -121,5 +127,5 @@ function initPage(session) {
 		API.get("/api/repo/project-info", {}, resetTitle);
 	});
 	$("#update_version").data("can-update", false)
-	API.get("/api/repo/refs", {}, loadLazyBranches);
+	API.get("/api/repo/selected-refs", {}, loadLazyBranches);
 }

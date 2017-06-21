@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 
+import bwfdm.sara.Config;
 import bwfdm.sara.git.GitRepo;
 import bwfdm.sara.git.GitRepoFactory;
 

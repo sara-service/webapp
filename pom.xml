@@ -27,6 +27,7 @@
             <artifactId>jackson-databind</artifactId>
             <version>2.8.7</version>
         </dependency>
+        <!-- spring framework and spring-boot as main framework -->
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-web</artifactId>
@@ -42,6 +43,22 @@
 			<artifactId>spring-boot-starter-tomcat</artifactId>
 			<version>1.5.3.RELEASE</version>
 			<scope>provided</scope>
+		</dependency>
+		<!-- JRuby to run the Licensee Ruby Gem used for license
+		     detection -->
+		<dependency>
+			<groupId>org.jruby</groupId>
+			<artifactId>jruby-complete</artifactId>
+			<version>9.1.12.0</version>
+		</dependency>
+		<!-- juniversalchardet to guess character encoding of files.
+		     mvnrepo says this is MPL 1.1, but the project's site
+		     https://code.google.com/archive/p/juniversalchardet/
+		     also permits GPL ≥2.0 and LGPL ≥2.1 -->
+		<dependency>
+			<groupId>com.googlecode.juniversalchardet</groupId>
+			<artifactId>juniversalchardet</artifactId>
+			<version>1.0.3</version>
 		</dependency>
 	</dependencies>
 </project>

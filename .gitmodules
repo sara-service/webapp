@@ -1,0 +1,3 @@
+[submodule "src/main/resources/bwfdm/sara/extractor/licensee/ruby"]
+	path = src/main/resources/bwfdm/sara/extractor/licensee/ruby
+	url = https://github.com/benbalter/licensee.git
