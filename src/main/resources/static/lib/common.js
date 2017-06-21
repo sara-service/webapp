@@ -63,7 +63,7 @@ API.delete = function(path, callback) {
 var autosave = {};
 autosave.msg = {
 	saving: {
-		glyphicon: "glyphicon-refresh",
+		glyphicon: "glyphicon-transfer",
 		feedback: null,
 		text: null },
 	success: {

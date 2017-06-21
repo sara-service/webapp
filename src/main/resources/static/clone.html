@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="icon" href="lib/icon.png" type="image/png"/>
+	<link rel="shortcut icon" href="lib/icon.png" type="image/png"/>
+	<link rel="stylesheet" href="lib/bootstrap.min.css" />
+	<link rel="stylesheet" href="lib/sara.css" />
+	<script src="lib/jquery.min.js"></script>
+	<script src="lib/common.js"></script>
+	<script src="clone.js"></script>
+	<title>SARA</title>
+</head>
+<body><div class="fluid-container">
+	<div class="row">
+		<div class="col-sm-9 col-xs-12">
+			<img src="lib/header.svg" class="logo-header" />
+		</div>
+		<div class="col-sm-3 col-xs-12">
+			<a id="ir_link">
+				<img class="logo-header-right" />
+			</a>
+		</div>
+	</div>
+
+	<div class="row">
+		<div class="col-xs-12 action-header">
+			<h1>Cloning your repository...</h1>
+		</div>
+	</div>
+	<div id="loading" class="loading"><span class="sr-only">clone in progress...</span></div>
+	<p style="height:3ex"></p>
+
+	<ul class="list-unstyled">
+		<li class="text-success row">
+			<div class="col-sm-3 col-sm-offset-4">starting <kbd>git clone</kbd> command</div>
+			<div class="col-sm-1 glyphicon glyphicon-ok" aria-hidden="true"></div>
+			<div class="sr-only">(success)</div>
+		</li>
+		<li class="text-success row">
+			<div class="col-sm-3 col-sm-offset-4">cloning branch master</div>
+			<div class="col-sm-1 glyphicon glyphicon-ok" aria-hidden="true"></div>
+			<div class="sr-only">(success)</div>
+		</li>
+		<li class="text-primary row">
+			<div class="col-sm-3 col-sm-offset-4">cloning branch webapp</div>
+			<div class="col-sm-1 glyphicon glyphicon-transfer" aria-hidden="true"></div>
+			<div class="sr-only">(success)</div>
+		</li>
+		<li class="text-muted row">
+			<div class="col-sm-3 col-sm-offset-4">cloning tag test</div>
+			<div class="col-sm-1 glyphicon glyphicon-hourglass" aria-hidden="true"></div>
+			<div class="sr-only">(success)</div>
+		</li>
+		<li class="text-muted row">
+			<div class="col-sm-3 col-sm-offset-4">cloning tag foo</div>
+			<div class="col-sm-1 glyphicon glyphicon-hourglass" aria-hidden="true"></div>
+			<div class="sr-only">(success)</div>
+		</li>
+		<li class="text-muted row">
+			<div class="col-sm-3 col-sm-offset-4">cloning tag bar</div>
+			<div class="col-sm-1 glyphicon glyphicon-hourglass" aria-hidden="true"></div>
+			<div class="sr-only">(success)</div>
+		</li>
+		<li class="text-muted row">
+			<div class="col-sm-3 col-sm-offset-4">cloning tag baz</div>
+			<div class="col-sm-1 glyphicon glyphicon-hourglass" aria-hidden="true"></div>
+			<div class="sr-only">(success)</div>
+		</li>
+	</ul>
+
+	<p style="height:3ex"></p>
+	<div class="row">
+		<a class="btn btn-default col-sm-3" href="/api/clone/cancel">← cancel</a>
+	</div>
+	<p style="height:3ex"></p>
+</div></body>
+</html>
