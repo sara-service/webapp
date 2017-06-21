@@ -7,8 +7,8 @@ function resetTitle(info) {
 }
 
 function setTitleDescription(title, description) {
-	autosave.value("title", title);
-	autosave.value("description", description);
+	autosave.value("title", title.value);
+	autosave.value("description", description.value);
 	$("#title_block").removeAttr("style");
 	$("#title_loading").css("display", "none");
 }
@@ -17,7 +17,7 @@ function resetVersion(branch) {
 	API.get("/api/extract/version", { ref: branch.ref }, function(ex) {
 		if (ex.version === null)
 			ex.version = "";
-		autosave.value("version", ex.version);
+		autosave.reset("version", ex.version);
 		$("[data-versionfile]").text(ex.path);
 		$("#update_version").data("can-update", ex.canUpdate)
 		branchChanged();
@@ -31,7 +31,7 @@ function resetLicenses() {
 		$.each(list, function(_, lic) {
 			licenses.push(lic.license);
 		});
-		autosave.value("license", licenses.join(", "));
+		autosave.reset("license", licenses.join(", "));
 		branchChanged();
 	});
 }
@@ -81,12 +81,12 @@ function loadLazyBranches(branches) {
 }
 
 function initFields(info) {
-	if (info.title === null || info.description === null) {
+	if (info.title.autodetected || info.description.autodetected) {
 		API.get("/api/repo/project-info", {}, function(data) {
-			if (info.title === null)
-				info.title = data.name;
-			if (info.description === null)
-				info.description = data.description;
+			if (info.title.autodetected)
+				info.title.value = data.name;
+			if (info.description.autodetected)
+				info.description.value = data.description;
 			setTitleDescription(info.title, info.description);
 		});
 	} else
@@ -94,8 +94,8 @@ function initFields(info) {
 
 	// these cannot be autodetected at startup because no branch has
 	// been selected yet
-	autosave.value("version", info.version);
-	autosave.value("license", info.license);
+	autosave.value("version", info.version.value);
+	autosave.value("license", info.license.value);
 	$("#version_block").removeAttr("style");
 	$("#version_loading").css("display", "none");
 }
@@ -120,8 +120,8 @@ function initPage(session) {
 	});
 	autosave.init("version", save, validateNotEmpty);
 	autosave.init("license", save, validateNotEmpty);
-
 	API.get("/api/meta", {}, initFields);
+
 	$("#reset_title").click(function() {
 		$("#reset_title_loading").removeAttr("style");
 		API.get("/api/repo/project-info", {}, resetTitle);

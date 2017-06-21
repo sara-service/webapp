@@ -13,12 +13,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @RestController
 @RequestMapping("/api/meta")
 public class MetadataStorage {
-	private String get(final HttpSession session, final String name,
-			final boolean maskAuto) {
+	private MetaDataItem get(final HttpSession session, final String name) {
 		final Object auto = session.getAttribute(name + ".auto");
-		if (auto == null || ((boolean) auto && maskAuto))
-			return null;
-		return (String) session.getAttribute(name); // TODO database
+		if (auto == null)
+			return new MetaDataItem("", true);
+		final String value = (String) session.getAttribute(name);
+		return new MetaDataItem(value, auto == null || (boolean) auto);
 	}
 
 	private void set(final HttpSession session, final String name,
@@ -28,14 +28,44 @@ public class MetadataStorage {
 	}
 
 	@GetMapping("")
-	public BasicMetaData getBasicMetaData(
-			@RequestParam(name = "mask-autodetected", defaultValue = "true") final boolean maskAuto,
-			final HttpSession session) {
-		final String title = get(session, "title", maskAuto);
-		final String desc = get(session, "description", maskAuto);
-		final String ver = get(session, "version", maskAuto);
-		final String lic = get(session, "license", maskAuto);
+	public BasicMetaData getBasicMetaData(final HttpSession session) {
+		final MetaDataItem title = get(session, "title");
+		final MetaDataItem desc = get(session, "description");
+		final MetaDataItem ver = get(session, "version");
+		final MetaDataItem lic = get(session, "license");
 		return new BasicMetaData(title, desc, ver, lic);
+	}
+
+	private static class BasicMetaData {
+		@JsonProperty
+		final MetaDataItem title;
+		@JsonProperty
+		final MetaDataItem description;
+		@JsonProperty
+		final MetaDataItem version;
+		@JsonProperty
+		final MetaDataItem license;
+
+		private BasicMetaData(final MetaDataItem title,
+				final MetaDataItem description, final MetaDataItem version,
+				final MetaDataItem license) {
+			this.title = title;
+			this.description = description;
+			this.version = version;
+			this.license = license;
+		}
+	}
+
+	private static class MetaDataItem {
+		@JsonProperty
+		final String value;
+		@JsonProperty("autodetected")
+		final boolean auto;
+
+		private MetaDataItem(final String value, final boolean auto) {
+			this.value = value;
+			this.auto = auto;
+		}
 	}
 
 	@PutMapping("title")
@@ -68,24 +98,5 @@ public class MetadataStorage {
 			@RequestParam(name = "autodetected", defaultValue = "false") final boolean auto,
 			final HttpSession session) {
 		set(session, "license", license, auto);
-	}
-
-	private static class BasicMetaData {
-		@JsonProperty
-		final String title;
-		@JsonProperty
-		final String description;
-		@JsonProperty
-		final String version;
-		@JsonProperty
-		final String license;
-
-		private BasicMetaData(final String title, final String description,
-				final String version, final String license) {
-			this.title = title;
-			this.description = description;
-			this.version = version;
-			this.license = license;
-		}
 	}
 }
