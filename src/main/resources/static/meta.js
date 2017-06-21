@@ -21,7 +21,12 @@ function resetVersion(branch) {
 		$("[data-versionfile]").text(ex.path);
 		$("#update_version").data("can-update", ex.canUpdate)
 		branchChanged();
-		// TODO remember that branch somewhere
+		saveSourceBranch(branch);
+		
+		var loader = $("#lazy_loading");
+		loader.data("version-done", true);
+		if (loader.data("license-done"))
+			$("#lazy_loading").css("display", "none");
 	});
 }
 
@@ -32,7 +37,11 @@ function resetLicenses() {
 			licenses.push(lic.license);
 		});
 		autosave.reset("license", licenses.join(", "));
-		branchChanged();
+		
+		var loader = $("#lazy_loading");
+		loader.data("license-done", true);
+		if (loader.data("version-done"))
+			$("#lazy_loading").css("display", "none");
 	});
 }
 
@@ -50,17 +59,22 @@ function branchChanged() {
 	var update = $("#update_version");
 	if (autosave.isValid("version") && branch.type == "BRANCH")
 		autosave.configureUpdateButton("version", function(value, id) {
-		API.post("/api/extract/version", { version: value },
+		API.post("/api/extract/version",
+			{ version: value, branch: branch.name },
 			function() {
 				autosave.reset(id, value);
-				// TODO remember that branch somewhere
+				saveSourceBranch(branch);
 			});
 		});
 	else
 		autosave.configureUpdateButton("version", null);
 }
 
-function loadLazyBranches(branches) {
+function saveSourceBranch(branch) {
+	API.put("/api/meta/source-branch", { value: branch.ref });
+}
+
+function loadLazyBranches(branches, source) {
 	// update list of branches
 	var select = $("#lazy_branch");
 	select.empty();
@@ -69,9 +83,16 @@ function loadLazyBranches(branches) {
 		var option = $("<option>").attr("value", branch.ref).text(name)
 				.data("branch", branch);
 		select.append(option);
+		// select that item if it's the one the user used last time
+		if (!source.autodetected && source.value == branch.ref)
+			select.val(source.value);
 	});
 	// event handler for "lazy" button
 	$("#lazy_button").click(function() {
+		var loader = $("#lazy_loading");
+		loader.removeAttr("style");
+		loader.data("version-done", false);
+		loader.data("license-done", false);
 		var branch = $("#lazy_branch :selected").data("branch");
 		resetVersion(branch);
 		resetLicenses();
@@ -127,5 +148,9 @@ function initPage(session) {
 		API.get("/api/repo/project-info", {}, resetTitle);
 	});
 	$("#update_version").data("can-update", false)
-	API.get("/api/repo/selected-refs", {}, loadLazyBranches);
+	API.get("/api/repo/selected-refs", {}, function(branches) {
+		API.get("/api/meta/source-branch", {}, function(source) {
+			loadLazyBranches(branches, source);
+		});
+	});
 }

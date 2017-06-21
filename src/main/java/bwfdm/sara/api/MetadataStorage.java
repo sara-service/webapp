@@ -99,4 +99,17 @@ public class MetadataStorage {
 			final HttpSession session) {
 		set(session, "license", license, auto);
 	}
+
+	@GetMapping("source-branch")
+	public MetaDataItem getSourceBranch(final HttpSession session) {
+		return get(session, "branch");
+	}
+
+	@PutMapping("source-branch")
+	public void setSourceBranch(
+			@RequestParam("value") final String branch,
+			@RequestParam(name = "autodetected", defaultValue = "false") final boolean auto,
+			final HttpSession session) {
+		set(session, "branch", branch, auto);
+	}
 }
