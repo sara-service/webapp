@@ -33,41 +33,13 @@
 	<div id="loading" class="loading"><span class="sr-only">clone in progress...</span></div>
 	<p style="height:3ex"></p>
 
-	<ul class="list-unstyled">
-		<li class="text-success row">
-			<div class="col-sm-3 col-sm-offset-4">starting <kbd>git clone</kbd> command</div>
-			<div class="col-sm-1 glyphicon glyphicon-ok" aria-hidden="true"></div>
-			<div class="sr-only">(success)</div>
-		</li>
-		<li class="text-success row">
-			<div class="col-sm-3 col-sm-offset-4">cloning branch master</div>
-			<div class="col-sm-1 glyphicon glyphicon-ok" aria-hidden="true"></div>
-			<div class="sr-only">(success)</div>
-		</li>
-		<li class="text-primary row">
-			<div class="col-sm-3 col-sm-offset-4">cloning branch webapp</div>
-			<div class="col-sm-1 glyphicon glyphicon-transfer" aria-hidden="true"></div>
-			<div class="sr-only">(success)</div>
-		</li>
-		<li class="text-muted row">
-			<div class="col-sm-3 col-sm-offset-4">cloning tag test</div>
-			<div class="col-sm-1 glyphicon glyphicon-hourglass" aria-hidden="true"></div>
-			<div class="sr-only">(success)</div>
-		</li>
-		<li class="text-muted row">
-			<div class="col-sm-3 col-sm-offset-4">cloning tag foo</div>
-			<div class="col-sm-1 glyphicon glyphicon-hourglass" aria-hidden="true"></div>
-			<div class="sr-only">(success)</div>
-		</li>
-		<li class="text-muted row">
-			<div class="col-sm-3 col-sm-offset-4">cloning tag bar</div>
-			<div class="col-sm-1 glyphicon glyphicon-hourglass" aria-hidden="true"></div>
-			<div class="sr-only">(success)</div>
-		</li>
-		<li class="text-muted row">
-			<div class="col-sm-3 col-sm-offset-4">cloning tag baz</div>
-			<div class="col-sm-1 glyphicon glyphicon-hourglass" aria-hidden="true"></div>
-			<div class="sr-only">(success)</div>
+	<ul class="list-unstyled" id="steps">
+		<li class="row text-success" id="template" style="display:none">
+			<div class="col-xs-10 col-xs-offset-1 col-sm-6 col-sm-offset-3 col-md-4 col-md-offset-4">
+				<span class="glyphicon inline-icon glyphicon-ok" aria-hidden="true" name="icon"></span>
+				<span class="sr-only" name="status">(success)</span>
+				<span name="text">initializing temporary repository</span>
+			</div>
 		</li>
 	</ul>
 

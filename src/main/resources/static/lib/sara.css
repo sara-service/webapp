@@ -75,6 +75,10 @@ body {
 	width: 100%;
 }
 
+.inline-icon {
+	margin: 0px 0.5em;
+}
+
 /* these are actually the dark colors so they are readable on white */
 .sara-red {
 	color: #8a3e49;

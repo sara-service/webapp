@@ -7,14 +7,18 @@ function template(name) {
 	template.index++;
 	root.attr("id", "form_" + template.index);
 	var form = { root: root };
-	// for all .form-control's and named labels, change their ID to be
-	// unique, but also collect them in the object that gets returned.
-	var elements = $(".form-control, label[name]", root);
+	// callect all child elements that have a name attribute
+	var elements = $("[name]", root);
 	elements.each(function() {
 		var id = $(this).attr("name");
-		var name = id + "_" + template.index;
-		$(this).attr("id", name).siblings("label").attr("for", name);
 		form[id] = $(this);
+		// rename element to be unique
+		var name = id + "_" + template.index;
+		$(this).attr("id", name)
+		// if it has a label, make sure it's associated with its control
+		var label = $(this).siblings("label");
+		if (label)
+			label.attr("for", name);
 	});
 	return form;
 }
@@ -60,6 +64,15 @@ API.delete = function(path, callback) {
 	});
 }
 
+function setStatusClass(elem, status_list, name, status) {
+	$.each(status_list, function(_, st) {
+		if (st[name])
+			elem.removeClass(st[name]);
+	});
+	if (status[name])
+		elem.addClass(status[name]);
+}
+
 var autosave = {};
 autosave.msg = {
 	saving: {
@@ -83,12 +96,7 @@ autosave.msg = {
 autosave.feedback = function(id, st) {
 	function setClass(id, part, name, value) {
 		var elem = $("#" + id + "_" + part);
-		$.each(autosave.msg, function(_, st) {
-			if (st[name])
-				elem.removeClass(st[name]);
-		});
-		if (value[name])
-			elem.addClass(value[name]);
+		setStatusClass(elem, autosave.msg, name, value);
 	}
 
 	setClass(id, "group", "feedback", st);
