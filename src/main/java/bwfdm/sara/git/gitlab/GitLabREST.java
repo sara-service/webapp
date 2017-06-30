@@ -25,7 +25,7 @@ import bwfdm.sara.git.RepoFile.FileType;
 import bwfdm.sara.git.Tag;
 
 /** high-level abstraction of the GitLab REST API. */
-public class GitLabREST extends GitRepo {
+public class GitLabREST implements GitRepo {
 	private final String root;
 	private final String appID;
 	private final String appSecret;
@@ -33,60 +33,63 @@ public class GitLabREST extends GitRepo {
 	private OAuthCode auth;
 	private String apiProject;
 	private String guiProject;
+	private String token;
 
 	/**
-	 * @param id
-	 *            ID of this GitLab instance in {@code repos.properties}
-	 * @param gitlab
-	 *            URL to GitLab root
 	 * @param appID
 	 *            OAuth application ID
 	 * @param appSecret
 	 *            OAuth application secret
+	 * @param gitlab
+	 *            URL to GitLab root
 	 */
-	public GitLabREST(final String id, final String root, final String appID,
+	public GitLabREST(final String root, final String appID,
 			final String appSecret) {
-		super(id);
 		this.root = root;
 		this.appID = appID;
 		this.appSecret = appSecret;
 	}
 
-	public GitLabREST(final String id, final Properties args) {
-		super(id);
+	public GitLabREST(final Properties args) {
 		root = args.getProperty("root");
 		appID = args.getProperty("oauth.id");
 		appSecret = args.getProperty("oauth.secret");
 	}
 
 	@Override
-	public void setProject(final String project) {
+	public void setProjectPath(final String project) {
 		apiProject = project;
-		rest = new RESTHelper(root, project);
 		guiProject = UrlEncode.decode(project);
+		rest = new RESTHelper(root, project);
+		// try to reuse the old token. it should work for any project (as long
+		// as it hasn't expired yet).
+		rest.setToken(token);
 	}
 
 	@Override
-	public String getProject() {
+	public String getProjectPath() {
 		return apiProject;
 	}
 
 	@Override
 	public boolean hasWorkingToken() {
-		if (!rest.hasToken())
+		if (token == null)
 			return false;
 
+		// looks like we do have a token. send a dummy API request to see
+		// whether it's a WORKING token.
 		try {
 			getProjectInfo();
 			return true;
-		} catch (final IllegalArgumentException e) {
-			// guess that didn't work
+		} catch (final Exception e) {
+			// that token doesn't appear to work
+			token = null;
 			return false;
 		}
 	}
 
 	@Override
-	public RedirectView triggerLogin(final String redirURI,
+	public RedirectView triggerAuth(final String redirURI,
 			final RedirectAttributes redir, final HttpSession session) {
 		if (hasWorkingToken())
 			return null;
@@ -96,13 +99,13 @@ public class GitLabREST extends GitRepo {
 	}
 
 	@Override
-	public boolean parseLoginResponse(
+	public boolean parseAuthResponse(
 			final java.util.Map<String, String> params,
 			final HttpSession session) {
 		if (auth == null)
 			return false;
 
-		final String token = auth.parse(params);
+		token = auth.parse(params);
 		rest.setToken(token);
 		return token != null;
 	}

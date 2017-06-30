@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.view.RedirectView;
 
+import bwfdm.sara.ProjectFactory;
 import bwfdm.sara.api.RefInfo.Action;
 import bwfdm.sara.git.Branch;
 import bwfdm.sara.git.Commit;
@@ -29,8 +30,7 @@ import bwfdm.sara.git.Tag;
 public class Repository {
 	@GetMapping("refs")
 	public List<RefInfo> getBranches(final HttpSession session) {
-		final List<RefInfo> refs = getAllRefs(GitRepoFactory
-				.getInstance(session));
+		final List<RefInfo> refs = getAllRefs(session);
 		Collections.sort(refs);
 		loadActions(refs, session);
 		return refs;
@@ -45,7 +45,8 @@ public class Repository {
 		return refs;
 	}
 
-	private List<RefInfo> getAllRefs(final GitRepo gl) {
+	private List<RefInfo> getAllRefs(final HttpSession session) {
+		final GitRepo gl = ProjectFactory.getInstance(session).getGitRepo();
 		final List<RefInfo> refs = new ArrayList<RefInfo>();
 		for (final Branch b : gl.getBranches())
 			refs.add(new RefInfo(b));

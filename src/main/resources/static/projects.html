@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="icon" href="lib/icon.png" type="image/png"/>
+	<link rel="shortcut icon" href="lib/icon.png" type="image/png"/>
+	<link rel="stylesheet" href="lib/bootstrap.min.css" />
+	<link rel="stylesheet" href="lib/sara.css" />
+	<script src="lib/jquery.min.js"></script>
+	<script src="lib/bootstrap.min.js"></script>
+	<script src="lib/common.js"></script>
+	<script src="branches.js"></script>
+	<title>SARA</title>
+</head>
+<body><div class="fluid-container">
+	<div class="row">
+		<div class="col-sm-9 col-xs-12">
+			<img src="lib/header.svg" class="logo-header" />
+		</div>
+		<div class="col-sm-3 col-xs-12">
+			<a id="ir_link">
+				<img class="logo-header-right" />
+			</a>
+		</div>
+	</div>
+
+	<div class="row">
+		<div class="col-xs-12 action-header">
+			<h1>Pick a project to publish!</h1>
+		</div>
+	</div>
+
+	<h2><b>TODO</b> Allow the user to pick projects here</h2>
+	<form class="form-horizontal" id="projects">
+		<div class="form-group" id="template" style="display:none">
+			<div class="col-xs-12 col-sm-6 col-md-4 col-lg-3 nopad">
+				<button type="button" class="btn btn-default form-control" name="select">SARA-server (Uni Konstanz)</button>
+			</div>
+		</div>
+	</form>
+	<div id="loading" class="loading"><span class="sr-only">loading, please wait...</span></div>
+
+	<p style="height:3ex"></p>
+	<div class="row">
+		<a class="btn btn-default col-sm-3" href="/api/repo/return">← return to GitLab</a>
+	</div>
+	<p style="height:3ex"></p>
+</div></body>
+</html>

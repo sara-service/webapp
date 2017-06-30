@@ -8,36 +8,23 @@ import javax.servlet.http.HttpSession;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 
-public abstract class GitRepo {
-	private final String id;
-
-	protected GitRepo(final String id) {
-		this.id = id;
-	}
-
+public interface GitRepo {
 	/**
-	 * @return ID of the repository, as given in the login API {@code repo=}
-	 *         query variable
+	 * @return path / ID used to identify the project in the git repo
 	 */
-	public String getID() {
-		return id;
-	}
+	public String getProjectPath();
 
 	/**
-	 * @return name of the project, as given in the login API {@code project=}
-	 *         query variable
-	 */
-	public abstract String getProject();
-
-	/**
+	 * Changes the project path / ID. This should attempt not to invalidate an
+	 * existing authorization if possible.
+	 * 
 	 * @param project
-	 *            name of the project, as given in the login API
-	 *            {@code project=} query variable
+	 *            path / ID used to identify the project in the git repo
 	 */
-	public abstract void setProject(final String project);
+	public void setProjectPath(final String project);
 
 	/** @return the url of the "main" page to view a project */
-	public abstract String getProjectViewURL();
+	public String getProjectViewURL();
 
 	/**
 	 * @param branch
@@ -46,7 +33,7 @@ public abstract class GitRepo {
 	 *            full, absolute path to file in repo
 	 * @return the url of a page where the user can edit the file
 	 */
-	public abstract String getEditURL(final String branch, String path);
+	public String getEditURL(final String branch, String path);
 
 	/**
 	 * @param branch
@@ -55,16 +42,16 @@ public abstract class GitRepo {
 	 *            full, absolute path to file in repo
 	 * @return the url of a page where the user can create such a file
 	 */
-	public abstract String getCreateURL(String branch, String path);
+	public String getCreateURL(String branch, String path);
 
 	/** @return a list of all branches in the given project */
-	public abstract List<Branch> getBranches();
+	public List<Branch> getBranches();
 
 	/** @return a list of all tags in the given project */
-	public abstract List<Tag> getTags();
+	public List<Tag> getTags();
 
 	/** @return the project metadata */
-	public abstract ProjectInfo getProjectInfo();
+	public ProjectInfo getProjectInfo();
 
 	/**
 	 * Updates the project metadata with the fields provided. <code>null</code>
@@ -75,7 +62,7 @@ public abstract class GitRepo {
 	 * @param description
 	 *            new project description, or <code>null</code>
 	 */
-	public abstract void updateProjectInfo(String name, String description);
+	public void updateProjectInfo(String name, String description);
 
 	/**
 	 * @param ref
@@ -85,7 +72,7 @@ public abstract class GitRepo {
 	 *            max
 	 * @return a list of the first few commits in a given branch or tag
 	 */
-	public abstract List<Commit> getCommits(final String ref, final int limit);
+	public List<Commit> getCommits(final String ref, final int limit);
 
 	/**
 	 * @param ref
@@ -96,7 +83,7 @@ public abstract class GitRepo {
 	 * @return the contents of the file as a byte array, or <code>null</code> if
 	 *         the file doesn't exist
 	 */
-	public abstract byte[] getBlob(String ref, String path);
+	public byte[] getBlob(String ref, String path);
 
 	/**
 	 * Commits a file to the repo, either updating or creating it. This
@@ -112,8 +99,8 @@ public abstract class GitRepo {
 	 *            the contents of the file as a byte array (non-
 	 *            <code>null</code>)
 	 */
-	public abstract void putBlob(String branch, String path,
-			String commitMessage, byte[] data);
+	public void putBlob(String branch, String path, String commitMessage,
+			byte[] data);
 
 	/**
 	 * @param ref
@@ -124,21 +111,21 @@ public abstract class GitRepo {
 	 *            slash (ie. the root directory is {@code ""})
 	 * @return a list of files in that directory
 	 */
-	public abstract List<RepoFile> getFiles(String branch, String path);
+	public List<RepoFile> getFiles(String branch, String path);
 
 	/**
 	 * @return <code>true</code> if we already have a token for GitLab,
 	 *         <i>and</i> that token actually works (IOW this method must test
 	 *         whether the token still works)
 	 */
-	public abstract boolean hasWorkingToken();
+	public boolean hasWorkingToken();
 
 	/**
 	 * Trigger the authorization process.
 	 * 
 	 * @param redirURI
 	 *            login response URL. anything sent here will end up in
-	 *            {@link #parseLoginResponse(RedirectAttributes, HttpSession)}
+	 *            {@link #parseAuthResponse(RedirectAttributes, HttpSession)}
 	 * @param redir
 	 *            {@link RedirectAttributes} for setting the query string
 	 *            attributes of the returned {@link RedirectView} (weird API)
@@ -151,7 +138,7 @@ public abstract class GitRepo {
 	 *         <code>null</code> if there is already a working token so that the
 	 *         user doesn't have to go through authorization again.
 	 */
-	public abstract RedirectView triggerLogin(final String redirURI,
+	public RedirectView triggerAuth(final String redirURI,
 			RedirectAttributes redir, HttpSession session);
 
 	/**
@@ -166,6 +153,6 @@ public abstract class GitRepo {
 	 * @return <code>true</code> if authorization was successful;
 	 *         <code>false</code> redirects to an error page instead
 	 */
-	public abstract boolean parseLoginResponse(
-			final Map<String, String> params, final HttpSession session);
+	public boolean parseAuthResponse(final Map<String, String> params,
+			final HttpSession session);
 }

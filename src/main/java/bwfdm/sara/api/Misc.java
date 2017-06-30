@@ -25,7 +25,7 @@ public class Misc {
 		private final IRMeta ir;
 
 		public SessionInfo(final HttpSession session) {
-			project = GitRepoFactory.getInstance(session).getProject();
+			project = GitRepoFactory.getInstance(session).getProjectPath();
 			// TODO read this from the session as well
 			ir = new IRMeta("https://kops.uni-konstanz.de/", "kops.svg");
 		}

@@ -67,10 +67,6 @@ class RESTHelper {
 		auth = new HttpEntity<Void>(authMap);
 	}
 
-	boolean hasToken() {
-		return auth != null;
-	}
-
 	UriComponentsBuilder uri(final String endpoint) {
 		return UriComponentsBuilder.fromHttpUrl(root + endpoint);
 	}
