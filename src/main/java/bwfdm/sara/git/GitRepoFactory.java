@@ -7,17 +7,17 @@ import javax.servlet.http.HttpSession;
 
 import bwfdm.sara.Config;
 import bwfdm.sara.Config.ConfigurationException;
-import bwfdm.sara.ProjectFactory;
+import bwfdm.sara.project.Project;
 
 public class GitRepoFactory {
 	public static GitRepo getInstance(final HttpSession session) {
-		return ProjectFactory.getInstance(session).getGitRepo();
+		return Project.getInstance(session).getGitRepo();
 	}
 
 	/**
 	 * Creates a new {@link GitRepo} instance, overwriting the previous one.
 	 * Meant to be called by
-	 * {@link ProjectFactory#createInstance(HttpSession, String)} only!
+	 * {@link Project#createInstance(HttpSession, String)} only!
 	 * 
 	 * @param session
 	 *            the user's {@link HttpSession}

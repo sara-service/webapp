@@ -2,6 +2,7 @@ package bwfdm.sara.api;
 
 import bwfdm.sara.git.Branch;
 import bwfdm.sara.git.Tag;
+import bwfdm.sara.project.RefAction;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -31,13 +32,8 @@ class RefInfo implements Comparable<RefInfo> {
 	/** <code>true</code> if this is the default branch */
 	@JsonProperty("default")
 	final boolean isDefault;
-
-	/** selected archival option. */
 	@JsonProperty("action")
-	Action action;
-	/** ID of first commit to archive. */
-	@JsonProperty("start")
-	String start;
+	RefAction action;
 
 	RefInfo(final Branch b) {
 		type = RefType.BRANCH;
@@ -82,10 +78,6 @@ class RefInfo implements Comparable<RefInfo> {
 	public String toString() {
 		return "Ref{" + ref + ", " + (isProtected ? "protected, " : "")
 				+ "action=" + action + "}";
-	}
-
-	public enum Action {
-		PUBLISH_FULL, PUBLISH_ABBREV, PUBLISH_LATEST, ARCHIVE_PUBLIC, ARCHIVE_HIDDEN
 	}
 
 	public enum RefType {

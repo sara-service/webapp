@@ -13,9 +13,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 
 import bwfdm.sara.Config;
-import bwfdm.sara.Project;
-import bwfdm.sara.ProjectFactory;
 import bwfdm.sara.git.GitRepo;
+import bwfdm.sara.project.Project;
 
 @RestController
 @ControllerAdvice
@@ -28,8 +27,8 @@ public class Authorization {
 			final RedirectAttributes redir, final HttpSession session) {
 		// check whether the user is pushy and tries to archive two projects at
 		// once. if so, make sure he knows it won't work.
-		if (ProjectFactory.hasInstance(session)) {
-			final Project project = ProjectFactory.getInstance(session);
+		if (Project.hasInstance(session)) {
+			final Project project = Project.getInstance(session);
 			if (!project.getRepoID().equals(gitRepo))
 				return warnPushy(redir, gitRepo, projectPath);
 			final String prevProjectPath = project.getGitRepo()
@@ -56,15 +55,15 @@ public class Authorization {
 			@RequestParam(name = "project", required = false) final String projectPath,
 			final RedirectAttributes redir, final HttpSession session) {
 		// if the user does not have a session for this repo, create one
-		if (!ProjectFactory.hasInstance(session)
-				|| !ProjectFactory.getInstance(session).getRepoID()
+		if (!Project.hasInstance(session)
+				|| !Project.getInstance(session).getRepoID()
 						.equals(gitRepo))
-			ProjectFactory.createInstance(session, gitRepo, projectPath);
+			Project.createInstance(session, gitRepo, projectPath);
 
 		// if the user already has a session, change the project field if
 		// necessary. if the token still works, we're done; no need to bother
 		// the user with authorization again.
-		final Project project = ProjectFactory.getInstance(session);
+		final Project project = Project.getInstance(session);
 		final GitRepo repo = project.getGitRepo();
 		final String prevProjectPath = repo.getProjectPath();
 		if (prevProjectPath == null || !prevProjectPath.equals(projectPath))
@@ -81,12 +80,12 @@ public class Authorization {
 	public RedirectView getOAuthToken(
 			@RequestParam final Map<String, String> args,
 			final RedirectAttributes redir, final HttpSession session) {
-		if (!ProjectFactory.hasInstance(session))
+		if (!Project.hasInstance(session))
 			// session has timed out before user returned. this should never
 			// happen.
 			return new RedirectView("/autherror.html");
 
-		final Project project = ProjectFactory.getInstance(session);
+		final Project project = Project.getInstance(session);
 		if (project.getGitRepo().parseAuthResponse(args, session))
 			return authFinished(project);
 

@@ -5,8 +5,8 @@ var forms = [];
 function save(branch) {
 	API.post("/api/repo/refs", {
 		ref: branch.ref,
-		action: branch.action,
-		start: branch.start,
+		publish: branch.action.publish,
+		firstCommit: branch.action.firstCommit,
 	});
 }
 
@@ -21,8 +21,8 @@ function addCommits(branch, select, commits) {
 	// get rid of the placeholder
 	$("option:disabled", select).remove();
 	// select previously selected option
-	if (branch.start)
-		select.val(branch.start);
+	if (branch.action.firstCommit)
+		select.val(branch.action.firstCommit);
 }
 
 function addBranch(branch) {
@@ -39,25 +39,25 @@ function addBranch(branch) {
 	form.branch_label.text(reftype_names[branch.type] + branch.name);
 	// default to publishing everything the user adds, because that's
 	// what we prefer.
-	if (!branch.action)
-		branch.action = "PUBLISH_FULL";
-	form.action.val(branch.action);
-	if (!branch.start)
-		branch.start = "HEAD";
+	if (!branch.action.publish)
+		branch.action.publish = "PUBLISH_FULL";
+	form.action.val(branch.action.publish);
+	if (!branch.action.firstCommit)
+		branch.action.firstCommit = "HEAD";
 
 	// event handler stuff
 	form.remove.click(function() {
-		branch.action = null;
+		branch.action.publish = null;
 		delete forms[branch.ref];
 		form.root.remove();
 		save(branch);
 	});
 	form.action.on("select change", function() {
-		branch.action = $(this).val();
+		branch.action.publish = $(this).val();
 		save(branch);
 	});
 	form.commit.on("select change", function() {
-		branch.start = $(this).val();
+		branch.action.firstCommit = $(this).val();
 		save(branch);
 	});
 	forms[branch.ref] = form;
@@ -85,7 +85,7 @@ function addBranches(branches) {
 	});
 	// add all branches which have an action set
 	$.each(branches, function(_, branch) {
-		if (branch.action)
+		if (branch.action.publish)
 			addBranch(branch);
 	});
 	// event handler for "add" button

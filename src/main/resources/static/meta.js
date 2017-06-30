@@ -6,23 +6,19 @@ function resetTitle(info) {
 	$("#reset_title_loading").css("display", "none");
 }
 
-function setTitleDescription(title, description) {
-	autosave.value("title", title.value);
-	autosave.value("description", description.value);
-	$("#title_block").removeAttr("style");
-	$("#title_loading").css("display", "none");
-}
-
 function resetVersion(branch) {
 	API.get("/api/extract/version", { ref: branch.ref }, function(ex) {
 		if (ex.version === null)
 			ex.version = "";
 		autosave.reset("version", ex.version);
+		// change the text on the "update version" button as well
 		$("[data-versionfile]").text(ex.path);
-		$("#update_version").data("can-update", ex.canUpdate)
+		$("#update_version").data("can-update", ex.canUpdate);
 		branchChanged();
+		// remember which branch the version was extracted from
 		saveSourceBranch(branch);
-		
+
+		// remove the loader iff the license extraction is also finished
 		var loader = $("#lazy_loading");
 		loader.data("version-done", true);
 		if (loader.data("license-done"))
@@ -32,12 +28,14 @@ function resetVersion(branch) {
 
 function resetLicenses() {
 	API.get("/api/extract/licenses", {}, function(list) {
+		// TODO make user confirm that the licenses are ok
 		var licenses = [];
 		$.each(list, function(_, lic) {
 			licenses.push(lic.license);
 		});
 		autosave.reset("license", licenses.join(", "));
 		
+		// remove the loader iff the version extraction is also finished
 		var loader = $("#lazy_loading");
 		loader.data("license-done", true);
 		if (loader.data("version-done"))
@@ -57,7 +55,8 @@ function branchChanged() {
 	$("[data-branch]").text(reftype_names[branch.type] + branch.name);
 
 	var update = $("#update_version");
-	if (autosave.isValid("version") && branch.type == "BRANCH")
+	if (autosave.isValid("version") && branch.type == "BRANCH"
+			&& update.data("can-update"))
 		autosave.configureUpdateButton("version", function(value, id) {
 		API.post("/api/extract/version",
 			{ version: value, branch: branch.name },
@@ -71,7 +70,7 @@ function branchChanged() {
 }
 
 function saveSourceBranch(branch) {
-	API.put("/api/meta/source-branch", { value: branch.ref });
+	API.put("/api/meta/sourceBranch", { value: branch.ref });
 }
 
 function loadLazyBranches(branches, source) {
@@ -102,7 +101,28 @@ function loadLazyBranches(branches, source) {
 }
 
 function initFields(info) {
+	function setField(field, value) {
+		if (value.autodetected)
+			// field value was read from project settings, so we want to
+			// write it back
+			autosave.reset(field, value.value);
+		else
+			// field value came from the database; no need to write it
+			// back to the database
+			autosave.value(field, value.value);
+	}
+
+	function setTitleDescription(title, description) {
+		setField("title", title);
+		setField("description", description);
+		$("#title_block").removeAttr("style");
+		$("#title_loading").css("display", "none");
+	}
+
 	if (info.title.autodetected || info.description.autodetected) {
+		// if the values were autodetected last time, the user probably
+		// wants them to track changes made in the git repo, so we just
+		// autodetect them again here.
 		API.get("/api/repo/project-info", {}, function(data) {
 			if (info.title.autodetected)
 				info.title.value = data.name;
@@ -113,12 +133,15 @@ function initFields(info) {
 	} else
 		setTitleDescription(info.title, info.description);
 
-	// these cannot be autodetected at startup because no branch has
-	// been selected yet
+	// these cannot be autodetected at first-time startup because no
+	// branch has been selected yet
 	autosave.value("version", info.version.value);
 	autosave.value("license", info.license.value);
-	$("#version_block").removeAttr("style");
-	$("#version_loading").css("display", "none");
+	API.get("/api/repo/selected-refs", {}, function(branches) {
+		loadLazyBranches(branches, info.sourceBranch);
+		$("#version_block").removeAttr("style");
+		$("#version_loading").css("display", "none");
+	});
 }
 
 function validateNotEmpty(value) {
@@ -146,11 +169,5 @@ function initPage(session) {
 	$("#reset_title").click(function() {
 		$("#reset_title_loading").removeAttr("style");
 		API.get("/api/repo/project-info", {}, resetTitle);
-	});
-	$("#update_version").data("can-update", false)
-	API.get("/api/repo/selected-refs", {}, function(branches) {
-		API.get("/api/meta/source-branch", {}, function(source) {
-			loadLazyBranches(branches, source);
-		});
 	});
 }

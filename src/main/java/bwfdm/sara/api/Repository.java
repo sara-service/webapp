@@ -2,7 +2,6 @@ package bwfdm.sara.api;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -16,14 +15,15 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.view.RedirectView;
 
-import bwfdm.sara.ProjectFactory;
-import bwfdm.sara.api.RefInfo.Action;
 import bwfdm.sara.git.Branch;
 import bwfdm.sara.git.Commit;
 import bwfdm.sara.git.GitRepo;
 import bwfdm.sara.git.GitRepoFactory;
 import bwfdm.sara.git.ProjectInfo;
 import bwfdm.sara.git.Tag;
+import bwfdm.sara.project.Project;
+import bwfdm.sara.project.RefAction;
+import bwfdm.sara.project.RefAction.PublicationMethod;
 
 @RestController
 @RequestMapping("/api/repo")
@@ -46,7 +46,7 @@ public class Repository {
 	}
 
 	private List<RefInfo> getAllRefs(final HttpSession session) {
-		final GitRepo gl = ProjectFactory.getInstance(session).getGitRepo();
+		final GitRepo gl = Project.getInstance(session).getGitRepo();
 		final List<RefInfo> refs = new ArrayList<RefInfo>();
 		for (final Branch b : gl.getBranches())
 			refs.add(new RefInfo(b));
@@ -56,52 +56,32 @@ public class Repository {
 	}
 
 	private void loadActions(final List<RefInfo> refs, final HttpSession session) {
-		// FIXME load from database instead
-		if (session.getAttribute("branch_actions") == null) {
-			final HashMap<String, Action> map = new HashMap<String, Action>();
+		final Map<String, RefAction> actionMap = Project.getInstance(
+				session).getRefActions();
+
+		if (actionMap.isEmpty())
 			// default to publishing protected branches (assumed to be the main
 			// branches), while only archiving everything else.
-			for (final RefInfo r : refs) {
-				if (r.isProtected || r.isDefault)
-					r.action = Action.PUBLISH_FULL;
-				map.put(r.ref, r.action);
-			}
-			session.setAttribute("branch_actions", map);
-		}
-
-		@SuppressWarnings("unchecked")
-		final Map<String, Action> actions = (Map<String, Action>) session
-				.getAttribute("branch_actions");
-		for (final RefInfo r : refs)
-			r.action = actions.get(r.ref);
-
-		@SuppressWarnings("unchecked")
-		final Map<String, String> starts = (Map<String, String>) session
-				.getAttribute("branch_starts");
-		if (starts != null)
 			for (final RefInfo r : refs)
-				r.start = starts.get(r.ref);
+				if (r.isProtected || r.isDefault)
+					actionMap.put(r.ref, new RefAction(PublicationMethod.PUBLISH_FULL,
+							"HEAD"));
+
+		for (final RefInfo r : refs)
+			r.action = actionMap.get(r.ref);
 	}
 
 	@PostMapping("refs")
 	public void setActions(@RequestParam("ref") final String ref,
-			@RequestParam("action") final Action action,
-			@RequestParam("start") final String start, final HttpSession session) {
-		// FIXME store in database instead
-		if (session.getAttribute("branch_actions") == null)
-			session.setAttribute("branch_actions",
-					new HashMap<String, Action>());
-		@SuppressWarnings("unchecked")
-		final Map<String, Action> actions = (Map<String, Action>) session
-				.getAttribute("branch_actions");
-		actions.put(ref, action);
-
-		if (session.getAttribute("branch_starts") == null)
-			session.setAttribute("branch_starts", new HashMap<String, String>());
-		@SuppressWarnings("unchecked")
-		final Map<String, String> starts = (Map<String, String>) session
-				.getAttribute("branch_starts");
-		starts.put(ref, start);
+			@RequestParam("publish") final PublicationMethod action,
+			@RequestParam("firstCommit") final String start,
+			final HttpSession session) {
+		final Map<String, RefAction> actionMap = Project.getInstance(
+				session).getRefActions();
+		if (action != null)
+			actionMap.put(ref, new RefAction(action, start));
+		else
+			actionMap.remove(ref);
 	}
 
 	@GetMapping("commits")
