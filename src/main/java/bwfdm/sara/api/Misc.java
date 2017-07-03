@@ -1,5 +1,7 @@
 package bwfdm.sara.api;
 
+import java.util.List;
+
 import javax.servlet.http.HttpSession;
 
 import org.springframework.web.bind.annotation.GetMapping;
@@ -7,25 +9,35 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import bwfdm.sara.git.GitRepoFactory;
+import bwfdm.sara.git.ProjectInfo;
+import bwfdm.sara.project.Project;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @RestController
 @RequestMapping("/api")
 public class Misc {
+	@GetMapping("project-list")
+	public List<ProjectInfo> getProjectList(final HttpSession session) {
+		return GitRepoFactory.getInstance(session).getProjects();
+	}
+
 	@GetMapping("session-info")
 	public SessionInfo getSessionInfo(final HttpSession session) {
-		return new SessionInfo(session);
+		return new SessionInfo(Project.getInstance(session));
 	}
 
 	private class SessionInfo {
 		@JsonProperty
-		private final String project;
+		private final String repo;
+		@JsonProperty("project")
+		private final String projectPath;
 		@JsonProperty
 		private final IRMeta ir;
 
-		public SessionInfo(final HttpSession session) {
-			project = GitRepoFactory.getInstance(session).getProjectPath();
+		public SessionInfo(final Project project) {
+			repo = project.getRepoID();
+			projectPath = project.getGitRepo().getProjectPath();
 			// TODO read this from the session as well
 			ir = new IRMeta("https://kops.uni-konstanz.de/", "kops.svg");
 		}

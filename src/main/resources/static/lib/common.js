@@ -158,7 +158,8 @@ autosave.reset = function(id, value) {
 	autosave.value(id, value);
 	var elem = $("#" + id);
 	var save = elem.data("autosave");
-	save.saver(value, id, true);
+	if (autosave.validate(id))
+		save.saver(value, id, true);
 };
 
 autosave.cancelTimeout = function(id) {
@@ -206,14 +207,12 @@ autosave.configureUpdateButton = function(id, updater) {
 		save.update.prop("disabled", true);
 }
 
-var reftype_names = {
-	BRANCH: "branch ",
-	TAG: "tag ",
-};
-
 $(function() {
 	API.get("/api/session-info", {}, function(info) {
-		$("title").text(info.project + " – SARA software publishing");
+		var title = "SARA software publishing";
+		if (info.project !== null)
+			title = info.project + " – " + title;
+		$("title").text(title);
 		$("#ir_link").attr("href", info.ir.url);
 		$("#ir_link img").attr("src", "/logos/" + info.ir.logo);
 		initPage(info);

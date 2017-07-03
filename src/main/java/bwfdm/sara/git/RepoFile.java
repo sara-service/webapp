@@ -1,6 +1,6 @@
 package bwfdm.sara.git;
 
-public class RepoFile {
+public final class RepoFile {
 	private final String name;
 	private final String hash;
 	private final FileType type;
@@ -24,6 +24,6 @@ public class RepoFile {
 	}
 
 	public enum FileType {
-		FILE, DIRECTORY
+		FILE, DIRECTORY, OTHER
 	}
 }

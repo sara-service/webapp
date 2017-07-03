@@ -4,7 +4,7 @@ var forms = [];
 
 function save(branch) {
 	API.post("/api/repo/refs", {
-		ref: branch.ref,
+		ref: branch.ref.path,
 		publish: branch.action.publish,
 		firstCommit: branch.action.firstCommit,
 	});
@@ -21,34 +21,37 @@ function addCommits(branch, select, commits) {
 	// get rid of the placeholder
 	$("option:disabled", select).remove();
 	// select previously selected option
-	if (branch.action.firstCommit)
+	if (branch.action)
 		select.val(branch.action.firstCommit);
 }
 
 function addBranch(branch) {
-	if (forms[branch.ref]) {
+	if (forms[branch.ref.path]) {
 		// user trying to add a branch twice
-		forms[branch.ref].action.focus();
-		console.log("StupidUserException: ref " + branch.ref
+		forms[branch.ref.path].action.focus();
+		console.log("StupidUserException: ref " + branch.ref.path
 				+ " already in list");
 		return;
 	}
 
 	var form = template("template");
 	form.branch = branch;
-	form.branch_label.text(reftype_names[branch.type] + branch.name);
+	form.branch_label.text(branch.ref.type + " " + branch.ref.name);
 	// default to publishing everything the user adds, because that's
 	// what we prefer.
-	if (!branch.action.publish)
-		branch.action.publish = "PUBLISH_FULL";
+	if (!branch.action) {
+		branch.action = {
+			publish: "PUBLISH_FULL",
+			firstCommit: "HEAD"
+		};
+	}
 	form.action.val(branch.action.publish);
-	if (!branch.action.firstCommit)
-		branch.action.firstCommit = "HEAD";
+	// firstCommit restored when list of commits has been loaded
 
 	// event handler stuff
 	form.remove.click(function() {
 		branch.action.publish = null;
-		delete forms[branch.ref];
+		delete forms[branch.ref.path];
 		form.root.remove();
 		save(branch);
 	});
@@ -60,13 +63,13 @@ function addBranch(branch) {
 		branch.action.firstCommit = $(this).val();
 		save(branch);
 	});
-	forms[branch.ref] = form;
+	forms[branch.ref.path] = form;
 	$("#branches").append(form.root);
 
 	// in the background, load list of commits and update starting point
 	// selection box
 	API.get("/api/repo/commits", { 
-		ref: branch.ref,
+		ref: branch.ref.path,
 		limit: 20,
 	}, function(commits) {
 		addCommits(branch, form.commit, commits);
@@ -78,14 +81,14 @@ function addBranches(branches) {
 	var select = $("#add_branch");
 	select.empty();
 	$.each(branches, function(_, branch) {
-		var name = reftype_names[branch.type] + branch.name;
-		var option = $("<option>").attr("value", branch.ref).text(name)
-				.data("branch", branch);
+		var name = branch.ref.type + " " + branch.ref.name;
+		var option = $("<option>").attr("value", branch.ref.path)
+				.text(name).data("branch", branch);
 		select.append(option);
 	});
 	// add all branches which have an action set
 	$.each(branches, function(_, branch) {
-		if (branch.action.publish)
+		if (branch.action)
 			addBranch(branch);
 	});
 	// event handler for "add" button

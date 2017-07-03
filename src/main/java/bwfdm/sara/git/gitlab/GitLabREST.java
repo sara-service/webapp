@@ -14,6 +14,7 @@ import org.springframework.util.Base64Utils;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import bwfdm.sara.auth.OAuthCode;
 import bwfdm.sara.git.Branch;
@@ -21,15 +22,15 @@ import bwfdm.sara.git.Commit;
 import bwfdm.sara.git.GitRepo;
 import bwfdm.sara.git.ProjectInfo;
 import bwfdm.sara.git.RepoFile;
-import bwfdm.sara.git.RepoFile.FileType;
 import bwfdm.sara.git.Tag;
 
 /** high-level abstraction of the GitLab REST API. */
 public class GitLabREST implements GitRepo {
+	private final AuthenticatedREST rest = new AuthenticatedREST();
 	private final String root;
 	private final String appID;
 	private final String appSecret;
-	private RESTHelper rest;
+	private RESTHelper helper;
 	private OAuthCode auth;
 	private String apiProject;
 	private String guiProject;
@@ -60,10 +61,9 @@ public class GitLabREST implements GitRepo {
 	public void setProjectPath(final String project) {
 		apiProject = project;
 		guiProject = UrlEncode.decode(project);
-		rest = new RESTHelper(root, project);
-		// try to reuse the old token. it should work for any project (as long
-		// as it hasn't expired yet).
-		rest.setToken(token);
+		// not invalidating the old token here. it should work for any project
+		// (as long as it hasn't expired yet).
+		helper = new RESTHelper(rest, root, project);
 	}
 
 	@Override
@@ -73,17 +73,19 @@ public class GitLabREST implements GitRepo {
 
 	@Override
 	public boolean hasWorkingToken() {
-		if (token == null)
+		if (!rest.hasToken())
 			return false;
 
 		// looks like we do have a token. send a dummy API request to see
-		// whether it's a WORKING token.
+		// whether it's a WORKING token. downloads the user info because that
+		// should always be available and doesn't depend on the project.
 		try {
-			getProjectInfo();
+			rest.getBlob(UriComponentsBuilder
+					.fromHttpUrl(root + "/api/v4/user"));
 			return true;
 		} catch (final Exception e) {
-			// that token doesn't appear to work
-			token = null;
+			// doesn't look like that token is working...
+			rest.setToken(null);
 			return false;
 		}
 	}
@@ -130,49 +132,46 @@ public class GitLabREST implements GitRepo {
 	@Override
 	public List<Branch> getBranches() {
 		final GLProjectInfo projectInfo = getGitLabProjectInfo();
-		final List<GLBranch> list = rest.getList("/repository/branches",
+		final List<GLBranch> list = helper.getList("/repository/branches",
 				new ParameterizedTypeReference<List<GLBranch>>() {
 				});
 		final ArrayList<Branch> branches = new ArrayList<>(list.size());
-		for (final GLBranch branch : list) {
-			final boolean isDefault = branch.name.equals(projectInfo.master);
-			branches.add(new Branch(branch.name, branch.isProtected, isDefault));
-		}
+		for (final GLBranch glb : list)
+			branches.add(glb.toBranch(projectInfo.master));
 		return branches;
+	}
+
+	private <T> List<T> toDataObject(final List<? extends GLDataObject<T>> items) {
+		final ArrayList<T> list = new ArrayList<>(items.size());
+		for (final GLDataObject<T> gldo : items)
+			list.add(gldo.toDataObject());
+		return list;
 	}
 
 	@Override
 	public List<Tag> getTags() {
-		final List<GLTag> list = rest.getList("/repository/tags",
+		return toDataObject(helper.getList("/repository/tags",
 				new ParameterizedTypeReference<List<GLTag>>() {
-				});
-		final ArrayList<Tag> tags = new ArrayList<>(list.size());
-		for (final GLTag tag : list)
-			// branches CAN be protected, but the GitLab API doesn't return that
-			// field...
-			tags.add(new Tag(tag.name, false));
-		return tags;
+				}));
 	}
 
 	@Override
 	public List<Commit> getCommits(final String ref, final int limit) {
-		final List<GLCommit> list = rest.get(
-				rest.uri("/repository/commits").queryParam("ref_name", ref)
-						.queryParam("per_page", Integer.toString(limit)),
+		final UriComponentsBuilder req = helper.uri("/repository/commits")
+				.queryParam("ref_name", ref)
+				.queryParam("per_page", Integer.toString(limit));
+		return toDataObject(helper.get(req,
 				new ParameterizedTypeReference<List<GLCommit>>() {
-				});
-		final ArrayList<Commit> tags = new ArrayList<>(list.size());
-		for (final GLCommit commit : list)
-			tags.add(new Commit(commit.id, commit.title, commit.date));
-		return tags;
+				}));
 	}
 
 	@Override
 	public byte[] getBlob(final String ref, final String path) {
+		final UriComponentsBuilder req = helper.uri(
+				"/repository/files/" + UrlEncode.encodePathSegment(path)
+						+ "/raw").queryParam("ref", ref);
 		try {
-			return rest.getBlob(rest.uri(
-					"/repository/files/" + UrlEncode.encodePathSegment(path)
-							+ "/raw").queryParam("ref", ref));
+			return helper.getBlob(req);
 		} catch (final HttpClientErrorException e) {
 			if (e.getStatusCode() == HttpStatus.NOT_FOUND)
 				return null; // file just doesn't exist
@@ -194,46 +193,47 @@ public class GitLabREST implements GitRepo {
 		final byte[] existing = getBlob("heads/" + branch, path);
 		if (existing == null)
 			// file doesn't exist; send create query.
-			rest.post(endpoint, args);
+			helper.post(endpoint, args);
 		else if (!Arrays.equals(data, existing))
 			// file exists, and has actually been changed. (gitlab doesn't like
 			// no-change writes because they create an empty commit.) send
 			// update query.
 			// note the different request method; it's otherwise identical to a
 			// create query.
-			rest.put(endpoint, args);
+			helper.put(endpoint, args);
 	}
 
 	@Override
 	public List<RepoFile> getFiles(final String ref, final String path) {
-		final List<GLRepoFile> list = rest.getList(rest.uri("/repository/tree")
+		return toDataObject(helper.getList(helper.uri("/repository/tree")
 				.queryParam("path", path).queryParam("ref", ref),
 				new ParameterizedTypeReference<List<GLRepoFile>>() {
-				});
-		final ArrayList<RepoFile> files = new ArrayList<RepoFile>(list.size());
-		for (final GLRepoFile x : list)
-			if (x.type.equals("tree"))
-				files.add(new RepoFile(x.name, x.hash, FileType.DIRECTORY));
-			else if (x.type.equals("blob"))
-				files.add(new RepoFile(x.name, x.hash, FileType.FILE));
-		return files;
+				}));
 	}
 
 	private GLProjectInfo getGitLabProjectInfo() {
-		return rest.get("" /* the project itself */,
+		return helper.get("" /* the project itself */,
 				new ParameterizedTypeReference<GLProjectInfo>() {
 				});
 	}
 
 	@Override
 	public ProjectInfo getProjectInfo() {
-		final GLProjectInfo info = getGitLabProjectInfo();
-		return new ProjectInfo(info.name, info.description);
+		return getGitLabProjectInfo().toDataObject();
 	}
 
 	@Override
 	public void updateProjectInfo(final String name, final String description) {
 		final GLProjectInfo info = new GLProjectInfo(name, description);
-		rest.put("" /* the project itself */, info);
+		helper.put("" /* the project itself */, info);
+	}
+
+	@Override
+	public List<ProjectInfo> getProjects() {
+		final UriComponentsBuilder req = UriComponentsBuilder.fromHttpUrl(
+				root + "/api/v4/projects").queryParam("simple", "true");
+		return toDataObject(RESTHelper.getList(rest, req,
+				new ParameterizedTypeReference<List<GLProjectInfo>>() {
+				}));
 	}
 }

@@ -1,5 +1,7 @@
 package bwfdm.sara.git.gitlab;
 
+import bwfdm.sara.git.Branch;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -20,4 +22,8 @@ class GLBranch {
 	 * <code>false</code>.
 	 */
 	boolean isDefault;
+
+	Branch toBranch(final String master) {
+		return new Branch(name, isProtected, name.equals(master));
+	}
 }

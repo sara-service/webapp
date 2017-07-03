@@ -1,23 +1,16 @@
 package bwfdm.sara.git.gitlab;
 
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 /** low-level helper class for making REST calls to the GitLab API. */
@@ -39,44 +32,27 @@ class RESTHelper {
 	private static final Pattern LINK_REL_NEXT_FIELD = Pattern
 			.compile("rel=(\"?)next\\1");
 
+	private final AuthenticatedREST rest;
 	private final String root;
-	private final RestTemplate rest;
-	private HttpEntity<Void> auth;
-	private MultiValueMap<String, String> authMap;
 
 	/**
+	 * @param rest
+	 *            the {@link AuthenticatedREST} instance ot use for accessing
+	 *            the API
 	 * @param root
 	 *            URL to GitLab root
 	 * @param project
 	 *            name of project whose API to access
 	 */
-	RESTHelper(final String root, final String project) {
+	RESTHelper(final AuthenticatedREST rest, final String root,
+			final String project) {
+		this.rest = rest;
 		this.root = root + "/api/v4/projects/"
 				+ UrlEncode.encodePathSegment(project);
-		rest = new RestTemplate();
-	}
-
-	void setToken(final String token) {
-		if (token == null) {
-			auth = null;
-			return;
-		}
-
-		authMap = new LinkedMultiValueMap<String, String>();
-		authMap.set("Authorization", "Bearer " + token);
-		auth = new HttpEntity<Void>(authMap);
 	}
 
 	UriComponentsBuilder uri(final String endpoint) {
 		return UriComponentsBuilder.fromHttpUrl(root + endpoint);
-	}
-
-	/**
-	 * Convenience function for calling
-	 * {@link #get(UriComponentsBuilder, ParameterizedTypeReference)}.
-	 */
-	<T> T get(final String endpoint, final ParameterizedTypeReference<T> type) {
-		return get(uri(endpoint), type);
 	}
 
 	/**
@@ -89,24 +65,38 @@ class RESTHelper {
 	 * @param type
 	 *            instance of {@link ParameterizedTypeReference} with correct
 	 *            type parameters
-	 * @return a list of all objects that GitLab returns
+	 * @return an instance of the specified object, deserialized from JSON
 	 */
-	<T> T get(final UriComponentsBuilder ucb,
-			final ParameterizedTypeReference<T> type) {
-		return rest.exchange(ucb.build(true).toUri(), HttpMethod.GET, auth,
-				type).getBody();
+	<T> T get(final String endpoint, final ParameterizedTypeReference<T> type) {
+		return rest.get(uri(endpoint), type);
 	}
 
+	/**
+	 * Variant of {@link #get(String, ParameterizedTypeReference)} that takes a
+	 * {@link UriComponentsBuilder}.
+	 */
+	<T> List<T> get(final UriComponentsBuilder queryParam,
+			final ParameterizedTypeReference<List<T>> type) {
+		return rest.get(queryParam, type);
+	}
+
+	/**
+	 * Performs a {@link HttpMethod#GET} request, returning the raw data
+	 * received as a {@code byte[]}.
+	 * 
+	 * @param ucb
+	 *            the URL as a {@link UriComponentsBuilder}
+	 * @return a byte array containing the raw response
+	 */
 	byte[] getBlob(final UriComponentsBuilder ucb) {
-		return rest.exchange(ucb.build(true).toUri(), HttpMethod.GET, auth,
-				byte[].class).getBody();
+		return rest.getBlob(ucb);
 	}
 
 	/**
 	 * Get a list of items from GitLab, working around the pagination misfeature
 	 * by requesting pages one by one. If you need just a few, use
-	 * {@link #get(UriComponentsBuilder, ParameterizedTypeReference)} and set
-	 * {@code per_page} manually.
+	 * {@link AuthenticatedREST#get(UriComponentsBuilder, ParameterizedTypeReference)}
+	 * and set {@code per_page} manually.
 	 * 
 	 * @param endpoint
 	 *            API path, relative to project
@@ -122,13 +112,23 @@ class RESTHelper {
 
 	<T> List<T> getList(final UriComponentsBuilder ucb,
 			final ParameterizedTypeReference<List<T>> type) {
+		return getList(rest, ucb, type);
+	}
+
+	/**
+	 * Static version of
+	 * {@link #getList(UriComponentsBuilder, ParameterizedTypeReference)} for
+	 * requesting the project list.
+	 */
+	static <T> List<T> getList(final AuthenticatedREST rest,
+			final UriComponentsBuilder ucb,
+			final ParameterizedTypeReference<List<T>> type) {
 		final List<T> list = new ArrayList<T>();
 		// 100 per page is the limit. use it for max efficiency.
-		URI uri = ucb.queryParam("per_page", Integer.toString(MAX_PER_PAGE))
-				.build(true).toUri();
+		UriComponentsBuilder uri = ucb.queryParam("per_page",
+				Integer.toString(MAX_PER_PAGE));
 		do {
-			final ResponseEntity<List<T>> resp = rest.exchange(uri,
-					HttpMethod.GET, auth, type);
+			final ResponseEntity<List<T>> resp = rest.getResponse(uri, type);
 			list.addAll(resp.getBody());
 			// work around the pagination misfeature
 			uri = getNextLink(resp, uri);
@@ -137,7 +137,8 @@ class RESTHelper {
 	}
 
 	/** Workaround for GitLab's pagination "feature". */
-	private URI getNextLink(final ResponseEntity<?> resp, final URI base) {
+	private static UriComponentsBuilder getNextLink(
+			final ResponseEntity<?> resp, final UriComponentsBuilder base) {
 		final List<String> linkHeaders = resp.getHeaders()
 				.get(HttpHeaders.LINK);
 		if (linkHeaders == null)
@@ -154,43 +155,27 @@ class RESTHelper {
 
 				for (int i = 1; i < fields.length; i++) {
 					if (LINK_REL_NEXT_FIELD.matcher(fields[i]).matches())
-						try {
-							// to handle relative URLs
-							return new URL(base.toURL(), url).toURI();
-						} catch (MalformedURLException | URISyntaxException e) {
-							throw new IllegalArgumentException(
-									"malformed URL in Link header: " + url, e);
-						}
+						// correctly resolve relative URLs, just in case
+						return UriComponentsBuilder.fromUri(base.build(true)
+								.toUri().resolve(url));
 				}
 			}
-		return null; // header present but no "next" link, ie. last page
+		return null; // header present but no "next" link, ie. the last page
 	}
 
 	/**
 	 * Convenience function for calling
-	 * {@link #put(UriComponentsBuilder, Object)}.
+	 * {@link AuthenticatedREST#put(UriComponentsBuilder, Object)}.
 	 */
 	void put(final String endpoint, final Object args) {
-		put(uri(endpoint), args);
-	}
-
-	void put(final UriComponentsBuilder ucb, final Object args) {
-		final HttpEntity<Object> data = new HttpEntity<>(args, authMap);
-		rest.exchange(ucb.build(true).toUri(), HttpMethod.PUT, data,
-				(Class<?>) null);
+		rest.put(uri(endpoint), args);
 	}
 
 	/**
 	 * Convenience function for calling
-	 * {@link #post(UriComponentsBuilder, Object)}.
+	 * {@link AuthenticatedREST#post(UriComponentsBuilder, Object)}.
 	 */
-	void post(final String endpoint, final Object args) {
-		post(uri(endpoint), args);
-	}
-
-	void post(final UriComponentsBuilder ucb, final Object args) {
-		final HttpEntity<Object> data = new HttpEntity<>(args, authMap);
-		rest.exchange(ucb.build(true).toUri(), HttpMethod.POST, data,
-				(Class<?>) null);
+	void post(final String endpoint, final Map<String, String> args) {
+		rest.post(uri(endpoint), args);
 	}
 }

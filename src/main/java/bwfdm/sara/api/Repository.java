@@ -2,7 +2,6 @@ package bwfdm.sara.api;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -22,6 +21,8 @@ import bwfdm.sara.git.GitRepoFactory;
 import bwfdm.sara.git.ProjectInfo;
 import bwfdm.sara.git.Tag;
 import bwfdm.sara.project.Project;
+import bwfdm.sara.project.Ref;
+import bwfdm.sara.project.Ref.RefType;
 import bwfdm.sara.project.RefAction;
 import bwfdm.sara.project.RefAction.PublicationMethod;
 
@@ -37,12 +38,9 @@ public class Repository {
 	}
 
 	@GetMapping("selected-refs")
-	public List<RefInfo> getSelectedBranches(final HttpSession session) {
-		final List<RefInfo> refs = getBranches(session);
-		for (final Iterator<RefInfo> i = refs.iterator(); i.hasNext();)
-			if (i.next().action == null)
-				i.remove();
-		return refs;
+	public List<Ref> getSelectedBranches(final HttpSession session) {
+		final Project project = Project.getInstance(session);
+		return new ArrayList<>(project.getRefActions().keySet());
 	}
 
 	private List<RefInfo> getAllRefs(final HttpSession session) {
@@ -56,28 +54,34 @@ public class Repository {
 	}
 
 	private void loadActions(final List<RefInfo> refs, final HttpSession session) {
-		final Map<String, RefAction> actionMap = Project.getInstance(
-				session).getRefActions();
+		final Map<Ref, RefAction> actionMap = Project.getInstance(session)
+				.getRefActions();
 
 		if (actionMap.isEmpty())
 			// default to publishing protected branches (assumed to be the main
-			// branches), while only archiving everything else.
+			// branches), while only archiving the other branches.
+			// completely ignore tags by default; they still serve their purpose
+			// of marking important points without being archived explicitly.
 			for (final RefInfo r : refs)
 				if (r.isProtected || r.isDefault)
-					actionMap.put(r.ref, new RefAction(PublicationMethod.PUBLISH_FULL,
-							"HEAD"));
+					actionMap.put(r.ref, new RefAction(
+							PublicationMethod.PUBLISH_FULL, "HEAD"));
+				else if (r.ref.type == RefType.BRANCH)
+					actionMap.put(r.ref, new RefAction(
+							PublicationMethod.ARCHIVE_PUBLIC, "HEAD"));
 
 		for (final RefInfo r : refs)
 			r.action = actionMap.get(r.ref);
 	}
 
 	@PostMapping("refs")
-	public void setActions(@RequestParam("ref") final String ref,
+	public void setActions(@RequestParam("ref") final String refPath,
 			@RequestParam("publish") final PublicationMethod action,
 			@RequestParam("firstCommit") final String start,
 			final HttpSession session) {
-		final Map<String, RefAction> actionMap = Project.getInstance(
-				session).getRefActions();
+		final Map<Ref, RefAction> actionMap = Project.getInstance(session)
+				.getRefActions();
+		final Ref ref = Ref.fromPath(refPath);
 		if (action != null)
 			actionMap.put(ref, new RefAction(action, start));
 		else

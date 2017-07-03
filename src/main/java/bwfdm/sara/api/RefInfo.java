@@ -2,6 +2,8 @@ package bwfdm.sara.api;
 
 import bwfdm.sara.git.Branch;
 import bwfdm.sara.git.Tag;
+import bwfdm.sara.project.Ref;
+import bwfdm.sara.project.Ref.RefType;
 import bwfdm.sara.project.RefAction;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -14,18 +16,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 @JsonInclude(Include.NON_NULL)
 class RefInfo implements Comparable<RefInfo> {
-	/**
-	 * user-friendly name of ref, ie. {@code master} or {@code foo}. doesn't
-	 * identify whether it's a branch or tag.
-	 */
-	@JsonProperty("name")
-	final String name;
-	/** ref in git syntax, ie. {@code heads/master} or {@code tags/foo} */
+	/** {@link Ref} data class */
 	@JsonProperty("ref")
-	final String ref;
-	/** ref type (branch or tag). */
-	@JsonProperty("type")
-	final RefType type;
+	final Ref ref;
 	/** <code>true</code> if this is a protected branch */
 	@JsonProperty("protected")
 	final boolean isProtected;
@@ -36,17 +29,13 @@ class RefInfo implements Comparable<RefInfo> {
 	RefAction action;
 
 	RefInfo(final Branch b) {
-		type = RefType.BRANCH;
-		ref = "heads/" + b.name;
-		name = b.name;
+		ref = new Ref(b);
 		isProtected = b.isProtected;
 		isDefault = b.isDefault;
 	}
 
 	RefInfo(final Tag t) {
-		type = RefType.TAG;
-		ref = "tags/" + t.name;
-		name = t.name;
+		ref = new Ref(t);
 		isProtected = t.isProtected;
 		isDefault = false;
 	}
@@ -60,9 +49,9 @@ class RefInfo implements Comparable<RefInfo> {
 		if (other.isDefault)
 			return +1;
 		// branches before tags
-		if (type == RefType.BRANCH && other.type != RefType.BRANCH)
+		if (ref.type == RefType.BRANCH && other.ref.type != RefType.BRANCH)
 			return -1;
-		if (other.type == RefType.BRANCH && type != RefType.BRANCH)
+		if (other.ref.type == RefType.BRANCH && ref.type != RefType.BRANCH)
 			return +1;
 		// protected branches are more likely to be the "main" branches,
 		// so put them before unprotected (likely "side") branches
@@ -71,16 +60,12 @@ class RefInfo implements Comparable<RefInfo> {
 		if (other.isProtected && !isProtected)
 			return +1;
 		// tiebreaker within those groups: lexicographic ordering
-		return name.compareTo(other.name);
+		return ref.name.compareTo(other.ref.name);
 	}
 
 	@Override
 	public String toString() {
-		return "Ref{" + ref + ", " + (isProtected ? "protected, " : "")
+		return "RefInfo{" + ref + ", " + (isProtected ? "protected, " : "")
 				+ "action=" + action + "}";
-	}
-
-	public enum RefType {
-		BRANCH, TAG
 	}
 }

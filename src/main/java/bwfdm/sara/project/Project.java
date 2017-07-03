@@ -15,7 +15,7 @@ public class Project {
 	private final GitRepo repo;
 	private final String gitRepo;
 	private final BasicMetaData metadata;
-	private final Map<String, RefAction> actions = new HashMap<String, RefAction>();
+	private final Map<Ref, RefAction> actions = new HashMap<Ref, RefAction>();
 
 	private Project(final String gitRepo, final GitRepo repo) {
 		this.gitRepo = gitRepo;
@@ -35,8 +35,13 @@ public class Project {
 		return metadata;
 	}
 
-	public Map<String, RefAction> getRefActions() {
+	public Map<Ref, RefAction> getRefActions() {
 		return actions;
+	}
+
+	public void setProjectPath(final String project) {
+		actions.clear(); // no longer valid
+		repo.setProjectPath(project);
 	}
 
 	public void loadFromDatabase() {
@@ -74,11 +79,12 @@ public class Project {
 	public static Project createInstance(final HttpSession session,
 			final String repoID, final String projectPath) {
 		final GitRepo repo = GitRepoFactory.createInstance(session, repoID);
-		if (projectPath != null)
-			repo.setProjectPath(projectPath);
 
 		final Project project = new Project(repoID, repo);
-		project.loadFromDatabase();
+		if (projectPath != null) {
+			project.setProjectPath(projectPath);
+			project.loadFromDatabase();
+		}
 		session.setAttribute(PROJECT_ATTR, project);
 		return project;
 	}

@@ -21,6 +21,7 @@ import bwfdm.sara.git.GitRepo;
 import bwfdm.sara.git.GitRepoFactory;
 import bwfdm.sara.git.RepoFile;
 import bwfdm.sara.git.RepoFile.FileType;
+import bwfdm.sara.project.Ref;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -43,9 +44,9 @@ public class MetadataExtractor {
 	public List<LicenseInfo> detectLicenses(final HttpSession session) {
 		final GitRepo repo = GitRepoFactory.getInstance(session);
 		final List<LicenseInfo> licenses = new ArrayList<>();
-		for (final RefInfo ref : repository.getSelectedBranches(session)) {
+		for (final Ref ref : repository.getSelectedBranches(session)) {
 			// TODO honor the branch starting point here
-			final LicenseFile license = detectLicense(ref.ref, repo);
+			final LicenseFile license = detectLicense(ref.path, repo);
 			if (license != null)
 				licenses.add(new LicenseInfo(ref, license));
 		}
@@ -75,8 +76,8 @@ public class MetadataExtractor {
 		@JsonProperty
 		final String license;
 
-		LicenseInfo(final RefInfo ref, final LicenseFile lic) {
-			this.ref = ref.ref;
+		LicenseInfo(final Ref ref, final LicenseFile lic) {
+			this.ref = ref.path;
 			path = lic.getFile();
 			license = lic.getID();
 		}

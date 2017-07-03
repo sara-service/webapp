@@ -33,7 +33,8 @@ public class Authorization {
 				return warnPushy(redir, gitRepo, projectPath);
 			final String prevProjectPath = project.getGitRepo()
 					.getProjectPath();
-			if (prevProjectPath != null && !prevProjectPath.equals(projectPath))
+			if (prevProjectPath != null && projectPath != null
+					&& !prevProjectPath.equals(projectPath))
 				return warnPushy(redir, gitRepo, projectPath);
 		}
 
@@ -56,8 +57,7 @@ public class Authorization {
 			final RedirectAttributes redir, final HttpSession session) {
 		// if the user does not have a session for this repo, create one
 		if (!Project.hasInstance(session)
-				|| !Project.getInstance(session).getRepoID()
-						.equals(gitRepo))
+				|| !Project.getInstance(session).getRepoID().equals(gitRepo))
 			Project.createInstance(session, gitRepo, projectPath);
 
 		// if the user already has a session, change the project field if
@@ -65,9 +65,11 @@ public class Authorization {
 		// the user with authorization again.
 		final Project project = Project.getInstance(session);
 		final GitRepo repo = project.getGitRepo();
-		final String prevProjectPath = repo.getProjectPath();
-		if (prevProjectPath == null || !prevProjectPath.equals(projectPath))
-			repo.setProjectPath(projectPath);
+		if (projectPath != null) { // never change towards "no project"
+			final String prevProjectPath = repo.getProjectPath();
+			if (prevProjectPath == null || !prevProjectPath.equals(projectPath))
+				project.setProjectPath(projectPath);
+		}
 		if (repo.hasWorkingToken())
 			return authFinished(project);
 

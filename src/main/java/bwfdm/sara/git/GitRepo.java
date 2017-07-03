@@ -64,6 +64,9 @@ public interface GitRepo {
 	 */
 	public void updateProjectInfo(String name, String description);
 
+	/** @return a list of all projects in GitLab */
+	public List<ProjectInfo> getProjects();
+
 	/**
 	 * @param ref
 	 *            git ref, should be {@code heads/master} or {@code tags/test}

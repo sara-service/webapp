@@ -6,8 +6,9 @@ function resetTitle(info) {
 	$("#reset_title_loading").css("display", "none");
 }
 
-function resetVersion(branch) {
-	API.get("/api/extract/version", { ref: branch.ref }, function(ex) {
+function resetVersion(ref) {
+	API.get("/api/extract/version", { ref: ref.path },
+			function(ex) {
 		if (ex.version === null)
 			ex.version = "";
 		autosave.reset("version", ex.version);
@@ -16,7 +17,7 @@ function resetVersion(branch) {
 		$("#update_version").data("can-update", ex.canUpdate);
 		branchChanged();
 		// remember which branch the version was extracted from
-		saveSourceBranch(branch);
+		saveSourceBranch(ref);
 
 		// remove the loader iff the license extraction is also finished
 		var loader = $("#lazy_loading");
@@ -51,39 +52,39 @@ function save(value, id, autoset) {
 }
 
 function branchChanged() {
-	var branch = $("#lazy_branch :selected").data("branch");
-	$("[data-branch]").text(reftype_names[branch.type] + branch.name);
+	var ref = $("#lazy_branch :selected").data("ref");
+	$("[data-branch]").text(ref.type + " " + ref.name);
 
 	var update = $("#update_version");
-	if (autosave.isValid("version") && branch.type == "BRANCH"
+	if (autosave.isValid("version") && ref.type == "branch"
 			&& update.data("can-update"))
 		autosave.configureUpdateButton("version", function(value, id) {
 		API.post("/api/extract/version",
-			{ version: value, branch: branch.name },
+			{ version: value, branch: ref.name },
 			function() {
 				autosave.reset(id, value);
-				saveSourceBranch(branch);
+				saveSourceBranch(ref);
 			});
 		});
 	else
 		autosave.configureUpdateButton("version", null);
 }
 
-function saveSourceBranch(branch) {
-	API.put("/api/meta/sourceBranch", { value: branch.ref });
+function saveSourceBranch(ref) {
+	API.put("/api/meta/sourceBranch", { value: ref.name });
 }
 
-function loadLazyBranches(branches, source) {
+function loadLazyBranches(refs, source) {
 	// update list of branches
 	var select = $("#lazy_branch");
 	select.empty();
-	$.each(branches, function(_, branch) {
-		var name = reftype_names[branch.type] + branch.name;
-		var option = $("<option>").attr("value", branch.ref).text(name)
-				.data("branch", branch);
+	$.each(refs, function(_, ref) {
+		var name = ref.type + " " + ref.name;
+		var option = $("<option>").attr("value", ref.path)
+				.text(name).data("ref", ref);
 		select.append(option);
 		// select that item if it's the one the user used last time
-		if (!source.autodetected && source.value == branch.ref)
+		if (!source.autodetected && source.value == ref.path)
 			select.val(source.value);
 	});
 	// event handler for "lazy" button
@@ -92,8 +93,8 @@ function loadLazyBranches(branches, source) {
 		loader.removeAttr("style");
 		loader.data("version-done", false);
 		loader.data("license-done", false);
-		var branch = $("#lazy_branch :selected").data("branch");
-		resetVersion(branch);
+		var ref = $("#lazy_branch :selected").data("ref");
+		resetVersion(ref);
 		resetLicenses();
 	});
 	$("#lazy_branch").on("select change", branchChanged);
@@ -137,8 +138,8 @@ function initFields(info) {
 	// branch has been selected yet
 	autosave.value("version", info.version.value);
 	autosave.value("license", info.license.value);
-	API.get("/api/repo/selected-refs", {}, function(branches) {
-		loadLazyBranches(branches, info.sourceBranch);
+	API.get("/api/repo/selected-refs", {}, function(refs) {
+		loadLazyBranches(refs, info.sourceBranch);
 		$("#version_block").removeAttr("style");
 		$("#version_loading").css("display", "none");
 	});
