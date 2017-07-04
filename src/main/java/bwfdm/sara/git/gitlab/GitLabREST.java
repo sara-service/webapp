@@ -80,8 +80,8 @@ public class GitLabREST implements GitRepo {
 		// whether it's a WORKING token. downloads the user info because that
 		// should always be available and doesn't depend on the project.
 		try {
-			rest.getBlob(UriComponentsBuilder
-					.fromHttpUrl(root + "/api/v4/user"));
+			rest.getBlob(UriComponentsBuilder.fromHttpUrl(root
+					+ RESTHelper.API_PREFIX + "/user"));
 			return true;
 		} catch (final Exception e) {
 			// doesn't look like that token is working...
@@ -110,6 +110,11 @@ public class GitLabREST implements GitRepo {
 		token = auth.parse(params);
 		rest.setToken(token);
 		return token != null;
+	}
+
+	@Override
+	public String getHomePageURL() {
+		return root;
 	}
 
 	@Override
@@ -231,7 +236,8 @@ public class GitLabREST implements GitRepo {
 	@Override
 	public List<ProjectInfo> getProjects() {
 		final UriComponentsBuilder req = UriComponentsBuilder.fromHttpUrl(
-				root + "/api/v4/projects").queryParam("simple", "true");
+				root + RESTHelper.API_PREFIX + "/projects").queryParam(
+				"simple", "true");
 		return toDataObject(RESTHelper.getList(rest, req,
 				new ParameterizedTypeReference<List<GLProjectInfo>>() {
 				}));

@@ -15,6 +15,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 /** low-level helper class for making REST calls to the GitLab API. */
 class RESTHelper {
+	static final String API_PREFIX = "/api/v4";
 	/**
 	 * date format pattern used by GitLab, {@link SimpleDateFormat} style.
 	 * currently ISO8601 ({@code 2012-09-20T11:50:22.000+03:00}).
@@ -47,7 +48,7 @@ class RESTHelper {
 	RESTHelper(final AuthenticatedREST rest, final String root,
 			final String project) {
 		this.rest = rest;
-		this.root = root + "/api/v4/projects/"
+		this.root = root + API_PREFIX + "/projects/"
 				+ UrlEncode.encodePathSegment(project);
 	}
 

@@ -54,22 +54,23 @@ public class Repository {
 	}
 
 	private void loadActions(final List<RefInfo> refs, final HttpSession session) {
-		final Map<Ref, RefAction> actionMap = Project.getInstance(session)
-				.getRefActions();
+		final Project project = Project.getInstance(session);
 
-		if (actionMap.isEmpty())
+		if (project.getRefActions().isEmpty())
 			// default to publishing protected branches (assumed to be the main
 			// branches), while only archiving the other branches.
 			// completely ignore tags by default; they still serve their purpose
 			// of marking important points without being archived explicitly.
 			for (final RefInfo r : refs)
 				if (r.isProtected || r.isDefault)
-					actionMap.put(r.ref, new RefAction(
-							PublicationMethod.PUBLISH_FULL, "HEAD"));
+					project.setRefAction(r.ref, PublicationMethod.PUBLISH_FULL,
+							RefAction.HEAD_COMMIT);
 				else if (r.ref.type == RefType.BRANCH)
-					actionMap.put(r.ref, new RefAction(
-							PublicationMethod.ARCHIVE_PUBLIC, "HEAD"));
+					project.setRefAction(r.ref,
+							PublicationMethod.ARCHIVE_PUBLIC,
+							RefAction.HEAD_COMMIT);
 
+		final Map<Ref, RefAction> actionMap = project.getRefActions();
 		for (final RefInfo r : refs)
 			r.action = actionMap.get(r.ref);
 	}
@@ -79,13 +80,8 @@ public class Repository {
 			@RequestParam("publish") final PublicationMethod action,
 			@RequestParam("firstCommit") final String start,
 			final HttpSession session) {
-		final Map<Ref, RefAction> actionMap = Project.getInstance(session)
-				.getRefActions();
-		final Ref ref = Ref.fromPath(refPath);
-		if (action != null)
-			actionMap.put(ref, new RefAction(action, start));
-		else
-			actionMap.remove(ref);
+		Project.getInstance(session).setRefAction(Ref.fromPath(refPath),
+				action, start);
 	}
 
 	@GetMapping("commits")
@@ -112,8 +108,10 @@ public class Repository {
 
 	@GetMapping("return")
 	public RedirectView getReturnURL(final HttpSession session) {
-		return new RedirectView(GitRepoFactory.getInstance(session)
-				.getProjectViewURL());
+		final GitRepo repo = GitRepoFactory.getInstance(session);
+		if (repo.getProjectPath() == null)
+			return new RedirectView(repo.getHomePageURL());
+		return new RedirectView(repo.getProjectViewURL());
 	}
 
 	@GetMapping("edit-file")

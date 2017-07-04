@@ -71,7 +71,7 @@ function branchChanged() {
 }
 
 function saveSourceBranch(ref) {
-	API.put("/api/meta/sourceBranch", { value: ref.name });
+	API.put("/api/meta/source-ref", { value: ref.path });
 }
 
 function loadLazyBranches(refs, source) {
@@ -139,7 +139,8 @@ function initFields(info) {
 	autosave.value("version", info.version.value);
 	autosave.value("license", info.license.value);
 	API.get("/api/repo/selected-refs", {}, function(refs) {
-		loadLazyBranches(refs, info.sourceBranch);
+		console.log(info['source-branch'], info);
+		loadLazyBranches(refs, info['source-ref']);
 		$("#version_block").removeAttr("style");
 		$("#version_loading").css("display", "none");
 	});

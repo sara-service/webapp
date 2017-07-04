@@ -1,26 +1,39 @@
 package bwfdm.sara.project;
 
-import java.util.HashMap;
+import java.util.Collections;
+import java.util.EnumMap;
 import java.util.Map;
 
 import javax.servlet.http.HttpSession;
 
 import bwfdm.sara.api.Authorization;
+import bwfdm.sara.dao.FakeDatabase;
+import bwfdm.sara.dao.FrontendDatabase;
 import bwfdm.sara.git.GitRepo;
 import bwfdm.sara.git.GitRepoFactory;
+import bwfdm.sara.project.RefAction.PublicationMethod;
 
 public class Project {
 	private static final String PROJECT_ATTR = Project.class.getCanonicalName();
+	private static final Map<MetadataField, MetadataValue> EMPTY_METADATA;
+	static {
+		// create an empty dummy entry for each metadata field. this ensures
+		// that all fields exist, even when they're empty.
+		final Map<MetadataField, MetadataValue> map = new EnumMap<>(
+				MetadataField.class);
+		for (final MetadataField f : MetadataField.values())
+			map.put(f, new MetadataValue(null, true));
+		EMPTY_METADATA = Collections.unmodifiableMap(map);
+	}
 
 	private final GitRepo repo;
 	private final String gitRepo;
-	private final BasicMetaData metadata;
-	private final Map<Ref, RefAction> actions = new HashMap<Ref, RefAction>();
+	private final FrontendDatabase db;
 
 	private Project(final String gitRepo, final GitRepo repo) {
 		this.gitRepo = gitRepo;
 		this.repo = repo;
-		metadata = new BasicMetaData();
+		db = new FakeDatabase(gitRepo);
 	}
 
 	public GitRepo getGitRepo() {
@@ -31,25 +44,30 @@ public class Project {
 		return gitRepo;
 	}
 
-	public BasicMetaData getMetadata() {
+	public void setProjectPath(final String project) {
+		repo.setProjectPath(project);
+		db.setProjectPath(project);
+	}
+
+	public Map<MetadataField, MetadataValue> getMetadata() {
+		final Map<MetadataField, MetadataValue> metadata = new EnumMap<>(
+				EMPTY_METADATA);
+		db.loadMetadata(metadata);
 		return metadata;
 	}
 
+	public void setMetadata(final MetadataField field, final String value,
+			final boolean auto) {
+		db.setMetadata(field, value, auto);
+	}
+
+	public void setRefAction(final Ref ref, final PublicationMethod method,
+			final String firstCommit) {
+		db.setRefAction(ref, method, firstCommit);
+	}
+
 	public Map<Ref, RefAction> getRefActions() {
-		return actions;
-	}
-
-	public void setProjectPath(final String project) {
-		actions.clear(); // no longer valid
-		repo.setProjectPath(project);
-	}
-
-	public void loadFromDatabase() {
-		// TODO
-	}
-
-	public void saveToDatabase() {
-		// TODO
+		return db.getRefActions();
 	}
 
 	public static Project getInstance(final HttpSession session) {
@@ -81,10 +99,8 @@ public class Project {
 		final GitRepo repo = GitRepoFactory.createInstance(session, repoID);
 
 		final Project project = new Project(repoID, repo);
-		if (projectPath != null) {
+		if (projectPath != null)
 			project.setProjectPath(projectPath);
-			project.loadFromDatabase();
-		}
 		session.setAttribute(PROJECT_ATTR, project);
 		return project;
 	}

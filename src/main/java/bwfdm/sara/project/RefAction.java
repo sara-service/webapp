@@ -3,6 +3,8 @@ package bwfdm.sara.project;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class RefAction {
+	public static final String HEAD_COMMIT = "HEAD";
+
 	/** selected archival option. */
 	private final PublicationMethod publicationMethod;
 	/** ID of first commit to archive. */

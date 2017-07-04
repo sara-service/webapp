@@ -23,6 +23,12 @@ public interface GitRepo {
 	 */
 	public void setProjectPath(final String project);
 
+	/**
+	 * @return the "home page" url of the repo, used when there is no other place
+	 *         to redirect the user to
+	 */
+	public String getHomePageURL();
+
 	/** @return the url of the "main" page to view a project */
 	public String getProjectViewURL();
 
