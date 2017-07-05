@@ -4,6 +4,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpSession;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,6 +21,9 @@ import bwfdm.sara.project.Project;
 @ControllerAdvice
 @RequestMapping("/api/auth")
 public class Authorization {
+	@Autowired
+	private Config config;
+
 	@GetMapping("login")
 	public RedirectView triggerAuth(
 			@RequestParam("repo") final String gitRepo,
@@ -58,7 +62,7 @@ public class Authorization {
 		// if the user does not have a session for this repo, create one
 		if (!Project.hasInstance(session)
 				|| !Project.getInstance(session).getRepoID().equals(gitRepo))
-			Project.createInstance(session, gitRepo, projectPath);
+			Project.createInstance(session, gitRepo, projectPath, config);
 
 		// if the user already has a session, change the project field if
 		// necessary. if the token still works, we're done; no need to bother
@@ -75,7 +79,7 @@ public class Authorization {
 
 		// user doesn't have a token or it has expired. trigger authorization
 		// again.
-		return repo.triggerAuth(getLoginRedirectURI(session), redir, session);
+		return repo.triggerAuth(getLoginRedirectURI(), redir, session);
 	}
 
 	@GetMapping("redirect")
@@ -102,7 +106,7 @@ public class Authorization {
 		return new RedirectView("/branches.html");
 	}
 
-	private static String getLoginRedirectURI(final HttpSession session) {
-		return Config.getWebRoot(session) + "/api/auth/redirect";
+	private String getLoginRedirectURI() {
+		return config.getWebRoot() + "/api/auth/redirect";
 	}
 }

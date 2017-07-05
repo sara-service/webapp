@@ -1,6 +1,5 @@
-package bwfdm.sara.dao;
+package bwfdm.sara.db;
 
-import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
@@ -16,10 +15,6 @@ public class FakeDatabase implements FrontendDatabase {
 	private final Map<MetadataField, MetadataValue> metadata = new EnumMap<>(
 			MetadataField.class);
 	private final Map<Ref, RefAction> actions = new HashMap<>();
-
-	public FakeDatabase(final String gitRepo) {
-		// gitRepo ignored for fake database
-	}
 
 	@Override
 	public void setProjectPath(final String project) {
@@ -40,8 +35,8 @@ public class FakeDatabase implements FrontendDatabase {
 	}
 
 	@Override
-	public Map<Ref, RefAction> getRefActions() {
-		return Collections.unmodifiableMap(actions);
+	public void loadRefActions(final Map<Ref, RefAction> actions) {
+		actions.putAll(this.actions);
 	}
 
 	@Override

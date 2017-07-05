@@ -2,13 +2,17 @@ package bwfdm.sara.project;
 
 import java.util.Collections;
 import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.http.HttpSession;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
+import bwfdm.sara.Config;
 import bwfdm.sara.api.Authorization;
-import bwfdm.sara.dao.FakeDatabase;
-import bwfdm.sara.dao.FrontendDatabase;
+import bwfdm.sara.db.FrontendDatabase;
+import bwfdm.sara.db.JDBCDatabase;
 import bwfdm.sara.git.GitRepo;
 import bwfdm.sara.git.GitRepoFactory;
 import bwfdm.sara.project.RefAction.PublicationMethod;
@@ -30,10 +34,11 @@ public class Project {
 	private final String gitRepo;
 	private final FrontendDatabase db;
 
-	private Project(final String gitRepo, final GitRepo repo) {
+	private Project(final String gitRepo, final GitRepo repo,
+			final Config config) {
 		this.gitRepo = gitRepo;
 		this.repo = repo;
-		db = new FakeDatabase(gitRepo);
+		db = new JDBCDatabase(gitRepo, config);
 	}
 
 	public GitRepo getGitRepo() {
@@ -61,13 +66,15 @@ public class Project {
 		db.setMetadata(field, value, auto);
 	}
 
+	public Map<Ref, RefAction> getRefActions() {
+		final Map<Ref, RefAction> actions = new HashMap<>();
+		db.loadRefActions(actions);
+		return actions;
+	}
+
 	public void setRefAction(final Ref ref, final PublicationMethod method,
 			final String firstCommit) {
 		db.setRefAction(ref, method, firstCommit);
-	}
-
-	public Map<Ref, RefAction> getRefActions() {
-		return db.getRefActions();
 	}
 
 	public static Project getInstance(final HttpSession session) {
@@ -92,13 +99,16 @@ public class Project {
 	 *            ID of the gitlab instance
 	 * @param projectPath
 	 *            path or ID of the project on gitlab (may be <code>null</code>)
+	 * @param config
+	 *            the global {@link Config} object (use {@link Autowired} to
+	 *            have spring inject it)
 	 * @return
 	 */
 	public static Project createInstance(final HttpSession session,
-			final String repoID, final String projectPath) {
+			final String repoID, final String projectPath, final Config config) {
 		final GitRepo repo = GitRepoFactory.createInstance(session, repoID);
 
-		final Project project = new Project(repoID, repo);
+		final Project project = new Project(repoID, repo, config);
 		if (projectPath != null)
 			project.setProjectPath(projectPath);
 		session.setAttribute(PROJECT_ATTR, project);

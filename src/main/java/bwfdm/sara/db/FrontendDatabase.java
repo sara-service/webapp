@@ -1,4 +1,4 @@
-package bwfdm.sara.dao;
+package bwfdm.sara.db;
 
 import java.util.Map;
 
@@ -20,5 +20,5 @@ public interface FrontendDatabase {
 	public void setRefAction(final Ref ref, final PublicationMethod method,
 			final String firstCommit);
 
-	public Map<Ref, RefAction> getRefActions();
+	public void loadRefActions(Map<Ref, RefAction> actions);
 }

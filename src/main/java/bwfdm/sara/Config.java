@@ -6,13 +6,37 @@ import java.util.Properties;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSession;
+import javax.sql.DataSource;
 
-public class Config {
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Component;
+import org.springframework.web.context.ServletContextAware;
+
+@Component
+public class Config implements ServletContextAware {
 	private static final String WEBROOT_ATTR = "sara.webroot";
 	private static final String REPOCONFIG_ATTR = "repos.properties";
 
-	public static String getWebRoot(final HttpSession session) {
-		return getContextParam(session.getServletContext(), WEBROOT_ATTR);
+	private DataSource db;
+	private ServletContext servletContext;
+
+	@Autowired
+	public void setDataSource(final DataSource db) {
+		this.db = db;
+	}
+
+	@Override
+	public void setServletContext(final ServletContext servletContext) {
+		this.servletContext = servletContext;
+	}
+
+	public JdbcTemplate getJdbcTemplate() {
+		return new JdbcTemplate(db);
+	}
+
+	public String getWebRoot() {
+		return getContextParam(servletContext, WEBROOT_ATTR);
 	}
 
 	public static Properties getGitRepoConfig(final HttpSession session) {

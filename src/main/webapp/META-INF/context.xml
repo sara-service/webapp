@@ -1,5 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Context copyXML="true">
+	<Resource name="jdbc.database" auth="Container" type="javax.sql.DataSource"
+		validationQuery="SELECT 1" testOnBorrow="true" closeMethod="close"
+		driverClassName="org.postgresql.Driver" username="sara" password="secret"
+		url="jdbc:postgresql://localhost/sara" maxActive="10" maxIdle="4"
+		description="JDBC database connection config as a DataSource resource" />
+	<Parameter name="spring.datasource.jndi-name" value="java:comp/env/jdbc.database"
+		description="tells spring to use the datasource defined above (no need to change)" />
+
 	<Parameter name="sara.webroot"
 		value="https://sara.unikn.netfuture.ch"
 		description="publicly visible URL of servlet root" />
