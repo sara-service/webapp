@@ -26,35 +26,40 @@ template.index = 0;
 
 var APIERR = {};
 
-APIERR.report = function(step, exception, message, confirm) {
-	var msg = "Failed to " + step + ": " + exception + ": " + message;
-	if (confirm)
-		return window.confirm(msg + "\n\n"
-			+ "Reload the page and hope the error will go away?");
-	window.alert(msg);
+APIERR.getmsg = function(step, exception, message) {
+	return "Failed to " + step + ": " + exception + ": " + message;
+}
+APIERR.report = function(step, exception, message) {
+	window.alert(APIERR.getmsg(step, exception, message));
+};
+// handles all unidentified exceptions
+APIERR.handleOther = function(step, exception, message) {
+	var msg = APIERR.getmsg(step, exception, message)
+		+ "\n\nReload the page and hope the error will go away?";
+	if (window.confirm(msg))
+		// fix the error for the user; it's not like he will do anything
+		// else
+		location.reload();
 };
 // handles specific "well-known" exceptions returned by the API
 APIERR.handleJSON = function(step, info) {
 	if (info.exception == "NoSessionException") {
-		APIERR.report(step, info.exception, info.message);
+		window.alert("Session expired!"
+			+ " (You didn't leave the tab open overnight, did you?)"
+			+ "\n\nYour progress has been saved. Please go through"
+			+ " the workflow once again and check that all fields"
+			+ " are the way you left them!");
 		// user not logged in. redirect to login page.
 		location.href = "/";
 		return;
 	}
 	if (info.exception == "NoProjectException") {
-		APIERR.report(step, info.exception, info.message);
+		window.alert("Please select a project first!");
 		// no project set. redirect to project selection page.
 		location.href = "/projects.html";
 		return;
 	}
 	APIERR.handleOther(step, info.exception, info.message);
-};
-// handles all other exceptions
-APIERR.handleOther = function(step, exception, message) {
-	if (APIERR.report(step, exception, message, true))
-		// fix the error for the user; it's not like he will do anything
-		// else
-		location.reload();
 };
 APIERR.handle = function(step, status, http, body) {
 	console.log("API error: " + step + ": " + status + "/" + http, body);
