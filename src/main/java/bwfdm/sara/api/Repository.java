@@ -22,7 +22,6 @@ import bwfdm.sara.git.ProjectInfo;
 import bwfdm.sara.git.Tag;
 import bwfdm.sara.project.Project;
 import bwfdm.sara.project.Ref;
-import bwfdm.sara.project.Ref.RefType;
 import bwfdm.sara.project.RefAction;
 import bwfdm.sara.project.RefAction.PublicationMethod;
 
@@ -56,21 +55,20 @@ public class Repository {
 	private void loadActions(final List<RefInfo> refs, final HttpSession session) {
 		final Project project = Project.getInstance(session);
 
-		if (project.getRefActions().isEmpty())
+		Map<Ref, RefAction> actionMap = project.getRefActions();
+		if (actionMap.isEmpty()) {
 			// default to publishing protected branches (assumed to be the main
-			// branches), while only archiving the other branches.
-			// completely ignore tags by default; they still serve their purpose
-			// of marking important points without being archived explicitly.
+			// branches). other branches are ignored by default to avoid
+			// overloading the user when there are many branches.
 			for (final RefInfo r : refs)
 				if (r.isProtected || r.isDefault)
 					project.setRefAction(r.ref, PublicationMethod.PUBLISH_FULL,
 							RefAction.HEAD_COMMIT);
-				else if (r.ref.type == RefType.BRANCH)
-					project.setRefAction(r.ref,
-							PublicationMethod.ARCHIVE_PUBLIC,
-							RefAction.HEAD_COMMIT);
+			// fetch the list again to get one with the modifications we just
+			// did. (the list is immutable once obtained.)
+			actionMap = project.getRefActions();
+		}
 
-		final Map<Ref, RefAction> actionMap = project.getRefActions();
 		for (final RefInfo r : refs)
 			r.action = actionMap.get(r.ref);
 	}
