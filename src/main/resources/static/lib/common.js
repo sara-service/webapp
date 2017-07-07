@@ -24,44 +24,79 @@ function template(name) {
 }
 template.index = 0;
 
-function reportAPIError(xhr, status, error) {
-	alert(status + " " + error);
-	// fix the error for the user; it's not like he will do anything
-	// else
-	if (!location.href.match("^file:"))
+var APIERR = {};
+
+APIERR.report = function(step, exception, message, confirm) {
+	var msg = "Failed to " + step + ": " + exception + ": " + message;
+	if (confirm)
+		return window.confirm(msg + "\n\n"
+			+ "Reload the page and hope the error will go away?");
+	window.alert(msg);
+};
+// handles specific "well-known" exceptions returned by the API
+APIERR.handleJSON = function(step, info) {
+	if (info.exception == "NoSessionException") {
+		APIERR.report(step, info.exception, info.message);
+		// user not logged in. redirect to login page.
+		location.href = "/";
+		return;
+	}
+	if (info.exception == "NoProjectException") {
+		APIERR.report(step, info.exception, info.message);
+		// no project set. redirect to project selection page.
+		location.href = "/projects.html";
+		return;
+	}
+	APIERR.handleOther(step, info.exception, info.message);
+};
+// handles all other exceptions
+APIERR.handleOther = function(step, exception, message) {
+	if (APIERR.report(step, exception, message, true))
+		// fix the error for the user; it's not like he will do anything
+		// else
 		location.reload();
+};
+APIERR.handle = function(step, status, http, body) {
+	console.log("API error: " + step + ": " + status + "/" + http, body);
+	if (body) try {
+		var info = JSON.parse(body);
+		if (info.exception)
+			// JSON error response from API
+			return APIERR.handleJSON(step, info);
+		if (info.error && info.status)
+			// JSON error response from Spring
+			return APIERR.handleOther(step, "Error " + info.status,
+				info.error);
+		return APIERR.handleOther(step, "Unknown Error", body);
+	} catch (e) {}
+	
+	if (http)
+		return APIERR.handleOther(step, "HTTP Error", http);
+	if (status == "timeout")
+		return APIERR.handleOther(step, "HTTP Timeout", null);
+	return APIERR.handleOther(step, "Unknown Error", body);
 }
 
 var API = {};
-API.get = function(path, data, callback) {
+API.ajax = function(step, method, path, data, callback) {
 	$.ajax(path, {
-		data: data,
-		success: callback,
-		error: reportAPIError,
+		method: method, data: data, success: callback,
+		error: function(xhr, status, http) {
+			APIERR.handle(step, status, http, xhr.responseText);
+		}
 	});
+}
+API.get = function(step, path, data, callback) {
+	API.ajax(step, "GET", path, data, callback);
 };
-API.post = function(path, data, callback) {
-	$.ajax(path, {
-		method: "POST",
-		data: data,
-		success: callback,
-		error: reportAPIError,
-	});
+API.post = function(step, path, data, callback) {
+	API.ajax(step, "POST", path, data, callback);
 }
-API.put = function(path, data, callback) {
-	$.ajax(path, {
-		method: "PUT",
-		data: data,
-		success: callback,
-		error: reportAPIError,
-	});
+API.put = function(step, path, data, callback) {
+	API.ajax(step, "PUT", path, data, callback);
 }
-API.delete = function(path, callback) {
-	$.ajax(path, {
-		method: "DELETE",
-		success: callback,
-		error: reportAPIError,
-	});
+API.delete = function(step, path, callback) {
+	API.ajax(step, "DELETE", path, null, callback);
 }
 
 function setStatusClass(elem, status_list, name, status) {
@@ -138,7 +173,7 @@ autosave.validate = function(id) {
 	var save = elem.data("autosave");
 	var valid = autosave.isValid(id);
 	autosave.feedback(id, valid ? autosave.msg.none :
-			autosave.msg.invalid);
+		autosave.msg.invalid);
 	if (save.update)
 		save.update.prop("disabled", !valid || !save.updateEnabled);
 	return valid;
@@ -207,14 +242,17 @@ autosave.configureUpdateButton = function(id, updater) {
 		save.update.prop("disabled", true);
 }
 
+var pageInfo;
+
 $(function() {
-	API.get("/api/session-info", {}, function(info) {
+	API.get("initialize page", "/api/session-info", {}, function(info) {
 		var title = "SARA software publishing";
 		if (info.project !== null)
 			title = info.project + " – " + title;
 		$("title").text(title);
 		$("#ir_link").attr("href", info.ir.url);
 		$("#ir_link img").attr("src", "/logos/" + info.ir.logo);
+		pageInfo = info;
 		initPage(info);
 	});
 });

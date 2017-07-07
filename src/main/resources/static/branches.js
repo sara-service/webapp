@@ -3,18 +3,19 @@
 var forms = [];
 
 function save(branch) {
-	API.post("/api/repo/refs", {
-		ref: branch.ref.path,
-		publish: branch.action.publish,
-		firstCommit: branch.action.firstCommit,
-	});
+	API.post("save " + branch.ref.type + " " + branch.ref.name,
+		"/api/repo/refs", {
+			ref: branch.ref.path,
+			publish: branch.action.publish,
+			firstCommit: branch.action.firstCommit,
+		});
 }
 
 function addCommits(branch, select, commits) {
 	$.each(commits, function(_, commit) {
 		var shortid = commit.id.substr(0, 7);
 		var title = shortid + " and before: " + commit.title + " ("
-				+ commit.date + ")";
+			+ commit.date + ")";
 		var option = $("<option>").attr("value", commit.id).text(title);
 		select.append(option);
 	});
@@ -30,7 +31,7 @@ function addBranch(branch) {
 		// user trying to add a branch twice
 		forms[branch.ref.path].action.focus();
 		console.log("StupidUserException: ref " + branch.ref.path
-				+ " already in list");
+			+ " already in list");
 		return;
 	}
 
@@ -39,12 +40,8 @@ function addBranch(branch) {
 	form.branch_label.text(branch.ref.type + " " + branch.ref.name);
 	// default to publishing everything the user adds, because that's
 	// what we prefer.
-	if (!branch.action) {
-		branch.action = {
-			publish: "PUBLISH_FULL",
-			firstCommit: "HEAD"
-		};
-	}
+	if (!branch.action)
+		branch.action = { publish: "PUBLISH_FULL", firstCommit: "HEAD" };
 	form.action.val(branch.action.publish);
 	// firstCommit restored when list of commits has been loaded
 
@@ -68,12 +65,13 @@ function addBranch(branch) {
 
 	// in the background, load list of commits and update starting point
 	// selection box
-	API.get("/api/repo/commits", { 
-		ref: branch.ref.path,
-		limit: 20,
-	}, function(commits) {
-		addCommits(branch, form.commit, commits);
-	});
+	API.get("load list of commits in " + branch.ref.type + " "
+		+ branch.ref.name, "/api/repo/commits", { 
+			ref: branch.ref.path,
+			limit: 20,
+		}, function(commits) {
+			addCommits(branch, form.commit, commits);
+		});
 }
 
 function addBranches(branches) {
@@ -83,7 +81,7 @@ function addBranches(branches) {
 	$.each(branches, function(_, branch) {
 		var name = branch.ref.type + " " + branch.ref.name;
 		var option = $("<option>").attr("value", branch.ref.path)
-				.text(name).data("branch", branch);
+			.text(name).data("branch", branch);
 		select.append(option);
 	});
 	// add all branches which have an action set
@@ -103,5 +101,6 @@ function addBranches(branches) {
 }
 
 function initPage() {
-	API.get("/api/repo/refs", {}, addBranches);
+	API.get("load list of tags and branches", "/api/repo/refs", {},
+		addBranches);
 }

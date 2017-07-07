@@ -106,10 +106,11 @@ public class Repository {
 
 	@GetMapping("return")
 	public RedirectView getReturnURL(final HttpSession session) {
-		final GitRepo repo = GitRepoFactory.getInstance(session);
-		if (repo.getProjectPath() == null)
-			return new RedirectView(repo.getHomePageURL());
-		return new RedirectView(repo.getProjectViewURL());
+		final Project project = Project.getInstance(session);
+		if (project.getProjectPath() == null)
+			return new RedirectView(project.getGitRepoWithoutProject()
+					.getHomePageURL());
+		return new RedirectView(project.getGitRepo().getProjectViewURL());
 	}
 
 	@GetMapping("edit-file")

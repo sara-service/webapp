@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import bwfdm.sara.git.GitRepoFactory;
 import bwfdm.sara.git.ProjectInfo;
 import bwfdm.sara.project.Project;
 
@@ -19,7 +18,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class Misc {
 	@GetMapping("project-list")
 	public List<ProjectInfo> getProjectList(final HttpSession session) {
-		return GitRepoFactory.getInstance(session).getProjects();
+		return Project.getInstance(session).getGitRepoWithoutProject()
+				.getProjects();
 	}
 
 	@GetMapping("session-info")
@@ -37,7 +37,7 @@ public class Misc {
 
 		public SessionInfo(final Project project) {
 			repo = project.getRepoID();
-			projectPath = project.getGitRepo().getProjectPath();
+			projectPath = project.getProjectPath();
 			// TODO read this from the session as well
 			ir = new IRMeta("https://kops.uni-konstanz.de/", "kops.svg");
 		}

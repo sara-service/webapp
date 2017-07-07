@@ -7,45 +7,49 @@ function resetTitle(info) {
 }
 
 function resetVersion(ref) {
-	API.get("/api/extract/version", { ref: ref.path },
-			function(ex) {
-		if (ex.version === null)
-			ex.version = "";
-		autosave.reset("version", ex.version);
-		// change the text on the "update version" button as well
-		$("[data-versionfile]").text(ex.path);
-		$("#update_version").data("can-update", ex.canUpdate);
-		branchChanged();
-		// remember which branch the version was extracted from
-		saveSourceBranch(ref);
+	API.get("autodetect version number", "/api/extract/version",
+		{ ref: ref.path }, function(ex) {
+			if (ex.version === null)
+				ex.version = "";
+			autosave.reset("version", ex.version);
+			// change the text on the "update version" button as well
+			$("[data-versionfile]").text(ex.path);
+			$("#update_version").data("can-update", ex.canUpdate);
+			branchChanged();
+			// remember which branch the version was extracted from
+			saveSourceBranch(ref);
 
-		// remove the loader iff the license extraction is also finished
-		var loader = $("#lazy_loading");
-		loader.data("version-done", true);
-		if (loader.data("license-done"))
-			$("#lazy_loading").css("display", "none");
-	});
+			// remove the loader iff the license extraction is also
+			// finished
+			var loader = $("#lazy_loading");
+			loader.data("version-done", true);
+			if (loader.data("license-done"))
+				$("#lazy_loading").css("display", "none");
+		});
 }
 
 function resetLicenses() {
-	API.get("/api/extract/licenses", {}, function(list) {
-		// TODO make user confirm that the licenses are ok
-		var licenses = [];
-		$.each(list, function(_, lic) {
-			licenses.push(lic.license);
+	API.get("autodetect licenses", "/api/extract/licenses", {},
+		function(list) {
+			// TODO make user confirm that the licenses are ok
+			var licenses = [];
+			$.each(list, function(_, lic) {
+				licenses.push(lic.license);
+			});
+			autosave.reset("license", licenses.join(", "));
+			
+			// remove the loader iff the version extraction is also
+			// finished
+			var loader = $("#lazy_loading");
+			loader.data("license-done", true);
+			if (loader.data("version-done"))
+				$("#lazy_loading").css("display", "none");
 		});
-		autosave.reset("license", licenses.join(", "));
-		
-		// remove the loader iff the version extraction is also finished
-		var loader = $("#lazy_loading");
-		loader.data("license-done", true);
-		if (loader.data("version-done"))
-			$("#lazy_loading").css("display", "none");
-	});
 }
 
 function save(value, id, autoset) {
-	API.put("/api/meta/" + id, { value: value, autodetected: autoset },
+	API.put("save field " + id, "/api/meta/" + id,
+		{ value: value, autodetected: autoset },
 		function() {
 			autosave.success(id);
 		});
@@ -57,21 +61,25 @@ function branchChanged() {
 
 	var update = $("#update_version");
 	if (autosave.isValid("version") && ref.type == "branch"
-			&& update.data("can-update"))
-		autosave.configureUpdateButton("version", function(value, id) {
-		API.post("/api/extract/version",
-			{ version: value, branch: ref.name },
-			function() {
-				autosave.reset(id, value);
-				saveSourceBranch(ref);
-			});
-		});
+		&& update.data("can-update"))
+			autosave.configureUpdateButton("version",
+				function(value, id) {
+					API.post("update file "
+							+ $("[data-versionfile]").text(),
+						"/api/extract/version",
+						{ version: value, branch: ref.name },
+						function() {
+							autosave.reset(id, value);
+							saveSourceBranch(ref);
+						});
+					});
 	else
 		autosave.configureUpdateButton("version", null);
 }
 
 function saveSourceBranch(ref) {
-	API.put("/api/meta/source-ref", { value: ref.path });
+	API.put("remember " + ref.type + " used for autodetection",
+		"/api/meta/source-ref", { value: ref.path });
 }
 
 function loadLazyBranches(refs, source) {
@@ -81,7 +89,7 @@ function loadLazyBranches(refs, source) {
 	$.each(refs, function(_, ref) {
 		var name = ref.type + " " + ref.name;
 		var option = $("<option>").attr("value", ref.path)
-				.text(name).data("ref", ref);
+			.text(name).data("ref", ref);
 		select.append(option);
 		// select that item if it's the one the user used last time
 		if (!source.autodetected && source.value == ref.path)
@@ -124,13 +132,14 @@ function initFields(info) {
 		// if the values were autodetected last time, the user probably
 		// wants them to track changes made in the git repo, so we just
 		// autodetect them again here.
-		API.get("/api/repo/project-info", {}, function(data) {
-			if (info.title.autodetected)
-				info.title.value = data.name;
-			if (info.description.autodetected)
-				info.description.value = data.description;
-			setTitleDescription(info.title, info.description);
-		});
+		API.get("load project name and description",
+			"/api/repo/project-info", {}, function(data) {
+				if (info.title.autodetected)
+					info.title.value = data.name;
+				if (info.description.autodetected)
+					info.description.value = data.description;
+				setTitleDescription(info.title, info.description);
+			});
 	} else
 		setTitleDescription(info.title, info.description);
 
@@ -138,12 +147,13 @@ function initFields(info) {
 	// branch has been selected yet
 	autosave.value("version", info.version.value);
 	autosave.value("license", info.license.value);
-	API.get("/api/repo/selected-refs", {}, function(refs) {
-		console.log(info['source-branch'], info);
-		loadLazyBranches(refs, info['source-ref']);
-		$("#version_block").removeAttr("style");
-		$("#version_loading").css("display", "none");
-	});
+	API.get("load branches and tags marked for publication",
+		"/api/repo/selected-refs", {}, function(refs) {
+			console.log(info['source-branch'], info);
+			loadLazyBranches(refs, info['source-ref']);
+			$("#version_block").removeAttr("style");
+			$("#version_loading").css("display", "none");
+		});
 }
 
 function validateNotEmpty(value) {
@@ -153,23 +163,26 @@ function validateNotEmpty(value) {
 function initPage(session) {
 	autosave.init("title", save, validateNotEmpty);
 	autosave.configureUpdateButton("title", function(value, id) {
-		API.post("/api/repo/project-info", { name: value }, function() {
-			autosave.reset(id, value);
-		});
+		API.post("update project name", "/api/repo/project-info",
+			{ name: value }, function() {
+				autosave.reset(id, value);
+			});
 	});
 	autosave.init("description", save);
 	autosave.configureUpdateButton("description", function(value, id) {
-		API.post("/api/repo/project-info", { description: value },
+		API.post("update project description", "/api/repo/project-info",
+			{ description: value },
 			function() {
 				autosave.reset(id, value);
 			});
 	});
 	autosave.init("version", save, validateNotEmpty);
 	autosave.init("license", save, validateNotEmpty);
-	API.get("/api/meta", {}, initFields);
+	API.get("load field values", "/api/meta", {}, initFields);
 
 	$("#reset_title").click(function() {
 		$("#reset_title_loading").removeAttr("style");
-		API.get("/api/repo/project-info", {}, resetTitle);
+		API.get("load project name and description",
+			"/api/repo/project-info", {}, resetTitle);
 	});
 }

@@ -15,6 +15,7 @@ import bwfdm.sara.db.FrontendDatabase;
 import bwfdm.sara.db.JDBCDatabase;
 import bwfdm.sara.git.GitRepo;
 import bwfdm.sara.git.GitRepoFactory;
+import bwfdm.sara.git.GitRepoWithoutProject;
 import bwfdm.sara.project.RefAction.PublicationMethod;
 
 public class Project {
@@ -33,6 +34,7 @@ public class Project {
 	private final GitRepo repo;
 	private final String gitRepo;
 	private final FrontendDatabase db;
+	private String projectPath;
 
 	private Project(final String gitRepo, final GitRepo repo,
 			final Config config) {
@@ -41,7 +43,21 @@ public class Project {
 		db = new JDBCDatabase(gitRepo, config);
 	}
 
+	private void checkHaveProjectPath() {
+		if (projectPath == null)
+			throw new NoProjectException();
+	}
+
+	/**
+	 * @return a {@link GitRepo}, ie. with project path set and ready for
+	 *         operations that need
+	 */
 	public GitRepo getGitRepo() {
+		checkHaveProjectPath();
+		return repo;
+	}
+
+	public GitRepoWithoutProject getGitRepoWithoutProject() {
 		return repo;
 	}
 
@@ -49,31 +65,40 @@ public class Project {
 		return gitRepo;
 	}
 
-	public void setProjectPath(final String project) {
-		repo.setProjectPath(project);
-		db.setProjectPath(project);
+	public void setProjectPath(final String projectPath) {
+		this.projectPath = projectPath;
+		repo.setProjectPath(projectPath);
+		db.setProjectPath(projectPath);
+	}
+
+	public String getProjectPath() {
+		return projectPath;
 	}
 
 	public Map<MetadataField, MetadataValue> getMetadata() {
+		checkHaveProjectPath();
 		final Map<MetadataField, MetadataValue> metadata = new EnumMap<>(
 				EMPTY_METADATA);
 		db.loadMetadata(metadata);
-		return metadata;
+		return Collections.unmodifiableMap(metadata);
 	}
 
 	public void setMetadata(final MetadataField field, final String value,
 			final boolean auto) {
+		checkHaveProjectPath();
 		db.setMetadata(field, value, auto);
 	}
 
 	public Map<Ref, RefAction> getRefActions() {
+		checkHaveProjectPath();
 		final Map<Ref, RefAction> actions = new HashMap<>();
 		db.loadRefActions(actions);
-		return actions;
+		return Collections.unmodifiableMap(actions);
 	}
 
 	public void setRefAction(final Ref ref, final PublicationMethod method,
 			final String firstCommit) {
+		checkHaveProjectPath();
 		db.setRefAction(ref, method, firstCommit);
 	}
 
@@ -117,5 +142,15 @@ public class Project {
 
 	@SuppressWarnings("serial")
 	public static class NoSessionException extends RuntimeException {
+		private NoSessionException() {
+			super("session expired or not found");
+		}
+	}
+
+	@SuppressWarnings("serial")
+	public static class NoProjectException extends RuntimeException {
+		private NoProjectException() {
+			super("no project selected");
+		}
 	}
 }

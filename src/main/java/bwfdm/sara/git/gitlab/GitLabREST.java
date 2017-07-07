@@ -32,7 +32,6 @@ public class GitLabREST implements GitRepo {
 	private final String appSecret;
 	private RESTHelper helper;
 	private OAuthCode auth;
-	private String apiProject;
 	private String guiProject;
 	private String token;
 
@@ -59,16 +58,10 @@ public class GitLabREST implements GitRepo {
 
 	@Override
 	public void setProjectPath(final String project) {
-		apiProject = project;
 		guiProject = UrlEncode.decode(project);
 		// not invalidating the old token here. it should work for any project
 		// (as long as it hasn't expired yet).
 		helper = new RESTHelper(rest, root, project);
-	}
-
-	@Override
-	public String getProjectPath() {
-		return apiProject;
 	}
 
 	@Override
@@ -241,5 +234,10 @@ public class GitLabREST implements GitRepo {
 		return toDataObject(RESTHelper.getList(rest, req,
 				new ParameterizedTypeReference<List<GLProjectInfo>>() {
 				}));
+	}
+
+	@SuppressWarnings("serial")
+	public static class NoProjectException extends RuntimeException {
+
 	}
 }

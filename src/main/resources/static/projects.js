@@ -12,10 +12,11 @@ function addProjectButton(repo, project) {
 }
 
 function initPage(info) {
-	API.get("/api/project-list", {}, function(list) {
-		$.each(list, function(_, project) {
-			addProjectButton(info.repo, project);
+	API.get("load list of projects", "/api/project-list", {},
+		function(list) {
+			$.each(list, function(_, project) {
+				addProjectButton(info.repo, project);
+			});
+			$("#loading").remove();	
 		});
-		$("#loading").remove();	
-	});
 }

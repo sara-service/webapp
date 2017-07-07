@@ -14,7 +14,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 
 import bwfdm.sara.Config;
-import bwfdm.sara.git.GitRepo;
+import bwfdm.sara.git.GitRepoWithoutProject;
 import bwfdm.sara.project.Project;
 
 @RestController
@@ -35,8 +35,7 @@ public class Authorization {
 			final Project project = Project.getInstance(session);
 			if (!project.getRepoID().equals(gitRepo))
 				return warnPushy(redir, gitRepo, projectPath);
-			final String prevProjectPath = project.getGitRepo()
-					.getProjectPath();
+			final String prevProjectPath = project.getProjectPath();
 			if (prevProjectPath != null && projectPath != null
 					&& !prevProjectPath.equals(projectPath))
 				return warnPushy(redir, gitRepo, projectPath);
@@ -68,9 +67,9 @@ public class Authorization {
 		// necessary. if the token still works, we're done; no need to bother
 		// the user with authorization again.
 		final Project project = Project.getInstance(session);
-		final GitRepo repo = project.getGitRepo();
+		final GitRepoWithoutProject repo = project.getGitRepoWithoutProject();
 		if (projectPath != null) { // never change towards "no project"
-			final String prevProjectPath = repo.getProjectPath();
+			final String prevProjectPath = project.getProjectPath();
 			if (prevProjectPath == null || !prevProjectPath.equals(projectPath))
 				project.setProjectPath(projectPath);
 		}
@@ -92,7 +91,7 @@ public class Authorization {
 			return new RedirectView("/autherror.html");
 
 		final Project project = Project.getInstance(session);
-		if (project.getGitRepo().parseAuthResponse(args, session))
+		if (project.getGitRepoWithoutProject().parseAuthResponse(args, session))
 			return authFinished(project);
 
 		// authorization failed. there isn't much we can do here; retrying
@@ -101,8 +100,10 @@ public class Authorization {
 	}
 
 	private RedirectView authFinished(final Project project) {
-		if (project.getGitRepo().getProjectPath() == null)
+		// if no project selected yet, go to project selection
+		if (project.getProjectPath() == null)
 			return new RedirectView("/projects.html");
+		// else go to branch selection
 		return new RedirectView("/branches.html");
 	}
 
