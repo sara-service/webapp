@@ -19,6 +19,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import bwfdm.sara.auth.OAuthCode;
 import bwfdm.sara.git.Branch;
 import bwfdm.sara.git.Commit;
+import bwfdm.sara.git.Contributor;
 import bwfdm.sara.git.GitRepo;
 import bwfdm.sara.git.ProjectInfo;
 import bwfdm.sara.git.RepoFile;
@@ -206,6 +207,16 @@ public class GitLabREST implements GitRepo {
 		return toDataObject(helper.getList(helper.uri("/repository/tree")
 				.queryParam("path", path).queryParam("ref", ref),
 				new ParameterizedTypeReference<List<GLRepoFile>>() {
+				}));
+	}
+
+	@Override
+	public List<Contributor> getContributors(final String ref) {
+		// FIXME this definitely shouldn't just ignore the ref!
+		// TODO tell GitLAb to add a ref= parameter to the API...
+		return toDataObject(helper.getList(
+				helper.uri("/repository/contributors"),
+				new ParameterizedTypeReference<List<GLContributor>>() {
 				}));
 	}
 

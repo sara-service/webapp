@@ -111,4 +111,12 @@ public interface GitRepo extends GitRepoWithoutProject {
 	 * @return a list of files in that directory
 	 */
 	public List<RepoFile> getFiles(String branch, String path);
+
+	/**
+	 * @param ref
+	 *            branch or tag to analyze, in git ref format (ie.
+	 *            {@code heads/master} or {@code tags/test})
+	 * @return a list of contributors appearing in that branch / tag
+	 */
+	public List<Contributor> getContributors(String branch);
 }
