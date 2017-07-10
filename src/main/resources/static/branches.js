@@ -97,6 +97,11 @@ function addBranches(branches) {
 		// selection before clicking next
 		save(branch);
 	});
+	// enable the "next" button only after branches have been loaded.
+	// this prevents the user from clicking it before we have a valid
+	// branch selection.
+	$("#next_button").attr("href", "/meta.html");
+	$("#next_button").removeClass("disabled");
 	$("#loading").remove();	
 }
 

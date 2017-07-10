@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-import bwfdm.sara.git.gitlab.GitLabREST.NoProjectException;
+import bwfdm.sara.project.Project.NoProjectException;
 import bwfdm.sara.project.Project.NoSessionException;
 
 import com.fasterxml.jackson.annotation.JsonInclude;

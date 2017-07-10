@@ -149,7 +149,6 @@ function initFields(info) {
 	autosave.value("license", info.license.value);
 	API.get("load branches and tags marked for publication",
 		"/api/repo/selected-refs", {}, function(refs) {
-			console.log(info['source-branch'], info);
 			loadLazyBranches(refs, info['source-ref']);
 			$("#version_block").removeAttr("style");
 			$("#version_loading").css("display", "none");
@@ -184,5 +183,19 @@ function initPage(session) {
 		$("#reset_title_loading").removeAttr("style");
 		API.get("load project name and description",
 			"/api/repo/project-info", {}, resetTitle);
+	});
+
+	$("#next_button").click(function() {
+		var valid = true;
+		// check required fields. note description isn't required!
+		$.each(["title", "version", "license"], function(_, id) {
+			if (!autosave.validate(id)) {
+				valid = false;
+				$("#" + id).focus();
+				return false;
+			}
+		});
+		if (valid)
+			location.href = "/clone.html";
 	});
 }

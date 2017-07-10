@@ -235,9 +235,4 @@ public class GitLabREST implements GitRepo {
 				new ParameterizedTypeReference<List<GLProjectInfo>>() {
 				}));
 	}
-
-	@SuppressWarnings("serial")
-	public static class NoProjectException extends RuntimeException {
-
-	}
 }
