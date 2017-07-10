@@ -79,6 +79,10 @@ body {
 	margin: 0px 0.5em;
 }
 
+.progress-thin {
+	height: 1ex;
+}
+
 /* these are actually the dark colors so they are readable on white */
 .sara-red {
 	color: #8a3e49;

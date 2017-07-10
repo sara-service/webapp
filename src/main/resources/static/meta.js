@@ -196,6 +196,7 @@ function initPage(session) {
 			}
 		});
 		if (valid)
+			// FIXME will become contributors then overview
 			location.href = "/clone.html";
 	});
 }

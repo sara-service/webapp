@@ -17,7 +17,7 @@ var clone_status = {
 
 var elements = {};
 
-function updateStatus(step) {
+function updateStatusItem(step) {
 	function setStatus(elem, name) {
 		setStatusClass(elem, clone_status, name,
 				clone_status[step.status]);
@@ -28,31 +28,55 @@ function updateStatus(step) {
 	setStatus(line.icon, "glyphicon");
 	line.status.text("(" + clone_status[step.status].status_text + ")");
 	line.text.text(step.text);
+
+	if (step.status == "working") {
+		line.progress.css("display", "block");
+		var value = step.progress * 100;
+		line.bar.attr("aria-valuenow", value);
+		line.bar.css("width", value + "%");
+	} else
+		line.progress.css("display", "none");
 }
 
-function addStatus(step) {
+function addStatusItem(step) {
 	var line = template("template");
 	elements[step.id] = line;
-	updateStatus(step);
+	updateStatusItem(step);
 	$("#steps").append(line.root);
 }
 
 function initStatus(steps) {
 	$.each(steps, function(_, step) {
-		addStatus(step);
+		addStatusItem(step);
 	});
 }
 
-function initPage(session) {
+function updateStatus(handleItem) {
+	API.get("check clone status", "/api/clone/status", {},
+		function(steps) {
+			var done = true;
+			$.each(steps, function(_, step) {
+				handleItem(step);
+				if (step.status != "done")
+					done = false;
+			});
+			if (done)
+				location.href = "/done.html";
+		});
 }
 
-var demo = [
-	{ id: "init", status: "done", text: "initializing temporary repository" },
-	{ id: "branch_master", status: "done", text: "cloning branch master" },
-	{ id: "branch_webapp", status: "working", text: "cloning branch webapp" },
-	{ id: "tag_test", status: "pending", text: "cloning branch test" },
-	{ id: "tag_foo", status: "pending", text: "cloning tag foo" },
-	{ id: "tag_bar", status: "pending", text: "cloning tag bar" },
-	{ id: "tag_baz", status: "pending", text: "cloning tag baz" }
-];
-$(function() { initStatus(demo); });
+function update() {
+	updateStatus(updateStatusItem);
+	// long timeout for later updates because the user is already
+	// annoyed anyway
+	// uses setTimeout instead of setInterval so two requests can never
+	// be active at the same time
+	setTimeout(update, 15000);
+}
+
+function initPage(session) {
+	updateStatus(addStatusItem);
+	// short timeout for first update so the user doesn't have to wait
+	// excessively if the operations finish quickly
+	setTimeout(update, 5000);
+}
