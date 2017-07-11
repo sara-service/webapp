@@ -1,21 +1,44 @@
 package bwfdm.sara.git;
 
-import java.lang.reflect.InvocationTargetException;
-import java.util.Properties;
-
 import javax.servlet.http.HttpSession;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 import bwfdm.sara.Config;
-import bwfdm.sara.Config.ConfigurationException;
 import bwfdm.sara.project.Project;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+@JsonIgnoreProperties(ignoreUnknown = false)
 public class GitRepoFactory {
-	/**
-	 * Convenience method for calling {@link Project#getInstance(HttpSession)}
-	 * then {@link Project#getGitRepo()}.
-	 */
-	public static GitRepo getInstance(final HttpSession session) {
-		return Project.getInstance(session).getGitRepo();
+	private static final ObjectMapper MAPPER = new ObjectMapper();
+
+	@JsonProperty
+	private String displayName;
+	@JsonProperty("class")
+	private String className;
+	@JsonProperty
+	private JsonNode args;
+
+	/** used only by Jackson via reflection */
+	private GitRepoFactory() {
+	}
+
+	public String getDisplayName() {
+		return displayName;
+	}
+
+	public GitRepo newGitRepo() throws ClassNotFoundException {
+		@SuppressWarnings("unchecked")
+		final Class<GitRepo> cls = (Class<GitRepo>) Class.forName(className);
+		// use Jackson to construct the object from JSON. for this to work, the
+		// constructor must be annotated with @JsonCreator, and all its
+		// arguments must have @JsonProperty annotation giving the argument's
+		// name in JSON, ie. something like @JsonProperty("url")
+		return MAPPER.convertValue(args, cls);
 	}
 
 	/**
@@ -23,37 +46,20 @@ public class GitRepoFactory {
 	 * Meant to be called by {@link Project#createInstance(HttpSession, String)}
 	 * only!
 	 * 
-	 * @param session
-	 *            the user's {@link HttpSession}
 	 * @param gitRepo
 	 *            ID of the gitlab instance
-	 * @return
+	 * @param config
+	 *            the global {@link Config} object (use {@link Autowired} to
+	 *            have Spring inject it)
+	 * 
+	 * @return a new {@link GitRepo}
 	 */
-	public static GitRepo createInstance(final HttpSession session,
-			final String gitRepo) {
-		final Properties config = Config.getGitRepoConfig(session);
-
-		// collect all properties that start with the gitRepo's name
-		final Properties args = new Properties();
-		final String prefix = gitRepo + ".";
-		for (final String name : config.stringPropertyNames())
-			if (name.startsWith(prefix)) {
-				final String localName = name.substring(prefix.length());
-				args.setProperty(localName, config.getProperty(name));
-			}
-
-		// try to instantiate the concrete gitRepo class
-		String className = args.getProperty("class");
-		if (className == null)
-			className = config.getProperty("default.class");
+	public static GitRepo createInstance(final String gitRepo,
+			final Config config) {
 		try {
-			return (GitRepo) Class.forName(className)
-					.getConstructor(Properties.class).newInstance(args);
-		} catch (final ClassNotFoundException | InstantiationException
-				| IllegalAccessException | InvocationTargetException
-				| NoSuchMethodException | SecurityException e) {
-			throw new ConfigurationException("cannot instantiate " + className
-					+ " for " + gitRepo, e);
+			return config.getRepoConfig().get(gitRepo).newGitRepo();
+		} catch (final ClassNotFoundException e) {
+			throw new RuntimeException("cannot instantiate " + gitRepo, e);
 		}
 	}
 }

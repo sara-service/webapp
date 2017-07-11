@@ -34,12 +34,14 @@ public class Project {
 	private final GitRepo repo;
 	private final String gitRepo;
 	private final FrontendDatabase db;
+	private final Config config;
 	private String projectPath;
 
 	private Project(final String gitRepo, final GitRepo repo,
 			final Config config) {
 		this.gitRepo = gitRepo;
 		this.repo = repo;
+		this.config = config;
 		db = new JDBCDatabase(gitRepo, config);
 	}
 
@@ -50,13 +52,17 @@ public class Project {
 
 	/**
 	 * @return a {@link GitRepo}, ie. with project path set and ready for
-	 *         operations that need
+	 *         operations that need a project to be selected
 	 */
 	public GitRepo getGitRepo() {
 		checkHaveProjectPath();
 		return repo;
 	}
 
+	/**
+	 * @return a {@link GitRepoWithoutProject}, supporting only those operations
+	 *         that don't need a project selected
+	 */
 	public GitRepoWithoutProject getGitRepoWithoutProject() {
 		return repo;
 	}
@@ -109,6 +115,14 @@ public class Project {
 		return repo;
 	}
 
+	/**
+	 * Convenience method for calling {@link #getInstance(HttpSession)} then
+	 * {@link Project#getGitRepo()}.
+	 */
+	public static GitRepo getGitRepo(final HttpSession session) {
+		return getInstance(session).getGitRepo();
+	}
+
 	public static boolean hasInstance(final HttpSession session) {
 		return session.getAttribute(PROJECT_ATTR) != null;
 	}
@@ -126,12 +140,12 @@ public class Project {
 	 *            path or ID of the project on gitlab (may be <code>null</code>)
 	 * @param config
 	 *            the global {@link Config} object (use {@link Autowired} to
-	 *            have spring inject it)
+	 *            have Spring inject it)
 	 * @return
 	 */
 	public static Project createInstance(final HttpSession session,
 			final String repoID, final String projectPath, final Config config) {
-		final GitRepo repo = GitRepoFactory.createInstance(session, repoID);
+		final GitRepo repo = GitRepoFactory.createInstance(repoID, config);
 
 		final Project project = new Project(repoID, repo, config);
 		if (projectPath != null)

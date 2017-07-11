@@ -11,7 +11,10 @@
 	<Parameter name="sara.webroot"
 		value="https://sara.unikn.netfuture.ch"
 		description="publicly visible URL of servlet root" />
-	<Parameter name="repos.properties"
-		value="gitlabs.properties"
-		description="path to properties file listing all git repos" />
+	<Parameter name="repos.config"
+		value="gitlabs.json"
+		description="path to JSON file listing all git repos" />
+	<Parameter name="temp.dir"
+		value="temp"
+		description="directory for temporary files, relative to servlet container's temp dir or absolute" />
 </Context>

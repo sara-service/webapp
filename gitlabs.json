@@ -1,0 +1,20 @@
+// list of gitlab instances
+// the "property" name in the outermost object gives the name used in
+// the login API (Authorization.java).
+// for each repo:
+// - the "class" property gives the implementing class, such as
+//   "bwfdm.sara.git.gitlab.GitLabRESTv4" for the GitLab REST API v4.
+// - all other property names provide the arguments passed to the
+//   constructor of the class.
+{
+	// sara development GitLab instance
+	"arbeits-gitlab": {
+		displayName: "Arbeits-GitLab (SARA Development)",
+		class: "bwfdm.sara.git.gitlab.GitLabRESTv4",
+		args: {
+			url: "https://arbeits-gitlab.unikn.netfuture.ch",
+			oauthID: "d6f80baadb28e3d9d20b79f6a27c0747f6692a67321375e40be1a1b0fd8bb430",
+			oauthSecret: "6df3596f15aaa0b4e1ecd4297c697e42632b2cab4c4224bbdd6a34b9ed0674f1"
+		}
+	}
+}

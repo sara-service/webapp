@@ -18,9 +18,9 @@ import bwfdm.sara.extractor.LicenseExtractor;
 import bwfdm.sara.extractor.LicenseFile;
 import bwfdm.sara.extractor.licensee.LicenseeExtractor;
 import bwfdm.sara.git.GitRepo;
-import bwfdm.sara.git.GitRepoFactory;
 import bwfdm.sara.git.RepoFile;
 import bwfdm.sara.git.RepoFile.FileType;
+import bwfdm.sara.project.Project;
 import bwfdm.sara.project.Ref;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -42,7 +42,7 @@ public class MetadataExtractor {
 
 	@GetMapping("licenses")
 	public List<LicenseInfo> detectLicenses(final HttpSession session) {
-		final GitRepo repo = GitRepoFactory.getInstance(session);
+		final GitRepo repo = Project.getGitRepo(session);
 		final List<LicenseInfo> licenses = new ArrayList<>();
 		for (final Ref ref : repository.getSelectedBranches(session)) {
 			// TODO honor the branch starting point here
@@ -54,6 +54,7 @@ public class MetadataExtractor {
 	}
 
 	private LicenseFile detectLicense(final String ref, final GitRepo repo) {
+		// TODO honor the branch starting point here
 		final List<RepoFile> files = repo.getFiles(ref, "");
 		final List<LazyFile> candidates = new ArrayList<LazyFile>(files.size());
 		for (final RepoFile file : files)
@@ -63,7 +64,7 @@ public class MetadataExtractor {
 		if (candidates.isEmpty())
 			return null;
 		final LicenseFile res = licenseExtractor.detectLicense(candidates);
-		// TODO cache result
+		// TODO cache result by file hash
 		return res;
 	}
 
@@ -86,7 +87,7 @@ public class MetadataExtractor {
 	@GetMapping("version")
 	public VersionInfo detectVersion(@RequestParam("ref") final String ref,
 			final HttpSession session) {
-		final GitRepo repo = GitRepoFactory.getInstance(session);
+		final GitRepo repo = Project.getGitRepo(session);
 
 		final byte[] blob = repo.getBlob(ref, VERSION_FILE);
 		if (blob == null)
@@ -101,7 +102,7 @@ public class MetadataExtractor {
 	public void updateVersion(@RequestParam("branch") final String branch,
 			@RequestParam("version") final String version,
 			final HttpSession session) {
-		final GitRepo repo = GitRepoFactory.getInstance(session);
+		final GitRepo repo = Project.getGitRepo(session);
 		// always write as UTF-8; that shouldn't break anything
 		repo.putBlob(branch, VERSION_FILE, "update version to " + version,
 				version.getBytes(UTF8));

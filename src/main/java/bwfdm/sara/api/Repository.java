@@ -17,7 +17,6 @@ import org.springframework.web.servlet.view.RedirectView;
 import bwfdm.sara.git.Branch;
 import bwfdm.sara.git.Commit;
 import bwfdm.sara.git.GitRepo;
-import bwfdm.sara.git.GitRepoFactory;
 import bwfdm.sara.git.ProjectInfo;
 import bwfdm.sara.git.Tag;
 import bwfdm.sara.project.Project;
@@ -87,12 +86,12 @@ public class Repository {
 			@RequestParam("ref") final String ref,
 			@RequestParam(name = "limit", defaultValue = "20") final int limit,
 			final HttpSession session) {
-		return GitRepoFactory.getInstance(session).getCommits(ref, limit);
+		return Project.getGitRepo(session).getCommits(ref, limit);
 	}
 
 	@GetMapping("project-info")
 	public ProjectInfo getProjectInfo(final HttpSession session) {
-		return GitRepoFactory.getInstance(session).getProjectInfo();
+		return Project.getGitRepo(session).getProjectInfo();
 	}
 
 	@PostMapping("project-info")
@@ -100,7 +99,7 @@ public class Repository {
 			@RequestParam(name = "name", required = false) final String name,
 			@RequestParam(name = "description", required = false) final String description,
 			final HttpSession session) {
-		GitRepoFactory.getInstance(session)
+		Project.getGitRepo(session)
 				.updateProjectInfo(name, description);
 	}
 
@@ -116,7 +115,7 @@ public class Repository {
 	@GetMapping("edit-file")
 	public RedirectView getEditURL(@RequestParam("branch") final String branch,
 			@RequestParam("path") final String path, final HttpSession session) {
-		final GitRepo repo = GitRepoFactory.getInstance(session);
+		final GitRepo repo = Project.getGitRepo(session);
 		if (repo.getBlob("heads/" + branch, path) != null)
 			return new RedirectView(repo.getEditURL(branch, path));
 		return new RedirectView(repo.getCreateURL(branch, path));

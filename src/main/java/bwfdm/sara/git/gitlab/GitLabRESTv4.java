@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Properties;
 
 import javax.servlet.http.HttpSession;
 
@@ -25,8 +24,11 @@ import bwfdm.sara.git.ProjectInfo;
 import bwfdm.sara.git.RepoFile;
 import bwfdm.sara.git.Tag;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /** high-level abstraction of the GitLab REST API. */
-public class GitLabREST implements GitRepo {
+public class GitLabRESTv4 implements GitRepo {
 	private final AuthenticatedREST rest = new AuthenticatedREST();
 	private final String root;
 	private final String appID;
@@ -44,17 +46,13 @@ public class GitLabREST implements GitRepo {
 	 * @param gitlab
 	 *            URL to GitLab root
 	 */
-	public GitLabREST(final String root, final String appID,
-			final String appSecret) {
+	@JsonCreator
+	public GitLabRESTv4(@JsonProperty("url") final String root,
+			@JsonProperty("oauthID") final String appID,
+			@JsonProperty("oauthSecret") final String appSecret) {
 		this.root = root;
 		this.appID = appID;
 		this.appSecret = appSecret;
-	}
-
-	public GitLabREST(final Properties args) {
-		root = args.getProperty("root");
-		appID = args.getProperty("oauth.id");
-		appSecret = args.getProperty("oauth.secret");
 	}
 
 	@Override
