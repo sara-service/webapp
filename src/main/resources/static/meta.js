@@ -9,9 +9,8 @@ function resetTitle(info) {
 function resetVersion(ref) {
 	API.get("autodetect version number", "/api/extract/version",
 		{ ref: ref.path }, function(ex) {
-			if (ex.version === null)
-				ex.version = "";
-			autosave.reset("version", ex.version);
+			if (ex.version !== null)
+				autosave.reset("version", ex.version);
 			// change the text on the "update version" button as well
 			$("[data-versionfile]").text(ex.path);
 			$("#update_version").data("can-update", ex.canUpdate);
@@ -36,7 +35,8 @@ function resetLicenses() {
 			$.each(list, function(_, lic) {
 				licenses.push(lic.license);
 			});
-			autosave.reset("license", licenses.join(", "));
+			if (licenses.length)
+				autosave.reset("license", licenses.join(", "));
 			
 			// remove the loader iff the version extraction is also
 			// finished

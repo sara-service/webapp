@@ -74,7 +74,7 @@ APIERR.handle = function(step, status, http, body) {
 				info.error);
 		return APIERR.handleOther(step, "Unknown Error", body);
 	} catch (e) {}
-	
+
 	if (http)
 		return APIERR.handleOther(step, "HTTP Error", http);
 	if (status == "timeout")
