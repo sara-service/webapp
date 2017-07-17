@@ -8,12 +8,10 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+import bwfdm.sara.project.ErrorInfo;
 import bwfdm.sara.project.Project.NoProjectException;
 import bwfdm.sara.project.Project.NoSessionException;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 @ControllerAdvice("bwfdm.sara.api")
 public class Error {
@@ -46,16 +44,4 @@ public class Error {
 
 	// TODO set up a handler for /error and return something nice for 404s etc
 
-	@JsonInclude(Include.NON_NULL)
-	private static class ErrorInfo {
-		@JsonProperty
-		public final String exception;
-		@JsonProperty
-		public final String message;
-
-		public ErrorInfo(final Exception e) {
-			exception = e.getClass().getSimpleName();
-			message = e.getMessage();
-		}
-	}
 }

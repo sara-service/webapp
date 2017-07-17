@@ -29,8 +29,8 @@ public class Config implements ServletContextAware {
 	private static final Charset UTF8 = Charset.forName("UTF-8");
 
 	private final ObjectMapper mapper;
+	@Autowired
 	private DataSource db;
-	// private ServletContext servletContext;
 	private String webroot;
 	private File temproot;
 	private Map<String, GitRepoFactory> repoConfig;
@@ -46,20 +46,26 @@ public class Config implements ServletContextAware {
 		mapper.enable(Feature.ALLOW_UNQUOTED_FIELD_NAMES);
 	}
 
-	@Autowired
-	public void setDataSource(final DataSource db) {
-		this.db = db;
-	}
-
 	@Override
 	public void setServletContext(final ServletContext servletContext) {
 		// this.servletContext = servletContext;
 		webroot = getContextParam(servletContext, WEBROOT_ATTR);
-		temproot = getTempRoot(servletContext);
 		repoConfig = readRepoConfig(servletContext);
-		// new
-		// File(getContextParam(servletContext,
-		// REPOCONFIG_ATTR));
+
+		temproot = getTempRoot(servletContext);
+		temproot.mkdirs(); // failure harmless if already there
+		if (!temproot.isDirectory())
+			throw new RuntimeException("temp directory "
+					+ temproot.getAbsolutePath() + " cannot be created");
+	}
+
+	private static String getContextParam(final ServletContext context,
+			final String name) {
+		final String attr = context.getInitParameter(name);
+		if (attr == null)
+			throw new ConfigurationException("missing context parameter "
+					+ name);
+		return attr;
 	}
 
 	private Map<String, GitRepoFactory> readRepoConfig(
@@ -90,7 +96,7 @@ public class Config implements ServletContextAware {
 		return new File(servletTemp, tempPath);
 	}
 
-	public JdbcTemplate getJdbcTemplate() {
+	public JdbcTemplate newJdbcTemplate() {
 		return new JdbcTemplate(db);
 	}
 
@@ -131,15 +137,6 @@ public class Config implements ServletContextAware {
 			throw new RuntimeException("failed to create directory "
 					+ temp.getAbsolutePath());
 		return temp;
-	}
-
-	private static String getContextParam(final ServletContext context,
-			final String name) {
-		final String attr = context.getInitParameter(name);
-		if (attr == null)
-			throw new ConfigurationException("missing context parameter "
-					+ name);
-		return attr;
 	}
 
 	@SuppressWarnings("serial")

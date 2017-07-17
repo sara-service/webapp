@@ -2,7 +2,7 @@ package bwfdm.sara.extractor;
 
 import java.nio.charset.Charset;
 
-import bwfdm.sara.git.GitRepo;
+import bwfdm.sara.git.GitProject;
 import bwfdm.sara.git.RepoFile;
 
 /**
@@ -10,12 +10,12 @@ import bwfdm.sara.git.RepoFile;
  * needed.
  */
 public class LazyFile {
-	private final GitRepo repo;
+	private final GitProject repo;
 	private final String ref;
 	private String content;
 	private final RepoFile file;
 
-	public LazyFile(final GitRepo repo, final String ref, final RepoFile file) {
+	public LazyFile(final GitProject repo, final String ref, final RepoFile file) {
 		this.repo = repo;
 		this.ref = ref;
 		this.file = file;

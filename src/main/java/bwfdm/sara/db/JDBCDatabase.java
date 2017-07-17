@@ -34,7 +34,7 @@ public class JDBCDatabase implements FrontendDatabase {
 
 	public JDBCDatabase(final String gitRepo, final Config config) {
 		this.gitRepo = gitRepo;
-		db = config.getJdbcTemplate();
+		db = config.newJdbcTemplate();
 		transaction = new TransactionTemplate(new DataSourceTransactionManager(
 				db.getDataSource()));
 	}

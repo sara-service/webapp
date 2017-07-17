@@ -1,28 +1,19 @@
 package bwfdm.sara.git.gitlab;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 
 import javax.servlet.http.HttpSession;
 
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpStatus;
-import org.springframework.util.Base64Utils;
-import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import bwfdm.sara.auth.OAuthCode;
-import bwfdm.sara.git.Branch;
-import bwfdm.sara.git.Commit;
-import bwfdm.sara.git.Contributor;
+import bwfdm.sara.git.GitProject;
 import bwfdm.sara.git.GitRepo;
 import bwfdm.sara.git.ProjectInfo;
-import bwfdm.sara.git.RepoFile;
-import bwfdm.sara.git.Tag;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -33,9 +24,7 @@ public class GitLabRESTv4 implements GitRepo {
 	private final String root;
 	private final String appID;
 	private final String appSecret;
-	private RESTHelper helper;
 	private OAuthCode auth;
-	private String guiProject;
 	private String token;
 
 	/**
@@ -56,11 +45,10 @@ public class GitLabRESTv4 implements GitRepo {
 	}
 
 	@Override
-	public void setProjectPath(final String project) {
-		guiProject = UrlEncode.decode(project);
+	public GitProject getGitProject(final String project) {
 		// not invalidating the old token here. it should work for any project
 		// (as long as it hasn't expired yet).
-		helper = new RESTHelper(rest, root, project);
+		return new GLProject(rest, root, project, token);
 	}
 
 	@Override
@@ -109,130 +97,11 @@ public class GitLabRESTv4 implements GitRepo {
 		return root;
 	}
 
-	@Override
-	public String getProjectViewURL() {
-		return root + "/" + guiProject;
-	}
-
-	@Override
-	public String getEditURL(final String branch, final String path) {
-		return root + "/" + guiProject + "/edit/" + branch + "/" + path;
-	}
-
-	@Override
-	public String getCreateURL(final String branch, final String path) {
-		return root + "/" + guiProject + "/new/" + branch
-				+ "/?commit_message=Add+" + UrlEncode.encodeQueryParam(path)
-				+ "&file_name=" + UrlEncode.encodeQueryParam(path);
-	}
-
-	@Override
-	public List<Branch> getBranches() {
-		final GLProjectInfo projectInfo = getGitLabProjectInfo();
-		final List<GLBranch> list = helper.getList("/repository/branches",
-				new ParameterizedTypeReference<List<GLBranch>>() {
-				});
-		final ArrayList<Branch> branches = new ArrayList<>(list.size());
-		for (final GLBranch glb : list)
-			branches.add(glb.toBranch(projectInfo.master));
-		return branches;
-	}
-
-	private <T> List<T> toDataObject(final List<? extends GLDataObject<T>> items) {
+	static <T> List<T> toDataObject(final List<? extends GLDataObject<T>> items) {
 		final ArrayList<T> list = new ArrayList<>(items.size());
 		for (final GLDataObject<T> gldo : items)
 			list.add(gldo.toDataObject());
 		return list;
-	}
-
-	@Override
-	public List<Tag> getTags() {
-		return toDataObject(helper.getList("/repository/tags",
-				new ParameterizedTypeReference<List<GLTag>>() {
-				}));
-	}
-
-	@Override
-	public List<Commit> getCommits(final String ref, final int limit) {
-		final UriComponentsBuilder req = helper.uri("/repository/commits")
-				.queryParam("ref_name", ref)
-				.queryParam("per_page", Integer.toString(limit));
-		return toDataObject(helper.get(req,
-				new ParameterizedTypeReference<List<GLCommit>>() {
-				}));
-	}
-
-	@Override
-	public byte[] getBlob(final String ref, final String path) {
-		final UriComponentsBuilder req = helper.uri(
-				"/repository/files/" + UrlEncode.encodePathSegment(path)
-						+ "/raw").queryParam("ref", ref);
-		try {
-			return helper.getBlob(req);
-		} catch (final HttpClientErrorException e) {
-			if (e.getStatusCode() == HttpStatus.NOT_FOUND)
-				return null; // file just doesn't exist
-			throw e; // something serious
-		}
-	}
-
-	@Override
-	public void putBlob(final String branch, final String path,
-			final String commitMessage, final byte[] data) {
-		final String endpoint = "/repository/files/"
-				+ UrlEncode.encodePathSegment(path);
-		final HashMap<String, String> args = new HashMap<>();
-		args.put("branch", branch);
-		args.put("commit_message", commitMessage);
-		args.put("encoding", "base64");
-		args.put("content", Base64Utils.encodeToString(data));
-
-		final byte[] existing = getBlob("heads/" + branch, path);
-		if (existing == null)
-			// file doesn't exist; send create query.
-			helper.post(endpoint, args);
-		else if (!Arrays.equals(data, existing))
-			// file exists, and has actually been changed. (gitlab doesn't like
-			// no-change writes because they create an empty commit.) send
-			// update query.
-			// note the different request method; it's otherwise identical to a
-			// create query.
-			helper.put(endpoint, args);
-	}
-
-	@Override
-	public List<RepoFile> getFiles(final String ref, final String path) {
-		return toDataObject(helper.getList(helper.uri("/repository/tree")
-				.queryParam("path", path).queryParam("ref", ref),
-				new ParameterizedTypeReference<List<GLRepoFile>>() {
-				}));
-	}
-
-	@Override
-	public List<Contributor> getContributors(final String ref) {
-		// FIXME this definitely shouldn't just ignore the ref!
-		// TODO tell GitLAb to add a ref= parameter to the API...
-		return toDataObject(helper.getList(
-				helper.uri("/repository/contributors"),
-				new ParameterizedTypeReference<List<GLContributor>>() {
-				}));
-	}
-
-	private GLProjectInfo getGitLabProjectInfo() {
-		return helper.get("" /* the project itself */,
-				new ParameterizedTypeReference<GLProjectInfo>() {
-				});
-	}
-
-	@Override
-	public ProjectInfo getProjectInfo() {
-		return getGitLabProjectInfo().toDataObject();
-	}
-
-	@Override
-	public void updateProjectInfo(final String name, final String description) {
-		final GLProjectInfo info = new GLProjectInfo(name, description);
-		helper.put("" /* the project itself */, info);
 	}
 
 	@Override

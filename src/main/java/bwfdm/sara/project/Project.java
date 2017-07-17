@@ -13,10 +13,11 @@ import bwfdm.sara.Config;
 import bwfdm.sara.api.Authorization;
 import bwfdm.sara.db.FrontendDatabase;
 import bwfdm.sara.db.JDBCDatabase;
+import bwfdm.sara.git.GitProject;
 import bwfdm.sara.git.GitRepo;
 import bwfdm.sara.git.GitRepoFactory;
-import bwfdm.sara.git.GitRepoWithoutProject;
 import bwfdm.sara.project.RefAction.PublicationMethod;
+import bwfdm.sara.transfer.TransferRepo;
 
 public class Project {
 	private static final String PROJECT_ATTR = Project.class.getCanonicalName();
@@ -34,36 +35,23 @@ public class Project {
 	private final GitRepo repo;
 	private final String gitRepo;
 	private final FrontendDatabase db;
-	private final Config config;
+	private final TransferRepo transferRepo;
+	private GitProject project;
 	private String projectPath;
 
 	private Project(final String gitRepo, final GitRepo repo,
 			final Config config) {
 		this.gitRepo = gitRepo;
 		this.repo = repo;
-		this.config = config;
 		db = new JDBCDatabase(gitRepo, config);
-	}
-
-	private void checkHaveProjectPath() {
-		if (projectPath == null)
-			throw new NoProjectException();
+		transferRepo = new TransferRepo(this, config);
 	}
 
 	/**
-	 * @return a {@link GitRepo}, ie. with project path set and ready for
-	 *         operations that need a project to be selected
+	 * @return a {@link GitRepo}, supporting only those operations that don't
+	 *         need a project selected
 	 */
 	public GitRepo getGitRepo() {
-		checkHaveProjectPath();
-		return repo;
-	}
-
-	/**
-	 * @return a {@link GitRepoWithoutProject}, supporting only those operations
-	 *         that don't need a project selected
-	 */
-	public GitRepoWithoutProject getGitRepoWithoutProject() {
 		return repo;
 	}
 
@@ -71,18 +59,33 @@ public class Project {
 		return gitRepo;
 	}
 
-	public void setProjectPath(final String projectPath) {
+	public synchronized void setProjectPath(final String projectPath) {
 		this.projectPath = projectPath;
-		repo.setProjectPath(projectPath);
+		project = repo.getGitProject(projectPath);
 		db.setProjectPath(projectPath);
+		transferRepo.invalidate();
 	}
 
-	public String getProjectPath() {
+	public synchronized String getProjectPath() {
 		return projectPath;
 	}
 
+	/**
+	 * @return a {@link GitRepo}, ie. with project path set and ready for
+	 *         operations that need a project to be selected
+	 */
+	public synchronized GitProject getGitProject() {
+		checkHaveProject();
+		return project;
+	}
+
+	private void checkHaveProject() {
+		if (project == null)
+			throw new NoProjectException();
+	}
+
 	public Map<MetadataField, MetadataValue> getMetadata() {
-		checkHaveProjectPath();
+		checkHaveProject();
 		final Map<MetadataField, MetadataValue> metadata = new EnumMap<>(
 				EMPTY_METADATA);
 		db.loadMetadata(metadata);
@@ -91,12 +94,12 @@ public class Project {
 
 	public void setMetadata(final MetadataField field, final String value,
 			final boolean auto) {
-		checkHaveProjectPath();
+		checkHaveProject();
 		db.setMetadata(field, value, auto);
 	}
 
 	public Map<Ref, RefAction> getRefActions() {
-		checkHaveProjectPath();
+		checkHaveProject();
 		final Map<Ref, RefAction> actions = new HashMap<>();
 		db.loadRefActions(actions);
 		return Collections.unmodifiableMap(actions);
@@ -104,8 +107,20 @@ public class Project {
 
 	public void setRefAction(final Ref ref, final PublicationMethod method,
 			final String firstCommit) {
-		checkHaveProjectPath();
+		checkHaveProject();
 		db.setRefAction(ref, method, firstCommit);
+		transferRepo.invalidate();
+	}
+
+	public TransferRepo getTransferRepo() {
+		checkHaveProject();
+		return transferRepo;
+	}
+
+	@SuppressWarnings("unused")
+	private void checkHaveTransferRepo() {
+		if (!transferRepo.isInitialized())
+			throw new NeedCloneException();
 	}
 
 	public static Project getInstance(final HttpSession session) {
@@ -117,10 +132,10 @@ public class Project {
 
 	/**
 	 * Convenience method for calling {@link #getInstance(HttpSession)} then
-	 * {@link Project#getGitRepo()}.
+	 * {@link Project#getGitProject()}.
 	 */
-	public static GitRepo getGitRepo(final HttpSession session) {
-		return getInstance(session).getGitRepo();
+	public static GitProject getGitProject(final HttpSession session) {
+		return getInstance(session).getGitProject();
 	}
 
 	public static boolean hasInstance(final HttpSession session) {
@@ -165,6 +180,13 @@ public class Project {
 	public static class NoProjectException extends RuntimeException {
 		private NoProjectException() {
 			super("no project selected");
+		}
+	}
+
+	@SuppressWarnings("serial")
+	public static class NeedCloneException extends RuntimeException {
+		private NeedCloneException() {
+			super("need to clone the repository first");
 		}
 	}
 }

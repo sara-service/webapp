@@ -42,9 +42,8 @@ public class GitRepoFactory {
 	}
 
 	/**
-	 * Creates a new {@link GitRepo} instance, overwriting the previous one.
-	 * Meant to be called by {@link Project#createInstance(HttpSession, String)}
-	 * only!
+	 * Creates a new {@link GitRepo} instance. Meant to be called by
+	 * {@link Project#createInstance(HttpSession, String)} only!
 	 * 
 	 * @param gitRepo
 	 *            ID of the gitlab instance

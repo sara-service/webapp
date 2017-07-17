@@ -16,7 +16,7 @@ import org.springframework.web.servlet.view.RedirectView;
 
 import bwfdm.sara.git.Branch;
 import bwfdm.sara.git.Commit;
-import bwfdm.sara.git.GitRepo;
+import bwfdm.sara.git.GitProject;
 import bwfdm.sara.git.ProjectInfo;
 import bwfdm.sara.git.Tag;
 import bwfdm.sara.project.Project;
@@ -42,7 +42,7 @@ public class Repository {
 	}
 
 	private List<RefInfo> getAllRefs(final HttpSession session) {
-		final GitRepo gl = Project.getInstance(session).getGitRepo();
+		final GitProject gl = Project.getInstance(session).getGitProject();
 		final List<RefInfo> refs = new ArrayList<RefInfo>();
 		for (final Branch b : gl.getBranches())
 			refs.add(new RefInfo(b));
@@ -86,12 +86,12 @@ public class Repository {
 			@RequestParam("ref") final String ref,
 			@RequestParam(name = "limit", defaultValue = "20") final int limit,
 			final HttpSession session) {
-		return Project.getGitRepo(session).getCommits(ref, limit);
+		return Project.getGitProject(session).getCommits(ref, limit);
 	}
 
 	@GetMapping("project-info")
 	public ProjectInfo getProjectInfo(final HttpSession session) {
-		return Project.getGitRepo(session).getProjectInfo();
+		return Project.getGitProject(session).getProjectInfo();
 	}
 
 	@PostMapping("project-info")
@@ -99,7 +99,7 @@ public class Repository {
 			@RequestParam(name = "name", required = false) final String name,
 			@RequestParam(name = "description", required = false) final String description,
 			final HttpSession session) {
-		Project.getGitRepo(session)
+		Project.getGitProject(session)
 				.updateProjectInfo(name, description);
 	}
 
@@ -107,15 +107,15 @@ public class Repository {
 	public RedirectView getReturnURL(final HttpSession session) {
 		final Project project = Project.getInstance(session);
 		if (project.getProjectPath() == null)
-			return new RedirectView(project.getGitRepoWithoutProject()
+			return new RedirectView(project.getGitRepo()
 					.getHomePageURL());
-		return new RedirectView(project.getGitRepo().getProjectViewURL());
+		return new RedirectView(project.getGitProject().getProjectViewURL());
 	}
 
 	@GetMapping("edit-file")
 	public RedirectView getEditURL(@RequestParam("branch") final String branch,
 			@RequestParam("path") final String path, final HttpSession session) {
-		final GitRepo repo = Project.getGitRepo(session);
+		final GitProject repo = Project.getGitProject(session);
 		if (repo.getBlob("heads/" + branch, path) != null)
 			return new RedirectView(repo.getEditURL(branch, path));
 		return new RedirectView(repo.getCreateURL(branch, path));

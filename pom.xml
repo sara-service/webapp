@@ -77,5 +77,11 @@
 			<artifactId>juniversalchardet</artifactId>
 			<version>1.0.3</version>
 		</dependency>
+		<!-- JGit for accessing git repositories -->
+		<dependency>
+			<groupId>org.eclipse.jgit</groupId>
+			<artifactId>org.eclipse.jgit</artifactId>
+			<version>4.8.0.201706111038-r</version>
+		</dependency>
 	</dependencies>
 </project>

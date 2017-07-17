@@ -14,7 +14,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 
 import bwfdm.sara.Config;
-import bwfdm.sara.git.GitRepoWithoutProject;
+import bwfdm.sara.git.GitRepo;
 import bwfdm.sara.project.Project;
 
 @RestController
@@ -67,7 +67,7 @@ public class Authorization {
 		// necessary. if the token still works, we're done; no need to bother
 		// the user with authorization again.
 		final Project project = Project.getInstance(session);
-		final GitRepoWithoutProject repo = project.getGitRepoWithoutProject();
+		final GitRepo repo = project.getGitRepo();
 		if (projectPath != null) { // never change towards "no project"
 			final String prevProjectPath = project.getProjectPath();
 			if (prevProjectPath == null || !prevProjectPath.equals(projectPath))
@@ -78,7 +78,8 @@ public class Authorization {
 
 		// user doesn't have a token or it has expired. trigger authorization
 		// again.
-		return repo.triggerAuth(getLoginRedirectURI(), redir, session);
+		return repo.triggerAuth(config.getWebRoot() + "/api/auth/redirect",
+				redir, session);
 	}
 
 	@GetMapping("redirect")
@@ -91,7 +92,7 @@ public class Authorization {
 			return new RedirectView("/autherror.html");
 
 		final Project project = Project.getInstance(session);
-		if (project.getGitRepoWithoutProject().parseAuthResponse(args, session))
+		if (project.getGitRepo().parseAuthResponse(args, session))
 			return authFinished(project);
 
 		// authorization failed. there isn't much we can do here; retrying
@@ -105,9 +106,5 @@ public class Authorization {
 			return new RedirectView("/projects.html");
 		// else go to branch selection
 		return new RedirectView("/branches.html");
-	}
-
-	private String getLoginRedirectURI() {
-		return config.getWebRoot() + "/api/auth/redirect";
 	}
 }

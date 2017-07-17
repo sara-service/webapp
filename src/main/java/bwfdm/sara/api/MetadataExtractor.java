@@ -17,7 +17,7 @@ import bwfdm.sara.extractor.LazyFile;
 import bwfdm.sara.extractor.LicenseExtractor;
 import bwfdm.sara.extractor.LicenseFile;
 import bwfdm.sara.extractor.licensee.LicenseeExtractor;
-import bwfdm.sara.git.GitRepo;
+import bwfdm.sara.git.GitProject;
 import bwfdm.sara.git.RepoFile;
 import bwfdm.sara.git.RepoFile.FileType;
 import bwfdm.sara.project.Project;
@@ -42,7 +42,7 @@ public class MetadataExtractor {
 
 	@GetMapping("licenses")
 	public List<LicenseInfo> detectLicenses(final HttpSession session) {
-		final GitRepo repo = Project.getGitRepo(session);
+		final GitProject repo = Project.getGitProject(session);
 		final List<LicenseInfo> licenses = new ArrayList<>();
 		for (final Ref ref : repository.getSelectedBranches(session)) {
 			// TODO honor the branch starting point here
@@ -53,7 +53,7 @@ public class MetadataExtractor {
 		return licenses;
 	}
 
-	private LicenseFile detectLicense(final String ref, final GitRepo repo) {
+	private LicenseFile detectLicense(final String ref, final GitProject repo) {
 		// TODO honor the branch starting point here
 		final List<RepoFile> files = repo.getFiles(ref, "");
 		final List<LazyFile> candidates = new ArrayList<LazyFile>(files.size());
@@ -87,7 +87,7 @@ public class MetadataExtractor {
 	@GetMapping("version")
 	public VersionInfo detectVersion(@RequestParam("ref") final String ref,
 			final HttpSession session) {
-		final GitRepo repo = Project.getGitRepo(session);
+		final GitProject repo = Project.getGitProject(session);
 
 		final byte[] blob = repo.getBlob(ref, VERSION_FILE);
 		if (blob == null)
@@ -102,7 +102,7 @@ public class MetadataExtractor {
 	public void updateVersion(@RequestParam("branch") final String branch,
 			@RequestParam("version") final String version,
 			final HttpSession session) {
-		final GitRepo repo = Project.getGitRepo(session);
+		final GitProject repo = Project.getGitProject(session);
 		// always write as UTF-8; that shouldn't break anything
 		repo.putBlob(branch, VERSION_FILE, "update version to " + version,
 				version.getBytes(UTF8));

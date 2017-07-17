@@ -18,7 +18,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class Misc {
 	@GetMapping("project-list")
 	public List<ProjectInfo> getProjectList(final HttpSession session) {
-		return Project.getInstance(session).getGitRepoWithoutProject()
+		return Project.getInstance(session).getGitRepo()
 				.getProjects();
 	}
 
