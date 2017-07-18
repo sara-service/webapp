@@ -75,6 +75,9 @@ public interface GitProject {
 	 * Obtains the credentials for authenticating access to the repository. Can
 	 * be username/password or SSH keys (or anything else supported by JGit /
 	 * JSch).
+	 * <p>
+	 * Must be bracketed in calls to {@link #enableClone(boolean)} because the
+	 * credentials might only be created by {@code enableClone(true)}.
 	 * 
 	 * @return a JGit {@link CredentialsProvider} to use for authentication when
 	 *         accessing {@link #getCloneURI()}
