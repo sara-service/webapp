@@ -2,7 +2,9 @@ package bwfdm.sara;
 
 import java.io.File;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.nio.charset.Charset;
+import java.security.SecureRandom;
 import java.util.Map;
 
 import javax.servlet.ServletContext;
@@ -26,6 +28,7 @@ public class Config implements ServletContextAware {
 	private static final String TEMPDIR_ATTR = "temp.dir";
 	private static final String REPOCONFIG_ATTR = "repos.config";
 
+	private static final SecureRandom RNG = new SecureRandom();
 	private static final Charset UTF8 = Charset.forName("UTF-8");
 
 	private final ObjectMapper mapper;
@@ -106,6 +109,25 @@ public class Config implements ServletContextAware {
 
 	public Map<String, GitRepoFactory> getRepoConfig() {
 		return repoConfig;
+	}
+
+	/**
+	 * Creates a randomly-named temporary directory. The same directory is never
+	 * returned twice. The directory will exists on return; delete it after use.
+	 * 
+	 * @return a unique temp directory
+	 */
+	public File getRandomTempDir() {
+		// 80 bits is enough that collisions happen only every 2^40 > 10^12
+		// operations, ie. which in practice means they never happen.
+		final String name = "r"
+				+ new BigInteger(80, RNG).toString(Character.MAX_RADIX);
+		final File temp = new File(temproot, name);
+		temp.mkdirs(); // ignore error; it may well exist already
+		if (!temp.isDirectory())
+			throw new RuntimeException("failed to create directory "
+					+ temp.getAbsolutePath());
+		return temp;
 	}
 
 	/**

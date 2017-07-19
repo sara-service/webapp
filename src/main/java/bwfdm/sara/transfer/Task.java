@@ -108,7 +108,8 @@ public abstract class Task implements ProgressMonitor, Runnable {
 	}
 
 	public void cancel() {
-		thread.interrupt();
+		if (thread != null)
+			thread.interrupt();
 		synchronized (this) {
 			cancelled = true;
 			if (!done)

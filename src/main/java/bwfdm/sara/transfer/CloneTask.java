@@ -2,17 +2,18 @@ package bwfdm.sara.transfer;
 
 import java.io.File;
 import java.io.IOException;
-import java.math.BigInteger;
 import java.net.URISyntaxException;
-import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.eclipse.jgit.api.FetchCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.RemoteAddCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Constants;
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.RefUpdate;
 import org.eclipse.jgit.lib.StoredConfig;
 import org.eclipse.jgit.lib.SubmoduleConfig.FetchRecurseSubmodulesMode;
 import org.eclipse.jgit.transport.RefSpec;
@@ -27,20 +28,16 @@ import bwfdm.sara.project.Ref;
 import bwfdm.sara.project.RefAction;
 
 class CloneTask extends Task {
-	private static final SecureRandom RNG = new SecureRandom();
-
 	private final GitProject repo;
 	private final Map<Ref, RefAction> actions;
 	private final File root;
 	private Git git;
 
-	public CloneTask(final GitProject repo, final Map<Ref, RefAction> actions,
-			final Config config) {
+	public CloneTask(final File root, final GitProject repo,
+			final Map<Ref, RefAction> actions, final Config config) {
 		this.repo = repo;
 		this.actions = actions;
-		// use something unique each time so we don't have to worry about a
-		// previous clone still shutting down when the next one starts
-		root = config.getTempDir(new BigInteger(80, RNG).toString());
+		this.root = root;
 	}
 
 	@Override
@@ -97,6 +94,42 @@ class CloneTask extends Task {
 			fetch.setProgressMonitor(this).call();
 		} finally {
 			repo.enableClone(false);
+		}
+
+		// if the user wanted to start archiving a few commits back, we now need
+		// to push the HEAD backwards for these refs. it would be more efficient
+		// to start fetching at those commit objects directly, but that isn't
+		// possible in the git clone protocol.
+		int pushBacks = 0;
+		for (final RefAction r : actions.values())
+			if (!r.getFirstCommit().equals(RefAction.HEAD_COMMIT))
+				pushBacks++;
+		if (pushBacks > 0) {
+			beginTask("Setting branch starting points", pushBacks);
+			for (final Entry<Ref, RefAction> e : actions.entrySet()) {
+				final String firstCommit = e.getValue().getFirstCommit();
+				if (firstCommit.equals(RefAction.HEAD_COMMIT))
+					continue;
+
+				// TODO how to handle annotated tags?
+				// as is, this turns annotated tags into lightweight tags unless
+				// firstCommit == HEAD, losing whatever information was stored
+				// in
+				// the annotated tag.
+				// probably not a problem in practice:
+				// - nobody uses annotated tags
+				// - people who do probably don't push them backwards
+				// - pointing signed annotated tags at a different commit would
+				// invalidate the signature so isn't advisable
+				final RefUpdate update = git.getRepository().updateRef(
+						Constants.R_REFS + e.getKey().path);
+				update.disableRefLog();
+				update.setNewObjectId(ObjectId.fromString(firstCommit));
+				update.setCheckConflicting(false);
+				update.forceUpdate();
+				update(1);
+			}
+			endTask();
 		}
 		this.git = git;
 	}
