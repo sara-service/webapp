@@ -91,7 +91,7 @@ public class JDBCDatabase implements FrontendDatabase {
 				final PublicationMethod publish = PublicationMethod.valueOf(rs
 						.getString("action"));
 				final String firstCommit = rs.getString("start");
-				actions.put(ref, new RefAction(publish, firstCommit));
+				actions.put(ref, new RefAction(ref, publish, firstCommit));
 			}
 		}, gitRepo, project);
 	}

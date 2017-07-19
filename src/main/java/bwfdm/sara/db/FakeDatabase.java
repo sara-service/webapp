@@ -43,7 +43,7 @@ public class FakeDatabase implements FrontendDatabase {
 	public void setRefAction(final Ref ref, final PublicationMethod method,
 			final String firstCommit) {
 		if (method != null)
-			actions.put(ref, new RefAction(method, firstCommit));
+			actions.put(ref, new RefAction(ref, method, firstCommit));
 		else
 			actions.remove(ref);
 	}

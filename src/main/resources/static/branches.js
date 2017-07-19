@@ -4,7 +4,7 @@ var forms = [];
 
 function save(branch) {
 	API.post("save " + branch.ref.type + " " + branch.ref.name,
-		"/api/repo/refs", {
+		"/api/repo/actions", {
 			ref: branch.ref.path,
 			publish: branch.action.publish,
 			firstCommit: branch.action.firstCommit,
@@ -100,7 +100,7 @@ function addBranches(branches) {
 	// enable the "next" button only after branches have been loaded.
 	// this prevents the user from clicking it before we have a valid
 	// branch selection.
-	$("#next_button").attr("href", "/meta.html");
+	$("#next_button").attr("href", "/clone.html");
 	$("#next_button").removeClass("disabled");
 	$("#loading").remove();	
 }

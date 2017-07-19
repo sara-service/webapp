@@ -86,13 +86,13 @@ function loadLazyBranches(refs, source) {
 	// update list of branches
 	var select = $("#lazy_branch");
 	select.empty();
-	$.each(refs, function(_, ref) {
-		var name = ref.type + " " + ref.name;
-		var option = $("<option>").attr("value", ref.path)
-			.text(name).data("ref", ref);
+	$.each(refs, function(_, action) {
+		var name = action.ref.type + " " + action.ref.name;
+		var option = $("<option>").attr("value", action.ref.path)
+			.text(name).data("ref", action.ref);
 		select.append(option);
 		// select that item if it's the one the user used last time
-		if (!source.autodetected && source.value == ref.path)
+		if (!source.autodetected && source.value == action.ref.path)
 			select.val(source.value);
 	});
 	// event handler for "lazy" button
@@ -148,7 +148,7 @@ function initFields(info) {
 	autosave.value("version", info.version.value);
 	autosave.value("license", info.license.value);
 	API.get("load branches and tags marked for publication",
-		"/api/repo/selected-refs", {}, function(refs) {
+		"/api/repo/actions", {}, function(refs) {
 			loadLazyBranches(refs, info['source-ref']);
 			$("#version_block").removeAttr("style");
 			$("#version_loading").css("display", "none");
@@ -196,7 +196,7 @@ function initPage(session) {
 			}
 		});
 		if (valid)
-			// FIXME will become contributors then overview
-			location.href = "/clone.html";
+			// FIXME will become contributors-then-overview
+			location.href = "/overview.html";
 	});
 }

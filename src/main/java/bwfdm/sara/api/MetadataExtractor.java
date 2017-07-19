@@ -6,7 +6,6 @@ import java.util.List;
 
 import javax.servlet.http.HttpSession;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -31,9 +30,6 @@ public class MetadataExtractor {
 	private static final String VERSION_FILE = "VERSION";
 	private static final Charset UTF8 = Charset.forName("UTF-8");
 
-	@Autowired
-	private Repository repository;
-
 	private final LicenseExtractor licenseExtractor;
 
 	public MetadataExtractor() {
@@ -42,9 +38,10 @@ public class MetadataExtractor {
 
 	@GetMapping("licenses")
 	public List<LicenseInfo> detectLicenses(final HttpSession session) {
-		final GitProject repo = Project.getGitProject(session);
+		final Project project = Project.getInstance(session);
+		final GitProject repo = project.getGitProject();
 		final List<LicenseInfo> licenses = new ArrayList<>();
-		for (final Ref ref : repository.getSelectedBranches(session)) {
+		for (final Ref ref : project.getRefActions().keySet()) {
 			// TODO honor the branch starting point here
 			final LicenseFile license = detectLicense(ref.path, repo);
 			if (license != null)

@@ -1,6 +1,7 @@
 package bwfdm.sara.api;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -35,10 +36,10 @@ public class Repository {
 		return refs;
 	}
 
-	@GetMapping("selected-refs")
-	public List<Ref> getSelectedBranches(final HttpSession session) {
+	@GetMapping("actions")
+	public Collection<RefAction> getRefActions(final HttpSession session) {
 		final Project project = Project.getInstance(session);
-		return new ArrayList<>(project.getRefActions().keySet());
+		return project.getRefActions().values();
 	}
 
 	private List<RefInfo> getAllRefs(final HttpSession session) {
@@ -72,7 +73,7 @@ public class Repository {
 			r.action = actionMap.get(r.ref);
 	}
 
-	@PostMapping("refs")
+	@PostMapping("actions")
 	public void setActions(@RequestParam("ref") final String refPath,
 			@RequestParam("publish") final PublicationMethod action,
 			@RequestParam("firstCommit") final String start,
@@ -99,16 +100,14 @@ public class Repository {
 			@RequestParam(name = "name", required = false) final String name,
 			@RequestParam(name = "description", required = false) final String description,
 			final HttpSession session) {
-		Project.getGitProject(session)
-				.updateProjectInfo(name, description);
+		Project.getGitProject(session).updateProjectInfo(name, description);
 	}
 
 	@GetMapping("return")
 	public RedirectView getReturnURL(final HttpSession session) {
 		final Project project = Project.getInstance(session);
 		if (project.getProjectPath() == null)
-			return new RedirectView(project.getGitRepo()
-					.getHomePageURL());
+			return new RedirectView(project.getGitRepo().getHomePageURL());
 		return new RedirectView(project.getGitProject().getProjectViewURL());
 	}
 
