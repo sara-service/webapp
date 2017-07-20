@@ -26,9 +26,8 @@ public class MetadataStorage {
 
 	@GetMapping("{field}")
 	public MetadataValue getSingleField(
-			@PathVariable("field") final MetadataField name,
-			final HttpSession session) {
-		return getAllFields(session).get(name);
+			@PathVariable("field") final String name, final HttpSession session) {
+		return getAllFields(session).get(MetadataField.forDisplayName(name));
 	}
 
 	@PutMapping("{field}")
@@ -37,7 +36,7 @@ public class MetadataStorage {
 			@RequestParam("value") final String value,
 			@RequestParam(name = "autodetected", defaultValue = "false") final boolean auto,
 			final HttpSession session) {
-		Project.getInstance(session).setMetadata(MetadataField.forDisplayName(name),
-				value, auto);
+		Project.getInstance(session).setMetadata(
+				MetadataField.forDisplayName(name), value, auto);
 	}
 }

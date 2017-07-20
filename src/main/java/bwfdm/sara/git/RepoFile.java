@@ -26,4 +26,9 @@ public final class RepoFile {
 	public enum FileType {
 		FILE, DIRECTORY, OTHER
 	}
+
+	@Override
+	public String toString() {
+		return hash + " " + type + " " + name;
+	}
 }
