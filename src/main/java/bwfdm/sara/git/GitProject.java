@@ -131,7 +131,7 @@ public interface GitProject {
 	 *            slash (ie. the root directory is {@code ""})
 	 * @return a list of files in that directory
 	 */
-	public List<RepoFile> getFiles(String branch, String path);
+	public List<RepoFile> getFiles(String ref, String path);
 
 	/**
 	 * @param ref

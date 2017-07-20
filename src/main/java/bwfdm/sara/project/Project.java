@@ -13,6 +13,7 @@ import bwfdm.sara.Config;
 import bwfdm.sara.api.Authorization;
 import bwfdm.sara.db.FrontendDatabase;
 import bwfdm.sara.db.JDBCDatabase;
+import bwfdm.sara.extractor.LocalRepo;
 import bwfdm.sara.git.GitProject;
 import bwfdm.sara.git.GitRepo;
 import bwfdm.sara.git.GitRepoFactory;
@@ -117,10 +118,14 @@ public class Project {
 		return transferRepo;
 	}
 
-	@SuppressWarnings("unused")
 	private void checkHaveTransferRepo() {
 		if (!transferRepo.isInitialized())
 			throw new NeedCloneException();
+	}
+
+	public LocalRepo getLocalRepo() {
+		checkHaveTransferRepo();
+		return transferRepo.getRepo();
 	}
 
 	public static Project getInstance(final HttpSession session) {

@@ -3,6 +3,7 @@ package bwfdm.sara.transfer;
 import java.io.File;
 
 import bwfdm.sara.Config;
+import bwfdm.sara.extractor.LocalRepo;
 import bwfdm.sara.project.Project;
 import bwfdm.sara.transfer.Task.TaskStatus;
 
@@ -12,6 +13,7 @@ public class TransferRepo {
 	private CloneTask init;
 
 	private File root;
+	private LocalRepo repo;
 
 	public TransferRepo(final Project project, final Config config) {
 		this.project = project;
@@ -57,5 +59,11 @@ public class TransferRepo {
 
 	public boolean isInitialized() {
 		return init != null && init.isDone();
+	}
+
+	public LocalRepo getRepo() {
+		if (repo == null)
+			repo = new LocalRepo(init.getRepo());
+		return repo;
 	}
 }

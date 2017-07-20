@@ -14,6 +14,7 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.RefUpdate;
+import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.StoredConfig;
 import org.eclipse.jgit.lib.SubmoduleConfig.FetchRecurseSubmodulesMode;
 import org.eclipse.jgit.transport.RefSpec;
@@ -134,10 +135,10 @@ class CloneTask extends Task {
 		this.git = git;
 	}
 
-	public Git getRepo() {
+	public Repository getRepo() {
 		if (!isDone())
 			throw new IllegalStateException(
 					"getRepo() on in-progress CloneTask");
-		return git;
+		return git.getRepository();
 	}
 }
