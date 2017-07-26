@@ -28,8 +28,7 @@ function blockLoaded(name) {
 	$("#loading").remove();
 	$("#content").removeAttr("style");
 	$("#next_button").click(function() {
-		// FIXME will become contributors-then-overview
-		location.href = "/overview.html";
+		location.href = "/push.html";
 	});
 	$("#next_button").removeClass("disabled");
 }

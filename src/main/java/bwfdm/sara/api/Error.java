@@ -12,7 +12,6 @@ import bwfdm.sara.project.ErrorInfo;
 import bwfdm.sara.project.Project.NoProjectException;
 import bwfdm.sara.project.Project.NoSessionException;
 
-
 @ControllerAdvice("bwfdm.sara.api")
 public class Error {
 	private static final Log logger = LogFactory.getLog(Error.class);
@@ -34,9 +33,10 @@ public class Error {
 	@ResponseBody
 	@ExceptionHandler
 	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-	public ErrorInfo handleBlankedException(final Exception e) {
+	public ErrorInfo handleBlanketException(final Exception e) {
 		// report the exception to make debugging easier
-		logger.warn(e.getClass().getSimpleName() + ": " + e.getMessage(), e);
+		logger.warn("uncaught exception: " + e.getClass().getSimpleName()
+				+ ": " + e.getMessage(), e);
 		// best-guess error handling: just reload the page. this is what the
 		// user will do anyway.
 		return new ErrorInfo(e);

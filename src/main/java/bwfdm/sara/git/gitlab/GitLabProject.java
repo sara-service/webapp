@@ -55,6 +55,8 @@ public class GitLabProject implements GitProject {
 
 	@Override
 	public String getCloneURI() {
+		// TODO should we take this from project info instead?
+		// ie. is there ever any case where this doesn't work as intended?
 		return guiRoot + ".git";
 	}
 

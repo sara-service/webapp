@@ -16,7 +16,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.DigestUtils;
 import org.springframework.web.context.ServletContextAware;
 
+import bwfdm.sara.git.ArchiveRepo;
 import bwfdm.sara.git.GitRepoFactory;
+import bwfdm.sara.git.gitlab.GitLabArchive;
 
 import com.fasterxml.jackson.core.JsonParser.Feature;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -27,6 +29,7 @@ public class Config implements ServletContextAware {
 	private static final String WEBROOT_ATTR = "sara.webroot";
 	private static final String TEMPDIR_ATTR = "temp.dir";
 	private static final String REPOCONFIG_ATTR = "repos.config";
+	private static final String ARCHIVE_CONFIG_ATTR = "archive.config";
 
 	private static final SecureRandom RNG = new SecureRandom();
 	private static final Charset UTF8 = Charset.forName("UTF-8");
@@ -37,6 +40,7 @@ public class Config implements ServletContextAware {
 	private String webroot;
 	private File temproot;
 	private Map<String, GitRepoFactory> repoConfig;
+	private ArchiveRepo archiveRepo;
 
 	/**
 	 * This class must be instantiated by Spring because it relies on injected
@@ -54,6 +58,7 @@ public class Config implements ServletContextAware {
 		// this.servletContext = servletContext;
 		webroot = getContextParam(servletContext, WEBROOT_ATTR);
 		repoConfig = readRepoConfig(servletContext);
+		archiveRepo = readArchiveConfig(servletContext);
 
 		temproot = getTempRoot(servletContext);
 		temproot.mkdirs(); // failure harmless if already there
@@ -84,6 +89,18 @@ public class Config implements ServletContextAware {
 		}
 	}
 
+	private GitLabArchive readArchiveConfig(final ServletContext servletContext) {
+		final String archiveConfig = getContextParam(servletContext,
+				ARCHIVE_CONFIG_ATTR);
+		try {
+			return mapper.readValue(new File(archiveConfig),
+					new TypeReference<GitLabArchive>() {
+					});
+		} catch (final IOException e) {
+			throw new RuntimeException("cannot parse " + archiveConfig, e);
+		}
+	}
+
 	private static File getTempRoot(final ServletContext servletContext) {
 		final File servletTemp = (File) servletContext
 				.getAttribute(ServletContext.TEMPDIR);
@@ -111,6 +128,10 @@ public class Config implements ServletContextAware {
 		return repoConfig;
 	}
 
+	public ArchiveRepo getArchiveRepo() {
+		return archiveRepo;
+	}
+
 	/**
 	 * Creates a randomly-named temporary directory. The same directory is never
 	 * returned twice. The directory will exists on return; delete it after use.
@@ -120,14 +141,22 @@ public class Config implements ServletContextAware {
 	public File getRandomTempDir() {
 		// 80 bits is enough that collisions happen only every 2^40 > 10^12
 		// operations, ie. which in practice means they never happen.
-		final String name = "r"
-				+ new BigInteger(80, RNG).toString(Character.MAX_RADIX);
+		final String name = "r" + getRandomID();
 		final File temp = new File(temproot, name);
 		temp.mkdirs(); // ignore error; it may well exist already
 		if (!temp.isDirectory())
 			throw new RuntimeException("failed to create directory "
 					+ temp.getAbsolutePath());
 		return temp;
+	}
+
+	/**
+	 * Creates a new random identifier. The same string is never returned twice.
+	 * 
+	 * @return a unique string
+	 */
+	public static String getRandomID() {
+		return new BigInteger(80, RNG).toString(Character.MAX_RADIX);
 	}
 
 	/**

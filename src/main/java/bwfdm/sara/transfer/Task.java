@@ -18,7 +18,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public abstract class Task implements ProgressMonitor, Runnable {
-	private static final Log logger = LogFactory.getLog(TransferRepo.class);
+	private static final Log logger = LogFactory.getLog(Task.class);
 
 	private final List<Step> steps = new ArrayList<>();
 	private Map<String, Step> declaredSteps;
@@ -166,9 +166,13 @@ public abstract class Task implements ProgressMonitor, Runnable {
 		private TaskStatus() {
 			if (cancelled) {
 				status = StatusCode.ERROR;
-				if (exception != null)
+				if (exception != null) {
+					logger.warn("exception in "
+							+ Task.this.getClass().getSimpleName() + ": "
+							+ exception.getClass().getSimpleName() + ": "
+							+ exception.getMessage(), exception);
 					error = new ErrorInfo(exception);
-				else
+				} else
 					error = null;
 			} else {
 				error = null;

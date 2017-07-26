@@ -1,0 +1,10 @@
+// repo configuration for https://testarchiv.unikn.netfuture.ch, used
+// for development
+{
+	url: "https://testarchiv.unikn.netfuture.ch",
+	token: "9SMsxR11E3_fLWWwuKeY",
+	namespace: "archive",
+	dark-namespace: "dark-archive",
+	key: "testarchiv.key",
+	known-hosts: "testarchiv.known"
+}

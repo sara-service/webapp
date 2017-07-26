@@ -14,12 +14,24 @@ class GLProjectInfo implements GLDataObject<ProjectInfo> {
 	/** default branch, <code>master</code> by default. */
 	@JsonProperty("default_branch")
 	String master;
+	/** project display name / title */
 	@JsonProperty("name")
-	String name;
+	String title;
+	/** project description */
 	@JsonProperty("description")
 	String description;
+	/** full project path */
 	@JsonProperty("path_with_namespace")
 	String path;
+	/** project name (last component of {@link #path}) */
+	@JsonProperty("path")
+	String name;
+	/** repo clone URL */
+	@JsonProperty("ssh_url_to_repo")
+	String cloneURL;
+	/** web root URL of project */
+	@JsonProperty("web_url")
+	String webURL;
 
 	/**
 	 * Used (and needed!) by Jackson to create an instance of the class when
@@ -30,13 +42,13 @@ class GLProjectInfo implements GLDataObject<ProjectInfo> {
 	private GLProjectInfo() {
 	}
 
-	GLProjectInfo(final String name, final String description) {
-		this.name = name;
+	GLProjectInfo(final String title, final String description) {
+		this.title = title;
 		this.description = description;
 	}
 
 	@Override
 	public ProjectInfo toDataObject() {
-		return new ProjectInfo(path, name, description);
+		return new ProjectInfo(path, title, description);
 	}
 }

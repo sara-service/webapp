@@ -109,15 +109,16 @@ class RESTHelper {
 		rest.post(ucb, args);
 	}
 
+	<T> T post(final UriComponentsBuilder ucb, final Map<String, String> args,
+			final ParameterizedTypeReference<T> type) {
+		return rest.post(ucb, args, type);
+	}
+
 	void put(final UriComponentsBuilder ucb, final Object args) {
 		rest.put(ucb, args);
 	}
 
-	void setToken(final String token) {
-		rest.setToken(token);
-	}
-
-	boolean hasToken() {
-		return rest.hasToken();
+	void delete(final UriComponentsBuilder ucb) {
+		rest.delete(ucb);
 	}
 }

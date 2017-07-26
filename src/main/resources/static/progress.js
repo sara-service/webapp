@@ -43,7 +43,7 @@ function updateStatusItem(id, step) {
 		line.progress.css("display", "none");
 }
 
-var _nextURL, _errorURL, _endpoint;
+var _success, _error, _endpoint;
 
 function updateStatus(timeout) {
 	API.get("check progress", _endpoint, {},
@@ -53,13 +53,13 @@ function updateStatus(timeout) {
 			// if task finished or failed, redirect to appropriate page
 			if (status.status == "error") {
 				if (status.error) {
-					window.alert("clone failed: " +
+					window.alert("operation failed: " +
 						status.error.exception + ": " +
 						status.error.message);
 				}
-				location.href = _errorURL;
+				_error(status);
 			} else if (status.status == "success")
-				location.href = _nextURL;
+				_success(status);
 			else
 				// schedule next status update. uses setTimeout instead
 				// of setInterval so two requests can never be active at
@@ -74,10 +74,10 @@ function update() {
 	updateStatus(5000);
 }
 
-function initStatus(endpoint, nextURL, errorURL) {
+function initStatus(endpoint, success, error) {
 	_endpoint = endpoint;
-	_nextURL = nextURL;
-	_errorURL = errorURL;
+	_success = success;
+	_error = error;
 
 	// short timeout for first update so the user doesn't have to wait
 	// excessively if the operations finish quickly

@@ -6,45 +6,46 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
-/** REST helper with {@code Authorization: Bearer t0k3N} authentication. */
-public class AuthenticatedREST {
-	private final MultiValueMap<String, String> authMap = new LinkedMultiValueMap<String, String>();
+/**
+ * REST helper with authentication. must be subclassed by something that handles
+ * creation of the actual authorization headers.
+ */
+public abstract class AuthenticatedREST {
 	private final RestTemplate rest = new RestTemplate();
 	private final String root;
+	private MultiValueMap<String, String> authMap;
 	private HttpEntity<Void> auth;
 
-	public AuthenticatedREST(final String root) {
+	protected AuthenticatedREST(final String root) {
 		this.root = root;
+	}
+
+	/**
+	 * Sets the headers to use for authentication.
+	 * 
+	 * @param authMap
+	 *            authentications headers to use for each request, or
+	 *            <code>null</code> to invalidate authorization
+	 */
+	protected void setAuth(final MultiValueMap<String, String> authMap) {
+		this.authMap = authMap;
+		if (authMap != null)
+			auth = new HttpEntity<Void>(authMap);
+		else
+			auth = null;
+	}
+
+	/** @return <code>true</code> if authorization headers have been set */
+	public boolean hasAuth() {
+		return auth != null;
 	}
 
 	public UriComponentsBuilder uri(final String endpoint) {
 		return UriComponentsBuilder.fromHttpUrl(root + endpoint);
-	}
-
-	/**
-	 * Sets the token to use for authentication.
-	 * 
-	 * @param token
-	 *            token to pass in the header
-	 */
-	public void setToken(final String token) {
-		if (token == null) {
-			auth = null;
-			return;
-		}
-
-		authMap.set("Authorization", "Bearer " + token);
-		auth = new HttpEntity<Void>(authMap);
-	}
-
-	/** @return <code>true</code> if a token has been set */
-	public boolean hasToken() {
-		return auth != null;
 	}
 
 	/**
@@ -63,6 +64,26 @@ public class AuthenticatedREST {
 	}
 
 	/**
+	 * Performs a {@link HttpMethod#POST} request, sending the specified
+	 * parameters as url-encoded form data, and converting the result into an
+	 * instance of the specified class.
+	 * 
+	 * @param ucb
+	 *            the URL as a {@link UriComponentsBuilder}
+	 * @param args
+	 *            name:value pairs to pass as parameters
+	 * @param type
+	 *            instance of {@link ParameterizedTypeReference} with correct
+	 *            type parameters for return value
+	 */
+	public <T> T post(final UriComponentsBuilder ucb,
+			final Map<String, String> args,
+			final ParameterizedTypeReference<T> type) {
+		return rest.exchange(ucb.build(true).toUri(), HttpMethod.POST,
+				new HttpEntity<>(args, authMap), type).getBody();
+	}
+
+	/**
 	 * Performs a {@link HttpMethod#PUT} request. Can be given either a single
 	 * object (which will be sent as JSON) or a {@link Map} of name:value pairs
 	 * (which will be sent as form data).
@@ -75,6 +96,18 @@ public class AuthenticatedREST {
 	public void put(final UriComponentsBuilder ucb, final Object args) {
 		rest.exchange(ucb.build(true).toUri(), HttpMethod.PUT,
 				new HttpEntity<>(args, authMap), (Class<?>) null);
+	}
+
+	/**
+	 * Performs a {@link HttpMethod#DELETE} request. Doesn't send any
+	 * parameters.
+	 * 
+	 * @param ucb
+	 *            the URL as a {@link UriComponentsBuilder}
+	 */
+	public void delete(final UriComponentsBuilder ucb) {
+		rest.exchange(ucb.build(true).toUri(), HttpMethod.DELETE, auth,
+				(Class<?>) null);
 	}
 
 	/**
@@ -125,4 +158,5 @@ public class AuthenticatedREST {
 		return rest.exchange(ucb.build(true).toUri(), HttpMethod.GET, auth,
 				byte[].class).getBody();
 	}
+
 }

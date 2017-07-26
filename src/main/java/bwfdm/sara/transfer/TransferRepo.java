@@ -14,6 +14,7 @@ public class TransferRepo {
 
 	private File root;
 	private LocalRepo repo;
+	private PushTask push;
 
 	public TransferRepo(final Project project, final Config config) {
 		this.project = project;
@@ -45,9 +46,22 @@ public class TransferRepo {
 		init.start();
 	}
 
-	public TaskStatus getStatus() {
+	public void startPush() {
+		if (push == null)
+			push = new PushTask(init.getRepo(), project.getRefActions(),
+					config.getArchiveRepo(), project.getMetadata(), true);
+		push.start();
+	}
+
+	public TaskStatus getInitStatus() {
 		if (init != null)
 			return init.getStatus();
+		return null;
+	}
+
+	public TaskStatus getPushStatus() {
+		if (push != null || push.isCancelled())
+			return push.getStatus();
 		return null;
 	}
 
@@ -55,6 +69,13 @@ public class TransferRepo {
 		if (init != null)
 			init.cancel();
 		init = null;
+		push = null;
+	}
+
+	public void cancelPush() {
+		if (push != null)
+			push.cancel();
+		push = null;
 	}
 
 	public boolean isInitialized() {
@@ -65,5 +86,9 @@ public class TransferRepo {
 		if (repo == null)
 			repo = new LocalRepo(init.getRepo());
 		return repo;
+	}
+
+	public String getWebURL() {
+		return push.getWebURL();
 	}
 }

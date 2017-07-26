@@ -10,8 +10,8 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 
-import bwfdm.sara.auth.AuthenticatedREST;
 import bwfdm.sara.auth.OAuthCode;
+import bwfdm.sara.auth.OAuthREST;
 import bwfdm.sara.git.GitProject;
 import bwfdm.sara.git.GitRepo;
 import bwfdm.sara.git.ProjectInfo;
@@ -32,7 +32,7 @@ public class GitLabRESTv4 implements GitRepo {
 	 */
 	static final String DATE_FORMAT_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX";
 
-	private final AuthenticatedREST authRest;
+	private final OAuthREST authRest;
 	private final RESTHelper rest;
 	private final String root;
 	private final String appID;
@@ -56,7 +56,7 @@ public class GitLabRESTv4 implements GitRepo {
 			throw new IllegalArgumentException(
 					"root URL must not end with slash: " + root);
 
-		authRest = new AuthenticatedREST(root + API_PREFIX);
+		authRest = new OAuthREST(root + API_PREFIX);
 		rest = new RESTHelper(authRest, "");
 		this.root = root;
 		this.appID = appID;
@@ -72,7 +72,7 @@ public class GitLabRESTv4 implements GitRepo {
 
 	@Override
 	public boolean hasWorkingToken() {
-		if (!rest.hasToken())
+		if (!authRest.hasToken())
 			return false;
 
 		// looks like we do have a token. send a dummy API request to see
@@ -83,7 +83,7 @@ public class GitLabRESTv4 implements GitRepo {
 			return true;
 		} catch (final Exception e) {
 			// doesn't look like that token is working...
-			rest.setToken(null);
+			authRest.setToken(null);
 			return false;
 		}
 	}
@@ -106,7 +106,7 @@ public class GitLabRESTv4 implements GitRepo {
 			return false;
 
 		token = auth.parse(params);
-		rest.setToken(token);
+		authRest.setToken(token);
 		return token != null;
 	}
 
