@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
-import org.eclipse.jgit.transport.CredentialsProvider;
+import org.eclipse.jgit.api.TransportCommand;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpStatus;
@@ -13,50 +13,55 @@ import org.springframework.util.Base64Utils;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import bwfdm.sara.auth.AuthenticatedREST;
 import bwfdm.sara.git.Branch;
 import bwfdm.sara.git.Commit;
-import bwfdm.sara.git.Contributor;
 import bwfdm.sara.git.GitProject;
 import bwfdm.sara.git.ProjectInfo;
 import bwfdm.sara.git.RepoFile;
 import bwfdm.sara.git.Tag;
 
 /** high-level abstraction of the GitLab REST API. */
-public class GLProject implements GitProject {
-	private final String root;
-	private final RESTHelper helper;
-	private final String guiProject;
+public class GitLabProject implements GitProject {
+	private final RESTHelper rest;
+	private final String guiRoot;
 	private final String token;
 
-	public GLProject(final AuthenticatedREST rest, final String root,
+	public GitLabProject(final AuthenticatedREST authRest, final String root,
 			final String project, final String token) {
-		this.root = root;
 		this.token = token;
-		helper = new RESTHelper(rest, root, project);
-		guiProject = UrlEncode.decode(project);
+		rest = new RESTHelper(authRest, "/projects/"
+				+ UrlEncode.encodePathSegment(project));
+		guiRoot = root + "/" + UrlEncode.decode(project);
 	}
 
 	@Override
 	public String getProjectViewURL() {
-		return root + "/" + guiProject;
+		return guiRoot;
 	}
 
 	@Override
 	public String getEditURL(final String branch, final String path) {
-		return root + "/" + guiProject + "/edit/" + branch + "/" + path;
+		return guiRoot + "/edit/" + branch + "/" + path;
 	}
 
 	@Override
 	public String getCreateURL(final String branch, final String path) {
-		return root + "/" + guiProject + "/new/" + branch
-				+ "/?commit_message=Add+" + UrlEncode.encodeQueryParam(path)
-				+ "&file_name=" + UrlEncode.encodeQueryParam(path);
+		return guiRoot + "/new/" + branch + "/?commit_message=Add+"
+				+ UrlEncode.encodeQueryParam(path) + "&file_name="
+				+ UrlEncode.encodeQueryParam(path);
+	}
+
+	@Override
+	public String getCloneURI() {
+		return guiRoot + ".git";
 	}
 
 	@Override
 	public List<Branch> getBranches() {
 		final GLProjectInfo projectInfo = getGitLabProjectInfo();
-		final List<GLBranch> list = helper.getList("/repository/branches",
+		final List<GLBranch> list = rest.getList(
+				rest.uri("/repository/branches"),
 				new ParameterizedTypeReference<List<GLBranch>>() {
 				});
 		final ArrayList<Branch> branches = new ArrayList<>(list.size());
@@ -67,28 +72,28 @@ public class GLProject implements GitProject {
 
 	@Override
 	public List<Tag> getTags() {
-		return GitLabRESTv4.toDataObject(helper.getList("/repository/tags",
+		return toDataObject(rest.getList(rest.uri("/repository/tags"),
 				new ParameterizedTypeReference<List<GLTag>>() {
 				}));
 	}
 
 	@Override
 	public List<Commit> getCommits(final String ref, final int limit) {
-		final UriComponentsBuilder req = helper.uri("/repository/commits")
+		final UriComponentsBuilder req = rest.uri("/repository/commits")
 				.queryParam("ref_name", ref)
 				.queryParam("per_page", Integer.toString(limit));
-		return GitLabRESTv4.toDataObject(helper.get(req,
+		return toDataObject(rest.get(req,
 				new ParameterizedTypeReference<List<GLCommit>>() {
 				}));
 	}
 
 	@Override
 	public byte[] getBlob(final String ref, final String path) {
-		final UriComponentsBuilder req = helper.uri(
+		final UriComponentsBuilder req = rest.uri(
 				"/repository/files/" + UrlEncode.encodePathSegment(path)
 						+ "/raw").queryParam("ref", ref);
 		try {
-			return helper.getBlob(req);
+			return rest.getBlob(req);
 		} catch (final HttpClientErrorException e) {
 			if (e.getStatusCode() == HttpStatus.NOT_FOUND)
 				return null; // file just doesn't exist
@@ -99,44 +104,33 @@ public class GLProject implements GitProject {
 	@Override
 	public void putBlob(final String branch, final String path,
 			final String commitMessage, final byte[] data) {
-		final String endpoint = "/repository/files/"
-				+ UrlEncode.encodePathSegment(path);
 		final HashMap<String, String> args = new HashMap<>();
 		args.put("branch", branch);
 		args.put("commit_message", commitMessage);
 		args.put("encoding", "base64");
 		args.put("content", Base64Utils.encodeToString(data));
 
+		final UriComponentsBuilder endpoint = rest.uri("/repository/files/"
+				+ UrlEncode.encodePathSegment(path));
 		final byte[] existing = getBlob("heads/" + branch, path);
 		if (existing == null)
 			// file doesn't exist; send create query.
-			helper.post(endpoint, args);
+			rest.post(endpoint, args);
 		else if (!Arrays.equals(data, existing))
 			// file exists, and has actually been changed. (gitlab doesn't like
 			// no-change writes because they create an empty commit.) send
 			// update query.
 			// note the different request method; it's otherwise identical to a
 			// create query.
-			helper.put(endpoint, args);
+			rest.put(endpoint, args);
 	}
 
 	@Override
 	public List<RepoFile> getFiles(final String ref, final String path) {
-		return GitLabRESTv4.toDataObject(helper.getList(
-				helper.uri("/repository/tree").queryParam("path", path)
-						.queryParam("ref", ref),
+		final UriComponentsBuilder req = rest.uri("/repository/tree")
+				.queryParam("path", path).queryParam("ref", ref);
+		return toDataObject(rest.getList(req,
 				new ParameterizedTypeReference<List<GLRepoFile>>() {
-				}));
-	}
-
-	@Override
-	public List<Contributor> getContributors(final String ref) {
-		// FIXME this definitely shouldn't just ignore the ref!
-		// GitLab doesn't take a ref= parameter to the API...
-		// TODO just do this on the local clone later on
-		return GitLabRESTv4.toDataObject(helper.getList(
-				helper.uri("/repository/contributors"),
-				new ParameterizedTypeReference<List<GLContributor>>() {
 				}));
 	}
 
@@ -148,18 +142,14 @@ public class GLProject implements GitProject {
 	}
 
 	@Override
-	public String getCloneURI() {
-		return root + "/" + guiProject + ".git";
-	}
-
-	@Override
-	public CredentialsProvider getCloneCredentials() {
+	public void setCredentials(final TransportCommand<?, ?> tx) {
 		// GitLab supports repo access using the OAuth token directly
-		return new UsernamePasswordCredentialsProvider("oauth2", token);
+		tx.setCredentialsProvider(new UsernamePasswordCredentialsProvider(
+				"oauth2", token));
 	}
 
 	private GLProjectInfo getGitLabProjectInfo() {
-		return helper.get("" /* the project itself */,
+		return rest.get(rest.uri("" /* the project itself */),
 				new ParameterizedTypeReference<GLProjectInfo>() {
 				});
 	}
@@ -172,6 +162,11 @@ public class GLProject implements GitProject {
 	@Override
 	public void updateProjectInfo(final String name, final String description) {
 		final GLProjectInfo info = new GLProjectInfo(name, description);
-		helper.put("" /* the project itself */, info);
+		rest.put(rest.uri("" /* the project itself */), info);
+	}
+
+	private static <T> List<T> toDataObject(
+			final List<? extends GLDataObject<T>> items) {
+		return GitLabRESTv4.toDataObject(items);
 	}
 }

@@ -1,6 +1,5 @@
 package bwfdm.sara.git.gitlab;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -9,95 +8,39 @@ import java.util.regex.Pattern;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import bwfdm.sara.auth.AuthenticatedREST;
+
 /** low-level helper class for making REST calls to the GitLab API. */
 class RESTHelper {
-	static final String API_PREFIX = "/api/v4";
-	/**
-	 * date format pattern used by GitLab, {@link SimpleDateFormat} style.
-	 * currently ISO8601 ({@code 2012-09-20T11:50:22.000+03:00}).
-	 */
-	static final String DATE_FORMAT_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX";
-	/**
-	 * date format used by GitLab, as a {@link SimpleDateFormat}. currently
-	 * ISO8601 ({@code 2012-09-20T11:50:22.000+03:00}).
-	 */
-	static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat(
-			DATE_FORMAT_PATTERN);
-
 	private static final int MAX_PER_PAGE = 100;
 	private static final Pattern LINK_URL_FIELD = Pattern.compile("<(.*)>");
 	private static final Pattern LINK_REL_NEXT_FIELD = Pattern
 			.compile("rel=(\"?)next\\1");
 
 	private final AuthenticatedREST rest;
-	private final String root;
+	private final String prefix;
 
-	/**
-	 * @param rest
-	 *            the {@link AuthenticatedREST} instance ot use for accessing
-	 *            the API
-	 * @param root
-	 *            URL to GitLab root
-	 * @param project
-	 *            name of project whose API to access
-	 */
-	RESTHelper(final AuthenticatedREST rest, final String root,
-			final String project) {
+	RESTHelper(final AuthenticatedREST rest, final String prefix) {
 		this.rest = rest;
-		this.root = root + API_PREFIX + "/projects/"
-				+ UrlEncode.encodePathSegment(project);
+		this.prefix = prefix;
+
+		// anything else will cause double slashes in the final URL
+		assert prefix.startsWith("/") || prefix.isEmpty();
+		assert prefix.endsWith("/");
 	}
 
-	UriComponentsBuilder uri(final String endpoint) {
-		return UriComponentsBuilder.fromHttpUrl(root + endpoint);
-	}
-
-	/**
-	 * Get a single item from GitLab. Works for lists, but will only return the
-	 * first page of 100 elements at most. Use
-	 * {@link #getList(String, ParameterizedTypeReference)} to get all elements.
-	 * 
-	 * @param endpoint
-	 *            API path, relative to project
-	 * @param type
-	 *            instance of {@link ParameterizedTypeReference} with correct
-	 *            type parameters
-	 * @return an instance of the specified object, deserialized from JSON
-	 */
-	<T> T get(final String endpoint, final ParameterizedTypeReference<T> type) {
-		return rest.get(uri(endpoint), type);
-	}
-
-	/**
-	 * Variant of {@link #get(String, ParameterizedTypeReference)} that takes a
-	 * {@link UriComponentsBuilder}.
-	 */
-	<T> List<T> get(final UriComponentsBuilder queryParam,
-			final ParameterizedTypeReference<List<T>> type) {
-		return rest.get(queryParam, type);
-	}
-
-	/**
-	 * Performs a {@link HttpMethod#GET} request, returning the raw data
-	 * received as a {@code byte[]}.
-	 * 
-	 * @param ucb
-	 *            the URL as a {@link UriComponentsBuilder}
-	 * @return a byte array containing the raw response
-	 */
-	byte[] getBlob(final UriComponentsBuilder ucb) {
-		return rest.getBlob(ucb);
+	protected UriComponentsBuilder uri(final String endpoint) {
+		return rest.uri(prefix + endpoint);
 	}
 
 	/**
 	 * Get a list of items from GitLab, working around the pagination misfeature
 	 * by requesting pages one by one. If you need just a few, use
-	 * {@link AuthenticatedREST#get(UriComponentsBuilder, ParameterizedTypeReference)}
-	 * and set {@code per_page} manually.
+	 * {@link #get(UriComponentsBuilder, ParameterizedTypeReference)} and set
+	 * {@code per_page} manually.
 	 * 
 	 * @param endpoint
 	 *            API path, relative to project
@@ -106,23 +49,7 @@ class RESTHelper {
 	 *            type parameters
 	 * @return a list of all objects that GitLab returns
 	 */
-	<T> List<T> getList(final String endpoint,
-			final ParameterizedTypeReference<List<T>> type) {
-		return getList(uri(endpoint), type);
-	}
-
-	<T> List<T> getList(final UriComponentsBuilder ucb,
-			final ParameterizedTypeReference<List<T>> type) {
-		return getList(rest, ucb, type);
-	}
-
-	/**
-	 * Static version of
-	 * {@link #getList(UriComponentsBuilder, ParameterizedTypeReference)} for
-	 * requesting the project list.
-	 */
-	static <T> List<T> getList(final AuthenticatedREST rest,
-			final UriComponentsBuilder ucb,
+	protected <T> List<T> getList(final UriComponentsBuilder ucb,
 			final ParameterizedTypeReference<List<T>> type) {
 		final List<T> list = new ArrayList<T>();
 		// 100 per page is the limit. use it for max efficiency.
@@ -132,13 +59,13 @@ class RESTHelper {
 			final ResponseEntity<List<T>> resp = rest.getResponse(uri, type);
 			list.addAll(resp.getBody());
 			// work around the pagination misfeature
-			uri = getNextLink(resp, uri);
+			uri = getNextPageLink(resp, uri);
 		} while (uri != null);
 		return list;
 	}
 
 	/** Workaround for GitLab's pagination "feature". */
-	private static UriComponentsBuilder getNextLink(
+	private static UriComponentsBuilder getNextPageLink(
 			final ResponseEntity<?> resp, final UriComponentsBuilder base) {
 		final List<String> linkHeaders = resp.getHeaders()
 				.get(HttpHeaders.LINK);
@@ -164,19 +91,33 @@ class RESTHelper {
 		return null; // header present but no "next" link, ie. the last page
 	}
 
-	/**
-	 * Convenience function for calling
-	 * {@link AuthenticatedREST#put(UriComponentsBuilder, Object)}.
-	 */
-	void put(final String endpoint, final Object args) {
-		rest.put(uri(endpoint), args);
+	<T> T get(final UriComponentsBuilder ucb,
+			final ParameterizedTypeReference<T> type) {
+		return rest.get(ucb, type);
 	}
 
-	/**
-	 * Convenience function for calling
-	 * {@link AuthenticatedREST#post(UriComponentsBuilder, Object)}.
-	 */
-	void post(final String endpoint, final Map<String, String> args) {
-		rest.post(uri(endpoint), args);
+	<T> ResponseEntity<T> getResponse(final UriComponentsBuilder ucb,
+			final ParameterizedTypeReference<T> type) {
+		return rest.getResponse(ucb, type);
+	}
+
+	byte[] getBlob(final UriComponentsBuilder ucb) {
+		return rest.getBlob(ucb);
+	}
+
+	void post(final UriComponentsBuilder ucb, final Map<String, String> args) {
+		rest.post(ucb, args);
+	}
+
+	void put(final UriComponentsBuilder ucb, final Object args) {
+		rest.put(ucb, args);
+	}
+
+	void setToken(final String token) {
+		rest.setToken(token);
+	}
+
+	boolean hasToken() {
+		return rest.hasToken();
 	}
 }

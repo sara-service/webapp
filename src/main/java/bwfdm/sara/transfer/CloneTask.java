@@ -51,7 +51,7 @@ class CloneTask extends Task {
 			IOException {
 		beginTask("Initializing temporary repository", 1);
 		final Git git = Git.init().setBare(true).setGitDir(root).call();
-		// add the "origon" remote
+		// add the "origin" remote
 		final RemoteAddCommand add = git.remoteAdd();
 		add.setName(Constants.DEFAULT_REMOTE_NAME);
 		add.setUri(new URIish(repo.getCloneURI()));
@@ -91,7 +91,7 @@ class CloneTask extends Task {
 		// "can clone" state afterwards.
 		repo.enableClone(true);
 		try {
-			fetch.setCredentialsProvider(repo.getCloneCredentials());
+			repo.setCredentials(fetch);
 			fetch.setProgressMonitor(this).call();
 		} finally {
 			repo.enableClone(false);

@@ -1,5 +1,6 @@
 package bwfdm.sara.git.gitlab;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,8 +9,8 @@ import javax.servlet.http.HttpSession;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
-import org.springframework.web.util.UriComponentsBuilder;
 
+import bwfdm.sara.auth.AuthenticatedREST;
 import bwfdm.sara.auth.OAuthCode;
 import bwfdm.sara.git.GitProject;
 import bwfdm.sara.git.GitRepo;
@@ -20,7 +21,19 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 /** high-level abstraction of the GitLab REST API. */
 public class GitLabRESTv4 implements GitRepo {
-	private final AuthenticatedREST rest = new AuthenticatedREST();
+	/**
+	 * URL prefix for accessing the API. also defines which API version will be
+	 * used.
+	 */
+	private static final String API_PREFIX = "/api/v4";
+	/**
+	 * date format pattern used by GitLab, {@link SimpleDateFormat} style.
+	 * currently ISO8601 ({@code 2012-09-20T11:50:22.000+03:00}).
+	 */
+	static final String DATE_FORMAT_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX";
+
+	private final AuthenticatedREST authRest;
+	private final RESTHelper rest;
 	private final String root;
 	private final String appID;
 	private final String appSecret;
@@ -39,6 +52,12 @@ public class GitLabRESTv4 implements GitRepo {
 	public GitLabRESTv4(@JsonProperty("url") final String root,
 			@JsonProperty("oauthID") final String appID,
 			@JsonProperty("oauthSecret") final String appSecret) {
+		if (root.endsWith("/"))
+			throw new IllegalArgumentException(
+					"root URL must not end with slash: " + root);
+
+		authRest = new AuthenticatedREST(root + API_PREFIX);
+		rest = new RESTHelper(authRest, "");
 		this.root = root;
 		this.appID = appID;
 		this.appSecret = appSecret;
@@ -48,7 +67,7 @@ public class GitLabRESTv4 implements GitRepo {
 	public GitProject getGitProject(final String project) {
 		// not invalidating the old token here. it should work for any project
 		// (as long as it hasn't expired yet).
-		return new GLProject(rest, root, project, token);
+		return new GitLabProject(authRest, root, project, token);
 	}
 
 	@Override
@@ -60,8 +79,7 @@ public class GitLabRESTv4 implements GitRepo {
 		// whether it's a WORKING token. downloads the user info because that
 		// should always be available and doesn't depend on the project.
 		try {
-			rest.getBlob(UriComponentsBuilder.fromHttpUrl(root
-					+ RESTHelper.API_PREFIX + "/user"));
+			rest.getBlob(rest.uri("/user"));
 			return true;
 		} catch (final Exception e) {
 			// doesn't look like that token is working...
@@ -97,20 +115,18 @@ public class GitLabRESTv4 implements GitRepo {
 		return root;
 	}
 
+	@Override
+	public List<ProjectInfo> getProjects() {
+		return toDataObject(rest.getList(
+				rest.uri("/projects").queryParam("simple", "true"),
+				new ParameterizedTypeReference<List<GLProjectInfo>>() {
+				}));
+	}
+
 	static <T> List<T> toDataObject(final List<? extends GLDataObject<T>> items) {
 		final ArrayList<T> list = new ArrayList<>(items.size());
 		for (final GLDataObject<T> gldo : items)
 			list.add(gldo.toDataObject());
 		return list;
-	}
-
-	@Override
-	public List<ProjectInfo> getProjects() {
-		final UriComponentsBuilder req = UriComponentsBuilder.fromHttpUrl(
-				root + RESTHelper.API_PREFIX + "/projects").queryParam(
-				"simple", "true");
-		return toDataObject(RESTHelper.getList(rest, req,
-				new ParameterizedTypeReference<List<GLProjectInfo>>() {
-				}));
 	}
 }

@@ -1,4 +1,4 @@
-package bwfdm.sara.git.gitlab;
+package bwfdm.sara.auth;
 
 import java.util.Map;
 
@@ -11,11 +11,20 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
-/** REST helper with {@code Authorization: Bearer xyz} authentication. */
+/** REST helper with {@code Authorization: Bearer t0k3N} authentication. */
 public class AuthenticatedREST {
 	private final MultiValueMap<String, String> authMap = new LinkedMultiValueMap<String, String>();
 	private final RestTemplate rest = new RestTemplate();
+	private final String root;
 	private HttpEntity<Void> auth;
+
+	public AuthenticatedREST(final String root) {
+		this.root = root;
+	}
+
+	public UriComponentsBuilder uri(final String endpoint) {
+		return UriComponentsBuilder.fromHttpUrl(root + endpoint);
+	}
 
 	/**
 	 * Sets the token to use for authentication.

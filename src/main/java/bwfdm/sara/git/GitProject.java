@@ -2,7 +2,7 @@ package bwfdm.sara.git;
 
 import java.util.List;
 
-import org.eclipse.jgit.transport.CredentialsProvider;
+import org.eclipse.jgit.api.TransportCommand;
 
 /**
  * This interface exposes all GitLab methods that need to have a project set via
@@ -72,17 +72,19 @@ public interface GitProject {
 	public String getCloneURI();
 
 	/**
-	 * Obtains the credentials for authenticating access to the repository. Can
-	 * be username/password or SSH keys (or anything else supported by JGit /
+	 * Sets the credentials for authenticating access to the repository. Can be
+	 * username/password or SSH keys (or anything else supported by JGit /
 	 * JSch).
 	 * <p>
 	 * Must be bracketed in calls to {@link #enableClone(boolean)} because the
 	 * credentials might only be created by {@code enableClone(true)}.
 	 * 
-	 * @return a JGit {@link CredentialsProvider} to use for authentication when
-	 *         accessing {@link #getCloneURI()}
+	 * @param tx
+	 *            a {@link TransportCommand} that will be used to access
+	 *            {@link #getCloneURI()} and that should have its credentials
+	 *            set
 	 */
-	public CredentialsProvider getCloneCredentials();
+	public void setCredentials(TransportCommand<?, ?> tx);
 
 	/**
 	 * @param ref
@@ -132,12 +134,4 @@ public interface GitProject {
 	 * @return a list of files in that directory
 	 */
 	public List<RepoFile> getFiles(String ref, String path);
-
-	/**
-	 * @param ref
-	 *            branch, tag or commit to analyze, in git ref format (ie.
-	 *            {@code heads/master} or {@code tags/test})
-	 * @return a list of contributors appearing in that branch / tag
-	 */
-	public List<Contributor> getContributors(String ref);
 }

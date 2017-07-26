@@ -19,7 +19,7 @@ class GLCommit implements GLDataObject<Commit> {
 	String title;
 	/** commit timestamp. */
 	@JsonProperty("committed_date")
-	@JsonFormat(pattern = RESTHelper.DATE_FORMAT_PATTERN)
+	@JsonFormat(pattern = GitLabRESTv4.DATE_FORMAT_PATTERN)
 	Date date;
 
 	@Override
