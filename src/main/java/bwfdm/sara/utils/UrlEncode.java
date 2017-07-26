@@ -1,4 +1,4 @@
-package bwfdm.sara.git.gitlab;
+package bwfdm.sara.utils;
 
 import java.io.UnsupportedEncodingException;
 

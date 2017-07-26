@@ -20,6 +20,7 @@ import bwfdm.sara.git.GitProject;
 import bwfdm.sara.git.ProjectInfo;
 import bwfdm.sara.git.RepoFile;
 import bwfdm.sara.git.Tag;
+import bwfdm.sara.utils.UrlEncode;
 
 /** high-level abstraction of the GitLab REST API. */
 public class GitLabProject implements GitProject {
