@@ -11,10 +11,16 @@
 	<Parameter name="sara.webroot"
 		value="https://sara.unikn.netfuture.ch"
 		description="publicly visible URL of servlet root" />
-	<Parameter name="repos.config"
-		value="gitlabs.json"
-		description="path to JSON file listing all git repos" />
 	<Parameter name="temp.dir"
 		value="temp"
 		description="directory for temporary files, relative to servlet container's temp dir or absolute" />
+	<Parameter name="repos.config"
+		value="gitlabs.json"
+		description="path to JSON file listing all git repos" />
+	<Parameter name="publish.config"
+		value="publish.json"
+		description="path to JSON file listing all publication repositories" />
+	<Parameter name="archive.config"
+		value="archive.json"
+		description="path to JSON file containing archive repo configuration" />
 </Context>

@@ -5,9 +5,11 @@
  */
 package bwfdm.sara.gui;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+
+import bwfdm.sara.Config;
 import bwfdm.sara.publication.DemoDSpaceOrgSix;
-import bwfdm.sara.publication.OparuFive;
-import bwfdm.sara.publication.OparuSix;
 import bwfdm.sara.publication.PublicationRepository;
 import bwfdm.sara.publication.dspace.DSpaceConfig;
 import bwfdm.sara.publication.dspace.DSpaceRest;
@@ -39,9 +41,9 @@ public class MainInt {
 			DSpaceConfig.RESPONSE_STATUS_OK_DemoDSpaceOrg_SIX);
 
 	public static PublicationRepository pubRepo;
-	public static PublicationRepository pubRepoOparuFive = new OparuFive();
-	public static PublicationRepository pubRepoOparuSix = new OparuSix();
-	public static PublicationRepository pubRepoDemoDSpaceOrgSix = new DemoDSpaceOrgSix();
+	public static PublicationRepository pubRepoOparuFive;
+	public static PublicationRepository pubRepoOparuSix;
+	public static PublicationRepository pubRepoDemoDSpaceOrgSix;
 
 	public static boolean isOK;
 
@@ -49,7 +51,16 @@ public class MainInt {
 	 * @param args
 	 *            the command line arguments
 	 */
-	public static void main(final String[] args) {
+	public static void main(final String[] args) throws IOException {
+		// creates a config for testing
+		final Config config = new Config(new FileInputStream(
+				"application.properties"));
+		pubRepoOparuFive = config.getPublicationRepositoryFactory("oparu5")
+				.newPublicationRepository();
+		pubRepoOparuSix = config.getPublicationRepositoryFactory("oparu6")
+				.newPublicationRepository();
+		pubRepoDemoDSpaceOrgSix = config.getPublicationRepositoryFactory(
+				"demo.dspace.org").newPublicationRepository();
 
 		// Test Form
 		/* Set the Nimbus look and feel */

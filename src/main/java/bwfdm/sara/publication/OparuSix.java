@@ -5,6 +5,8 @@ import bwfdm.sara.publication.dspace.DSpaceVersionSix;
 import bwfdm.sara.publication.dspace.dto.CommunityObjectDSpaceSix;
 import bwfdm.sara.utils.JsonUtils;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * 
  * @author vk
@@ -13,14 +15,20 @@ public class OparuSix implements PublicationRepository {
 
 	private final DSpaceVersionSix dspaceRepo;
 	private final String urlServer;
+	protected final String user;
+	protected final String pass;
 
 	// Constructor
-	public OparuSix() {
+	public OparuSix(@JsonProperty("url") final String url,
+			@JsonProperty("rest") final String rest,
+			@JsonProperty("username") final String user,
+			@JsonProperty("password") final String pass) {
 
-		urlServer = DSpaceConfig.URL_OPARU_SIX;
+		urlServer = url;
+		this.user = user;
+		this.pass = pass;
 
-		dspaceRepo = new DSpaceVersionSix("OPARU-6",
-				DSpaceConfig.URL_OPARU_SIX, DSpaceConfig.URL_OPARU_SIX_REST,
+		dspaceRepo = new DSpaceVersionSix("OPARU-6", url, rest,
 				DSpaceConfig.SSL_VERIFY_OPARU_SIX,
 				DSpaceConfig.RESPONSE_STATUS_OK_OPARU_SIX);
 
@@ -32,9 +40,7 @@ public class OparuSix implements PublicationRepository {
 		if (!dspaceRepo.isRestEnable()) {
 			return false;
 		}
-		return dspaceRepo
-				.login(DSpaceConfig.PASSWORD_OPARU_SIX, DSpaceConfig
-						.getPassword(DSpaceConfig.PASSWORD_OPARU_SIX, this));
+		return dspaceRepo.login(user, pass);
 	}
 
 	@Override
@@ -85,44 +91,17 @@ public class OparuSix implements PublicationRepository {
 
 	@Override
 	public String changeElement() {
-		throw new UnsupportedOperationException("Not supported yet."); // To
-																		// change
-																		// body
-																		// of
-																		// generated
-																		// methods,
-																		// choose
-																		// Tools
-																		// |
-																		// Templates.
+		throw new UnsupportedOperationException("Not supported yet.");
 	}
 
 	@Override
 	public String deleteElement() {
-		throw new UnsupportedOperationException("Not supported yet."); // To
-																		// change
-																		// body
-																		// of
-																		// generated
-																		// methods,
-																		// choose
-																		// Tools
-																		// |
-																		// Templates.
+		throw new UnsupportedOperationException("Not supported yet.");
 	}
 
 	@Override
 	public String changeElementMetadata() {
-		throw new UnsupportedOperationException("Not supported yet."); // To
-																		// change
-																		// body
-																		// of
-																		// generated
-																		// methods,
-																		// choose
-																		// Tools
-																		// |
-																		// Templates.
+		throw new UnsupportedOperationException("Not supported yet.");
 	}
 
 	@Override

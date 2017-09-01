@@ -1,0 +1,51 @@
+// list of institutional repositories for publication
+// the "id" property gives the key that is used in
+// Config.getPublicationRepositoryFactory().
+// for each repo:
+// - the "class" property gives the implementing class.
+// - all other property names provide the arguments passed to the
+//   constructor of the class.
+[
+	{ // OPARU-5
+		id: "oparu5",
+		displayName: "OPARU-5",
+		class: "bwfdm.sara.publication.OparuFive",
+		args: {
+ 			url: "https://vtstest.rz.uni-ulm.de",
+			rest: "https://vtstest.rz.uni-ulm.de/rest",
+			username: "project-sara@uni-konstanz.de",
+			password: "SaraTest"
+		}
+	}, { // OPARU-6
+		id: "oparu6",
+		displayName: "OPARU-6",
+		class: "bwfdm.sara.publication.OparuSix",
+		args: {
+ 			url: "https://bib-test.rz.uni-ulm.de",
+			rest: "https://bib-test.rz.uni-ulm.de/rest",
+			username: "project-sara@uni-konstanz.de",
+			password: "Sara+Test"
+		}
+	}, { // demo.dspace.org
+		id: "demo.dspace.org",
+		displayName: "demo.dspace.org",
+		class: "bwfdm.sara.publication.DemoDSpaceOrgSix",
+		args: {
+			url: "https://demo.dspace.org",
+			rest: "https://demo.dspace.org/rest",
+			username: "dspacedemo+admin@gmail.com",
+			password: "dspace"
+		}
+	}, { // KOPS-5
+		id: "kops5",
+		displayName: "KOPS-5",
+		class: "bwfdm.sara.publication.KopsFive",
+		args: {
+			// FIXME these are obviously wrong
+ 			url: "https://vtstest.rz.uni-ulm.de",
+			rest: "https://vtstest.rz.uni-ulm.de/rest",
+			username: "project-sara@uni-konstanz.de",
+			password: "SaraTest"
+		}
+	}
+]

@@ -24,6 +24,7 @@ import bwfdm.sara.git.ArchiveRepo;
 import bwfdm.sara.git.GitRepo;
 import bwfdm.sara.git.GitRepoFactory;
 import bwfdm.sara.git.gitlab.GitLabArchive;
+import bwfdm.sara.publication.PublicationRepositoryFactory;
 
 import com.fasterxml.jackson.core.JsonParser.Feature;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -34,6 +35,7 @@ public class Config implements ServletContextAware {
 	private static final String WEBROOT_ATTR = "sara.webroot";
 	private static final String TEMPDIR_ATTR = "temp.dir";
 	private static final String REPOCONFIG_ATTR = "repos.config";
+	private static final String IRCONFIG_ATTR = "publish.config";
 	private static final String ARCHIVE_CONFIG_ATTR = "archive.config";
 
 	private static final SecureRandom RNG = new SecureRandom();
@@ -47,6 +49,7 @@ public class Config implements ServletContextAware {
 	private String webroot;
 	private File temproot;
 	private List<GitRepoFactory> repoConfig;
+	private List<PublicationRepositoryFactory> irConfig;
 	private ArchiveRepo archiveRepo;
 
 	private Config(final Properties props) {
@@ -90,6 +93,9 @@ public class Config implements ServletContextAware {
 		webroot = getContextParam(WEBROOT_ATTR);
 		repoConfig = readRepoConfig(REPOCONFIG_ATTR,
 				new TypeReference<List<GitRepoFactory>>() {
+				});
+		irConfig = readRepoConfig(IRCONFIG_ATTR,
+				new TypeReference<List<PublicationRepositoryFactory>>() {
 				});
 		archiveRepo = readArchiveConfig();
 
@@ -175,6 +181,20 @@ public class Config implements ServletContextAware {
 			if (r.getID().equals(id))
 				return r;
 		throw new NoSuchElementException("no git repo named " + id);
+	}
+
+	/**
+	 * @param id
+	 *            name of institutional repository in {@code publish.json}
+	 * @return the {@link GitRepoFactory} for the name {@link GitRepo}
+	 */
+	public PublicationRepositoryFactory getPublicationRepositoryFactory(
+			final String id) {
+		for (final PublicationRepositoryFactory r : irConfig)
+			if (r.getID().equals(id))
+				return r;
+		throw new NoSuchElementException("no publication repository named "
+				+ id);
 	}
 
 	public ArchiveRepo getArchiveRepo() {
