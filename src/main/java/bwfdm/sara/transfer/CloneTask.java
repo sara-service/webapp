@@ -11,6 +11,8 @@ import org.eclipse.jgit.api.FetchCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.RemoteAddCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.api.errors.InvalidRemoteException;
+import org.eclipse.jgit.api.errors.TransportException;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.RefUpdate;
@@ -49,6 +51,14 @@ class CloneTask extends Task {
 	@Override
 	protected void execute() throws GitAPIException, URISyntaxException,
 			IOException {
+		final Git git = initRepo();
+		fetchHeads(git);
+		pushBackHeads(git);
+		this.git = git;
+	}
+
+	private Git initRepo() throws GitAPIException, URISyntaxException,
+			IOException {
 		beginTask("Initializing temporary repository", 1);
 		final Git git = Git.init().setBare(true).setGitDir(root).call();
 		// add the "origin" remote
@@ -71,13 +81,18 @@ class CloneTask extends Task {
 		final StoredConfig config = git.getRepository().getConfig();
 		remote.update(config);
 		config.save();
-		// deliberately not calling endTask() here: JGit will take a while until
-		// it starts reporting the next step, and having a checkmark sitting
-		// there with nothing happening is confusing. instead just set the
-		// progress bar to 100%, without setting the checkmark just yet. the
-		// next startTask() will do that anyway.
-		update(1);
 
+		// deliberately not calling endTask() here: JGit will take a while until
+		// it starts reporting the first step of the actual clone, and having a
+		// checkmark sitting there with nothing happening is confusing.
+		// instead just set the progress bar to 100%, without setting the
+		// checkmark just yet. the next startTask() will do that anyway.
+		update(1);
+		return git;
+	}
+
+	private void fetchHeads(final Git git) throws GitAPIException,
+			InvalidRemoteException, TransportException {
 		final FetchCommand fetch = git.fetch();
 		// to guard against corruption
 		fetch.setCheckFetchedObjects(true);
@@ -96,7 +111,9 @@ class CloneTask extends Task {
 		} finally {
 			repo.enableClone(false);
 		}
+	}
 
+	private void pushBackHeads(final Git git) throws IOException {
 		// if the user wanted to start archiving a few commits back, we now need
 		// to push the HEAD backwards for these refs. it would be more efficient
 		// to start fetching at those commit objects directly, but that isn't
@@ -105,34 +122,33 @@ class CloneTask extends Task {
 		for (final RefAction r : actions.values())
 			if (!r.getFirstCommit().equals(RefAction.HEAD_COMMIT))
 				pushBacks++;
-		if (pushBacks > 0) {
-			beginTask("Setting branch starting points", pushBacks);
-			for (final Entry<Ref, RefAction> e : actions.entrySet()) {
-				final String firstCommit = e.getValue().getFirstCommit();
-				if (firstCommit.equals(RefAction.HEAD_COMMIT))
-					continue;
+		if (pushBacks == 0)
+			return; // nothing to do
 
-				// TODO how to handle annotated tags?
-				// as is, this turns annotated tags into lightweight tags unless
-				// firstCommit == HEAD, losing whatever information was stored
-				// in
-				// the annotated tag.
-				// probably not a problem in practice:
-				// - nobody uses annotated tags
-				// - people who do probably don't push them backwards
-				// - pointing signed annotated tags at a different commit would
-				// invalidate the signature so isn't advisable
-				final RefUpdate update = git.getRepository().updateRef(
-						Constants.R_REFS + e.getKey().path);
-				update.disableRefLog();
-				update.setNewObjectId(ObjectId.fromString(firstCommit));
-				update.setCheckConflicting(false);
-				update.forceUpdate();
-				update(1);
-			}
-			endTask();
+		beginTask("Setting branch starting points", pushBacks);
+		for (final Entry<Ref, RefAction> e : actions.entrySet()) {
+			final String firstCommit = e.getValue().getFirstCommit();
+			if (firstCommit.equals(RefAction.HEAD_COMMIT))
+				continue;
+
+			// TODO how to handle annotated tags?
+			// as is, this turns annotated tags into lightweight tags unless
+			// firstCommit == HEAD, losing whatever information was stored in
+			// the annotated tag.
+			// probably not a problem in practice:
+			// - nobody uses annotated tags
+			// - people who do probably don't push them backwards
+			// - pointing signed annotated tags at a different commit would
+			// invalidate the signature so isn't advisable anyway
+			final RefUpdate update = git.getRepository().updateRef(
+					Constants.R_REFS + e.getKey().path);
+			update.disableRefLog();
+			update.setNewObjectId(ObjectId.fromString(firstCommit));
+			update.setCheckConflicting(false);
+			update.forceUpdate();
+			update(1);
 		}
-		this.git = git;
+		endTask();
 	}
 
 	public Repository getRepo() {

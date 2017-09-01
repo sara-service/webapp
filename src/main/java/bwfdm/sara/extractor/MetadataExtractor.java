@@ -34,10 +34,10 @@ public class MetadataExtractor {
 		det.dataEnd();
 		final String charset = det.getDetectedCharset();
 		if (charset == null)
-			// bug in juniversalchardet: if the input is ASCII, it doesn't
-			// detect anything.
-			// workaround by falling back to UTF-8 if nothing detected. it's the
-			// best alternative anyway.
+			// bug / peculiarity in juniversalchardet: if the input is ASCII, it
+			// doesn't detect anything and returns null.
+			// workaround by falling back to UTF-8 if nothing detected. in that
+			// situation, it's the best guess anyway.
 			return new String(blob, UTF8);
 		return new String(blob, charset);
 	}
