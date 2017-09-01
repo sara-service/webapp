@@ -1,71 +1,64 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package bwfdm.sara.publication.dspace.dto;
 
 /**
- *
+ * 
  * @author vk
  */
 public class StatusObjectDSpaceSix {
-    
-    private boolean okay;
-    private boolean authenticated;
-    private String email;
-    private String fullname;
-    private String sourceVersion;
-    private String apiVersion;
 
-    public boolean isOkay() {
-        return okay;
-    }
+	private boolean okay;
+	private boolean authenticated;
+	private String email;
+	private String fullname;
+	private String sourceVersion;
+	private String apiVersion;
 
-    public void setOkay(boolean okay) {
-        this.okay = okay;
-    }
+	public boolean isOkay() {
+		return okay;
+	}
 
-    public boolean isAuthenticated() {
-        return authenticated;
-    }
+	public void setOkay(final boolean okay) {
+		this.okay = okay;
+	}
 
-    public void setAuthenticated(boolean authenticated) {
-        this.authenticated = authenticated;
-    }
+	public boolean isAuthenticated() {
+		return authenticated;
+	}
 
-    public String getEmail() {
-        return email;
-    }
+	public void setAuthenticated(final boolean authenticated) {
+		this.authenticated = authenticated;
+	}
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
+	public String getEmail() {
+		return email;
+	}
 
-    public String getFullname() {
-        return fullname;
-    }
+	public void setEmail(final String email) {
+		this.email = email;
+	}
 
-    public void setFullname(String fullname) {
-        this.fullname = fullname;
-    }
+	public String getFullname() {
+		return fullname;
+	}
 
-    public String getSourceVersion() {
-        return sourceVersion;
-    }
+	public void setFullname(final String fullname) {
+		this.fullname = fullname;
+	}
 
-    public void setSourceVersion(String sourceVersion) {
-        this.sourceVersion = sourceVersion;
-    }
+	public String getSourceVersion() {
+		return sourceVersion;
+	}
 
-    public String getApiVersion() {
-        return apiVersion;
-    }
+	public void setSourceVersion(final String sourceVersion) {
+		this.sourceVersion = sourceVersion;
+	}
 
-    public void setApiVersion(String apiVersion) {
-        this.apiVersion = apiVersion;
-    }
-    
-    
-    
+	public String getApiVersion() {
+		return apiVersion;
+	}
+
+	public void setApiVersion(final String apiVersion) {
+		this.apiVersion = apiVersion;
+	}
+
 }
