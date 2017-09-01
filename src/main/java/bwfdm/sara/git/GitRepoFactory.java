@@ -2,11 +2,9 @@ package bwfdm.sara.git;
 
 import javax.servlet.http.HttpSession;
 
-import org.springframework.beans.factory.annotation.Autowired;
-
-import bwfdm.sara.Config;
 import bwfdm.sara.project.Project;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -16,6 +14,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class GitRepoFactory {
 	private static final ObjectMapper MAPPER = new ObjectMapper();
 
+	@JsonProperty
+	private String id;
 	@JsonProperty
 	private String displayName;
 	@JsonProperty("class")
@@ -27,38 +27,35 @@ public class GitRepoFactory {
 	private GitRepoFactory() {
 	}
 
-	public String getDisplayName() {
-		return displayName;
+	public String getID() {
+		return id;
 	}
 
-	public GitRepo newGitRepo() throws ClassNotFoundException {
-		@SuppressWarnings("unchecked")
-		final Class<GitRepo> cls = (Class<GitRepo>) Class.forName(className);
-		// use Jackson to construct the object from JSON. for this to work, the
-		// constructor must be annotated with @JsonCreator, and all its
-		// arguments must have @JsonProperty annotation giving the argument's
-		// name in JSON, ie. something like @JsonProperty("url")
-		return MAPPER.convertValue(args, cls);
+	public String getDisplayName() {
+		return displayName;
 	}
 
 	/**
 	 * Creates a new {@link GitRepo} instance. Meant to be called by
 	 * {@link Project#createInstance(HttpSession, String)} only!
-	 * 
-	 * @param gitRepo
-	 *            ID of the gitlab instance
-	 * @param config
-	 *            the global {@link Config} object (use {@link Autowired} to
-	 *            have Spring inject it)
+	 * <p>
+	 * Uses Jackson to construct the object from JSON. For this to work, the
+	 * constructor must be annotated with {@link JsonCreator}, and all its
+	 * arguments must have {@link JsonProperty} annotation giving the argument's
+	 * name in the JSON, ie. something like
+	 * {@code @JsonProperty("url") String url}.
 	 * 
 	 * @return a new {@link GitRepo}
 	 */
-	public static GitRepo createInstance(final String gitRepo,
-			final Config config) {
+	public GitRepo newGitRepo() {
 		try {
-			return config.getRepoConfig().get(gitRepo).newGitRepo();
+			@SuppressWarnings("unchecked")
+			final Class<GitRepo> cls = (Class<GitRepo>) Class
+					.forName(className);
+			// convertValue takes a raw JSON tree and creates an object from it
+			return MAPPER.convertValue(args, cls);
 		} catch (final ClassNotFoundException e) {
-			throw new RuntimeException("cannot instantiate " + gitRepo, e);
+			throw new RuntimeException("cannot instantiate " + id, e);
 		}
 	}
 }

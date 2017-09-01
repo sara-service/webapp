@@ -5,7 +5,8 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.security.SecureRandom;
-import java.util.Map;
+import java.util.List;
+import java.util.NoSuchElementException;
 
 import javax.servlet.ServletContext;
 import javax.sql.DataSource;
@@ -17,6 +18,7 @@ import org.springframework.util.DigestUtils;
 import org.springframework.web.context.ServletContextAware;
 
 import bwfdm.sara.git.ArchiveRepo;
+import bwfdm.sara.git.GitRepo;
 import bwfdm.sara.git.GitRepoFactory;
 import bwfdm.sara.git.gitlab.GitLabArchive;
 
@@ -39,7 +41,7 @@ public class Config implements ServletContextAware {
 	private DataSource db;
 	private String webroot;
 	private File temproot;
-	private Map<String, GitRepoFactory> repoConfig;
+	private List<GitRepoFactory> repoConfig;
 	private ArchiveRepo archiveRepo;
 
 	/**
@@ -57,7 +59,9 @@ public class Config implements ServletContextAware {
 	public void setServletContext(final ServletContext servletContext) {
 		// this.servletContext = servletContext;
 		webroot = getContextParam(servletContext, WEBROOT_ATTR);
-		repoConfig = readRepoConfig(servletContext);
+		repoConfig = readRepoConfig(servletContext, REPOCONFIG_ATTR,
+				new TypeReference<List<GitRepoFactory>>() {
+				});
 		archiveRepo = readArchiveConfig(servletContext);
 
 		temproot = getTempRoot(servletContext);
@@ -76,14 +80,11 @@ public class Config implements ServletContextAware {
 		return attr;
 	}
 
-	private Map<String, GitRepoFactory> readRepoConfig(
-			final ServletContext servletContext) {
-		final String repoConfig = getContextParam(servletContext,
-				REPOCONFIG_ATTR);
+	private <T> List<T> readRepoConfig(final ServletContext servletContext,
+			final String attribute, final TypeReference<List<T>> type) {
+		final String repoConfig = getContextParam(servletContext, attribute);
 		try {
-			return mapper.readValue(new File(repoConfig),
-					new TypeReference<Map<String, GitRepoFactory>>() {
-					});
+			return mapper.readValue(new File(repoConfig), type);
 		} catch (final IOException e) {
 			throw new RuntimeException("cannot parse " + repoConfig, e);
 		}
@@ -124,8 +125,16 @@ public class Config implements ServletContextAware {
 		return webroot;
 	}
 
-	public Map<String, GitRepoFactory> getRepoConfig() {
-		return repoConfig;
+	/**
+	 * @param id
+	 *            repo name used in {@code gitlabs.json}
+	 * @return the {@link GitRepoFactory} for the name {@link GitRepo}
+	 */
+	public GitRepoFactory getGitRepoFactory(final String id) {
+		for (final GitRepoFactory r : repoConfig)
+			if (r.getID().equals(id))
+				return r;
+		throw new NoSuchElementException("no git repo named " + id);
 	}
 
 	public ArchiveRepo getArchiveRepo() {

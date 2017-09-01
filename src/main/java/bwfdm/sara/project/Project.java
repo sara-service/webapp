@@ -16,7 +16,6 @@ import bwfdm.sara.db.JDBCDatabase;
 import bwfdm.sara.extractor.LocalRepo;
 import bwfdm.sara.git.GitProject;
 import bwfdm.sara.git.GitRepo;
-import bwfdm.sara.git.GitRepoFactory;
 import bwfdm.sara.project.RefAction.PublicationMethod;
 import bwfdm.sara.transfer.TransferRepo;
 
@@ -72,7 +71,7 @@ public class Project {
 	}
 
 	/**
-	 * @return a {@link GitRepo}, ie. with project path set and ready for
+	 * @return a {@link GitProject}, ie. with project path set and ready for
 	 *         operations that need a project to be selected
 	 */
 	public synchronized GitProject getGitProject() {
@@ -165,7 +164,7 @@ public class Project {
 	 */
 	public static Project createInstance(final HttpSession session,
 			final String repoID, final String projectPath, final Config config) {
-		final GitRepo repo = GitRepoFactory.createInstance(repoID, config);
+		final GitRepo repo = config.getGitRepoFactory(repoID).newGitRepo();
 
 		final Project project = new Project(repoID, repo, config);
 		if (projectPath != null)
