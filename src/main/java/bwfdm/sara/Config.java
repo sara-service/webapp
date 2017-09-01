@@ -1,12 +1,15 @@
 package bwfdm.sara;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.security.SecureRandom;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Properties;
 
 import javax.servlet.ServletContext;
 import javax.sql.DataSource;
@@ -37,52 +40,83 @@ public class Config implements ServletContextAware {
 	private static final Charset UTF8 = Charset.forName("UTF-8");
 
 	private final ObjectMapper mapper;
+	private final Properties props;
 	@Autowired
 	private DataSource db;
+	private ServletContext context;
 	private String webroot;
 	private File temproot;
 	private List<GitRepoFactory> repoConfig;
 	private ArchiveRepo archiveRepo;
 
-	/**
-	 * This class must be instantiated by Spring because it relies on injected
-	 * components.
-	 */
-	private Config() {
+	private Config(final Properties props) {
+		this.props = props;
 		mapper = new ObjectMapper();
 		// these are nonstandard but make JSON files much more human-friendly
 		mapper.enable(Feature.ALLOW_COMMENTS);
 		mapper.enable(Feature.ALLOW_UNQUOTED_FIELD_NAMES);
 	}
 
+	/**
+	 * Constructor used by Spring, along with
+	 * {@link #setServletContext(ServletContext)} and injection for the database
+	 * config.
+	 */
+	@SuppressWarnings("unused")
+	private Config() {
+		this((Properties) null);
+	}
+
+	/**
+	 * Constructor used <b>for testing only</>, when context parameters are
+	 * simply loaded from a properties file (or resource). Use
+	 * {@code @Autowired private Config config;} everywhere else!
+	 * 
+	 * @param contextParams
+	 *            either a {@link FileInputStream} for a properties file, or the
+	 *            one returned by {@link Class#getResourceAsStream(String)} when
+	 *            reading from a resource
+	 */
+	public Config(final InputStream contextParams) throws IOException {
+		this(new Properties());
+		props.load(contextParams);
+		setServletContext(null);
+		// FIXME should initialize the database here!
+	}
+
 	@Override
 	public void setServletContext(final ServletContext servletContext) {
-		// this.servletContext = servletContext;
-		webroot = getContextParam(servletContext, WEBROOT_ATTR);
-		repoConfig = readRepoConfig(servletContext, REPOCONFIG_ATTR,
+		context = servletContext;
+		webroot = getContextParam(WEBROOT_ATTR);
+		repoConfig = readRepoConfig(REPOCONFIG_ATTR,
 				new TypeReference<List<GitRepoFactory>>() {
 				});
-		archiveRepo = readArchiveConfig(servletContext);
+		archiveRepo = readArchiveConfig();
 
-		temproot = getTempRoot(servletContext);
+		temproot = getTempRoot();
 		temproot.mkdirs(); // failure harmless if already there
 		if (!temproot.isDirectory())
 			throw new RuntimeException("temp directory "
 					+ temproot.getAbsolutePath() + " cannot be created");
 	}
 
-	private static String getContextParam(final ServletContext context,
-			final String name) {
-		final String attr = context.getInitParameter(name);
+	private String getContextParam(final String name) {
+		final String attr;
+		if (!testMode())
+			attr = context.getInitParameter(name);
+		else
+			// for testing, just read from the properties file directly.
+			// add prefix so we can use application.properties directly.
+			attr = props.getProperty("server.context_parameters." + name);
 		if (attr == null)
 			throw new ConfigurationException("missing context parameter "
 					+ name);
 		return attr;
 	}
 
-	private <T> List<T> readRepoConfig(final ServletContext servletContext,
-			final String attribute, final TypeReference<List<T>> type) {
-		final String repoConfig = getContextParam(servletContext, attribute);
+	private <T> List<T> readRepoConfig(final String attribute,
+			final TypeReference<List<T>> type) {
+		final String repoConfig = getContextParam(attribute);
 		try {
 			return mapper.readValue(new File(repoConfig), type);
 		} catch (final IOException e) {
@@ -90,9 +124,8 @@ public class Config implements ServletContextAware {
 		}
 	}
 
-	private GitLabArchive readArchiveConfig(final ServletContext servletContext) {
-		final String archiveConfig = getContextParam(servletContext,
-				ARCHIVE_CONFIG_ATTR);
+	private GitLabArchive readArchiveConfig() {
+		final String archiveConfig = getContextParam(ARCHIVE_CONFIG_ATTR);
 		try {
 			return mapper.readValue(new File(archiveConfig),
 					new TypeReference<GitLabArchive>() {
@@ -102,10 +135,13 @@ public class Config implements ServletContextAware {
 		}
 	}
 
-	private static File getTempRoot(final ServletContext servletContext) {
-		final File servletTemp = (File) servletContext
+	private File getTempRoot() {
+		if (testMode())
+			return new File("temp");
+
+		final File servletTemp = (File) context
 				.getAttribute(ServletContext.TEMPDIR);
-		final String tempPath = servletContext.getInitParameter(TEMPDIR_ATTR);
+		final String tempPath = context.getInitParameter(TEMPDIR_ATTR);
 		// if parameter missing, use servlet container's tempdir
 		if (tempPath == null || tempPath.isEmpty())
 			return servletTemp;
@@ -115,6 +151,10 @@ public class Config implements ServletContextAware {
 			return absPath;
 		// else resolve it relative to the servlet container's tempdir
 		return new File(servletTemp, tempPath);
+	}
+
+	private boolean testMode() {
+		return context == null && props != null;
 	}
 
 	public JdbcTemplate newJdbcTemplate() {
