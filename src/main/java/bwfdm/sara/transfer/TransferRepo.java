@@ -41,15 +41,16 @@ public class TransferRepo {
 	}
 
 	private void startClone() {
-		init = new CloneTask(root, project.getGitProject(),
-				project.getRefActions(), config);
+		init = new CloneTask(root, project.getGitProject(), project
+				.getFrontendDatabase().getRefActions(), config);
 		init.start();
 	}
 
 	public void startPush() {
 		if (push == null)
-			push = new PushTask(init.getRepo(), project.getRefActions(),
-					config.getArchiveRepo(), project.getMetadata(), true);
+			push = new PushTask(init.getRepo(), project.getFrontendDatabase()
+					.getRefActions(), config.getArchiveRepo(), project
+					.getFrontendDatabase().getMetadata(), true);
 		push.start();
 	}
 

@@ -21,7 +21,7 @@ public class MetadataStorage {
 	@GetMapping("")
 	public Map<MetadataField, MetadataValue> getAllFields(
 			final HttpSession session) {
-		return Project.getInstance(session).getMetadata();
+		return Project.getInstance(session).getFrontendDatabase().getMetadata();
 	}
 
 	@GetMapping("{field}")
@@ -36,7 +36,7 @@ public class MetadataStorage {
 			@RequestParam("value") final String value,
 			@RequestParam(name = "autodetected", defaultValue = "false") final boolean auto,
 			final HttpSession session) {
-		Project.getInstance(session).setMetadata(
-				MetadataField.forDisplayName(name), value, auto);
+		Project.getInstance(session).getFrontendDatabase()
+				.setMetadata(MetadataField.forDisplayName(name), value, auto);
 	}
 }

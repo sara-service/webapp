@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.view.RedirectView;
 
+import bwfdm.sara.db.FrontendDatabase;
 import bwfdm.sara.git.Branch;
 import bwfdm.sara.git.Commit;
 import bwfdm.sara.git.GitProject;
@@ -39,7 +40,7 @@ public class Repository {
 	@GetMapping("actions")
 	public Collection<RefAction> getRefActions(final HttpSession session) {
 		final Project project = Project.getInstance(session);
-		return project.getRefActions().values();
+		return project.getFrontendDatabase().getRefActions().values();
 	}
 
 	private List<RefInfo> getAllRefs(final HttpSession session) {
@@ -54,19 +55,22 @@ public class Repository {
 
 	private void loadActions(final List<RefInfo> refs, final HttpSession session) {
 		final Project project = Project.getInstance(session);
+		final FrontendDatabase db = project.getFrontendDatabase();
 
-		Map<Ref, RefAction> actionMap = project.getRefActions();
+		Map<Ref, RefAction> actionMap = db.getRefActions();
 		if (actionMap.isEmpty()) {
 			// default to publishing protected branches (assumed to be the main
 			// branches). other branches are ignored by default to avoid
 			// overloading the user when there are many branches.
 			for (final RefInfo r : refs)
-				if (r.isProtected || r.isDefault)
-					project.setRefAction(r.ref, PublicationMethod.PUBLISH_FULL,
+				if (r.isProtected || r.isDefault) {
+					db.setRefAction(r.ref, PublicationMethod.PUBLISH_FULL,
 							RefAction.HEAD_COMMIT);
+				}
 			// fetch the list again to get one with the modifications we just
 			// did. (the list is immutable once obtained.)
-			actionMap = project.getRefActions();
+			actionMap = db.getRefActions();
+			project.getTransferRepo().invalidate();
 		}
 
 		for (final RefInfo r : refs)
@@ -78,8 +82,10 @@ public class Repository {
 			@RequestParam("publish") final PublicationMethod action,
 			@RequestParam("firstCommit") final String start,
 			final HttpSession session) {
-		Project.getInstance(session).setRefAction(Ref.fromPath(refPath),
-				action, start);
+		final Project project = Project.getInstance(session);
+		project.getFrontendDatabase()
+				.setRefAction(Ref.fromPath(refPath), action, start);
+		project.getTransferRepo().invalidate();
 	}
 
 	@GetMapping("commits")

@@ -1,10 +1,5 @@
 package bwfdm.sara.project;
 
-import java.util.Collections;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.Map;
-
 import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,30 +7,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import bwfdm.sara.Config;
 import bwfdm.sara.api.Authorization;
 import bwfdm.sara.db.FrontendDatabase;
-import bwfdm.sara.db.JDBCDatabase;
 import bwfdm.sara.extractor.LocalRepo;
 import bwfdm.sara.git.GitProject;
 import bwfdm.sara.git.GitRepo;
-import bwfdm.sara.project.RefAction.PublicationMethod;
 import bwfdm.sara.transfer.TransferRepo;
 
 public class Project {
 	private static final String PROJECT_ATTR = Project.class.getCanonicalName();
-	private static final Map<MetadataField, MetadataValue> EMPTY_METADATA;
-	static {
-		// create an empty dummy entry for each metadata field. this ensures
-		// that all fields exist, even when they're empty.
-		final Map<MetadataField, MetadataValue> map = new EnumMap<>(
-				MetadataField.class);
-		for (final MetadataField f : MetadataField.values())
-			map.put(f, new MetadataValue(null, true));
-		EMPTY_METADATA = Collections.unmodifiableMap(map);
-	}
 
+	private final Config config;
 	private final GitRepo repo;
 	private final String gitRepo;
-	private final FrontendDatabase db;
 	private final TransferRepo transferRepo;
+	private FrontendDatabase db;
 	private GitProject project;
 	private String projectPath;
 
@@ -43,7 +27,7 @@ public class Project {
 			final Config config) {
 		this.gitRepo = gitRepo;
 		this.repo = repo;
-		db = new JDBCDatabase(gitRepo, config);
+		this.config = config;
 		transferRepo = new TransferRepo(this, config);
 	}
 
@@ -62,7 +46,7 @@ public class Project {
 	public synchronized void setProjectPath(final String projectPath) {
 		this.projectPath = projectPath;
 		project = repo.getGitProject(projectPath);
-		db.setProjectPath(projectPath);
+		db = new FrontendDatabase(gitRepo, config, projectPath);
 		transferRepo.invalidate();
 	}
 
@@ -84,32 +68,9 @@ public class Project {
 			throw new NoProjectException();
 	}
 
-	public Map<MetadataField, MetadataValue> getMetadata() {
+	public FrontendDatabase getFrontendDatabase() {
 		checkHaveProject();
-		final Map<MetadataField, MetadataValue> metadata = new EnumMap<>(
-				EMPTY_METADATA);
-		db.loadMetadata(metadata);
-		return Collections.unmodifiableMap(metadata);
-	}
-
-	public void setMetadata(final MetadataField field, final String value,
-			final boolean auto) {
-		checkHaveProject();
-		db.setMetadata(field, value, auto);
-	}
-
-	public Map<Ref, RefAction> getRefActions() {
-		checkHaveProject();
-		final Map<Ref, RefAction> actions = new HashMap<>();
-		db.loadRefActions(actions);
-		return Collections.unmodifiableMap(actions);
-	}
-
-	public void setRefAction(final Ref ref, final PublicationMethod method,
-			final String firstCommit) {
-		checkHaveProject();
-		db.setRefAction(ref, method, firstCommit);
-		transferRepo.invalidate();
+		return db;
 	}
 
 	public TransferRepo getTransferRepo() {

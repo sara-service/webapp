@@ -8,7 +8,7 @@ public class RefAction {
 	private final Ref ref;
 	/** selected archival option. */
 	private final PublicationMethod publicationMethod;
-	/** ID of first commit to archive. */
+	/** ID of first commit to archive. either the SHA-1 or {@link #HEAD_COMMIT} */
 	private final String firstCommit;
 
 	public RefAction(final Ref ref, final PublicationMethod publicationMethod,
