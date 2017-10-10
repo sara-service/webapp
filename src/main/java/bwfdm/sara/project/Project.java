@@ -46,7 +46,7 @@ public class Project {
 	public synchronized void setProjectPath(final String projectPath) {
 		this.projectPath = projectPath;
 		project = repo.getGitProject(projectPath);
-		db = new FrontendDatabase(gitRepo, config, projectPath);
+		db = new FrontendDatabase(config, gitRepo, projectPath);
 		transferRepo.invalidate();
 	}
 

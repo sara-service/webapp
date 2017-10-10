@@ -22,9 +22,12 @@ import bwfdm.sara.project.RefAction;
 import bwfdm.sara.project.RefAction.PublicationMethod;
 
 /**
- * JDBC-based implementation of {@link FrontendDatabase}. Should work with
- * PostgreSQL, MySQL (untested) and HSQL (embedded database used for
- * development) because it only uses trivial (CRUD, but without U) queries.
+ * Database for the web frontend, storing the user's selections as they come in
+ * over the REST API.
+ * <p>
+ * Implementation should work with PostgreSQL, MySQL (untested) and HSQL
+ * (embedded database used for development) because it only uses trivial (CRUD,
+ * but without U) queries.
  */
 public class FrontendDatabase {
 	private static final String ACTION_TABLE = "frontend_actions";
@@ -46,7 +49,22 @@ public class FrontendDatabase {
 	private final JdbcTemplate db;
 	private final TransactionTemplate transaction;
 
-	public FrontendDatabase(final String gitRepo, final Config config,
+	/*
+	 * TODO if settings are to be per-user instead of per-project, must add a
+	 * "user" field here and to the database schema.
+	 */
+	/**
+	 * Creates a DAO for reading / writing values for a particular project.
+	 * 
+	 * @param config
+	 *            the {@link Config} from which the {@link JdbcTemplate} will be
+	 *            obtained
+	 * @param gitRepo
+	 *            ID of the git repo, to qualify the project name
+	 * @param project
+	 *            the project name, used as database key together with gitRepo
+	 */
+	public FrontendDatabase(final Config config, final String gitRepo,
 			final String project) {
 		this.gitRepo = gitRepo;
 		this.project = project;
