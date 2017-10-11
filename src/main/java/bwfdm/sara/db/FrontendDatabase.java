@@ -14,7 +14,6 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import bwfdm.sara.Config;
 import bwfdm.sara.project.MetadataField;
 import bwfdm.sara.project.MetadataValue;
 import bwfdm.sara.project.Ref;
@@ -56,19 +55,18 @@ public class FrontendDatabase {
 	/**
 	 * Creates a DAO for reading / writing values for a particular project.
 	 * 
-	 * @param config
-	 *            the {@link Config} from which the {@link JdbcTemplate} will be
-	 *            obtained
+	 * @param db
+	 *            the {@link JdbcTemplate} to use for all queries
 	 * @param gitRepo
 	 *            ID of the git repo, to qualify the project name
 	 * @param project
 	 *            the project name, used as database key together with gitRepo
 	 */
-	public FrontendDatabase(final Config config, final String gitRepo,
+	public FrontendDatabase(final JdbcTemplate db, final String gitRepo,
 			final String project) {
 		this.gitRepo = gitRepo;
 		this.project = project;
-		db = config.newJdbcTemplate();
+		this.db = db;
 		transaction = new TransactionTemplate(new DataSourceTransactionManager(
 				db.getDataSource()));
 	}
@@ -105,17 +103,17 @@ public class FrontendDatabase {
 	 *            the field to update, not {@code null}
 	 * @param value
 	 *            the new value, not {@code null} either
-	 * @param auto
+	 * @param autodetected
 	 *            <code>true</code> if the value results from autodetection,
 	 *            <code>false</code> if the user entered that value manually
 	 */
 	public void setMetadata(final MetadataField field, final String value,
-			final boolean auto) {
+			final boolean autodetected) {
 		transaction.execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(
 					final TransactionStatus status) {
-				updateMetadata(field.getDisplayName(), value, auto);
+				updateMetadata(field.getDisplayName(), value, autodetected);
 			}
 		});
 	}
