@@ -118,7 +118,8 @@ public class GitLabRESTv4 implements GitRepo {
 	@Override
 	public List<ProjectInfo> getProjects() {
 		return toDataObject(rest.getList(
-				rest.uri("/projects").queryParam("simple", "true"),
+				rest.uri("/projects").queryParam("simple", "true")
+						.queryParam("membership", "true"),
 				new ParameterizedTypeReference<List<GLProjectInfo>>() {
 				}));
 	}

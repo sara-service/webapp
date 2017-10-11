@@ -2,8 +2,8 @@
 
 function addProjectButton(repo, project) {
 	var form = template("template");
-	$("span", form.select).text(project.name);
-	$("tt", form.select).text(project.path);
+	form.display.text(project.name);
+	form.internal.text(project.path);
 	form.select.attr("href", URI("/api/auth/login").search({
 		project: project.path,
 		repo: repo
