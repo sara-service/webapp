@@ -28,6 +28,7 @@ public class MetadataExtraction {
 
 	public MetadataExtraction() {
 		meta = new MetadataExtractor();
+		meta.initializeInBackground();
 	}
 
 	@GetMapping("licenses")

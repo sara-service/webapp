@@ -19,10 +19,16 @@ public class MetadataExtractor {
 
 	public static final String VERSION_FILE = "VERSION";
 
-	private final LicenseExtractor licenseExtractor;
-
-	public MetadataExtractor() {
-		licenseExtractor = new LicenseeExtractor();
+	public void initializeInBackground() {
+		new Thread("LicenseeExtractor eager init") {
+			@Override
+			public void run() {
+				// getInstance() does lazy-init so it doesn't slow down startup,
+				// but that slows down the first license detection. thus we
+				// initialize it here.
+				LicenseeExtractor.getInstance();
+			};
+		}.start();
 	}
 
 	private String readAsString(final TransferRepo repo, final String ref,
@@ -77,7 +83,8 @@ public class MetadataExtractor {
 			}
 		if (candidates.isEmpty())
 			return null;
-		final LicenseFile res = licenseExtractor.detectLicense(candidates);
+		final LicenseFile res = LicenseeExtractor.getInstance().detectLicense(
+				candidates);
 		// TODO cache result by file hash
 		return res;
 	}
