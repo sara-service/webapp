@@ -1,95 +1,123 @@
 package bwfdm.sara.transfer;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.NoSuchElementException;
 
-import bwfdm.sara.Config;
-import bwfdm.sara.extractor.LocalRepo;
-import bwfdm.sara.project.Project;
-import bwfdm.sara.transfer.Task.TaskStatus;
+import org.eclipse.jgit.lib.Constants;
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.revwalk.RevTree;
+import org.eclipse.jgit.treewalk.TreeWalk;
+import org.springframework.util.FileSystemUtils;
+
+import bwfdm.sara.transfer.RepoFile.FileType;
 
 public class TransferRepo {
-	private final Project project;
-	private final Config config;
-	private CloneTask init;
+	private final File root;
+	private Repository repo;
+	private boolean upToDate;
+	private boolean disposed;
 
-	private File root;
-	private LocalRepo repo;
-	private PushTask push;
-
-	public TransferRepo(final Project project, final Config config) {
-		this.project = project;
-		this.config = config;
+	public TransferRepo(final File root) {
+		this.root = root;
 	}
 
-	public void initialize() {
-		if (init == null || init.isCancelled()) {
-			// if there was an error, the background thread may still be
-			// removing the old directory. some steps block for several seconds,
-			// so this is not a difficult race to trigger at all. therefore,
-			// just create a new CloneTask each time. that way, any race
-			// conditions are moot.
-			// use a unique directory each time so we don't have to worry about
-			// a previous clone still shutting down when the next one starts
-			root = config.getRandomTempDir();
-			startClone();
-		} else if (init.isDone())
-			// if the user is triggering the clone again after it has finished,
-			// perform another clone in the same directory. the repo might have
-			// changed and the user almost certainly wants to see this change in
-			// the archived data.
-			startClone();
+	void setRepo(final Repository repo) {
+		upToDate = true;
+		this.repo = repo;
 	}
 
-	private void startClone() {
-		init = new CloneTask(root, project.getGitProject(), project
-				.getFrontendDatabase().getRefActions(), config);
-		init.start();
-	}
-
-	public void startPush() {
-		if (push == null)
-			push = new PushTask(init.getRepo(), project.getFrontendDatabase()
-					.getRefActions(), config.getArchiveRepo(), project
-					.getFrontendDatabase().getMetadata(), true);
-		push.start();
-	}
-
-	public TaskStatus getInitStatus() {
-		if (init != null)
-			return init.getStatus();
-		return null;
-	}
-
-	public TaskStatus getPushStatus() {
-		if (push != null || push.isCancelled())
-			return push.getStatus();
-		return null;
-	}
-
-	public void invalidate() {
-		if (init != null)
-			init.cancel();
-		init = null;
-		push = null;
-	}
-
-	public void cancelPush() {
-		if (push != null)
-			push.cancel();
-		push = null;
-	}
-
-	public boolean isInitialized() {
-		return init != null && init.isDone();
-	}
-
-	public LocalRepo getRepo() {
-		if (repo == null)
-			repo = new LocalRepo(init.getRepo());
+	public Repository getRepo() {
 		return repo;
 	}
 
-	public String getWebURL() {
-		return push.getWebURL();
+	public File getRoot() {
+		return root;
+	}
+
+	public void markOutdated() {
+		upToDate = false;
+	}
+
+	public boolean isUpToDate() {
+		return upToDate && !disposed;
+	}
+
+	public void dispose() {
+		if (disposed)
+			return;
+
+		disposed = true;
+		repo = null;
+		new Thread("cleanup for " + root.getName()) {
+			@Override
+			public void run() {
+				FileSystemUtils.deleteRecursively(root);
+			};
+		}.start();
+	}
+
+	public boolean isDisposed() {
+		return disposed;
+	}
+
+	private void checkInitialized() {
+		if (!isUpToDate())
+			throw new IllegalStateException(
+					"TransferRepo outdated or uninitialized");
+	}
+
+	private ObjectId findObject(final String ref, final String path)
+			throws IOException {
+		final ObjectId commit = repo.resolve(ref);
+		if (commit == null)
+			throw new NoSuchElementException(ref);
+		final RevTree tree = repo.parseCommit(commit).getTree();
+		if (path.isEmpty())
+			return tree;
+		final ObjectId object = TreeWalk.forPath(repo, path, tree).getObjectId(
+				0);
+		if (object.equals(ObjectId.zeroId()))
+			return null;
+		return object;
+	}
+
+	public byte[] getBlob(final String ref, final String path)
+			throws IOException {
+		checkInitialized();
+		final ObjectId file = findObject(ref, path);
+		if (file == null)
+			return null;
+		return repo.open(file).getBytes();
+	}
+
+	public byte[] getBlob(final String hash) throws IOException {
+		return repo.open(ObjectId.fromString(hash)).getBytes();
+	}
+
+	public List<RepoFile> getFiles(final String ref, final String path)
+			throws IOException {
+		final List<RepoFile> files = new ArrayList<>();
+		final ObjectId dir = findObject(ref, path);
+		try (final TreeWalk walk = new TreeWalk(repo)) {
+			walk.addTree(dir);
+			walk.setRecursive(false);
+			while (walk.next()) {
+				final FileType type = walk.isSubtree() ? FileType.DIRECTORY
+						: FileType.FILE;
+				final String hash = walk.getObjectId(0).getName();
+				files.add(new RepoFile(walk.getNameString(), hash, type));
+			}
+		}
+		return files;
+	}
+
+	public Collection<String> getRefs() throws IOException {
+		checkInitialized();
+		return repo.getRefDatabase().getRefs(Constants.R_REFS).keySet();
 	}
 }

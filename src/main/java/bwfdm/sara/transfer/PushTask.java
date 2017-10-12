@@ -23,7 +23,7 @@ import bwfdm.sara.project.MetadataValue;
 import bwfdm.sara.project.Ref;
 import bwfdm.sara.project.RefAction;
 
-class PushTask extends Task {
+public class PushTask extends Task {
 	private static final String TARGET_REMOTE = "target";
 
 	private final Repository repo;
@@ -33,10 +33,10 @@ class PushTask extends Task {
 	private final boolean visible;
 	private ArchiveProject project;
 
-	public PushTask(final Repository repo, final Map<Ref, RefAction> actions,
+	public PushTask(final TransferRepo repo, final Map<Ref, RefAction> actions,
 			final ArchiveRepo archive,
 			final Map<MetadataField, MetadataValue> meta, final boolean visible) {
-		this.repo = repo;
+		this.repo = repo.getRepo();
 		this.actions = actions;
 		this.archive = archive;
 		this.meta = meta;

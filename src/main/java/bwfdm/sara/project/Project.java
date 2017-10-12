@@ -7,9 +7,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import bwfdm.sara.Config;
 import bwfdm.sara.api.Authorization;
 import bwfdm.sara.db.FrontendDatabase;
-import bwfdm.sara.extractor.LocalRepo;
 import bwfdm.sara.git.GitProject;
 import bwfdm.sara.git.GitRepo;
+import bwfdm.sara.transfer.CloneTask;
+import bwfdm.sara.transfer.PushTask;
+import bwfdm.sara.transfer.Task.TaskStatus;
 import bwfdm.sara.transfer.TransferRepo;
 
 public class Project {
@@ -18,17 +20,18 @@ public class Project {
 	private final Config config;
 	private final GitRepo repo;
 	private final String gitRepo;
-	private final TransferRepo transferRepo;
+	private TransferRepo transferRepo;
 	private FrontendDatabase db;
 	private GitProject project;
 	private String projectPath;
+	private CloneTask clone;
+	private PushTask push;
 
 	private Project(final String gitRepo, final GitRepo repo,
 			final Config config) {
 		this.gitRepo = gitRepo;
 		this.repo = repo;
 		this.config = config;
-		transferRepo = new TransferRepo(this, config);
 	}
 
 	/**
@@ -48,11 +51,19 @@ public class Project {
 		project = repo.getGitProject(projectPath);
 		db = new FrontendDatabase(config.newJdbcTemplate(), gitRepo,
 				projectPath);
-		transferRepo.invalidate();
+		// if the project changes, the transferRepo doesn't just become
+		// outdated, it becomes completely invalid, and we'll have to recreate
+		// it completely.
+		disposeTransferRepo();
 	}
 
 	public synchronized String getProjectPath() {
 		return projectPath;
+	}
+
+	private void checkHaveProject() {
+		if (project == null)
+			throw new NoProjectException();
 	}
 
 	/**
@@ -64,29 +75,108 @@ public class Project {
 		return project;
 	}
 
-	private void checkHaveProject() {
-		if (project == null)
-			throw new NoProjectException();
-	}
-
 	public FrontendDatabase getFrontendDatabase() {
 		checkHaveProject();
 		return db;
 	}
 
-	public TransferRepo getTransferRepo() {
-		checkHaveProject();
-		return transferRepo;
-	}
-
 	private void checkHaveTransferRepo() {
-		if (!transferRepo.isInitialized())
+		if (!transferRepo.isUpToDate())
 			throw new NeedCloneException();
 	}
 
-	public LocalRepo getLocalRepo() {
+	public TransferRepo getTransferRepo() {
 		checkHaveTransferRepo();
-		return transferRepo.getRepo();
+		return transferRepo;
+	}
+
+	public CloneTask createTransferRepo() {
+		if (transferRepo == null || transferRepo.isDisposed()
+				|| clone.isCancelled()) {
+			// TransferRepo is invalid or nonexistent and cannot be reused.
+			// create a new one.
+			transferRepo = new TransferRepo(config.getRandomTempDir());
+			clone = null;
+		}
+
+		if (clone == null || clone.isDone()) {
+			// if the user is triggering the clone again after it has finished,
+			// perform another clone in the same directory. the repo might have
+			// changed and the user almost certainly wants to see this change in
+			// the archived data.
+			clone = new CloneTask(transferRepo, getGitProject(),
+					getFrontendDatabase().getRefActions());
+			clone.start();
+		}
+		return clone;
+	}
+
+	/**
+	 * Called when the list of branches has changed, ie. after
+	 * {@link FrontendDatabase#setRefAction(Ref, bwfdm.sara.project.RefAction.PublicationMethod, String)}
+	 * . Needs to be called only once for multiple changes.
+	 */
+	public void invalidateTransferRepo() {
+		if (clone != null && !clone.isDone()) {
+			// clone is still running, but will be outdated once it finishes.
+			// for now, just zap the TransferRepo completely. that way, we don't
+			// have to worry about a previous clone still shutting down when the
+			// next one starts
+			// TODO we should try to keep at least the objects, they're big
+			// this may not actually be necessary but the background thread may
+			// still be removing the old directory. some steps block for several
+			// seconds, so this is not a difficult race to trigger at all.
+			clone.cancel();
+			transferRepo = null;
+			clone = null;
+			return;
+		}
+
+		if (transferRepo != null)
+			// CloneTask has finished, so the TransferRepo is outdated but
+			// consistent. we can just "git pull" it.
+			transferRepo.markOutdated();
+		// or the user has never performed a clone anyway. nothing to do in that
+		// case.
+	}
+
+	public void disposeTransferRepo() {
+		// cancelling the CloneTask is always possible, even after it has
+		// finished, and will always clean up the TransferRepo.
+		if (clone != null)
+			clone.cancel();
+		clone = null;
+		transferRepo = null;
+	}
+
+	public TaskStatus getInitStatus() {
+		if (clone == null)
+			return null;
+		return clone.getStatus();
+	}
+
+	public void startPush() {
+		if (push == null)
+			push = new PushTask(getTransferRepo(), getFrontendDatabase()
+					.getRefActions(), config.getArchiveRepo(),
+					getFrontendDatabase().getMetadata(), true);
+		push.start();
+	}
+
+	public void cancelPush() {
+		if (push != null)
+			push.cancel();
+		push = null;
+	}
+
+	public TaskStatus getPushStatus() {
+		if (push != null || push.isCancelled())
+			return push.getStatus();
+		return null;
+	}
+
+	public String getWebURL() {
+		return push.getWebURL();
 	}
 
 	public static Project getInstance(final HttpSession session) {

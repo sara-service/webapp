@@ -7,8 +7,10 @@ import java.util.List;
 
 import org.mozilla.universalchardet.UniversalDetector;
 
-import bwfdm.sara.extractor.RepoFile.FileType;
 import bwfdm.sara.extractor.licensee.LicenseeExtractor;
+import bwfdm.sara.transfer.RepoFile;
+import bwfdm.sara.transfer.RepoFile.FileType;
+import bwfdm.sara.transfer.TransferRepo;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -23,7 +25,7 @@ public class MetadataExtractor {
 		licenseExtractor = new LicenseeExtractor();
 	}
 
-	private String readAsString(final LocalRepo repo, final String ref,
+	private String readAsString(final TransferRepo repo, final String ref,
 			final String filename) throws IOException {
 		final byte[] blob = repo.getBlob(ref, filename);
 		if (blob == null)
@@ -42,7 +44,7 @@ public class MetadataExtractor {
 		return new String(blob, charset);
 	}
 
-	public List<LicenseInfo> detectLicenses(final LocalRepo repo)
+	public List<LicenseInfo> detectLicenses(final TransferRepo repo)
 			throws IOException {
 		final List<LicenseInfo> licenses = new ArrayList<>();
 		for (final String ref : repo.getRefs()) {
@@ -53,7 +55,7 @@ public class MetadataExtractor {
 		return licenses;
 	}
 
-	private LicenseFile detectLicense(final LocalRepo repo, final String ref)
+	private LicenseFile detectLicense(final TransferRepo repo, final String ref)
 			throws IOException {
 		final List<RepoFile> files = repo.getFiles(ref, "");
 		final List<LazyFile> candidates = new ArrayList<LazyFile>(files.size());
@@ -96,7 +98,7 @@ public class MetadataExtractor {
 		}
 	}
 
-	public VersionInfo detectVersion(final LocalRepo repo, final String ref)
+	public VersionInfo detectVersion(final TransferRepo repo, final String ref)
 			throws IOException {
 		final String data = readAsString(repo, ref, VERSION_FILE);
 		// note: deliberately returns data == null when file missing!

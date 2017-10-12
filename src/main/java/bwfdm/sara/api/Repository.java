@@ -70,7 +70,9 @@ public class Repository {
 			// fetch the list again to get one with the modifications we just
 			// did. (the list is immutable once obtained.)
 			actionMap = db.getRefActions();
-			project.getTransferRepo().invalidate();
+			// the user changed the list of branches, so we will obviously have
+			// to clone this again
+			project.invalidateTransferRepo();
 		}
 
 		for (final RefInfo r : refs)
@@ -83,9 +85,9 @@ public class Repository {
 			@RequestParam("firstCommit") final String start,
 			final HttpSession session) {
 		final Project project = Project.getInstance(session);
-		project.getFrontendDatabase()
-				.setRefAction(Ref.fromPath(refPath), action, start);
-		project.getTransferRepo().invalidate();
+		project.getFrontendDatabase().setRefAction(Ref.fromPath(refPath),
+				action, start);
+		project.invalidateTransferRepo();
 	}
 
 	@GetMapping("commits")

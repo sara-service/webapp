@@ -1,4 +1,4 @@
-package bwfdm.sara.extractor;
+package bwfdm.sara.transfer;
 
 public final class RepoFile {
 	private final String name;

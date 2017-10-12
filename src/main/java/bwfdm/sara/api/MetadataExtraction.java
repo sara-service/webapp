@@ -12,12 +12,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import bwfdm.sara.extractor.LocalRepo;
 import bwfdm.sara.extractor.MetadataExtractor;
 import bwfdm.sara.extractor.MetadataExtractor.LicenseInfo;
 import bwfdm.sara.extractor.MetadataExtractor.VersionInfo;
 import bwfdm.sara.git.GitProject;
 import bwfdm.sara.project.Project;
+import bwfdm.sara.transfer.TransferRepo;
 
 @RestController
 @RequestMapping("/api/extract")
@@ -33,14 +33,16 @@ public class MetadataExtraction {
 	@GetMapping("licenses")
 	public List<LicenseInfo> detectLicenses(final HttpSession session)
 			throws IOException {
-		final LocalRepo repo = Project.getInstance(session).getLocalRepo();
+		final TransferRepo repo = Project.getInstance(session)
+				.getTransferRepo();
 		return meta.detectLicenses(repo);
 	}
 
 	@GetMapping("version")
 	public VersionInfo detectVersion(@RequestParam("ref") final String ref,
 			final HttpSession session) throws IOException {
-		final LocalRepo repo = Project.getInstance(session).getLocalRepo();
+		final TransferRepo repo = Project.getInstance(session)
+				.getTransferRepo();
 		return meta.detectVersion(repo, ref);
 	}
 

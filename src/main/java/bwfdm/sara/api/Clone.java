@@ -9,27 +9,27 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.view.RedirectView;
 
 import bwfdm.sara.project.Project;
+import bwfdm.sara.transfer.CloneTask;
 import bwfdm.sara.transfer.Task.TaskStatus;
-import bwfdm.sara.transfer.TransferRepo;
 
 @RestController
 @RequestMapping("/api/clone")
 public class Clone {
 	@GetMapping("cancel")
 	public RedirectView abortClone(final HttpSession session) {
-		Project.getInstance(session).getTransferRepo().invalidate();
+		Project.getInstance(session).disposeTransferRepo();
 		return new RedirectView("/meta.html"); // FIXME will become branches
 	}
 
 	@GetMapping("status")
 	public TaskStatus getStatus(final HttpSession session) {
-		return Project.getInstance(session).getTransferRepo().getInitStatus();
+		return Project.getInstance(session).getInitStatus();
 	}
 
 	@PostMapping("trigger")
 	public TaskStatus triggerClone(final HttpSession session) {
-		final TransferRepo tx = Project.getInstance(session).getTransferRepo();
-		tx.initialize();
-		return tx.getInitStatus();
+		final CloneTask clone = Project.getInstance(session)
+				.createTransferRepo();
+		return clone.getStatus();
 	}
 }

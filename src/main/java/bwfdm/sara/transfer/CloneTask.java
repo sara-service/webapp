@@ -23,29 +23,29 @@ import org.eclipse.jgit.transport.RefSpec;
 import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.jgit.transport.TagOpt;
 import org.eclipse.jgit.transport.URIish;
-import org.springframework.util.FileSystemUtils;
 
-import bwfdm.sara.Config;
 import bwfdm.sara.git.GitProject;
 import bwfdm.sara.project.Ref;
 import bwfdm.sara.project.RefAction;
 
-class CloneTask extends Task {
+public class CloneTask extends Task {
 	private final GitProject repo;
 	private final Map<Ref, RefAction> actions;
 	private final File root;
 	private Git git;
+	private final TransferRepo transferRepo;
 
-	public CloneTask(final File root, final GitProject repo,
-			final Map<Ref, RefAction> actions, final Config config) {
+	public CloneTask(final TransferRepo transferRepo, final GitProject repo,
+			final Map<Ref, RefAction> actions) {
+		this.transferRepo = transferRepo;
 		this.repo = repo;
 		this.actions = actions;
-		this.root = root;
+		root = transferRepo.getRoot();
 	}
 
 	@Override
 	protected void cleanup() {
-		FileSystemUtils.deleteRecursively(root);
+		transferRepo.dispose();
 	}
 
 	@Override
@@ -54,7 +54,7 @@ class CloneTask extends Task {
 		final Git git = initRepo();
 		fetchHeads(git);
 		pushBackHeads(git);
-		this.git = git;
+		transferRepo.setRepo(git.getRepository());
 	}
 
 	private Git initRepo() throws GitAPIException, URISyntaxException,
@@ -139,7 +139,7 @@ class CloneTask extends Task {
 			// - nobody uses annotated tags
 			// - people who do probably don't push them backwards
 			// - pointing signed annotated tags at a different commit would
-			// invalidate the signature so isn't advisable anyway
+			//   invalidate the signature so isn't advisable anyway
 			final RefUpdate update = git.getRepository().updateRef(
 					Constants.R_REFS + e.getKey().path);
 			update.disableRefLog();

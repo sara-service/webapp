@@ -59,6 +59,14 @@ APIERR.handleJSON = function(step, info) {
 		location.href = "/projects.html";
 		return;
 	}
+	if (info.exception == "NeedCloneException") {
+		window.alert("Repository needs to be cloned first!");
+		// we need a local repo but don't have one. let's change that.
+		// unfortunately this resets the workflow back to right after
+		// the clone...
+		location.href = "/clone.html";
+		return;
+	}
 	APIERR.handleOther(step, info.exception, info.message);
 };
 APIERR.handle = function(step, status, http, body) {

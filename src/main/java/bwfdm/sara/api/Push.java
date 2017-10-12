@@ -11,25 +11,24 @@ import org.springframework.web.servlet.view.RedirectView;
 
 import bwfdm.sara.project.Project;
 import bwfdm.sara.transfer.Task.TaskStatus;
-import bwfdm.sara.transfer.TransferRepo;
 
 @RestController
 @RequestMapping("/api/push")
 public class Push {
 	@GetMapping("cancel")
 	public RedirectView abortPush(final HttpSession session) {
-		Project.getInstance(session).getTransferRepo().cancelPush();
+		Project.getInstance(session).cancelPush();
 		return new RedirectView("/overview.html");
 	}
 
 	@GetMapping("status")
 	public TaskStatus getStatus(final HttpSession session) {
-		return Project.getInstance(session).getTransferRepo().getPushStatus();
+		return Project.getInstance(session).getPushStatus();
 	}
 
 	@PostMapping("trigger")
 	public TaskStatus triggerClone(final HttpSession session) {
-		final TransferRepo tx = Project.getInstance(session).getTransferRepo();
+		final Project tx = Project.getInstance(session);
 		tx.startPush();
 		return tx.getPushStatus();
 	}
@@ -37,8 +36,10 @@ public class Push {
 	@GetMapping("web-url")
 	@ResponseBody
 	public String getWebUrl(final HttpSession session) {
-		// TODO should kill the session at around this point!
+		// TODO should kill the TransferRepo at around this point
+		// (but definitely not HERE!)
+
 		// we're done now; there is no point for the user to go back
-		return Project.getInstance(session).getTransferRepo().getWebURL();
+		return Project.getInstance(session).getWebURL();
 	}
 }
