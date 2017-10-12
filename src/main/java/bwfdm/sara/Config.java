@@ -15,7 +15,6 @@ import javax.servlet.ServletContext;
 import javax.sql.DataSource;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.util.DigestUtils;
 import org.springframework.web.context.ServletContextAware;
@@ -163,8 +162,8 @@ public class Config implements ServletContextAware {
 		return context == null && props != null;
 	}
 
-	public JdbcTemplate newJdbcTemplate() {
-		return new JdbcTemplate(db);
+	public DataSource getDatabase() {
+		return db;
 	}
 
 	public String getWebRoot() {

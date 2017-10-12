@@ -49,8 +49,7 @@ public class Project {
 	public synchronized void setProjectPath(final String projectPath) {
 		this.projectPath = projectPath;
 		project = repo.getGitProject(projectPath);
-		db = new FrontendDatabase(config.newJdbcTemplate(), gitRepo,
-				projectPath);
+		db = new FrontendDatabase(config.getDatabase(), gitRepo, projectPath);
 		// if the project changes, the transferRepo doesn't just become
 		// outdated, it becomes completely invalid, and we'll have to recreate
 		// it completely.

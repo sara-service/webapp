@@ -7,6 +7,8 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.sql.DataSource;
+
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
@@ -56,19 +58,19 @@ public class FrontendDatabase {
 	 * Creates a DAO for reading / writing values for a particular project.
 	 * 
 	 * @param db
-	 *            the {@link JdbcTemplate} to use for all queries
+	 *            the {@link DataSource} to use for all queries
 	 * @param gitRepo
 	 *            ID of the git repo, to qualify the project name
 	 * @param project
 	 *            the project name, used as database key together with gitRepo
 	 */
-	public FrontendDatabase(final JdbcTemplate db, final String gitRepo,
+	public FrontendDatabase(final DataSource db, final String gitRepo,
 			final String project) {
 		this.gitRepo = gitRepo;
 		this.project = project;
-		this.db = db;
+		this.db = new JdbcTemplate(db);
 		transaction = new TransactionTemplate(new DataSourceTransactionManager(
-				db.getDataSource()));
+				db));
 	}
 
 	/**
