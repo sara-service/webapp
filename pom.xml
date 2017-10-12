@@ -44,7 +44,8 @@
 			<artifactId>spring-boot-starter-jdbc</artifactId>
 			<version>1.5.3.RELEASE</version>
 		</dependency>
-		<!-- embedded database for development -->
+		<!-- embedded database for development. production use must
+		     configure a real, persistent database (eg. PostgreSQL) -->
 		<dependency>
 			<groupId>org.hsqldb</groupId>
 			<artifactId>hsqldb</artifactId>
