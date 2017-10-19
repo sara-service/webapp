@@ -62,7 +62,7 @@ public class GitLabProject implements GitProject {
 
 	@Override
 	public List<Branch> getBranches() {
-		final GLProjectInfo projectInfo = getGitLabProjectInfo();
+		final ProjectInfo projectInfo = getProjectInfo();
 		final List<GLBranch> list = rest.getList(
 				rest.uri("/repository/branches"),
 				new ParameterizedTypeReference<List<GLBranch>>() {
@@ -151,15 +151,11 @@ public class GitLabProject implements GitProject {
 				"oauth2", token));
 	}
 
-	private GLProjectInfo getGitLabProjectInfo() {
-		return rest.get(rest.uri("" /* the project itself */),
-				new ParameterizedTypeReference<GLProjectInfo>() {
-				});
-	}
-
 	@Override
 	public ProjectInfo getProjectInfo() {
-		return getGitLabProjectInfo().toDataObject();
+		return rest.get(rest.uri("" /* the project itself */),
+				new ParameterizedTypeReference<GLProjectInfo>() {
+				}).toDataObject();
 	}
 
 	@Override

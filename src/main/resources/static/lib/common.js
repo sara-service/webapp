@@ -201,14 +201,6 @@ autosave.value = function(id, value) {
 	save.value = value;
 	autosave.validate(id);
 };
-// sets the control value, saving with autoset=true
-autosave.reset = function(id, value) {
-	autosave.value(id, value);
-	var elem = $("#" + id);
-	var save = elem.data("autosave");
-	if (autosave.validate(id))
-		save.saver(value, id, true);
-};
 
 autosave.cancelTimeout = function(id) {
 	autosave._cancelTimeout($("#" + id).data("autosave"));

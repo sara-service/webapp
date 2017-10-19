@@ -25,6 +25,18 @@ public class LicenseeExtractor implements LicenseExtractor {
 		extractor = container.runScriptlet("LicenseExtractor");
 	}
 
+	static {
+		new Thread("LicenseeExtractor background initialization") {
+			@Override
+			public void run() {
+				// getInstance() does lazy-init so it doesn't slow down startup,
+				// but that slows down the first license detection. thus we
+				// initialize it here.
+				LicenseeExtractor.getInstance();
+			};
+		}.start();
+	}
+
 	public static synchronized LicenseeExtractor getInstance() {
 		if (instance == null)
 			instance = new LicenseeExtractor();

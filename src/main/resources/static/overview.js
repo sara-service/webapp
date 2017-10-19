@@ -34,9 +34,7 @@ function blockLoaded(name) {
 }
 
 function initBranches(info) {
-	console.log(info);
 	$.each(info, function(_, action) {
-		console.log(action);
 		var line = template(action.firstCommit == "HEAD" ?
 			"template_head" : "template_nonhead");
 		line.publish.addClass(publish[action.publish].sara);
@@ -51,7 +49,7 @@ function initBranches(info) {
 }
 
 function initMeta(info) {
-	$.each(["title", "description", "version", "license"],
+	$.each(["title", "description", "version"],
 		function(_, name) {
 			$("#" + name).text(info[name].value);
 		});

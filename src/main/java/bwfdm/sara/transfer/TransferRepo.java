@@ -77,11 +77,13 @@ public class TransferRepo {
 		if (commit == null)
 			throw new NoSuchElementException(ref);
 		final RevTree tree = repo.parseCommit(commit).getTree();
-		if (path.isEmpty())
+		if (path.isEmpty()) // we want the root
 			return tree;
-		final ObjectId object = TreeWalk.forPath(repo, path, tree).getObjectId(
-				0);
-		if (object.equals(ObjectId.zeroId()))
+		final TreeWalk treewalk = TreeWalk.forPath(repo, path, tree);
+		if (treewalk == null) // path not in tree
+			return null;
+		final ObjectId object = treewalk.getObjectId(0);
+		if (object.equals(ObjectId.zeroId())) // probably impossible
 			return null;
 		return object;
 	}
@@ -119,5 +121,13 @@ public class TransferRepo {
 	public Collection<String> getRefs() throws IOException {
 		checkInitialized();
 		return repo.getRefDatabase().getRefs(Constants.R_REFS).keySet();
+	}
+
+	public long getCommitDate(final String ref) throws IOException {
+		final ObjectId id = repo.resolve(ref);
+		if (id == null)
+			throw new NoSuchElementException(ref);
+		// FIXME 32-bit timestamp in an API! in 2017!!! wtf????
+		return repo.parseCommit(id).getCommitTime();
 	}
 }

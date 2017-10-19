@@ -10,11 +10,14 @@ public final class ProjectInfo {
 	public final String name;
 	@JsonProperty("description")
 	public final String description;
+	@JsonProperty("default-branch")
+	public final String master;
 
 	public ProjectInfo(final String path, final String name,
-			final String description) {
+			final String description, final String master) {
 		this.path = path;
 		this.name = name;
 		this.description = description;
+		this.master = master;
 	}
 }

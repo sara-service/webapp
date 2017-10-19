@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import bwfdm.sara.Config;
 import bwfdm.sara.api.Authorization;
 import bwfdm.sara.db.FrontendDatabase;
+import bwfdm.sara.extractor.MetadataExtractor;
 import bwfdm.sara.git.GitProject;
 import bwfdm.sara.git.GitRepo;
 import bwfdm.sara.transfer.CloneTask;
@@ -21,6 +22,7 @@ public class Project {
 	private final GitRepo repo;
 	private final String gitRepo;
 	private TransferRepo transferRepo;
+	private MetadataExtractor metadataExtractor;
 	private FrontendDatabase db;
 	private GitProject project;
 	private String projectPath;
@@ -89,12 +91,18 @@ public class Project {
 		return transferRepo;
 	}
 
+	public MetadataExtractor getMetadataExtractor() {
+		checkHaveTransferRepo();
+		return metadataExtractor;
+	}
+
 	public CloneTask createTransferRepo() {
 		if (transferRepo == null || transferRepo.isDisposed()
 				|| clone.isCancelled()) {
 			// TransferRepo is invalid or nonexistent and cannot be reused.
 			// create a new one.
 			transferRepo = new TransferRepo(config.getRandomTempDir());
+			metadataExtractor = new MetadataExtractor(transferRepo, project);
 			clone = null;
 		}
 
@@ -103,8 +111,8 @@ public class Project {
 			// perform another clone in the same directory. the repo might have
 			// changed and the user almost certainly wants to see this change in
 			// the archived data.
-			clone = new CloneTask(transferRepo, getGitProject(),
-					getFrontendDatabase().getRefActions());
+			clone = new CloneTask(transferRepo, metadataExtractor,
+					getGitProject(), db.getRefActions(), db);
 			clone.start();
 		}
 		return clone;
@@ -127,6 +135,7 @@ public class Project {
 			// seconds, so this is not a difficult race to trigger at all.
 			clone.cancel();
 			transferRepo = null;
+			metadataExtractor = null;
 			clone = null;
 			return;
 		}

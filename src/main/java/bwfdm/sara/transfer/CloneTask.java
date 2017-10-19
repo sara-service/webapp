@@ -16,7 +16,6 @@ import org.eclipse.jgit.api.errors.TransportException;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.RefUpdate;
-import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.StoredConfig;
 import org.eclipse.jgit.lib.SubmoduleConfig.FetchRecurseSubmodulesMode;
 import org.eclipse.jgit.transport.RefSpec;
@@ -24,22 +23,29 @@ import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.jgit.transport.TagOpt;
 import org.eclipse.jgit.transport.URIish;
 
+import bwfdm.sara.extractor.MetadataExtractor;
 import bwfdm.sara.git.GitProject;
+import bwfdm.sara.project.MetadataField;
 import bwfdm.sara.project.Ref;
 import bwfdm.sara.project.RefAction;
 
 public class CloneTask extends Task {
-	private final GitProject repo;
+	private final MetadataExtractor extractor;
+	private final GitProject project;
 	private final Map<Ref, RefAction> actions;
 	private final File root;
-	private Git git;
 	private final TransferRepo transferRepo;
+	private final MetadataSink meta;
+	private Git git;
 
-	public CloneTask(final TransferRepo transferRepo, final GitProject repo,
-			final Map<Ref, RefAction> actions) {
+	public CloneTask(final TransferRepo transferRepo,
+			final MetadataExtractor extractor, final GitProject project,
+			final Map<Ref, RefAction> actions, final MetadataSink meta) {
 		this.transferRepo = transferRepo;
-		this.repo = repo;
+		this.extractor = extractor;
+		this.project = project;
 		this.actions = actions;
+		this.meta = meta;
 		root = transferRepo.getRoot();
 	}
 
@@ -51,20 +57,22 @@ public class CloneTask extends Task {
 	@Override
 	protected void execute() throws GitAPIException, URISyntaxException,
 			IOException {
-		final Git git = initRepo();
-		fetchHeads(git);
-		pushBackHeads(git);
+		initRepo();
+		fetchHeads();
+		pushBackHeads();
 		transferRepo.setRepo(git.getRepository());
+		extractMetaData();
+		endTask();
 	}
 
-	private Git initRepo() throws GitAPIException, URISyntaxException,
+	private void initRepo() throws GitAPIException, URISyntaxException,
 			IOException {
 		beginTask("Initializing temporary repository", 1);
-		final Git git = Git.init().setBare(true).setGitDir(root).call();
+		git = Git.init().setBare(true).setGitDir(root).call();
 		// add the "origin" remote
 		final RemoteAddCommand add = git.remoteAdd();
 		add.setName(Constants.DEFAULT_REMOTE_NAME);
-		add.setUri(new URIish(repo.getCloneURI()));
+		add.setUri(new URIish(project.getCloneURI()));
 		final RemoteConfig remote = add.call();
 		// change remote config to only fetch branches and tags that we actually
 		// want.
@@ -88,11 +96,10 @@ public class CloneTask extends Task {
 		// instead just set the progress bar to 100%, without setting the
 		// checkmark just yet. the next startTask() will do that anyway.
 		update(1);
-		return git;
 	}
 
-	private void fetchHeads(final Git git) throws GitAPIException,
-			InvalidRemoteException, TransportException {
+	private void fetchHeads() throws GitAPIException, InvalidRemoteException,
+			TransportException {
 		final FetchCommand fetch = git.fetch();
 		// to guard against corruption
 		fetch.setCheckFetchedObjects(true);
@@ -104,16 +111,16 @@ public class CloneTask extends Task {
 
 		// try-finally for best-effort attempt to never leave the repo in the
 		// "can clone" state afterwards.
-		repo.enableClone(true);
+		project.enableClone(true);
 		try {
-			repo.setCredentials(fetch);
+			project.setCredentials(fetch);
 			fetch.setProgressMonitor(this).call();
 		} finally {
-			repo.enableClone(false);
+			project.enableClone(false);
 		}
 	}
 
-	private void pushBackHeads(final Git git) throws IOException {
+	private void pushBackHeads() throws IOException {
 		// if the user wanted to start archiving a few commits back, we now need
 		// to push the HEAD backwards for these refs. it would be more efficient
 		// to start fetching at those commit objects directly, but that isn't
@@ -148,13 +155,20 @@ public class CloneTask extends Task {
 			update.forceUpdate();
 			update(1);
 		}
-		endTask();
 	}
 
-	public Repository getRepo() {
-		if (!isDone())
-			throw new IllegalStateException(
-					"getRepo() on in-progress CloneTask");
-		return git.getRepository();
+	private void extractMetaData() throws IOException {
+		beginTask("Extracting metadata", 2);
+		extractor.detectProjectInfo();
+		update(1);
+
+		final Ref master = extractor.detectMasterBranch(actions.keySet());
+		extractor.detectVersion(); // detect for ALL branches
+		extractor.setVersionFromBranch(master);
+		update(1);
+
+		meta.setAutodetectedMetadata(extractor.get(MetadataField.values()));
+
+		// TODO run license detection and store result
 	}
 }

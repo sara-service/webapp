@@ -19,7 +19,6 @@ import bwfdm.sara.db.FrontendDatabase;
 import bwfdm.sara.git.Branch;
 import bwfdm.sara.git.Commit;
 import bwfdm.sara.git.GitProject;
-import bwfdm.sara.git.ProjectInfo;
 import bwfdm.sara.git.Tag;
 import bwfdm.sara.project.Project;
 import bwfdm.sara.project.Ref;
@@ -96,19 +95,6 @@ public class Repository {
 			@RequestParam(name = "limit", defaultValue = "20") final int limit,
 			final HttpSession session) {
 		return Project.getGitProject(session).getCommits(ref, limit);
-	}
-
-	@GetMapping("project-info")
-	public ProjectInfo getProjectInfo(final HttpSession session) {
-		return Project.getGitProject(session).getProjectInfo();
-	}
-
-	@PostMapping("project-info")
-	public void setProjectInfo(
-			@RequestParam(name = "name", required = false) final String name,
-			@RequestParam(name = "description", required = false) final String description,
-			final HttpSession session) {
-		Project.getGitProject(session).updateProjectInfo(name, description);
 	}
 
 	@GetMapping("return")

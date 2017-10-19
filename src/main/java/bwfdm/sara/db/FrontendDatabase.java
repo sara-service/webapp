@@ -6,11 +6,13 @@ import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.sql.DataSource;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowCallbackHandler;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
@@ -21,6 +23,7 @@ import bwfdm.sara.project.MetadataValue;
 import bwfdm.sara.project.Ref;
 import bwfdm.sara.project.RefAction;
 import bwfdm.sara.project.RefAction.PublicationMethod;
+import bwfdm.sara.transfer.MetadataSink;
 
 /**
  * Database for the web frontend, storing the user's selections as they come in
@@ -30,7 +33,7 @@ import bwfdm.sara.project.RefAction.PublicationMethod;
  * (embedded database used for development) because it only uses trivial (CRUD,
  * but without U) queries.
  */
-public class FrontendDatabase {
+public class FrontendDatabase implements MetadataSink {
 	private static final String ACTION_TABLE = "frontend_actions";
 	private static final String METADATA_TABLE = "frontend_metadata";
 
@@ -41,9 +44,18 @@ public class FrontendDatabase {
 		final Map<MetadataField, MetadataValue> map = new EnumMap<>(
 				MetadataField.class);
 		for (final MetadataField f : MetadataField.values())
-			map.put(f, new MetadataValue(null, true));
+			map.put(f, new MetadataValue(null, null));
 		EMPTY_METADATA = Collections.unmodifiableMap(map);
 	}
+
+	private static final RowMapper<MetadataValue> metadataMapper = new RowMapper<MetadataValue>() {
+		@Override
+		public MetadataValue mapRow(final ResultSet rs, final int rowNum)
+				throws SQLException {
+			return new MetadataValue(rs.getString("value"),
+					rs.getString("autodetected"));
+		}
+	};
 
 	private final String gitRepo;
 	private final String project;
@@ -75,27 +87,39 @@ public class FrontendDatabase {
 
 	/**
 	 * Get metadata. All fields will always be present (JavaScript needs this);
-	 * unset values map to an autodetected {@link MetadataValue} with a value of
-	 * {@code null}. The returned map is a snapshot; it doesn't reflect later
-	 * changes made by {@link #setMetadata(MetadataField, String, boolean)}!
+	 * unset values map to a {@code (null, null)} {@link MetadataValue}. The
+	 * returned map is a snapshot; it doesn't reflect later changes made by
+	 * {@link #setMetadata(MetadataField, String)}!
 	 * 
 	 * @return all metadata fields in a {@link Map}
 	 */
 	public Map<MetadataField, MetadataValue> getMetadata() {
 		final Map<MetadataField, MetadataValue> meta = new EnumMap<>(
 				EMPTY_METADATA);
-		db.query("select field, value, auto from " + METADATA_TABLE
+		db.query("select field, value, autodetected from " + METADATA_TABLE
 				+ " where repo = ? and project = ?", new RowCallbackHandler() {
 			@Override
 			public void processRow(final ResultSet rs) throws SQLException {
 				final MetadataField field = MetadataField.forDisplayName(rs
 						.getString("field"));
-				final MetadataValue value = new MetadataValue(rs
-						.getString("value"), rs.getBoolean("auto"));
-				meta.put(field, value);
+				meta.put(field, metadataMapper.mapRow(rs, 0));
 			}
 		}, gitRepo, project);
 		return Collections.unmodifiableMap(meta);
+	}
+
+	/**
+	 * Get a single metadata field.
+	 * 
+	 * @param field
+	 *            the field to query, not {@code null} obviously
+	 * @return all metadata fields in a {@link Map}
+	 */
+	public MetadataValue getMetadata(final MetadataField field) {
+		return db.queryForObject("select value, autodetected from "
+				+ METADATA_TABLE
+				+ " where repo = ? and project = ? and field = ?",
+				metadataMapper, gitRepo, project, field.getDisplayName());
 	}
 
 	/**
@@ -104,30 +128,95 @@ public class FrontendDatabase {
 	 * @param field
 	 *            the field to update, not {@code null}
 	 * @param value
-	 *            the new value, not {@code null} either
-	 * @param autodetected
-	 *            <code>true</code> if the value results from autodetection,
-	 *            <code>false</code> if the user entered that value manually
+	 *            the new value, or {@code null} to revert to the autodetected
+	 *            value
 	 */
-	public void setMetadata(final MetadataField field, final String value,
-			final boolean autodetected) {
+	public void setMetadata(final MetadataField field, final String value) {
 		transaction.execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(
 					final TransactionStatus status) {
-				updateMetadata(field.getDisplayName(), value, autodetected);
+				updateMetadata(field.getDisplayName(), value);
 			}
 		});
 	}
 
-	private void updateMetadata(final String name, final String value,
-			final boolean auto) {
-		db.update("delete from " + METADATA_TABLE
-				+ " where repo = ? and project = ? and field = ?", gitRepo,
-				project, name);
-		db.update("insert into " + METADATA_TABLE
-				+ "(repo, project, field, value, auto) values(?, ?, ?, ?, ?)",
-				gitRepo, project, name, value, auto);
+	private void updateMetadata(final String field, final String value) {
+		// if (db.queryForObject("select count(*) from " + METADATA_TABLE
+		// + " where repo = ? and project = ? and field = ?",
+		// Integer.class, gitRepo, project, field) > 0)
+		// no real need to do an upsert here. all rows are generated by the
+		// CloneTask autodetecting stuff.
+		db.update("update " + METADATA_TABLE + " set value = ?"
+				+ " where repo = ? and project = ? and field = ?", value,
+				gitRepo, project, field);
+		// else
+		// db.update("insert into " + METADATA_TABLE
+		// + "(repo, project, field, value) values(?, ?, ?, ?)",
+		// gitRepo, project, field, value);
+	}
+
+	/**
+	 * Populate metadata fields with values from autodetection. Only fields
+	 * present in the set will be updated. This does not override the
+	 * user-specified value set with {@link #setMetadata(MetadataField, String)}
+	 * .
+	 * 
+	 * @param meta
+	 *            {@link Map} of {@link MetadataField} to field value
+	 */
+	@Override
+	public void setAutodetectedMetadata(final Map<MetadataField, String> meta) {
+		transaction.execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(
+					final TransactionStatus status) {
+				for (final Entry<MetadataField, String> e : meta.entrySet())
+					updateAutodetectedMetadata(e.getKey().getDisplayName(),
+							e.getValue());
+			}
+		});
+	}
+
+	/**
+	 * Populate a single metadata fields with values from autodetection. This
+	 * does not override the user-specified value set with
+	 * {@link #setMetadata(MetadataField, String)}.
+	 * 
+	 * @param field
+	 *            the {@link MetadataField} to change
+	 * @param value
+	 *            the field value, non-<code>null</code>
+	 */
+	public void setAutodetectedMetadata(final MetadataField field,
+			final String value) {
+		transaction.execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(
+					final TransactionStatus status) {
+				updateAutodetectedMetadata(field.getDisplayName(), value);
+			}
+		});
+	}
+
+	private void updateAutodetectedMetadata(final String field,
+			final String value) {
+		final int entries = db.queryForObject("select count(*) from "
+				+ METADATA_TABLE
+				+ " where repo = ? and project = ? and field = ?",
+				Integer.class, gitRepo, project, field);
+		if (entries > 1)
+			throw new IllegalStateException(entries + " entries for " + gitRepo
+					+ ", " + project + ", " + field);
+
+		if (entries == 0)
+			db.update("insert into " + METADATA_TABLE
+					+ "(repo, project, field, autodetected)"
+					+ " values(?, ?, ?, ?)", gitRepo, project, field, value);
+		else
+			db.update("update " + METADATA_TABLE + " set autodetected = ?"
+					+ " where repo = ? and project = ? and field = ?", value,
+					gitRepo, project, field);
 	}
 
 	/**

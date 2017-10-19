@@ -56,6 +56,9 @@ public class PushTask extends Task {
 			IOException, ProjectExistsException {
 		beginTask("NOT rewriting history (not implemented yet)", 1);
 		// TODO handle abbreviated history etc, producing @version refs
+		beginTask("NOT committing metadata to git archive"
+				+ " (not implemented yet, either)", 1);
+		// TODO commit submitted_metadata.xml to repo
 
 		final String id = Config.getRandomID();
 		beginTask("Creating project " + id, 1);

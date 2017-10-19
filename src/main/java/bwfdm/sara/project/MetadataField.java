@@ -6,8 +6,17 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum MetadataField {
-	TITLE("title"), DESCRIPTION("description"), VERSION("version"), //
-	LICENSE("license"), SOURCE_REF("source-ref");
+	/** the publication title */
+	TITLE("title"),
+	/** projects description / abstract */
+	DESCRIPTION("description"),
+	/** software version number */
+	VERSION("version"),
+	/**
+	 * branch the version number was read from. this isn't really a metadatum,
+	 * but it should be remembered for the user's next visit anyway.
+	 */
+	VERSION_BRANCH("versionbranch");
 
 	private final String displayName;
 

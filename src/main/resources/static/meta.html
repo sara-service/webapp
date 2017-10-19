@@ -25,93 +25,77 @@
 		</div>
 	</div>
 
-	<div class="row">
-		<div class="col-xs-12 action-header">
-			<h1>Describe your Publication!</h1>
-		</div>
-	</div>
-	<div id="title_loading" class="loading"><span class="sr-only">loading title and description...</span></div>
-	<form class="form-horizontal" id="title_block" style="display:none">
-		<div class="form-group has-feedback" id="title_group">
-			<label class="col-sm-2 control-label" for="title">publication title</label>
-			<div class="col-sm-7 nopad">
-				<input type="text" class="form-control" id="title" placeholder="name of your software artefact" aria-describedby="title_status_text">
-				<span id="title_status" class="glyphicon form-control-feedback" aria-hidden="true"></span>
-				<span id="title_status_text" class="sr-only"></span>
-  			</div>
-			<div class="col-sm-3 nopad">
-				<button type="button" class="btn btn-default form-control" id="update_title">update project name in git repo</button>
+	<div id="main_loading" class="loading"><span class="sr-only">loading title and description...</span></div>
+	<div id="main" style="display:none">
+		<div class="row">
+			<div class="col-xs-12 action-header">
+				<h1>Describe your Publication!</h1>
 			</div>
 		</div>
-		<div class="form-group has-feedback" id="description_group">
-			<label class="col-sm-2 control-label" for="description">short description (optional)</label>
-			<div class="col-sm-7 nopad">
-				<textarea class="form-control" id="description" placeholder="short description of what your software does" aria-describedby="description_status_text"></textarea>
-				<span id="description_status" class="glyphicon form-control-feedback" aria-hidden="true"></span>
-				<span id="description_status_text" class="sr-only"></span>
+		<form class="form-horizontal" id="title_block">
+			<div class="form-group has-feedback" id="title_group">
+				<label class="col-sm-2 control-label" for="title">publication title</label>
+				<div class="col-sm-7 nopad">
+					<input type="text" class="form-control" id="title" placeholder="name of your software artefact" aria-describedby="title_status_text">
+					<span id="title_status" class="glyphicon form-control-feedback" aria-hidden="true"></span>
+					<span id="title_status_text" class="sr-only"></span>
+				</div>
+				<div class="col-sm-3 nopad">
+					<button type="button" class="btn btn-default form-control" id="update_title">update project name in git repo</button>
+				</div>
 			</div>
-			<div class="col-sm-3 nopad">
-				<button type="button" class="btn btn-default form-control" id="update_description">update project description in git repo</button>
+			<div class="form-group has-feedback" id="description_group">
+				<label class="col-sm-2 control-label" for="description">short description (optional)</label>
+				<div class="col-sm-7 nopad">
+					<textarea class="form-control" id="description" placeholder="short description of what your software does" aria-describedby="description_status_text"></textarea>
+					<span id="description_status" class="glyphicon form-control-feedback" aria-hidden="true"></span>
+					<span id="description_status_text" class="sr-only"></span>
+				</div>
+				<div class="col-sm-3 nopad">
+					<button type="button" class="btn btn-default form-control" id="update_description">update project description in git repo</button>
+				</div>
 			</div>
-		</div>
-		<div class="form-group">
-			<div class="col-sm-7 col-sm-offset-2 nopad">
-				<button type="button" class="btn btn-sm btn-danger" id="reset_title">reset title and description to project name and description from git repo</button>
-				<div id="reset_title_loading" class="loading-inline" style="display:none"><span class="sr-only">loading title and description...</span></div>
+			<div class="form-group">
+				<div class="col-sm-7 col-sm-offset-2 nopad">
+					<button type="button" class="btn btn-sm btn-danger" id="reset_title">reset title and description to project name and description from git repo</button>
+					<div id="reset_title_loading" class="loading-inline" style="display:none"><span class="sr-only">loading title and description...</span></div>
+				</div>
 			</div>
-		</div>
-	</form></div>
+		</form>
 
-	<div class="row">
-		<div class="col-xs-12 action-header">
-			<h1>Provide the required Metadata</h1>
+		<div class="row">
+			<div class="col-xs-12 action-header">
+				<h1>Provide the required Metadata</h1>
+			</div>
 		</div>
+		<form class="form-horizontal" id="version_block">
+			<div class="form-group">
+				<label class="col-sm-2 control-label" for="version_branch">autodetect metadata from</label>
+				<div class="col-sm-2 nopad">
+					<select class="form-control" id="version_branch">
+						<option value="IDIOT" disabled selected>… loading …</option>
+					</select>
+				</div>
+				<div class="col-sm-2 nopad">
+					<button type="button" class="btn btn-danger form-control" id="reset_version" disabled>I'm Feeling Lazy</button>
+				</div>
+				<div class="col-sm-6 nopad">
+					<div id="version_loading" class="loading-inline" style="display:none"><span class="sr-only">detecting metadata...</span></div>
+				</div>
+			</div>
+			<div class="form-group has-feedback" id="version_group">
+				<label class="col-sm-2 control-label" for="version">software version</label>
+				<div class="col-sm-7 nopad">
+					<input type="text" class="form-control" id="version" placeholder="version number" aria-describedby="version_status_text">
+					<span id="version_status" class="glyphicon form-control-feedback" aria-hidden="true"></span>
+					<span id="version_status_text" class="sr-only"></span>
+				</div>
+				<div class="col-sm-3 nopad">
+					<button type="button" class="btn btn-default form-control" id="update_version" data-can-update="true" disabled>update file <tt data-versionfile>VERSION</tt> in <span data-branch>branch master</span></button>
+				</div>
+			</div>
+		</form>
 	</div>
-	<div id="version_loading" class="loading"><span class="sr-only">loading version and license...</span></div>
-	<form class="form-horizontal" id="version_block" style="display:none">
-		<div class="form-group">
-			<label class="col-sm-2 control-label" for="lazy_branch">autodetect metadata from</label>
-			<div class="col-sm-2 nopad">
-				<select class="form-control" id="lazy_branch">
-					<option value="IDIOT" disabled selected>… loading …</option>
-				</select>
-			</div>
-			<div class="col-sm-2 nopad">
-				<button type="button" class="btn btn-danger form-control" id="lazy_button">I'm Feeling Lazy</button>
-			</div>
-			<div class="col-sm-6 nopad">
-				<div id="lazy_loading" class="loading-inline" style="display:none"><span class="sr-only">detecting metadata...</span></div>
-			</div>
-		</div>
-		<div class="form-group has-feedback" id="version_group">
-			<label class="col-sm-2 control-label" for="version">software version</label>
-			<div class="col-sm-7 nopad">
-				<input type="text" class="form-control" id="version" placeholder="version number" aria-describedby="version_status_text">
-				<span id="version_status" class="glyphicon form-control-feedback" aria-hidden="true"></span>
-				<span id="version_status_text" class="sr-only"></span>
-			</div>
-			<div class="col-sm-3 nopad">
-				<button type="button" class="btn btn-default form-control" id="update_version" data-can-update="true" disabled>update file <tt data-versionfile>VERSION</tt> in <span data-branch>branch master</span></button>
-			</div>
-		</div>
-		<div class="form-group has-feedback" id="license_group">
-			<label class="col-sm-2 control-label" for="license">license</label>
-			<div class="col-sm-7 nopad">
-				<input type="text" class="form-control" id="license" placeholder="name of a well-known license, eg. GPL-3.0">
-				<span id="license_status" class="glyphicon form-control-feedback" aria-hidden="true"></span>
-				<span id="license_status_text" class="sr-only"></span>
-				<p>Please make sure your choice is applicable to all branches.
-				If you have copied third-party code or if you are using libraries,
-				make sure your choice is
-				<a href="https://en.wikipedia.org/wiki/License_compatibility#Compatibility_of_FOSS_licenses">compatible</a>
-				with their license(s) as well!
-				You may otherwise be liable for copyright infringement.</p>
-			</div>
-			<div class="col-sm-3 nopad">
-				<button type="button" class="btn btn-default form-control" name="edit_license" disabled>edit file <tt>LICENSE</tt> in git repo</button>
-			</div>
-		</div>
-	</form>
 
 	<p style="height:3ex"></p>
 	<div class="row">

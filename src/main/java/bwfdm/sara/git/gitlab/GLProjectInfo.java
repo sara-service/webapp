@@ -49,6 +49,6 @@ class GLProjectInfo implements GLDataObject<ProjectInfo> {
 
 	@Override
 	public ProjectInfo toDataObject() {
-		return new ProjectInfo(path, title, description);
+		return new ProjectInfo(path, title, description, master);
 	}
 }

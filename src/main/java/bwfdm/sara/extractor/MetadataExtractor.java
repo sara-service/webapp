@@ -3,11 +3,20 @@ package bwfdm.sara.extractor;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.mozilla.universalchardet.UniversalDetector;
 
 import bwfdm.sara.extractor.licensee.LicenseeExtractor;
+import bwfdm.sara.git.GitProject;
+import bwfdm.sara.git.ProjectInfo;
+import bwfdm.sara.project.MetadataField;
+import bwfdm.sara.project.Ref;
+import bwfdm.sara.project.Ref.RefType;
 import bwfdm.sara.transfer.RepoFile;
 import bwfdm.sara.transfer.RepoFile.FileType;
 import bwfdm.sara.transfer.TransferRepo;
@@ -19,20 +28,33 @@ public class MetadataExtractor {
 
 	public static final String VERSION_FILE = "VERSION";
 
-	public void initializeInBackground() {
-		new Thread("LicenseeExtractor eager init") {
-			@Override
-			public void run() {
-				// getInstance() does lazy-init so it doesn't slow down startup,
-				// but that slows down the first license detection. thus we
-				// initialize it here.
-				LicenseeExtractor.getInstance();
-			};
-		}.start();
+	private final Map<MetadataField, String> meta = new EnumMap<>(
+			MetadataField.class);
+	private final Map<String, String> versions = new HashMap<>();
+	private final TransferRepo repo;
+	private final GitProject project;
+
+	public MetadataExtractor(final TransferRepo repo, final GitProject project) {
+		this.repo = repo;
+		this.project = project;
 	}
 
-	private String readAsString(final TransferRepo repo, final String ref,
-			final String filename) throws IOException {
+	public Map<MetadataField, String> get(final MetadataField... fields) {
+		final Map<MetadataField, String> res = new EnumMap<>(
+				MetadataField.class);
+		for (final MetadataField f : fields)
+			res.put(f, meta.get(f));
+		return res;
+	}
+
+	public void detectProjectInfo() {
+		final ProjectInfo info = project.getProjectInfo();
+		meta.put(MetadataField.TITLE, info.name);
+		meta.put(MetadataField.DESCRIPTION, info.description);
+	}
+
+	private String readAsString(final String ref, final String filename)
+			throws IOException {
 		final byte[] blob = repo.getBlob(ref, filename);
 		if (blob == null)
 			return null;
@@ -50,19 +72,17 @@ public class MetadataExtractor {
 		return new String(blob, charset);
 	}
 
-	public List<LicenseInfo> detectLicenses(final TransferRepo repo)
-			throws IOException {
+	public List<LicenseInfo> detectLicenses() throws IOException {
 		final List<LicenseInfo> licenses = new ArrayList<>();
 		for (final String ref : repo.getRefs()) {
-			final LicenseFile license = detectLicense(repo, ref);
+			final LicenseFile license = detectLicense(ref);
 			if (license != null)
 				licenses.add(new LicenseInfo(ref, license));
 		}
 		return licenses;
 	}
 
-	private LicenseFile detectLicense(final TransferRepo repo, final String ref)
-			throws IOException {
+	private LicenseFile detectLicense(final String ref) throws IOException {
 		final List<RepoFile> files = repo.getFiles(ref, "");
 		final List<LazyFile> candidates = new ArrayList<LazyFile>(files.size());
 		for (final RepoFile file : files)
@@ -77,7 +97,7 @@ public class MetadataExtractor {
 
 					@Override
 					public String getContent() throws IOException {
-						return readAsString(repo, ref, name);
+						return readAsString(ref, name);
 					}
 				});
 			}
@@ -103,29 +123,61 @@ public class MetadataExtractor {
 			path = lic.getFile();
 			license = lic.getID();
 		}
-	}
 
-	public VersionInfo detectVersion(final TransferRepo repo, final String ref)
-			throws IOException {
-		final String data = readAsString(repo, ref, VERSION_FILE);
-		// note: deliberately returns data == null when file missing!
-		return new VersionInfo(data, VERSION_FILE, true);
-	}
-
-	/** data class for autodetected version info. */
-	public static class VersionInfo {
-		@JsonProperty
-		final String version;
-		@JsonProperty
-		final String path;
-		@JsonProperty
-		final boolean canUpdate;
-
-		VersionInfo(final String version, final String path,
-				final boolean canUpdate) {
-			this.version = version;
-			this.path = path;
-			this.canUpdate = canUpdate;
+		@Override
+		public String toString() {
+			return license;
 		}
+	}
+
+	public Ref detectMasterBranch(final Collection<Ref> refs)
+			throws IOException {
+		final Ref master = detectMaster(refs);
+		meta.put(MetadataField.VERSION_BRANCH, master.path);
+		return master;
+	}
+
+	private Ref detectMaster(final Collection<Ref> refs) throws IOException {
+		// pick the default branch from GitLab if it's in the list
+		final String master = project.getProjectInfo().master;
+		for (final Ref branch : refs)
+			if (branch.type == RefType.BRANCH && branch.name.equals(master))
+				return branch;
+
+		// TODO if exactly 1 branch contains a LICENSE / COPYING file, use that
+
+		// there isn't any obvious candidate, so we'll have to guess. let's just
+		// pick the ref with the newest head commit; this will tend to at least
+		// pick the newest version. prefer branches over tags again.
+		Ref best = refs.iterator().next();
+		long bestDate = Long.MIN_VALUE;
+		for (final Ref ref : refs) {
+			final long date = repo.getCommitDate(ref.path);
+			if ((best.type == RefType.TAG && ref.type == RefType.BRANCH)
+					|| (date > bestDate)) {
+				best = ref;
+				bestDate = date;
+			}
+		}
+		return best;
+	}
+
+	public void detectVersion() throws IOException {
+		for (final String ref : repo.getRefs()) {
+			String data = readAsString(ref, VERSION_FILE);
+			if (data == null)
+				data = "1.0"; // probably not a terrible guess
+			versions.put(ref, data);
+		}
+	}
+
+	public String setVersionFromBranch(final Ref ref) {
+		final String version = versions.get(ref.path);
+		meta.put(MetadataField.VERSION, version);
+		return version;
+	}
+
+	public void updateVersion(final Ref ref, final String version) {
+		versions.put(ref.path, version);
 	}
 }
