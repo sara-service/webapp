@@ -71,6 +71,10 @@ body {
 	padding: 0px .25em;
 }
 
+.smallpad {
+	padding: .25em;
+}
+
 .hfill {
 	width: 100%;
 }

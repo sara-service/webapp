@@ -14,9 +14,12 @@ function addProjectButton(repo, project) {
 function initPage(info) {
 	API.get("load list of projects", "/api/project-list", {},
 		function(list) {
-			$.each(list, function(_, project) {
-				addProjectButton(info.repo, project);
-			});
+			if (list.length === 0)
+				$("#noprojects").removeAttr("style")
+			else
+				$.each(list, function(_, project) {
+					addProjectButton(info.repo, project);
+				});
 			$("#loading").remove();	
 		});
 }
