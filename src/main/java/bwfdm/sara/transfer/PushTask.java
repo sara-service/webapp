@@ -47,6 +47,7 @@ public class PushTask extends Task {
 	protected void cleanup() {
 		if (project == null || !project.isEmpty())
 			return; // never remove projects that we didn't create!
+		// TODO SARA user should not need this permission on the archive
 		project.deleteProject();
 		project = null;
 	}

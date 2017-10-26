@@ -82,7 +82,11 @@ public class GitLabArchive implements ArchiveRepo {
 		args.put("path", "p" + id);
 		// FIXME filter name:
 		// "Name can contain only letters, digits, emojis, '_', '.', dash, space."
-		args.put("name", meta.get(MetadataField.TITLE).value + " _" + id + "_");
+		// it's probably ok if we don't support the emojis...
+		// FIXME check whether there is a length limit!
+		final String name = meta.get(MetadataField.TITLE).value + " "
+				+ meta.get(MetadataField.VERSION).value;
+		args.put("name", name + " _" + id + "_");
 		args.put("description", meta.get(MetadataField.DESCRIPTION).value);
 		for (final String feature : UNUSED_FEATURES)
 			args.put(feature, "false");
