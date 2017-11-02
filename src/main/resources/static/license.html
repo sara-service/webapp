@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="icon" href="lib/icon.png" type="image/png"/>
+	<link rel="shortcut icon" href="lib/icon.png" type="image/png"/>
+	<link rel="stylesheet" href="lib/bootstrap.min.css" />
+	<link rel="stylesheet" href="lib/sara.css" />
+	<script src="lib/jquery.min.js"></script>
+	<script src="lib/common.js"></script>
+	<script src="license.js"></script>
+	<title>SARA</title>
+</head>
+<body><div class="fluid-container">
+	<div class="row">
+		<div class="col-sm-9 col-xs-12">
+			<img src="lib/header.svg" class="logo-header" />
+		</div>
+		<div class="col-sm-3 col-xs-12">
+			<a id="ir_link">
+				<img class="logo-header-right" />
+			</a>
+		</div>
+	</div>
+
+	<div class="row">
+		<div class="col-xs-12 action-header">
+			<h1>What can others do with your Software?</h1>
+		</div>
+		<p class="col-xs-12">Blah blah blah you need a license.</p>
+		<p class="col-xs-12">Blah blah blah you want an open-source license.</p>
+		<p class="col-xs-12">Blah blah blah if you need help, <a href="https://choosealicense.com/">choosealicense.com</a>.</p>
+	</div>
+	<p style="height:3ex"></p>
+	<form class="form" id="license" style="display:none">
+		<div class="form-group">
+			<label class="form-label" id="none_existing" style="display:none">No license detected!</label>
+			<label class="form-label" id="single_existing" style="display:none">Detected license: <a id="single_detected">GNU GPL 3.0</a></label>
+			<label class="form-label" id="multi_existing" style="display:none">Multiple licenses detected: <span id="multi_detected"></span></label>
+		</div>
+		<div class="form-group" id="declare_group" style="display:none">
+			<label for="declare" class="form-label">License to declare in publication / archive</label>
+			<select class="form-control" id="declare">
+				<option id="declare_choose" disabled selected>choose a license...</option>
+				<option id="declare_keep" value="keep">keep existing license</option>
+				<option id="declare_loading" disabled>... loading...</option>
+			</select>
+			<p style="height:0ex"></p>
+			<div class="text-right"><a class="btn btn-default disabled" id="info" target="_blank">more info</a></div>
+		</div>
+		<div class="form-group">
+			<a href="/licenses.html" class="btn btn-default pull-left">edit license separately for each branch</a>
+		</div>
+
+		<div class="form-group text-right" id="confirm_group">
+			<p>Please make sure your choice is
+				<a href="https://en.wikipedia.org/wiki/License_compatibility#Compatibility_of_FOSS_licenses">compatible</a>
+				with any existing licenses you are using,<br>
+				particularly if you have copied third-party code or if you are using libraries!<br>
+				You may otherwise be liable for copyright infringement.</p>
+			<a class="btn btn-default btn-danger" id="confirm_single" style="display:none">confirm choice of license</a>
+			<a class="btn btn-default btn-danger" id="confirm_missing" style="display:none">choose this license for all branches</a>
+			<a class="btn btn-default btn-default" id="confirm_multi" style="display:none">confirm choice of license for each branch</a>
+			<a class="btn btn-default btn-default" id="confirm_edit" href="/licenses.html" style="display:none">choose a license for each branch without a license</a>
+		</div>
+	</form>
+	<div id="loading" class="loading"><span class="sr-only">loading, please wait...</span></div>
+
+	<p style="height:3ex"></p>
+	<div class="row">
+		<a class="btn btn-default col-sm-3" href="/branches.html">← previous</a>
+	</div>
+	<p style="height:3ex"></p>
+</div></body>
+</html>

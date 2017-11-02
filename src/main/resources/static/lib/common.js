@@ -7,7 +7,7 @@ function template(name) {
 	template.index++;
 	root.attr("id", "form_" + template.index);
 	var form = { root: root };
-	// callect all child elements that have a name attribute
+	// collect all child elements that have a name attribute
 	var elements = $("[name]", root);
 	elements.each(function() {
 		var id = $(this).attr("name");
@@ -93,7 +93,7 @@ APIERR.handle = function(step, status, http, body) {
 var API = {};
 API.ajax = function(step, method, path, data, callback) {
 	$.ajax(path, {
-		method: method, data: data, success: callback,
+		method: method, data: data, success: callback, dataType: 'json',
 		error: function(xhr, status, http) {
 			APIERR.handle(step, status, http, xhr.responseText);
 		}

@@ -31,16 +31,14 @@
 
 	<div class="row">
 		<div class="col-xs-12 action-header">
-			<h1>What can others do with your Software?</h1>
+			<h1>Choose your licenses, one at a time...</h1>
 		</div>
-		<p class="col-xs-12">Blah blah blah you need a license.</p>
-		<p class="col-xs-12">Blah blah blah you want an open-source license.</p>
-		<p class="col-xs-12">Blah blah blah if you need help, <a href="https://choosealicense.com/">choosealicense.com</a>.</p>
+		<p class="col-xs-12">You may want to have a look at <a href="https://choosealicense.com/licenses/">choosealicense.com's excellent list of licenses</a>.</p>
 	</div>
 	<p style="height:3ex"></p>
 	<form class="form-horizontal" id="licenses">
 		<table class="table">
-			<tr><th>branch</th><th>file</th><th>existing license</th><th colspan="2">license to declare in publication / archive</th></tr>
+			<tr><th>branch</th><th>file</th><th>detected license</th><th colspan="2">license to declare in publication / archive</th></tr>
 			<tr>
 				<td style="vertical-align:middle">branch <b>master</b></td>
 				<td style="vertical-align:middle"><tt>LICENSE</tt> <a href="/api/repo/edit?branch=master" class="btn btn-warning btn-sm">edit in git repo</a></td>
@@ -68,7 +66,7 @@
 			</tr>
 			<tr>
 				<td style="vertical-align:middle">branch <b>webapp</b></td>
-				<td style="vertical-align:middle">&#8213;</td>
+				<td style="vertical-align:middle">&#8213; <a href="/api/repo/edit?branch=foo" class="btn btn-default btn-sm">create one in git repo</a></td>
 				<td style="vertical-align:middle"><b>license missing</b></td>
 				<td style="vertical-align:middle">
 					<select class="form-control col-sm-4">
@@ -104,5 +102,5 @@
 		<a class="btn btn-primary col-sm-2 col-sm-offset-7" id="next">next →</a>
 	</div>
 	<p style="height:3ex"></p>
-</body>
+</div></body>
 </html>

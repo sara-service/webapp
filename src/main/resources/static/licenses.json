@@ -1,0 +1,5 @@
+[
+	{ "id": "GPL-3.0", "name": "GNU General Public License v3.0", "url": "https://choosealicense.com/licenses/gpl-3.0/" },
+	{ "id": "LGPL-3.0", "name": "GNU Lesser General Public License v3.0", "url": "https://choosealicense.com/licenses/lgpl-3.0/" },
+	{ "id": "fake", "name": "Fake Testing License", "url": null }
+]
