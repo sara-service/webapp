@@ -3,17 +3,16 @@ package bwfdm.sara.transfer;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.treewalk.TreeWalk;
 import org.springframework.util.FileSystemUtils;
 
+import bwfdm.sara.project.Ref;
 import bwfdm.sara.transfer.RepoFile.FileType;
 
 public class TransferRepo {
@@ -71,11 +70,11 @@ public class TransferRepo {
 					"TransferRepo outdated or uninitialized");
 	}
 
-	private ObjectId findObject(final String ref, final String path)
+	private ObjectId findObject(final Ref ref, final String path)
 			throws IOException {
-		final ObjectId commit = repo.resolve(ref);
+		final ObjectId commit = repo.resolve(ref.path);
 		if (commit == null)
-			throw new NoSuchElementException(ref);
+			throw new NoSuchElementException(ref.path);
 		final RevTree tree = repo.parseCommit(commit).getTree();
 		if (path.isEmpty()) // we want the root
 			return tree;
@@ -88,8 +87,7 @@ public class TransferRepo {
 		return object;
 	}
 
-	public byte[] getBlob(final String ref, final String path)
-			throws IOException {
+	public byte[] getBlob(final Ref ref, final String path) throws IOException {
 		checkInitialized();
 		final ObjectId file = findObject(ref, path);
 		if (file == null)
@@ -101,7 +99,7 @@ public class TransferRepo {
 		return repo.open(ObjectId.fromString(hash)).getBytes();
 	}
 
-	public List<RepoFile> getFiles(final String ref, final String path)
+	public List<RepoFile> getFiles(final Ref ref, final String path)
 			throws IOException {
 		final List<RepoFile> files = new ArrayList<>();
 		final ObjectId dir = findObject(ref, path);
@@ -116,11 +114,6 @@ public class TransferRepo {
 			}
 		}
 		return files;
-	}
-
-	public Collection<String> getRefs() throws IOException {
-		checkInitialized();
-		return repo.getRefDatabase().getRefs(Constants.R_REFS).keySet();
 	}
 
 	public long getCommitDate(final String ref) throws IOException {

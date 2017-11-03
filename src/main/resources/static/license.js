@@ -14,7 +14,7 @@ function addLicense(license, existing) {
 
 function loadLicenses(existing) {
 	$("#declare_group").removeAttr("style");
-	API.get("load supported licenses", "licenses.json", {},
+	API.get("load supported licenses", "/api/licenses/list", {},
 		function(list) {
 			$.each(list, function(_, info) {
 				if (existing == null || info.id != existing.id)
@@ -35,7 +35,7 @@ function updateInfoButton() {
 		$("#info").addClass("disabled");
 		$("#info").removeAttr("href");
 	}
-	// TODO save to backend!
+	// FIXME save to backend!
 }
 
 function loadinigFinished() {
@@ -84,9 +84,10 @@ function initMultiLicense(licenses, missing) {
 		if (index > 0)
 			$("#multi_detected").append(", ");
 		var link;
-		if (lic.url !== null)
+		if (lic.url !== null) {
 			link = $("<a>").attr("href", lic.url);
-		else
+			link.attr("target", "_blank");
+		} else
 			link = $("<b>");
 		$("#multi_detected").append(link.text(lic.name));
 	});
@@ -100,11 +101,17 @@ function initMultiLicense(licenses, missing) {
 	loadinigFinished();
 }
 
-function initPage(info) {
-	// TODO
-	//initNoLicense();
-	initSingleLicense({"id":"GPL-3.0","name":"GNU General Public License v3.0","url":"https://choosealicense.com/licenses/gpl-3.0/"}, false);
-	//initMultiLicense([{"id":"GPL-3.0","name":"GNU General Public License v3.0","url":"https://choosealicense.com/licenses/gpl-3.0/"}, {"id":"LGPL-3.0","name":"GNU Lesser General Public License v3.0","url":null}], false);
+function initLicense(info) {
+	if (info.licenses.length == 0)
+		initNoLicense();
+	else if (info.licenses.length == 1)
+		initSingleLicense(info.licenses[0], info.missing);
+	else
+		initMultiLicense(info.licenses, info.missing);
+	$("#declare_loading").remove();
+	updateInfoButton();
 }
 
-$(initPage);
+function initPage(info) {
+	API.get("autodetect licenses", "/api/licenses", {}, initLicense);
+}

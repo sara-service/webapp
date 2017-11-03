@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -23,6 +24,7 @@ import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.jgit.transport.TagOpt;
 import org.eclipse.jgit.transport.URIish;
 
+import bwfdm.sara.extractor.BranchLicense;
 import bwfdm.sara.extractor.MetadataExtractor;
 import bwfdm.sara.git.GitProject;
 import bwfdm.sara.project.MetadataField;
@@ -158,17 +160,20 @@ public class CloneTask extends Task {
 	}
 
 	private void extractMetaData() throws IOException {
-		beginTask("Extracting metadata", 2);
+		beginTask("Extracting metadata", 3);
 		extractor.detectProjectInfo();
 		update(1);
 
 		final Ref master = extractor.detectMasterBranch(actions.keySet());
-		extractor.detectVersion(); // detect for ALL branches
+		extractor.detectVersion(actions.keySet()); // detect for ALL branches
 		extractor.setVersionFromBranch(master);
 		update(1);
 
 		meta.setAutodetectedMetadata(extractor.get(MetadataField.values()));
 
-		// TODO run license detection and store result
+		final List<BranchLicense> licenses = extractor.detectLicenses(actions
+				.keySet());
+		meta.setAutodetectedLicenses(licenses);
+		update(1);
 	}
 }

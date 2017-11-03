@@ -18,7 +18,7 @@ public class Clone {
 	@GetMapping("cancel")
 	public RedirectView abortClone(final HttpSession session) {
 		Project.getInstance(session).disposeTransferRepo();
-		return new RedirectView("/meta.html"); // FIXME will become branches
+		return new RedirectView("/branches.html");
 	}
 
 	@GetMapping("status")

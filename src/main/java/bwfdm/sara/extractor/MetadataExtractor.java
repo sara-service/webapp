@@ -8,6 +8,7 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.mozilla.universalchardet.UniversalDetector;
 
@@ -21,8 +22,6 @@ import bwfdm.sara.transfer.RepoFile;
 import bwfdm.sara.transfer.RepoFile.FileType;
 import bwfdm.sara.transfer.TransferRepo;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 public class MetadataExtractor {
 	private static final Charset UTF8 = Charset.forName("UTF8");
 
@@ -33,6 +32,7 @@ public class MetadataExtractor {
 	private final Map<String, String> versions = new HashMap<>();
 	private final TransferRepo repo;
 	private final GitProject project;
+	private final ArrayList<BranchLicense> licenses = new ArrayList<BranchLicense>();
 
 	public MetadataExtractor(final TransferRepo repo, final GitProject project) {
 		this.repo = repo;
@@ -53,7 +53,7 @@ public class MetadataExtractor {
 		meta.put(MetadataField.DESCRIPTION, info.description);
 	}
 
-	private String readAsString(final String ref, final String filename)
+	private String readAsString(final Ref ref, final String filename)
 			throws IOException {
 		final byte[] blob = repo.getBlob(ref, filename);
 		if (blob == null)
@@ -72,17 +72,18 @@ public class MetadataExtractor {
 		return new String(blob, charset);
 	}
 
-	public List<LicenseInfo> detectLicenses() throws IOException {
-		final List<LicenseInfo> licenses = new ArrayList<>();
-		for (final String ref : repo.getRefs()) {
+	public List<BranchLicense> detectLicenses(final Collection<Ref> refs)
+			throws IOException {
+		licenses.clear();
+		for (final Ref ref : refs) {
 			final LicenseFile license = detectLicense(ref);
 			if (license != null)
-				licenses.add(new LicenseInfo(ref, license));
+				licenses.add(new BranchLicense(ref.path, license));
 		}
 		return licenses;
 	}
 
-	private LicenseFile detectLicense(final String ref) throws IOException {
+	private LicenseFile detectLicense(final Ref ref) throws IOException {
 		final List<RepoFile> files = repo.getFiles(ref, "");
 		final List<LazyFile> candidates = new ArrayList<LazyFile>(files.size());
 		for (final RepoFile file : files)
@@ -109,25 +110,8 @@ public class MetadataExtractor {
 		return res;
 	}
 
-	/** data class for autodetected license info. */
-	public static class LicenseInfo {
-		@JsonProperty
-		final String ref;
-		@JsonProperty
-		final String path;
-		@JsonProperty
-		final String license;
-
-		LicenseInfo(final String ref, final LicenseFile lic) {
-			this.ref = ref;
-			path = lic.getFile();
-			license = lic.getID();
-		}
-
-		@Override
-		public String toString() {
-			return license;
-		}
+	public List<BranchLicense> getLicenses() {
+		return licenses;
 	}
 
 	public Ref detectMasterBranch(final Collection<Ref> refs)
@@ -162,12 +146,12 @@ public class MetadataExtractor {
 		return best;
 	}
 
-	public void detectVersion() throws IOException {
-		for (final String ref : repo.getRefs()) {
+	public void detectVersion(final Set<Ref> set) throws IOException {
+		for (final Ref ref : set) {
 			String data = readAsString(ref, VERSION_FILE);
 			if (data == null)
 				data = "1.0"; // probably not a terrible guess
-			versions.put(ref, data);
+			versions.put(ref.path, data);
 		}
 	}
 

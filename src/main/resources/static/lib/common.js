@@ -93,7 +93,7 @@ APIERR.handle = function(step, status, http, body) {
 var API = {};
 API.ajax = function(step, method, path, data, callback) {
 	$.ajax(path, {
-		method: method, data: data, success: callback, dataType: 'json',
+		method: method, data: data, success: callback,
 		error: function(xhr, status, http) {
 			APIERR.handle(step, status, http, xhr.responseText);
 		}
