@@ -50,6 +50,9 @@ public class Project {
 
 	public synchronized void setProjectPath(final String projectPath) {
 		this.projectPath = projectPath;
+	}
+
+	public void initializeProject() {
 		project = repo.getGitProject(projectPath);
 		db = new FrontendDatabase(config.getDatabase(), gitRepo, projectPath);
 		// if the project changes, the transferRepo doesn't just become
@@ -112,7 +115,7 @@ public class Project {
 			// changed and the user almost certainly wants to see this change in
 			// the archived data.
 			clone = new CloneTask(transferRepo, metadataExtractor,
-					getGitProject(), db.getRefActions(), db);
+					getGitProject(), db.getRefActions());
 			clone.start();
 		}
 		return clone;
@@ -225,10 +228,9 @@ public class Project {
 	public static Project createInstance(final HttpSession session,
 			final String repoID, final String projectPath, final Config config) {
 		final GitRepo repo = config.getGitRepoFactory(repoID).newGitRepo();
-
 		final Project project = new Project(repoID, repo, config);
 		if (projectPath != null)
-			project.setProjectPath(projectPath);
+			project.projectPath = projectPath;
 		session.setAttribute(PROJECT_ATTR, project);
 		return project;
 	}

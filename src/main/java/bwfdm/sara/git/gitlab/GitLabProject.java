@@ -129,6 +129,7 @@ public class GitLabProject implements GitProject {
 	}
 
 	@Override
+	@Deprecated
 	public List<RepoFile> getFiles(final String ref, final String path) {
 		final UriComponentsBuilder req = rest.uri("/repository/tree")
 				.queryParam("path", path).queryParam("ref", ref);

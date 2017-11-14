@@ -63,16 +63,13 @@ public class Authorization {
 				|| !Project.getInstance(session).getRepoID().equals(gitRepo))
 			Project.createInstance(session, gitRepo, projectPath, config);
 
-		// if the user already has a session, change the project field if
-		// necessary. if the token still works, we're done; no need to bother
-		// the user with authorization again.
 		final Project project = Project.getInstance(session);
 		final GitRepo repo = project.getGitRepo();
-		if (projectPath != null) { // never change towards "no project"
-			final String prevProjectPath = project.getProjectPath();
-			if (prevProjectPath == null || !prevProjectPath.equals(projectPath))
-				project.setProjectPath(projectPath);
-		}
+		// if project selected, remember for later
+		if (projectPath != null)
+			project.setProjectPath(projectPath);
+		// if the user already has a session and the token still works, we're
+		// done; no need to bother the user with authorization again.
 		if (repo.hasWorkingToken())
 			return authFinished(project);
 
@@ -105,6 +102,7 @@ public class Authorization {
 		if (project.getProjectPath() == null)
 			return new RedirectView("/projects.html");
 		// else go to branch selection
+		project.initializeProject();
 		return new RedirectView("/branches.html");
 	}
 }

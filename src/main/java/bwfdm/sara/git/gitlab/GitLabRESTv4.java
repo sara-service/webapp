@@ -67,7 +67,7 @@ public class GitLabRESTv4 implements GitRepo {
 	public GitProject getGitProject(final String project) {
 		// not invalidating the old token here. it should work for any project
 		// (as long as it hasn't expired yet).
-		return new GitLabProject(authRest, root, project, token);
+		return new GitLabProject(authRest, root, project, authRest.getToken());
 	}
 
 	@Override
