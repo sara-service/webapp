@@ -1,7 +1,4 @@
--- database schema. auto-loaded for HSQL; for everything else, run it
--- manually or have the DBA run it.
-
-SET DATABASE SQL SYNTAX PGS TRUE;
+-- database schema. needs to be manually imported into PostgeSQL.
 
 create table frontend_metadata(
 	repo text not null,

@@ -44,12 +44,15 @@
 			<artifactId>spring-boot-starter-jdbc</artifactId>
 			<version>1.5.3.RELEASE</version>
 		</dependency>
-		<!-- embedded database for development. production use must
-		     configure a real, persistent database (eg. PostgreSQL) -->
+		<!-- postgresql jdbc connector for development. for deployment,
+		     the jar MUST be copied into tomcat's /lib directory. it
+		     cannot be built into the WAR because the DataSource in
+		     context.xml is created before the WAR is loaded. see also:
+		     https://stackoverflow.com/questions/6981564 -->
 		<dependency>
-			<groupId>org.hsqldb</groupId>
-			<artifactId>hsqldb</artifactId>
-			<version>2.4.0</version>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<version>42.1.4</version>
 			<scope>runtime</scope>
 		</dependency>
 		<!-- JRuby to run the Licensee Ruby Gem used for license
