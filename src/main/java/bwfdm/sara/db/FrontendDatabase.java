@@ -20,7 +20,7 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import bwfdm.sara.extractor.BranchLicense;
+import bwfdm.sara.extractor.LicenseFile;
 import bwfdm.sara.project.MetadataField;
 import bwfdm.sara.project.MetadataValue;
 import bwfdm.sara.project.Ref;
@@ -243,7 +243,7 @@ public class FrontendDatabase implements MetadataSink {
 	}
 
 	@Override
-	public void setAutodetectedLicenses(final List<BranchLicense> licenses) {
+	public void setAutodetectedLicenses(final Map<Ref, LicenseFile> licenses) {
 		// FIXME store to database instead!
 		System.out.println(licenses);
 	}

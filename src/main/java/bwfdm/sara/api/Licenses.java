@@ -14,8 +14,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.view.RedirectView;
 
 import bwfdm.sara.db.License;
-import bwfdm.sara.extractor.BranchLicense;
+import bwfdm.sara.extractor.LicenseFile;
 import bwfdm.sara.project.Project;
+import bwfdm.sara.project.Ref;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -45,11 +46,11 @@ public class Licenses {
 		@JsonProperty("licenses")
 		public final Set<License> licenses = new HashSet<>();
 		@JsonProperty("branches")
-		public final List<BranchLicense> branches;
+		public final Map<Ref, LicenseFile> branches;
 		@JsonProperty("missing")
 		public final boolean missing;
 
-		LicenseDetectionResult(final List<BranchLicense> branches,
+		LicenseDetectionResult(final Map<Ref, LicenseFile> branches,
 				final List<License> allLicenses) {
 			this.branches = branches;
 
@@ -57,7 +58,7 @@ public class Licenses {
 			for (final License l : allLicenses)
 				temp.put(l.id, l);
 			boolean miss = false;
-			for (final BranchLicense b : branches)
+			for (final LicenseFile b : branches.values())
 				if (b.licenseID != null)
 					licenses.add(temp.get(b.licenseID));
 				else
