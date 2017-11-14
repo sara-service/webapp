@@ -8,11 +8,13 @@ import java.util.Set;
 
 import javax.servlet.http.HttpSession;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.view.RedirectView;
 
+import bwfdm.sara.Config;
 import bwfdm.sara.db.License;
 import bwfdm.sara.extractor.LicenseFile;
 import bwfdm.sara.project.Project;
@@ -23,6 +25,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @RestController
 @RequestMapping("/api/licenses")
 public class Licenses {
+	@Autowired
+	private Config config;
+
 	@GetMapping("check")
 	public RedirectView checkLicense(final HttpSession session) {
 		// FIXME actually do some checking here!!
@@ -34,12 +39,7 @@ public class Licenses {
 	public LicenseDetectionResult getLicenses(final HttpSession session) {
 		final Project project = Project.getInstance(session);
 		return new LicenseDetectionResult(project.getMetadataExtractor()
-				.getLicenses(), project.getFrontendDatabase().getLicenses());
-	}
-
-	@GetMapping("list")
-	public List<License> getLicenseList(final HttpSession session) {
-		return Project.getInstance(session).getFrontendDatabase().getLicenses();
+				.getLicenses(), config.getConfigDatabase().getLicenses());
 	}
 
 	static class LicenseDetectionResult {
@@ -65,5 +65,10 @@ public class Licenses {
 					miss = true;
 			missing = miss;
 		}
+	}
+
+	@GetMapping("list")
+	public List<License> getLicenseList(final HttpSession session) {
+		return config.getConfigDatabase().getLicenses();
 	}
 }

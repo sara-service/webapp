@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.DigestUtils;
 import org.springframework.web.context.ServletContextAware;
 
+import bwfdm.sara.db.ConfigDatabase;
 import bwfdm.sara.git.ArchiveRepo;
 import bwfdm.sara.git.GitRepo;
 import bwfdm.sara.git.GitRepoFactory;
@@ -42,7 +43,6 @@ public class Config implements ServletContextAware {
 
 	private final ObjectMapper mapper;
 	private final Properties props;
-	@Autowired
 	private DataSource db;
 	private ServletContext context;
 	private String webroot;
@@ -50,6 +50,7 @@ public class Config implements ServletContextAware {
 	private List<GitRepoFactory> repoConfig;
 	private List<PublicationRepositoryFactory> irConfig;
 	private ArchiveRepo archiveRepo;
+	private ConfigDatabase configDB;
 
 	private Config(final Properties props) {
 		this.props = props;
@@ -83,7 +84,16 @@ public class Config implements ServletContextAware {
 		this(new Properties());
 		props.load(contextParams);
 		setServletContext(null);
-		// FIXME should initialize the database here!
+	}
+
+	/**
+	 * Sets the {@link DataSource} to use for database access. Can be uses for
+	 * testing but is also used by Spring to inject the configured database.
+	 */
+	@Autowired
+	public void setDataSource(final DataSource db) {
+		this.db = db;
+		configDB = new ConfigDatabase(db);
 	}
 
 	@Override
@@ -103,6 +113,10 @@ public class Config implements ServletContextAware {
 		if (!temproot.isDirectory())
 			throw new RuntimeException("temp directory "
 					+ temproot.getAbsolutePath() + " cannot be created");
+	}
+
+	public ConfigDatabase getConfigDatabase() {
+		return configDB;
 	}
 
 	private String getContextParam(final String name) {

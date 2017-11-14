@@ -2,11 +2,9 @@ package bwfdm.sara.db;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.sql.DataSource;
@@ -34,7 +32,6 @@ import bwfdm.sara.transfer.MetadataSink;
  * but without U) queries.
  */
 public class FrontendDatabase implements MetadataSink {
-	private static final String LICENSES_TABLE = "supported_licenses";
 	private static final String ACTION_TABLE = "frontend_actions";
 	private static final String METADATA_TABLE = "frontend_metadata";
 
@@ -64,26 +61,6 @@ public class FrontendDatabase implements MetadataSink {
 		this.db = new JdbcTemplate(db);
 		transaction = new TransactionTemplate(new DataSourceTransactionManager(
 				db));
-	}
-
-	public List<License> getLicenses() {
-		final List<License> licenses = new ArrayList<>();
-		db.query("select id, display_name, info_url from " + LICENSES_TABLE
-				+ " order by preference asc, id asc", new RowCallbackHandler() {
-			@Override
-			public void processRow(final ResultSet rs) throws SQLException {
-				final String id = rs.getString("id");
-				final String displayName = rs.getString("display_name");
-				final String infoURL = rs.getString("info_url");
-				licenses.add(new License(id, displayName, infoURL));
-			}
-		});
-		return licenses;
-	}
-
-	public String getLicenseText(final String id) {
-		return db.queryForObject("select full_text from " + LICENSES_TABLE
-				+ " where id = ?", String.class, id);
 	}
 
 	/**

@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import bwfdm.sara.Config;
 import bwfdm.sara.api.Authorization;
+import bwfdm.sara.db.ConfigDatabase;
 import bwfdm.sara.db.FrontendDatabase;
 import bwfdm.sara.extractor.MetadataExtractor;
 import bwfdm.sara.git.GitProject;
@@ -46,6 +47,10 @@ public class Project {
 
 	public String getRepoID() {
 		return gitRepo;
+	}
+
+	public ConfigDatabase getConfigDatabase() {
+		return config.getConfigDatabase();
 	}
 
 	public synchronized void setProjectPath(final String projectPath) {

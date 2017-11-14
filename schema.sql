@@ -28,11 +28,14 @@ create table supported_licenses(
 	display_name text not null,
 	info_url text,
 	preference integer default 2147483647, -- lower is earlier in list
+	hidden integer(1) default 0,
 	full_text text not null,
+	-- disallow reserved names used by frontend
+	check (id not in ('keep', 'other', 'multi', '')),
 	primary key (id)
 );
 -- query planner might decide to use this for FrontendDatabase.getLicenses():
--- create index on supported_licenses(preference asc, id asc);
+create index on supported_licenses(preference asc, id asc);
 
 -- FIXME these should be populated from choosealicense.com...
 insert into supported_licenses(id, display_name, preference, info_url, full_text)
