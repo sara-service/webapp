@@ -19,7 +19,6 @@ import bwfdm.sara.git.ArchiveProject;
 import bwfdm.sara.git.ArchiveRepo;
 import bwfdm.sara.git.ArchiveRepo.ProjectExistsException;
 import bwfdm.sara.project.MetadataField;
-import bwfdm.sara.project.MetadataValue;
 import bwfdm.sara.project.Ref;
 import bwfdm.sara.project.RefAction;
 
@@ -29,13 +28,13 @@ public class PushTask extends Task {
 	private final Repository repo;
 	private final Map<Ref, RefAction> actions;
 	private final ArchiveRepo archive;
-	private final Map<MetadataField, MetadataValue> meta;
+	private final Map<MetadataField, String> meta;
 	private final boolean visible;
 	private ArchiveProject project;
 
 	public PushTask(final TransferRepo repo, final Map<Ref, RefAction> actions,
-			final ArchiveRepo archive,
-			final Map<MetadataField, MetadataValue> meta, final boolean visible) {
+			final ArchiveRepo archive, final Map<MetadataField, String> meta,
+			final boolean visible) {
 		this.repo = repo.getRepo();
 		this.actions = actions;
 		this.archive = archive;
@@ -64,7 +63,7 @@ public class PushTask extends Task {
 		final String id = Config.getRandomID();
 		beginTask("Creating project " + id, 1);
 		project = archive.createProject(id, visible, meta);
-		final String version = meta.get(MetadataField.VERSION).value;
+		final String version = meta.get(MetadataField.VERSION);
 
 		beginTask("Preparing repository for upload", 1);
 		final Git git = Git.wrap(repo);

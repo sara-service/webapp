@@ -26,7 +26,6 @@ import org.eclipse.jgit.transport.URIish;
 import bwfdm.sara.extractor.LicenseFile;
 import bwfdm.sara.extractor.MetadataExtractor;
 import bwfdm.sara.git.GitProject;
-import bwfdm.sara.project.MetadataField;
 import bwfdm.sara.project.Ref;
 import bwfdm.sara.project.RefAction;
 
@@ -167,8 +166,6 @@ public class CloneTask extends Task {
 		extractor.detectVersion(actions.keySet()); // detect for ALL branches
 		extractor.setVersionFromBranch(master);
 		update(1);
-
-		meta.setAutodetectedMetadata(extractor.get(MetadataField.values()));
 
 		final Map<Ref, LicenseFile> licenses = extractor.detectLicenses(actions
 				.keySet());

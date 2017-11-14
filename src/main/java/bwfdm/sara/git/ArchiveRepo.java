@@ -4,7 +4,6 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 
 import bwfdm.sara.project.MetadataField;
-import bwfdm.sara.project.MetadataValue;
 
 public interface ArchiveRepo {
 	/**
@@ -24,8 +23,7 @@ public interface ArchiveRepo {
 	 *             if the named project already exists
 	 */
 	public ArchiveProject createProject(String id, boolean visible,
-			Map<MetadataField, MetadataValue> meta)
-			throws ProjectExistsException;
+			Map<MetadataField, String> meta) throws ProjectExistsException;
 
 	/**
 	 * Get a handle to an existing project on the archival GitLab.

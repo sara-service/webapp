@@ -23,6 +23,9 @@ function branchChanged() {
 	$("[data-branch]").text(branch.text());
 
 	var action = branch.data("ref");
+	// only allow updating branches that haven't been pushed back. tags
+	// cannot be written to, and trying to update branches a few commits
+	// back is impossible to do consistently.
 	if (autosave.isValid("version") && action.ref.type == "branch"
 			&& action.firstCommit == "HEAD")
 		autosave.configureUpdateButton("version", function(value, id) {

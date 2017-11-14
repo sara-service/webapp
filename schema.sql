@@ -7,10 +7,8 @@ create table frontend_metadata(
 	repo text not null,
 	project text not null,
 	field text not null,
-	value text,
-	autodetected text,
-	check (field in ('title', 'description', 'version',
-			'versionbranch')),
+	value text not null,
+	check (field in ('title', 'description', 'version', 'versionbranch')),
 	primary key (repo, project, field)
 );
 
@@ -20,8 +18,8 @@ create table frontend_actions(
 	ref text not null,
 	action text not null,
 	start text not null,
-	check (action in ('PUBLISH_FULL', 'PUBLISH_ABBREV',
-			'PUBLISH_LATEST', 'ARCHIVE_PUBLIC', 'ARCHIVE_HIDDEN')),
+	check (action in ('PUBLISH_FULL', 'PUBLISH_ABBREV', 'PUBLISH_LATEST',
+			'ARCHIVE_PUBLIC', 'ARCHIVE_HIDDEN')),
 	primary key (repo, project, ref)
 );
 

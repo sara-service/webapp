@@ -2,6 +2,7 @@ package bwfdm.sara.api;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.EnumMap;
 import java.util.Map;
 
 import javax.servlet.http.HttpSession;
@@ -17,10 +18,11 @@ import org.springframework.web.bind.annotation.RestController;
 import bwfdm.sara.db.FrontendDatabase;
 import bwfdm.sara.extractor.MetadataExtractor;
 import bwfdm.sara.project.MetadataField;
-import bwfdm.sara.project.MetadataValue;
 import bwfdm.sara.project.Project;
 import bwfdm.sara.project.Ref;
 import bwfdm.sara.project.Ref.RefType;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @RestController
 @RequestMapping("/api/meta")
@@ -30,14 +32,27 @@ public class Metadata {
 	@GetMapping("")
 	public Map<MetadataField, MetadataValue> getAllFields(
 			final HttpSession session) {
-		return Project.getInstance(session).getFrontendDatabase().getMetadata();
+		final Project project = Project.getInstance(session);
+		final Map<MetadataField, String> detectedValues = project
+				.getMetadataExtractor().get(MetadataField.values());
+		final Map<MetadataField, String> userValues = project
+				.getFrontendDatabase().getMetadata();
+		// make sure all fields are always present; JavaScript needs this. unset
+		// values map to a {@code (null, null)} {@link MetadataValue}.
+		final EnumMap<MetadataField, MetadataValue> res = new EnumMap<>(
+				MetadataField.class);
+		for (final MetadataField f : MetadataField.values()) {
+			final String user = userValues.get(f);
+			final String auto = detectedValues.get(f);
+			res.put(f, new MetadataValue(user, auto));
+		}
+		return res;
 	}
 
 	@GetMapping("{field}")
 	public MetadataValue getSingleField(
 			@PathVariable("field") final String name, final HttpSession session) {
-		return Project.getInstance(session).getFrontendDatabase()
-				.getMetadata(MetadataField.forDisplayName(name));
+		return getAllFields(session).get(MetadataField.forDisplayName(name));
 	}
 
 	@PutMapping("{field}")
@@ -61,7 +76,6 @@ public class Metadata {
 		// user entered. this way the field doesn't end up empty if detection
 		// fails.
 		final FrontendDatabase db = project.getFrontendDatabase();
-		db.setAutodetectedMetadata(extractor.get(fields));
 		for (final MetadataField field : fields)
 			db.setMetadata(field, null);
 
@@ -112,11 +126,9 @@ public class Metadata {
 		// need to re-run detection because it depends on the ref. this has the
 		// side effect that it crashes if ref is invalid, so it's harder to get
 		// garbage into the versionbranch field...
-		final String version = project.getMetadataExtractor()
-				.setVersionFromBranch(Ref.fromPath(ref));
+		project.getMetadataExtractor().setVersionFromBranch(Ref.fromPath(ref));
 
 		final FrontendDatabase db = project.getFrontendDatabase();
-		db.setAutodetectedMetadata(MetadataField.VERSION, version);
 		db.setMetadata(MetadataField.VERSION_BRANCH, ref);
 		db.setMetadata(MetadataField.VERSION, null);
 
@@ -138,15 +150,45 @@ public class Metadata {
 		// update MetadataExtractor's cached copy. the underlying repo won't
 		// change, so re-running version detection would restore the old value,
 		// which isn't desirable.
+		// note: this only works if detectVersion() is NOT called again here!
+		// detectVersion() would overwrite this value!
 		project.getMetadataExtractor().updateVersion(ref, version);
 
 		final FrontendDatabase db = project.getFrontendDatabase();
 		db.setMetadata(MetadataField.VERSION_BRANCH, ref.path);
 		db.setMetadata(MetadataField.VERSION, null);
-		db.setAutodetectedMetadata(MetadataField.VERSION, version);
-		// FIXME must update in local repo, too!
-		// otherwise the "lazy" button won't detect it again
 
 		return getAllFields(session);
+	}
+
+	public class MetadataValue {
+		/**
+		 * the "effective" value: the one the {@link #user} entered if present,
+		 * else the {@link #autodetected} value.
+		 */
+		@JsonProperty("value")
+		public final String value;
+		/**
+		 * the value the user entered, or <code>null</code> to use the
+		 * {@link #autodetected} value.
+		 */
+		@JsonProperty("user")
+		public final String user;
+		/**
+		 * the autodetected value, or <code>null</code> if nothing was detected.
+		 */
+		@JsonProperty("autodetected")
+		public final String autodetected;
+
+		private MetadataValue(final String user, final String autodetected) {
+			this.user = user;
+			this.autodetected = autodetected;
+			if (user != null)
+				value = user;
+			else if (autodetected != null)
+				value = autodetected;
+			else
+				value = "";
+		}
 	}
 }

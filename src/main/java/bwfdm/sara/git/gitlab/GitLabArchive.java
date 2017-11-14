@@ -11,7 +11,6 @@ import bwfdm.sara.auth.AuthenticatedREST;
 import bwfdm.sara.git.ArchiveProject;
 import bwfdm.sara.git.ArchiveRepo;
 import bwfdm.sara.project.MetadataField;
-import bwfdm.sara.project.MetadataValue;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -76,7 +75,7 @@ public class GitLabArchive implements ArchiveRepo {
 
 	@Override
 	public ArchiveProject createProject(final String id, final boolean visible,
-			final Map<MetadataField, MetadataValue> meta)
+			final Map<MetadataField, String> meta)
 			throws ProjectExistsException {
 		final Map<String, String> args = new HashMap<>();
 		args.put("path", "p" + id);
@@ -84,10 +83,10 @@ public class GitLabArchive implements ArchiveRepo {
 		// "Name can contain only letters, digits, emojis, '_', '.', dash, space."
 		// it's probably ok if we don't support the emojis...
 		// FIXME check whether there is a length limit!
-		final String name = meta.get(MetadataField.TITLE).value + " "
-				+ meta.get(MetadataField.VERSION).value;
+		final String name = meta.get(MetadataField.TITLE) + " "
+				+ meta.get(MetadataField.VERSION);
 		args.put("name", name + " _" + id + "_");
-		args.put("description", meta.get(MetadataField.DESCRIPTION).value);
+		args.put("description", meta.get(MetadataField.DESCRIPTION));
 		for (final String feature : UNUSED_FEATURES)
 			args.put(feature, "false");
 		args.put("visibility", visible ? "public" : "private");
