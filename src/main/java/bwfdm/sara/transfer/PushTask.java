@@ -8,6 +8,7 @@ import java.util.Map;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.PushCommand;
 import org.eclipse.jgit.api.RemoteAddCommand;
+import org.eclipse.jgit.api.RemoteRemoveCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.Repository;
@@ -63,15 +64,18 @@ public class PushTask extends Task {
 		final String id = Config.getRandomID();
 		beginTask("Creating project " + id, 1);
 		project = archive.createProject(id, visible, meta);
-		final String version = meta.get(MetadataField.VERSION);
 
 		beginTask("Preparing repository for upload", 1);
 		final Git git = Git.wrap(repo);
+		// remove remote before recreating it. it may otherwise still contain
+		// stale information from a previous execution.
+		final RemoteRemoveCommand rm = git.remoteRemove();
+		rm.setName(TARGET_REMOTE);
+		rm.call();
 		final RemoteAddCommand add = git.remoteAdd();
 		add.setName(TARGET_REMOTE);
 		add.setUri(new URIish(project.getPushURI()));
 		add.call();
-		// final RemoteConfig remote = add.call();
 		// again not calling endTask() here; push will take a while to connect
 		// and get started
 		update(1);
@@ -80,14 +84,10 @@ public class PushTask extends Task {
 		final ArrayList<RefSpec> refs = new ArrayList<RefSpec>(actions.size());
 		for (final Ref r : actions.keySet()) {
 			final String path = Constants.R_REFS + r.path;
-			// TODO send locally-created @version refs unchanged
-			refs.add(new RefSpec().setSourceDestination(path,
-					path + "@" + version).setForceUpdate(true));
+			// TODO send locally-created refs unchanged
+			refs.add(new RefSpec().setSourceDestination(path, path)
+					.setForceUpdate(true));
 		}
-		// remote.setPushRefSpecs(refs);
-		// final StoredConfig config = git.getRepository().getConfig();
-		// remote.update(config);
-		// config.save();
 		push.setRefSpecs(refs);
 		push.setRemote(TARGET_REMOTE);
 

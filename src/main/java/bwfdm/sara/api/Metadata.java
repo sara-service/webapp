@@ -58,8 +58,10 @@ public class Metadata {
 	@PutMapping("{field}")
 	public void setSingleField(@PathVariable("field") final String name,
 			@RequestParam("value") final String value, final HttpSession session) {
-		Project.getInstance(session).getFrontendDatabase()
-				.setMetadata(MetadataField.forDisplayName(name), value);
+		final Project project = Project.getInstance(session);
+		project.getFrontendDatabase().setMetadata(
+				MetadataField.forDisplayName(name), value);
+		project.invalidateMetadata();
 	}
 
 	private Map<MetadataField, MetadataValue> resetProjectInfo(
@@ -78,6 +80,7 @@ public class Metadata {
 		final FrontendDatabase db = project.getFrontendDatabase();
 		for (final MetadataField field : fields)
 			db.setMetadata(field, null);
+		project.invalidateMetadata();
 
 		return getAllFields(session);
 	}
@@ -131,6 +134,7 @@ public class Metadata {
 		final FrontendDatabase db = project.getFrontendDatabase();
 		db.setMetadata(MetadataField.VERSION_BRANCH, ref);
 		db.setMetadata(MetadataField.VERSION, null);
+		project.invalidateMetadata();
 
 		return getAllFields(session);
 	}
@@ -157,6 +161,7 @@ public class Metadata {
 		final FrontendDatabase db = project.getFrontendDatabase();
 		db.setMetadata(MetadataField.VERSION_BRANCH, ref.path);
 		db.setMetadata(MetadataField.VERSION, null);
+		project.invalidateMetadata(); // due to versionbranch field
 
 		return getAllFields(session);
 	}

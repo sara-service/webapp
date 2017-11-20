@@ -1,5 +1,7 @@
 package bwfdm.sara.project;
 
+import java.util.Map;
+
 import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -172,10 +174,15 @@ public class Project {
 	}
 
 	public void startPush() {
-		if (push == null)
+		if (push == null) {
+			// FIXME this shouldn't have to be done HERE!
+			// api.Push is a much better place...
+			final Map<MetadataField, String> meta = metadataExtractor
+					.get(MetadataField.values());
+			meta.putAll(getFrontendDatabase().getMetadata());
 			push = new PushTask(getTransferRepo(), getFrontendDatabase()
-					.getRefActions(), config.getArchiveRepo(),
-					getFrontendDatabase().getMetadata(), true);
+					.getRefActions(), config.getArchiveRepo(), meta, true);
+		}
 		push.start();
 	}
 
@@ -186,9 +193,21 @@ public class Project {
 	}
 
 	public TaskStatus getPushStatus() {
-		if (push != null || push.isCancelled())
+		if (push != null)
 			return push.getStatus();
 		return null;
+	}
+
+	/**
+	 * Called when publication metadata has changed, ie. after
+	 * {@link FrontendDatabase#setLicense(Ref, String)},
+	 * {@link FrontendDatabase#setMetadata(MetadataField, String)} etc, to mark
+	 * the existing metadata copies as outdated. Needs to be called only once
+	 * for multiple changes.
+	 */
+	public void invalidateMetadata() {
+		cancelPush();
+		// FIXME is there anything else we need to do here?
 	}
 
 	public String getWebURL() {

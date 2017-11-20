@@ -40,6 +40,7 @@ public class Push {
 		// (but definitely not HERE!)
 
 		// we're done now; there is no point for the user to go back
+		// FIXME replace with some info page
 		return Project.getInstance(session).getWebURL();
 	}
 }

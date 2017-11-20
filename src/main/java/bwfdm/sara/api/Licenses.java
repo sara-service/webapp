@@ -234,24 +234,26 @@ public class Licenses {
 	@PostMapping("all")
 	public void setAllLicenses(@RequestParam("license") final String license,
 			final HttpSession session) {
-		final FrontendDatabase db = Project.getInstance(session)
-				.getFrontendDatabase();
+		final Project project = Project.getInstance(session);
+		final FrontendDatabase db = project.getFrontendDatabase();
 
 		final String licenseID = license.equals(KEEP_LICENSE) ? null : license;
 		final Map<Ref, String> licenses = new HashMap<>();
 		for (final Ref ref : db.getRefActions().keySet())
 			licenses.put(ref, licenseID);
 		db.setLicenses(licenses);
+		project.invalidateMetadata();
 	}
 
 	@PostMapping("{ref}")
 	public void setLicense(@PathVariable("ref") final String refPath,
 			@RequestParam("license") final String license,
 			final HttpSession session) {
-		final FrontendDatabase db = Project.getInstance(session)
-				.getFrontendDatabase();
+		final Project project = Project.getInstance(session);
+		final FrontendDatabase db = project.getFrontendDatabase();
 		final String licenseID = license.equals(KEEP_LICENSE) ? null : license;
 		db.setLicense(Ref.fromPath(refPath), licenseID);
+		project.invalidateMetadata();
 	}
 
 	@GetMapping("supported")
