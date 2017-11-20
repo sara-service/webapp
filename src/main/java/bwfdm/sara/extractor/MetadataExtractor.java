@@ -121,7 +121,7 @@ public class MetadataExtractor {
 		for (final Ref ref : set) {
 			String data = repo.readString(ref, VERSION_FILE);
 			if (data == null)
-				data = "1.0"; // probably not a terrible guess
+				data = ""; // force the user to enter something
 			versions.put(ref.path, data);
 		}
 	}
