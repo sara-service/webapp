@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.sql.DataSource;
 
@@ -16,12 +17,10 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import bwfdm.sara.extractor.LicenseFile;
 import bwfdm.sara.project.MetadataField;
 import bwfdm.sara.project.Ref;
 import bwfdm.sara.project.RefAction;
 import bwfdm.sara.project.RefAction.PublicationMethod;
-import bwfdm.sara.transfer.MetadataSink;
 
 /**
  * Database for the web frontend, storing the user's selections as they come in
@@ -31,9 +30,10 @@ import bwfdm.sara.transfer.MetadataSink;
  * (embedded database used for development) because it only uses trivial (CRUD,
  * but without U) queries.
  */
-public class FrontendDatabase implements MetadataSink {
+public class FrontendDatabase {
 	private static final String ACTION_TABLE = "frontend_actions";
 	private static final String METADATA_TABLE = "frontend_metadata";
+	private static final String LICENSES_TABLE = "frontend_licenses";
 
 	private final String gitRepo;
 	private final String project;
@@ -114,10 +114,75 @@ public class FrontendDatabase implements MetadataSink {
 					gitRepo, project, field, value);
 	}
 
-	@Override
-	public void setAutodetectedLicenses(final Map<Ref, LicenseFile> licenses) {
-		// FIXME store to database instead!
-		System.out.println(licenses);
+	/**
+	 * Get per-branch license selection. The returned map is a snapshot; it
+	 * doesn't reflect later changes made by {@link #setLicense(Ref, String)} or
+	 * {@link #setLicenses(Map)}! Also, refs will not have a value unless the
+	 * user chose a different license for that branch (or for all branches).
+	 * 
+	 * @return a {@link Map} giving the user-selected license for each branch /
+	 *         tag
+	 */
+	public Map<Ref, String> getLicenses() {
+		final Map<Ref, String> meta = new HashMap<>();
+		db.query("select ref, license from " + LICENSES_TABLE
+				+ " where repo = ? and project = ?", new RowCallbackHandler() {
+			@Override
+			public void processRow(final ResultSet rs) throws SQLException {
+				final Ref ref = Ref.fromPath(rs.getString("ref"));
+				meta.put(ref, rs.getString("license"));
+			}
+		}, gitRepo, project);
+		return Collections.unmodifiableMap(meta);
+	}
+
+	/**
+	 * Updates the license for a single ref.
+	 * 
+	 * @param ref
+	 *            the ref whose license to set, never {@code null}
+	 * @param value
+	 *            the new license, or {@code null} to keep the existing license
+	 */
+	public void setLicense(final Ref ref, final String value) {
+		transaction.execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(
+					final TransactionStatus status) {
+				updateLicense(ref, value);
+			}
+		});
+	}
+
+	/**
+	 * Updates the license for a set of refs. Only refs that have a
+	 * corresponding key in the set will be modifed.
+	 * 
+	 * @param values
+	 *            a {@link Map} providing a license for each ref. refs
+	 *            explicitly mapped to {@code null} are set to keep the existing
+	 *            license; refs that don't have a corresponding key in the set
+	 *            are left unchanged.
+	 */
+	public void setLicenses(final Map<Ref, String> values) {
+		transaction.execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(
+					final TransactionStatus status) {
+				for (final Entry<Ref, String> e : values.entrySet())
+					updateLicense(e.getKey(), e.getValue());
+			}
+		});
+	}
+
+	private void updateLicense(final Ref ref, final String value) {
+		db.update("delete from " + LICENSES_TABLE
+				+ " where repo = ? and project = ? and ref = ?", gitRepo,
+				project, ref.path);
+		if (value != null)
+			db.update("insert into " + LICENSES_TABLE
+					+ "(repo, project, ref, license) values(?, ?, ?, ?)",
+					gitRepo, project, ref.path, value);
 	}
 
 	/**

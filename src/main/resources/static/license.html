@@ -44,8 +44,7 @@
 			<label for="declare" class="form-label">License to declare in publication / archive</label>
 			<select class="form-control" id="declare">
 				<option id="declare_choose" disabled selected>choose a license...</option>
-				<option id="declare_keep" value="keep">keep existing license</option>
-				<option id="declare_loading" disabled>... loading...</option>
+				<option id="declare_keep" value="keep">keep autodetected license</option>
 			</select>
 			<p style="height:0ex"></p>
 			<div class="text-right"><a class="btn btn-default disabled" id="info" target="_blank">more info</a></div>
@@ -60,10 +59,10 @@
 				with any existing licenses you are using,<br>
 				particularly if you have copied third-party code or if you are using libraries!<br>
 				You may otherwise be liable for copyright infringement.</p>
-			<a class="btn btn-default btn-danger" id="confirm_single" href="/api/licenses/check" style="display:none">confirm choice of license</a>
-			<a class="btn btn-default btn-danger" id="confirm_missing" href="/api/licenses/check" style="display:none">choose this license for all branches</a>
-			<a class="btn btn-default btn-default" id="confirm_multi" href="/licenses.html" style="display:none">confirm choice of license for each branch</a>
-			<a class="btn btn-default btn-default" id="confirm_edit" href="/licenses.html" style="display:none">choose a license for each branch without a license</a>
+			<a class="btn btn-default btn-danger" id="confirm_single" style="display:none">confirm choice of license</a>
+			<a class="btn btn-default btn-danger" id="confirm_missing" style="display:none">choose this license for all branches</a>
+			<a class="btn btn-default btn-primary" id="confirm_multi" href="/licenses.html" style="display:none">confirm choice of license for each branch</a>
+			<a class="btn btn-default btn-primary" id="confirm_edit" href="/licenses.html" style="display:none">choose a license for each branch without a license</a>
 		</div>
 	</form>
 	<div id="loading" class="loading"><span class="sr-only">loading, please wait...</span></div>

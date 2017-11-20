@@ -1,33 +1,43 @@
 "use strict";
 
-function addLicense(license, existing) {
+function addLicense(license, action) {
 	var option = $("<option>").attr("value", license.id);
-	if (existing != null)
-		option.text("replace with " + license.name);
-	else
-		option.text(license.name);
-	console.log(license);
+	option.text(action + " " + license.name);
 	option.data("infourl", license.url);
-	console.log(option.data("infourl"));
 	$("#declare").append(option);
 }
 
-function loadLicenses(existing) {
-	$("#declare_group").removeAttr("style");
-	API.get("load supported licenses", "/api/licenses/list", {},
-		function(list) {
-			$.each(list, function(_, info) {
-				if (existing == null || info.id != existing.id)
-					addLicense(info, existing);
-			});
-			$("#declare_loading").remove();
-			updateInfoButton();
-		});
+function initLicenseList(supported, detected, user) {
+	// create the "keep" entry separately. this automatically deals with
+	// the situation where it isn't in the list (ie. "other" or a hidden
+	// license).
+	if (detected != null) {
+		$("#declare_keep").text("keep " + detected.name);
+		$("#declare_keep").data("infourl", detected.url);
+	} else
+		// "keep" makes no sense whatsoever if there is nothing to keep
+		$("#declare_keep").remove();
+
+	$.each(supported, function(_, info) {
+		if (detected == null)
+			addLicense(info, "choose");
+		else if (detected.id != info.id)
+			addLicense(info, "replace with");
+	});
+
+	// select whatever value the user selected last time. if there is no
+	// "last time", the "choose a license" text will stay selected.
+	if (user != null)
+		$("#declare").val(user);
+
 	$("#declare").on("select change", updateInfoButton);
+	updateInfoButton();
+	$("#declare_group").removeAttr("style");
 }
 
 function updateInfoButton() {
-	var url = $("#declare :selected").data("infourl");
+	var lic = $("#declare :selected");
+	var url = lic.data("infourl");
 	if (url != null) {
 		$("#info").removeClass("disabled");
 		$("#info").attr("href", url);
@@ -35,46 +45,52 @@ function updateInfoButton() {
 		$("#info").addClass("disabled");
 		$("#info").removeAttr("href");
 	}
-	// FIXME save to backend!
 }
 
-function loadinigFinished() {
+function saveAndContinue() {
+	var lic = $("#declare :selected");
+	console.log($("#declare").val(), lic.val(), lic.attr("value"));
+	API.post("save license selection", "/api/licenses/all",
+		{ license: lic.val() }, function() {
+			location.href = "/meta.html";
+		});
+}
+
+function loadingFinished(nextButton) {
+	var next = $("#" + nextButton);
+	next.removeAttr("style");
+	if (typeof next.attr("href") == "undefined")
+		next.click(function() {
+			// we don't care what the user actually selected as long as
+			// we have a useful license, ie. anything but the "choose a
+			// license" placeholder is valid.
+			if ($("#declare").val() == null)
+				$("#declare").focus(); // will the user notice?
+			else
+				saveAndContinue();
+		});
 	$("#license").removeAttr("style");
 	$("#loading").remove();
 }
 
-function initNoLicense() {
+function initNoLicense(supported, user) {
 	$("#none_existing").removeAttr("style");
-	// allow user to choose a license
-	loadLicenses(null);
-	$("#confirm_missing").removeAttr("style");
-	// "keep" makes no sense whatsoever; there is nothing to keep
-	$("#declare_keep").remove();
-
-	loadinigFinished();
+	initLicenseList(supported, null, user);
+	loadingFinished("confirm_missing");
 }
 
-function initSingleLicense(license, missing) {
+function initSingleLicense(supported, detected, user, missing) {
 	$("#single_existing").removeAttr("style");
-	// show declared license in a few places
-	$("#declare_keep").text("keep " + license.name);
-	$("#declare_keep").data("infourl", license.url);
-	$("#single_detected").text(license.name);
-	if (license.url != null)
-		$("#single_detected").attr("href", license.url);
-	updateInfoButton();
-	// remove the stupid "choose" text. the default is simply to keep
-	// whatever license is there.
-	$("#declare_choose").remove();
-	// allow user to choose a license
-	loadLicenses(license);
+	initLicenseList(supported, detected, user);
+	// show declared license in label text
+	$("#single_detected").text(detected.name);
+	if (detected.url != null)
+		$("#single_detected").attr("href", detected.url);
 	// enable the right button
 	if (missing)
-		$("#confirm_missing").removeAttr("style");
+		loadingFinished("confirm_missing");
 	else
-		$("#confirm_single").removeAttr("style");
-
-	loadinigFinished();
+		loadingFinished("confirm_single");
 }
 
 function initMultiLicense(licenses, missing) {
@@ -92,24 +108,29 @@ function initMultiLicense(licenses, missing) {
 		$("#multi_detected").append(link.text(lic.name));
 	});
 	// only allow user to continue if all branches have licenses.
-	// never allow the user to choose a (single) replacement license.
+	// (both buttons just go to the "per-license branch" page; the only
+	// difference is the label. neither actually commits anything to the
+	// server.)
 	if (!missing)
-		$("#confirm_multi").removeAttr("style");
+		loadingFinished("confirm_multi");
 	else
-		$("#confirm_edit").removeAttr("style");
-
-	loadinigFinished();
+		loadingFinished("confirm_edit");
 }
 
 function initLicense(info) {
-	if (info.licenses.length == 0)
-		initNoLicense();
-	else if (info.licenses.length == 1)
-		initSingleLicense(info.licenses[0], info.missing);
-	else
-		initMultiLicense(info.licenses, info.missing);
+	if (info.detected.length > 1) {
+		// multiple licenses detected. user needs to clean up that mess
+		// on the per-branch licenses page (or, even better, in the git
+		// repo).
+		initMultiLicense(info.detected, info.missing);
+	} else {
+		if (info.detected.length == 0)
+			initNoLicense(info.supported, info.user);
+		else
+			initSingleLicense(info.supported, info.detected[0],
+				info.user, info.missing);
+	}	
 	$("#declare_loading").remove();
-	updateInfoButton();
 }
 
 function initPage(info) {

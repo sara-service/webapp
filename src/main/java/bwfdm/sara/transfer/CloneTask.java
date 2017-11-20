@@ -23,7 +23,6 @@ import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.jgit.transport.TagOpt;
 import org.eclipse.jgit.transport.URIish;
 
-import bwfdm.sara.extractor.LicenseFile;
 import bwfdm.sara.extractor.MetadataExtractor;
 import bwfdm.sara.git.GitProject;
 import bwfdm.sara.project.Ref;
@@ -35,17 +34,15 @@ public class CloneTask extends Task {
 	private final Map<Ref, RefAction> actions;
 	private final File root;
 	private final TransferRepo transferRepo;
-	private final MetadataSink meta;
 	private Git git;
 
 	public CloneTask(final TransferRepo transferRepo,
 			final MetadataExtractor extractor, final GitProject project,
-			final Map<Ref, RefAction> actions, final MetadataSink meta) {
+			final Map<Ref, RefAction> actions) {
 		this.transferRepo = transferRepo;
 		this.extractor = extractor;
 		this.project = project;
 		this.actions = actions;
-		this.meta = meta;
 		root = transferRepo.getRoot();
 	}
 
@@ -167,9 +164,7 @@ public class CloneTask extends Task {
 		extractor.setVersionFromBranch(master);
 		update(1);
 
-		final Map<Ref, LicenseFile> licenses = extractor.detectLicenses(actions
-				.keySet());
-		meta.setAutodetectedLicenses(licenses);
+		extractor.detectLicenses(actions.keySet());
 		update(1);
 	}
 }

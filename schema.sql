@@ -9,6 +9,14 @@ create table frontend_metadata(
 	primary key (repo, project, field)
 );
 
+create table frontend_licenses(
+	repo text not null,
+	project text not null,
+	ref text not null,
+	license text not null,
+	primary key (repo, project, ref)
+);
+
 create table frontend_actions(
 	repo text not null,
 	project text not null,
@@ -25,14 +33,21 @@ create table supported_licenses(
 	display_name text not null,
 	info_url text,
 	preference integer default 2147483647, -- lower is earlier in list
-	hidden integer(1) default 0,
+	hidden boolean default false,
 	full_text text not null,
 	-- disallow reserved names used by frontend
 	check (id not in ('keep', 'other', 'multi', '')),
 	primary key (id)
 );
--- query planner might decide to use this for FrontendDatabase.getLicenses():
-create index on supported_licenses(preference asc, id asc);
+-- if the database is smart, it will store the (large) full_text column
+-- out of the primary table. if it isn't, this index should speed up
+-- FrontendDatabase.getLicenses():
+create index on supported_licenses(hidden asc, preference asc, id asc);
+-- only allow the frontend to set known licenses. the frontend_licenses
+-- table is only used during the publication workflow, so this cannot
+-- cuse any long-term consistency problems.
+alter table frontend_licenses add foreign key (license)
+	references supported_licenses(id) on delete cascade;
 
 -- FIXME these should be populated from choosealicense.com...
 insert into supported_licenses(id, display_name, preference, info_url, full_text)

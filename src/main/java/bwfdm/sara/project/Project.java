@@ -120,7 +120,7 @@ public class Project {
 			// changed and the user almost certainly wants to see this change in
 			// the archived data.
 			clone = new CloneTask(transferRepo, metadataExtractor,
-					getGitProject(), db.getRefActions(), db);
+					getGitProject(), db.getRefActions());
 			clone.start();
 		}
 		return clone;
