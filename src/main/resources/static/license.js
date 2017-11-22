@@ -26,9 +26,12 @@ function initLicenseList(supported, detected, user) {
 	});
 
 	// select whatever value the user selected last time. if there is no
-	// "last time", the "choose a license" text will stay selected.
+	// "last time", or if the user has selected different licenses per
+	// branch, keep the "choose a license" text selected.
 	if (user != null)
 		$("#declare").val(user);
+	else
+		$("#declare_choose").prop("selected", true);
 
 	$("#declare").on("select change", updateInfoButton);
 	updateInfoButton();
@@ -73,21 +76,22 @@ function loadingFinished(nextButton) {
 	$("#loading").remove();
 }
 
-function initNoLicense(supported, user) {
-	$("#none_existing").removeAttr("style");
-	initLicenseList(supported, null, user);
-	loadingFinished("confirm_missing");
-}
+function initSingleLicense(info) {
+	var detected = info.detected.length > 0 ? info.detected[0] : null;
+	initLicenseList(info.supported, detected, info.user);
 
-function initSingleLicense(supported, detected, user, missing) {
-	$("#single_existing").removeAttr("style");
-	initLicenseList(supported, detected, user);
-	// show declared license in label text
-	$("#single_detected").text(detected.name);
-	if (detected.url != null)
-		$("#single_detected").attr("href", detected.url);
+	if (detected != null) {
+		// show label naming the detected license
+		$("#single_existing").removeAttr("style");
+		$("#single_detected").text(detected.name);
+		if (detected.url != null)
+			$("#single_detected").attr("href", detected.url);
+	} else
+		// show "missing license" label
+		$("#none_existing").removeAttr("style");
+
 	// enable the right button
-	if (missing)
+	if (info.missing)
 		loadingFinished("confirm_missing");
 	else
 		loadingFinished("confirm_single");
@@ -123,13 +127,8 @@ function initLicense(info) {
 		// on the per-branch licenses page (or, even better, in the git
 		// repo).
 		initMultiLicense(info.detected, info.missing);
-	} else {
-		if (info.detected.length == 0)
-			initNoLicense(info.supported, info.user);
-		else
-			initSingleLicense(info.supported, info.detected[0],
-				info.user, info.missing);
-	}	
+	} else
+		initSingleLicense(info);
 	$("#declare_loading").remove();
 }
 
