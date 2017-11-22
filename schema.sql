@@ -71,3 +71,25 @@ insert into fe_supported_licenses(id, display_name, preference, info_url, full_t
 insert into fe_supported_licenses(id, display_name, preference, info_url, full_text)
 	values('Unlicense', 'The Unlicense', 7000,
 		'https://choosealicense.com/licenses/unlicense/', 'Actually Longer Than MIT?!');
+
+create table fe_gitrepos(
+	id text not null,
+	display_name text not null,
+	adapter text not null,
+	primary key (id)
+);
+create table fe_gitrepo_params(
+	id text not null references fe_gitrepos(id) on delete cascade,
+	param text not null,
+	value text,
+	primary key (id, param)
+);
+
+insert into fe_gitrepos(id, display_name, adapter)
+	values('arbeits-gitlab', 'Arbeits-GitLab (SARA Development)', 'GitLabRESTv4');
+insert into fe_gitrepo_params(id, param, value)
+	values('arbeits-gitlab', 'url', 'https://arbeits-gitlab.unikn.netfuture.ch');
+insert into fe_gitrepo_params(id, param, value)
+	values('arbeits-gitlab', 'oauthID', 'd6f80baadb28e3d9d20b79f6a27c0747f6692a67321375e40be1a1b0fd8bb430');
+insert into fe_gitrepo_params(id, param, value)
+	values('arbeits-gitlab', 'oauthSecret', '6df3596f15aaa0b4e1ecd4297c697e42632b2cab4c4224bbdd6a34b9ed0674f1');

@@ -251,7 +251,7 @@ public class Project {
 	 */
 	public static Project createInstance(final HttpSession session,
 			final String repoID, final String projectPath, final Config config) {
-		final GitRepo repo = config.getGitRepoFactory(repoID).newGitRepo();
+		final GitRepo repo = config.getConfigDatabase().newGitRepo(repoID);
 		final Project project = new Project(repoID, repo, config);
 		if (projectPath != null)
 			project.projectPath = projectPath;

@@ -3,12 +3,18 @@ package bwfdm.sara.db;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.sql.DataSource;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowCallbackHandler;
+import org.springframework.jdbc.core.RowMapper;
+
+import bwfdm.sara.git.GitRepo;
+import bwfdm.sara.git.GitRepoFactory;
 
 /**
  * Database containing config stuff for the web frontend. Effectively read-only.
@@ -19,6 +25,20 @@ import org.springframework.jdbc.core.RowCallbackHandler;
  */
 public class ConfigDatabase {
 	private static final String LICENSES_TABLE = "fe_supported_licenses";
+	private static final String GITREPOS_TABLE = "fe_gitrepos";
+	private static final String GITREPO_PARAM_TABLE = "fe_gitrepo_params";
+
+	// the kind of name you only get if you use Spring:
+	private static final RowMapper<GitRepoFactory> GIT_REPO_FACTORY_MAPPER = new RowMapper<GitRepoFactory>() {
+		@Override
+		public GitRepoFactory mapRow(final ResultSet rs, final int rowNum)
+				throws SQLException {
+			final String id = rs.getString("id");
+			final String displayName = rs.getString("display_name");
+			final String adapter = rs.getString("adapter");
+			return new GitRepoFactory(id, displayName, adapter);
+		}
+	};
 
 	private final JdbcTemplate db;
 
@@ -56,5 +76,31 @@ public class ConfigDatabase {
 	public String getLicenseText(final String id) {
 		return db.queryForObject("select full_text from " + LICENSES_TABLE
 				+ " where id = ?", String.class, id);
+	}
+
+	/** @return a list of all supported git repos */
+	public List<GitRepoFactory> getGitRepos() {
+		return db.query("select id, display_name, adapter from "
+				+ GITREPOS_TABLE, GIT_REPO_FACTORY_MAPPER);
+	}
+
+	/**
+	 * @param id
+	 *            git repo name used in the {@value GITLABS_TABLE} table
+	 * @return a new instance of the named {@link GitRepo}
+	 */
+	public GitRepo newGitRepo(final String id) {
+		final GitRepoFactory factory = db.queryForObject(
+				"select id, display_name, adapter from " + GITREPOS_TABLE
+						+ " where id = ?", GIT_REPO_FACTORY_MAPPER, id);
+		final Map<String, String> args = new HashMap<>();
+		db.query("select param, value from " + GITREPO_PARAM_TABLE
+				+ " where id = ?", new RowCallbackHandler() {
+			@Override
+			public void processRow(final ResultSet rs) throws SQLException {
+				args.put(rs.getString("param"), rs.getString("value"));
+			}
+		}, id);
+		return factory.newGitRepo(args);
 	}
 }

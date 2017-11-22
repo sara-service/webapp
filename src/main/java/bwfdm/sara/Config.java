@@ -34,7 +34,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class Config implements ServletContextAware {
 	private static final String WEBROOT_ATTR = "sara.webroot";
 	private static final String TEMPDIR_ATTR = "temp.dir";
-	private static final String REPOCONFIG_ATTR = "repos.config";
 	private static final String IRCONFIG_ATTR = "publish.config";
 	private static final String ARCHIVE_CONFIG_ATTR = "archive.config";
 
@@ -47,7 +46,6 @@ public class Config implements ServletContextAware {
 	private ServletContext context;
 	private String webroot;
 	private File temproot;
-	private List<GitRepoFactory> repoConfig;
 	private List<PublicationRepositoryFactory> irConfig;
 	private ArchiveRepo archiveRepo;
 	private ConfigDatabase configDB;
@@ -100,9 +98,6 @@ public class Config implements ServletContextAware {
 	public void setServletContext(final ServletContext servletContext) {
 		context = servletContext;
 		webroot = getContextParam(WEBROOT_ATTR);
-		repoConfig = readRepoConfig(REPOCONFIG_ATTR,
-				new TypeReference<List<GitRepoFactory>>() {
-				});
 		irConfig = readRepoConfig(IRCONFIG_ATTR,
 				new TypeReference<List<PublicationRepositoryFactory>>() {
 				});
@@ -182,18 +177,6 @@ public class Config implements ServletContextAware {
 
 	public String getWebRoot() {
 		return webroot;
-	}
-
-	/**
-	 * @param id
-	 *            repo name used in {@code gitlabs.json}
-	 * @return the {@link GitRepoFactory} for the name {@link GitRepo}
-	 */
-	public GitRepoFactory getGitRepoFactory(final String id) {
-		for (final GitRepoFactory r : repoConfig)
-			if (r.getID().equals(id))
-				return r;
-		throw new NoSuchElementException("no git repo named " + id);
 	}
 
 	/**
