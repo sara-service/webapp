@@ -18,7 +18,7 @@ import org.springframework.jdbc.core.RowCallbackHandler;
  * but without U) queries.
  */
 public class ConfigDatabase {
-	private static final String LICENSES_TABLE = "supported_licenses";
+	private static final String LICENSES_TABLE = "fe_supported_licenses";
 
 	private final JdbcTemplate db;
 

@@ -31,9 +31,9 @@ import bwfdm.sara.project.RefAction.PublicationMethod;
  * but without U) queries.
  */
 public class FrontendDatabase {
-	private static final String ACTION_TABLE = "frontend_actions";
-	private static final String METADATA_TABLE = "frontend_metadata";
-	private static final String LICENSES_TABLE = "frontend_licenses";
+	private static final String ACTION_TABLE = "fe_temp_actions";
+	private static final String METADATA_TABLE = "fe_temp_metadata";
+	private static final String LICENSES_TABLE = "fe_temp_licenses";
 
 	private final String gitRepo;
 	private final String project;
