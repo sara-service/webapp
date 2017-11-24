@@ -1,5 +1,8 @@
 package bwfdm.sara.git;
 
+import java.io.ByteArrayInputStream;
+import java.nio.charset.Charset;
+
 import org.eclipse.jgit.api.TransportConfigCallback;
 import org.eclipse.jgit.transport.JschConfigSessionFactory;
 import org.eclipse.jgit.transport.OpenSshConfig.Host;
@@ -13,20 +16,27 @@ import com.jcraft.jsch.Session;
 
 public class SSHKeySessionFactory extends JschConfigSessionFactory implements
 		TransportConfigCallback {
-	private final String keyFile;
+	private static final Charset UTF8 = Charset.forName("UTF-8");
+
+	private final String privateKey, publicKey;
 	private final String knownHosts;
 
 	/**
-	 * @param keyFile
-	 *            full path to the private key file (usually called
+	 * @param privateKey
+	 *            full contents of the private key file (usually called
 	 *            {@code id_rsa} or {@code id_ecdsa})
+	 * @param publicKey
+	 *            full contents of the public key file (usually called
+	 *            {@code id_rsa.pub} or {@code id_ecdsa.pub})
 	 * @param knownHosts
-	 *            full path to the known-hosts file (almost universally called
-	 *            {@code known_hosts})
+	 *            full contents of the known-hosts file (almost universally
+	 *            called {@code known_hosts})
 	 */
-	public SSHKeySessionFactory(final String keyFile, final String knownHosts) {
+	public SSHKeySessionFactory(final String privateKey,
+			final String publicKey, final String knownHosts) {
+		this.privateKey = privateKey;
+		this.publicKey = publicKey;
 		this.knownHosts = knownHosts;
-		this.keyFile = keyFile;
 	}
 
 	@Override
@@ -37,8 +47,9 @@ public class SSHKeySessionFactory extends JschConfigSessionFactory implements
 	@Override
 	protected JSch createDefaultJSch(final FS fs) throws JSchException {
 		final JSch jsch = super.createDefaultJSch(fs);
-		jsch.addIdentity(keyFile);
-		jsch.setKnownHosts(knownHosts);
+		jsch.addIdentity("default", privateKey.getBytes(UTF8),
+				publicKey.getBytes(UTF8), null);
+		jsch.setKnownHosts(new ByteArrayInputStream(knownHosts.getBytes(UTF8)));
 		return jsch;
 	}
 

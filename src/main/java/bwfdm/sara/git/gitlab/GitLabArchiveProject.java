@@ -10,19 +10,20 @@ import bwfdm.sara.utils.UrlEncode;
 public class GitLabArchiveProject implements ArchiveProject {
 	private final RESTHelper rest;
 	private final GLProjectInfo project;
-	private final String keyFile;
+	private final String privateKey, publicKey, knownHosts;
 	private final boolean isEmpty;
-	private final String knownHosts;
 
 	public GitLabArchiveProject(final AuthenticatedREST authRest,
-			final GLProjectInfo project, final String keyFile,
-			final String knownHosts, final boolean isEmpty) {
+			final GLProjectInfo project, final String privateKey,
+			final String publicKey, final String knownHosts,
+			final boolean isEmpty) {
+		this.privateKey = privateKey;
+		this.publicKey = publicKey;
 		this.knownHosts = knownHosts;
 		this.isEmpty = isEmpty;
 		rest = new RESTHelper(authRest, "/projects/"
 				+ UrlEncode.encodePathSegment(project.path));
 		this.project = project;
-		this.keyFile = keyFile;
 	}
 
 	@Override
@@ -49,8 +50,8 @@ public class GitLabArchiveProject implements ArchiveProject {
 
 	@Override
 	public void setCredentials(final TransportCommand<?, ?> tx) {
-		tx.setTransportConfigCallback(new SSHKeySessionFactory(keyFile,
-				knownHosts));
+		tx.setTransportConfigCallback(new SSHKeySessionFactory(privateKey,
+				publicKey, knownHosts));
 	}
 
 	@Override

@@ -16,7 +16,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class GitLabArchive implements ArchiveRepo {
+public class GitLabArchiveRESTv4 implements ArchiveRepo {
 	/**
 	 * URL prefix for accessing the API. also defines which API version will be
 	 * used.
@@ -38,10 +38,8 @@ public class GitLabArchive implements ArchiveRepo {
 
 	private final RESTHelper rest;
 	private final AuthenticatedREST authRest;
-	private final String projectNamespace;
-	private final String sshKeyFile;
-	private final String darkNamespace;
-	private final String knownHostsFile;
+	private final String projectNamespace, darkNamespace, tempNamespace;
+	private final String sshPrivateKey, sshPublicKey, knownHostsFile;
 
 	/**
 	 * @param root
@@ -55,21 +53,26 @@ public class GitLabArchive implements ArchiveRepo {
 	 *            {@code .pub} appended
 	 */
 	@JsonCreator
-	public GitLabArchive(@JsonProperty("url") final String root,
+	public GitLabArchiveRESTv4(@JsonProperty("url") final String root,
 			@JsonProperty("token") final String apiToken,
-			@JsonProperty("namespace") final String projectNamespace,
+			@JsonProperty("temp-namespace") final String tempNamespace,
+			@JsonProperty("main-namespace") final String projectNamespace,
 			@JsonProperty("dark-namespace") final String darkNamespace,
-			@JsonProperty("key") final String sshKeyFile,
+			@JsonProperty("private-key") final String sshPrivateKey,
+			@JsonProperty("public-key") final String sshPublicKey,
 			@JsonProperty("known-hosts") final String knownHostsFile) {
 		if (root.endsWith("/"))
 			throw new IllegalArgumentException(
 					"root URL must not end with slash: " + root);
 
-		authRest = new PrivateTokenREST(root + API_PREFIX, apiToken);
 		this.projectNamespace = projectNamespace;
-		this.sshKeyFile = sshKeyFile;
 		this.darkNamespace = darkNamespace;
+		this.tempNamespace = tempNamespace;
+
+		this.sshPrivateKey = sshPrivateKey;
+		this.sshPublicKey = sshPublicKey;
 		this.knownHostsFile = knownHostsFile;
+		authRest = new PrivateTokenREST(root + API_PREFIX, apiToken);
 		rest = new RESTHelper(authRest, "");
 	}
 
@@ -96,8 +99,8 @@ public class GitLabArchive implements ArchiveRepo {
 		final GLProjectInfo project = rest.post(rest.uri("/projects"), args,
 				new ParameterizedTypeReference<GLProjectInfo>() {
 				});
-		return new GitLabArchiveProject(authRest, project, sshKeyFile,
-				knownHostsFile, true);
+		return new GitLabArchiveProject(authRest, project, sshPrivateKey,
+				sshPublicKey, knownHostsFile, true);
 	}
 
 	private int getNamespaceID(final String namespace) {
@@ -124,7 +127,7 @@ public class GitLabArchive implements ArchiveRepo {
 	public ArchiveProject getProject(final String id)
 			throws NoSuchElementException {
 		return new GitLabArchiveProject(authRest, getProjectInfo(id),
-				sshKeyFile, knownHostsFile, false);
+				sshPrivateKey, sshPublicKey, knownHostsFile, false);
 	}
 
 	private GLProjectInfo getProjectInfo(final String id) {

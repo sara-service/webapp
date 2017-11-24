@@ -177,11 +177,13 @@ public class Project {
 		if (push == null) {
 			// FIXME this shouldn't have to be done HERE!
 			// api.Push is a much better place...
+			final String archiveID = "default"; // FIXME should be dynamic
 			final Map<MetadataField, String> meta = metadataExtractor
 					.get(MetadataField.values());
 			meta.putAll(getFrontendDatabase().getMetadata());
 			push = new PushTask(getTransferRepo(), getFrontendDatabase()
-					.getRefActions(), config.getArchiveRepo(), meta, true);
+					.getRefActions(), config.getConfigDatabase().newGitArchive(
+					archiveID), meta, true);
 		}
 		push.start();
 	}

@@ -20,10 +20,8 @@ import org.springframework.util.DigestUtils;
 import org.springframework.web.context.ServletContextAware;
 
 import bwfdm.sara.db.ConfigDatabase;
-import bwfdm.sara.git.ArchiveRepo;
 import bwfdm.sara.git.GitRepo;
 import bwfdm.sara.git.GitRepoFactory;
-import bwfdm.sara.git.gitlab.GitLabArchive;
 import bwfdm.sara.publication.PublicationRepositoryFactory;
 
 import com.fasterxml.jackson.core.JsonParser.Feature;
@@ -35,7 +33,6 @@ public class Config implements ServletContextAware {
 	private static final String WEBROOT_ATTR = "sara.webroot";
 	private static final String TEMPDIR_ATTR = "temp.dir";
 	private static final String IRCONFIG_ATTR = "publish.config";
-	private static final String ARCHIVE_CONFIG_ATTR = "archive.config";
 
 	private static final SecureRandom RNG = new SecureRandom();
 	private static final Charset UTF8 = Charset.forName("UTF-8");
@@ -47,7 +44,6 @@ public class Config implements ServletContextAware {
 	private String webroot;
 	private File temproot;
 	private List<PublicationRepositoryFactory> irConfig;
-	private ArchiveRepo archiveRepo;
 	private ConfigDatabase configDB;
 
 	private Config(final Properties props) {
@@ -101,7 +97,6 @@ public class Config implements ServletContextAware {
 		irConfig = readRepoConfig(IRCONFIG_ATTR,
 				new TypeReference<List<PublicationRepositoryFactory>>() {
 				});
-		archiveRepo = readArchiveConfig();
 
 		temproot = getTempRoot();
 		temproot.mkdirs(); // failure harmless if already there
@@ -135,17 +130,6 @@ public class Config implements ServletContextAware {
 			return mapper.readValue(new File(repoConfig), type);
 		} catch (final IOException e) {
 			throw new RuntimeException("cannot parse " + repoConfig, e);
-		}
-	}
-
-	private GitLabArchive readArchiveConfig() {
-		final String archiveConfig = getContextParam(ARCHIVE_CONFIG_ATTR);
-		try {
-			return mapper.readValue(new File(archiveConfig),
-					new TypeReference<GitLabArchive>() {
-					});
-		} catch (final IOException e) {
-			throw new RuntimeException("cannot parse " + archiveConfig, e);
 		}
 	}
 
@@ -191,10 +175,6 @@ public class Config implements ServletContextAware {
 				return r;
 		throw new NoSuchElementException("no publication repository named "
 				+ id);
-	}
-
-	public ArchiveRepo getArchiveRepo() {
-		return archiveRepo;
 	}
 
 	/**
