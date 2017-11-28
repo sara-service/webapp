@@ -10,5 +10,5 @@
 -- sudo -u postgres psql sara -f permissions.sql
 
 -- frontend only needs CRUD
-grant select, insert, update, delete on frontend_metadata to sara;
-grant select, insert, update, delete on frontend_actions to sara;
+grant select, insert, update, delete on fe_temp_metadata to test;
+grant select, insert, update, delete on fe_temp_actions to test;
