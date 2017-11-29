@@ -2,3 +2,4 @@
 .project
 .settings/
 target/
+schema-pub.sql
