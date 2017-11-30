@@ -2,15 +2,8 @@ package bwfdm.sara.publication.db;
 
 import java.util.List;
 import javax.sql.DataSource;
-//import java.sql.Connection;
-//import java.sql.Driver;
-//import java.sql.SQLException;
-
-//import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.SimpleDriverDataSource;
 import bwfdm.sara.db.PublicationDatabase;
-import bwfdm.sara.publication.db.RepositoryDAO;
-//import bwfdm.sara.project.Project;
 
 class Test {
     public static void main(String[] args) {
@@ -24,11 +17,30 @@ class Test {
         PublicationDatabase pdb= new PublicationDatabase(ds);
         
         List<RepositoryDAO> myIRs = pdb.getRepositoryList();
+        List<ArchiveDAO> myArchives = pdb.getArchiveList();
+        List<SourceDAO> mySources = pdb.getSourceList();
     	
-        System.out.println( "#IRs " + myIRs.size() );
         
+        System.out.println("===REPOSITORIES===");
+        System.out.println( "#IRs: " + myIRs.size() );
+        
+        // institutional repositories
         for (RepositoryDAO ir : myIRs ) {
         	ir.dump();
+        }
+        
+        // git archives
+        System.out.println("===ARCHIVES===");
+        System.out.println("#Archives:" + myArchives.size());
+        for (ArchiveDAO a : myArchives ) {
+        	a.dump();
+        }
+        
+        // git sources
+        System.out.println("===SOURCES===");
+        System.out.println("#Sources:" + mySources.size());
+        for (SourceDAO s : mySources ) {
+        	s.dump();
         }
 
     } 
