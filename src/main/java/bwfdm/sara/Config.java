@@ -37,12 +37,14 @@ public class Config implements ServletContextAware {
 	private static final SecureRandom RNG = new SecureRandom();
 	private static final Charset UTF8 = Charset.forName("UTF-8");
 
+	@Deprecated
 	private final ObjectMapper mapper;
 	private final Properties props;
 	private DataSource db;
 	private ServletContext context;
 	private String webroot;
 	private File temproot;
+	@Deprecated
 	private List<PublicationRepositoryFactory> irConfig;
 	private ConfigDatabase configDB;
 
@@ -123,6 +125,7 @@ public class Config implements ServletContextAware {
 		return attr;
 	}
 
+	@Deprecated
 	private <T> List<T> readRepoConfig(final String attribute,
 			final TypeReference<List<T>> type) {
 		final String repoConfig = getContextParam(attribute);
@@ -167,7 +170,9 @@ public class Config implements ServletContextAware {
 	 * @param id
 	 *            name of institutional repository in {@code publish.json}
 	 * @return the {@link GitRepoFactory} for the name {@link GitRepo}
+	 * @deprecated config should be read from database instead
 	 */
+	@Deprecated
 	public PublicationRepositoryFactory getPublicationRepositoryFactory(
 			final String id) {
 		for (final PublicationRepositoryFactory r : irConfig)
@@ -185,10 +190,10 @@ public class Config implements ServletContextAware {
 	 */
 	public File getRandomTempDir() {
 		// 80 bits is enough that collisions happen only every 2^40 > 10^12
-		// operations, ie. which in practice means they never happen.
+		// operations, which in practice is the same as "never".
 		final String name = "r" + getRandomID();
 		final File temp = new File(temproot, name);
-		temp.mkdirs(); // ignore error; it may well exist already
+		temp.mkdirs(); // ignore errors; we only need it to exist afterwards
 		if (!temp.isDirectory())
 			throw new RuntimeException("failed to create directory "
 					+ temp.getAbsolutePath());
