@@ -63,4 +63,10 @@ public class PublicationDatabase {
 	public PublicationDatabase(final DataSource db) {
 		this.db = new JdbcTemplate(db);
 	}
+	
+	// ...
+	public List<RepositoryDAO> getRepositoryList() {
+		return db.query("select name, URL, query_API_endpoint, query_user, query_pwd, submit_API_endpoint, submit_user, submit_pwd, contactEMail, version, default_collection from "
+				+ REPOSITORY_TABLE, REPOSITORY_MAPPER);
+	}
 }
