@@ -5,47 +5,17 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 
-import org.postgresql.Driver;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.datasource.DataSourceTransactionManager;
-import org.springframework.jdbc.datasource.SimpleDriverDataSource;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.TransactionCallbackWithoutResult;
-import org.springframework.transaction.support.TransactionTemplate;
-
 import bwfdm.sara.db.ConfigDatabase;
 
-public class UpdateLicenses {
-	private static final Driver DRIVER = new Driver();
+public class UpdateLicenses extends TransacionHelper {
 	private static final String CHOOSEALICENSE_BASE = "https://choosealicense.com/licenses/";
 
-	private final JdbcTemplate db;
-	private final TransactionTemplate tx;
-
-	public UpdateLicenses(final String url, final String user, final String pass)
-			throws ReflectiveOperationException {
-		final SimpleDriverDataSource ds = new SimpleDriverDataSource(DRIVER,
-				url, user, pass);
-		db = new JdbcTemplate(ds);
-		tx = new TransactionTemplate(new DataSourceTransactionManager(ds));
+	public UpdateLicenses(final String url, final String user, final String pass) {
+		super(url, user, pass);
 	}
 
-	public void run() {
-		tx.execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(
-					final TransactionStatus status) {
-				try {
-					execute();
-				} catch (final IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-		});
-	}
-
-	private void execute() throws IOException {
+	@Override
+	public void run() throws IOException {
 		// set foreign-key constraints to deferred. this way we can just upsert
 		// using delete-and-insert, which is (still) less silly than using
 		// merge to do an upsert.
@@ -73,8 +43,7 @@ public class UpdateLicenses {
 		}
 	}
 
-	public static void main(final String... args)
-			throws ReflectiveOperationException {
+	public static void main(final String... args) {
 		if (args.length != 3) {
 			System.err
 					.println("usage: java -cp … "
@@ -83,8 +52,6 @@ public class UpdateLicenses {
 							+ " username password");
 			System.exit(1);
 		}
-
-		final String url = args[0], user = args[1], pass = args[2];
-		new UpdateLicenses(url, user, pass).run();
+		new UpdateLicenses(args[0], args[1], args[2]).executeInTransaction();
 	}
 }
