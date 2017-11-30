@@ -2,15 +2,16 @@ package bwfdm.sara.db;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
+//import java.util.ArrayList;
+//import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.UUID;
+//import java.util.Map;
 
 import javax.sql.DataSource;
 
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowCallbackHandler;
+//import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.jdbc.core.RowMapper;
 
 import bwfdm.sara.publication.db.ArchiveDAO;
@@ -25,7 +26,7 @@ import bwfdm.sara.publication.db.SourceDAO;
  * but without U) queries.
  */
 public class PublicationDatabase {
-	private static final String ITEM_TABLE = "public.item";
+	//private static final String ITEM_TABLE = "public.item";
 	private static final String ARCHIVE_TABLE = "public.archive";
 	private static final String REPOSITORY_TABLE = "public.repository";
 	private static final String SOURCE_TABLE = "public.source";
@@ -33,12 +34,13 @@ public class PublicationDatabase {
 	private static final RowMapper<SourceDAO> SOURCE_MAPPER = new RowMapper<SourceDAO>() {
 		@Override
 		public SourceDAO mapRow(final ResultSet rs, final int rowNum) throws SQLException {
+			final UUID id = (UUID) rs.getObject("uuid");
 			final String name = rs.getString("name");
 			final String URL = rs.getString("URL");
 			final String apie = rs.getString("api_Endpoint");
 			final String s = rs.getString("oauth_secret");
 			
-			return new SourceDAO(name,URL,apie,s);
+			return new SourceDAO(id, name,URL,apie,s);
 		}
 	};
 	
@@ -91,7 +93,7 @@ public class PublicationDatabase {
 	}
 	
 	public List<SourceDAO> getSourceList() {
-		return db.query("select name, URL, api_Endpoint, oauth_secret from " + SOURCE_TABLE, SOURCE_MAPPER);
+		return db.query("select uuid, name, URL, api_Endpoint, oauth_secret from " + SOURCE_TABLE, SOURCE_MAPPER);
 	}
 	
 	public List<ArchiveDAO> getArchiveList() {
