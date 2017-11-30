@@ -32,7 +32,7 @@ create table fe_supported_licenses(
 	id text not null,
 	display_name text not null,
 	info_url text,
-	preference integer default 2147483647, -- lower is earlier in list
+	preference integer not null default 2147483647, -- lower is earlier in list
 	hidden boolean default false,
 	full_text text not null,
 	-- disallow reserved names used by frontend
@@ -45,9 +45,15 @@ create table fe_supported_licenses(
 create index on fe_supported_licenses(hidden asc, preference asc, id asc);
 -- only allow the frontend to set known licenses. the fe_temp_licenses
 -- table is only used during the publication workflow, so this cannot
--- cuse any long-term consistency problems.
-alter table fe_temp_licenses add foreign key (license)
-	references fe_supported_licenses(id) on delete cascade;
+-- cause any long-term consistency problems.
+-- "on delete no action" is required to allow fe_supported_licenses to be
+-- updated with delete + insert without wiping the fe_temp_licenses. it also
+-- means that "delete from fe_supported_licenses where ..." will fail unless
+-- the license is unused – but licenses should never be deleted anyway, only
+-- set as hidden.
+alter table fe_temp_licenses add constraint fe_temp_valid_license
+	foreign key (license) references fe_supported_licenses(id)
+	on delete no action on update cascade deferrable;
 
 -- FIXME these should be populated from choosealicense.com...
 insert into fe_supported_licenses(id, display_name, preference, info_url, full_text)

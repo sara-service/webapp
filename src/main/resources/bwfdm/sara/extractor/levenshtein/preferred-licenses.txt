@@ -1,0 +1,7 @@
+AGPL-3.0
+GPL-3.0
+LGPL-3.0
+MPL-2.0
+Apache-2.0
+MIT
+Unlicense

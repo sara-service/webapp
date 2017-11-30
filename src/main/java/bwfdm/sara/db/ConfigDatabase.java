@@ -26,7 +26,7 @@ import bwfdm.sara.git.GitRepoFactory;
  * but without U) queries.
  */
 public class ConfigDatabase {
-	private static final String LICENSES_TABLE = "fe_supported_licenses";
+	public static final String LICENSES_TABLE = "fe_supported_licenses";
 	private static final String GITREPOS_TABLE = "fe_gitrepos";
 	private static final String GITREPO_PARAM_TABLE = "fe_gitrepo_params";
 	private static final String ARCHIVES_TABLE = "fe_archives";
