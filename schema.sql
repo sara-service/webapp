@@ -1,3 +1,5 @@
+\connect test;
+
 -- database schema. needs to be manually imported into PostgeSQL.
 
 create table fe_temp_metadata(
