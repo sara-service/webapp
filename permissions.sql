@@ -20,4 +20,4 @@ grant select on fe_archive_params to test;
 grant select on public.source to test;
 grant select on public.repository to test;
 grant select on public.archive to test;
-grant select, insert, update to public.item to test;
+grant select, insert, update on public.item to test;
