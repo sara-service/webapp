@@ -27,6 +27,12 @@ public class ItemDAO {
 		submitter_uuid = sRef; repository_uuid = pRef; archive_uuid = aRef; foreign_uuid = fuuid;
 		citation_handle = doi;
 	}
+	
+    public void dump() {
+    	System.out.println("ItemType=" + itemType.toString());
+    	System.out.println("ItemStatus=" + itemStatus.toString());
+    	System.out.println("DateCreated=" + dateCreated.toString());
+    }
 /*	
 	// Item for archival
 	public ItemDAO(ItemType t, ItemStatus s, long crDate, long lmDate, UUID sRef, UUID aRef){ 

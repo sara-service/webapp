@@ -6,6 +6,7 @@ import java.sql.SQLException;
 //import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
+import java.util.Date;
 //import java.util.Map;
 
 import javax.sql.DataSource;
@@ -18,6 +19,10 @@ import bwfdm.sara.publication.db.ArchiveDAO;
 import bwfdm.sara.publication.db.RepositoryDAO;
 import bwfdm.sara.publication.db.SourceDAO;
 
+import bwfdm.sara.publication.db.ItemDAO;
+import bwfdm.sara.publication.db.ItemType;
+import bwfdm.sara.publication.db.ItemStatus;
+
 /**
  * Database containing config stuff for the publication backend.
  * <p>
@@ -26,7 +31,7 @@ import bwfdm.sara.publication.db.SourceDAO;
  * but without U) queries.
  */
 public class PublicationDatabase {
-	//private static final String ITEM_TABLE = "public.item";
+	private static final String ITEM_TABLE = "public.item";
 	private static final String ARCHIVE_TABLE = "public.archive";
 	private static final String REPOSITORY_TABLE = "public.repository";
 	private static final String SOURCE_TABLE = "public.source";
@@ -53,6 +58,24 @@ public class PublicationDatabase {
 			return new ArchiveDAO(name,URL);
 		}
 	};
+	
+	private static final RowMapper<ItemDAO> ITEM_MAPPER = new RowMapper<ItemDAO>() {
+		@Override
+		public ItemDAO mapRow(final ResultSet rs, final int rowNum) throws SQLException {
+			final UUID sRef = (UUID)rs.getObject("submitter_uuid");
+			final UUID aRef = (UUID)rs.getObject("archive_uuid");
+			final UUID rRef = (UUID)rs.getObject("repository_uuid");
+			final String fRef = rs.getString("fuuid");
+			final ItemType t = ItemType.fromString(rs.getString("itemtype"));
+			final ItemStatus s = ItemStatus.fromString(rs.getString("itemstate"));
+			final Date crDate = rs.getTimestamp("date_created");
+			final Date lmDate = rs.getTimestamp("date_last_modified");
+			final String citationHandle = rs.getString("citation_handle");
+			
+			return new ItemDAO(t,s,crDate,lmDate,sRef,rRef,aRef,fRef,citationHandle);
+		}
+	};
+
 	
 	private static final RowMapper<RepositoryDAO> REPOSITORY_MAPPER = new RowMapper<RepositoryDAO>() {
 		@Override
@@ -97,12 +120,16 @@ public class PublicationDatabase {
 	}
 	
 	public List<ArchiveDAO> getArchiveList() {
-		return db.query("select name, URL from " + ARCHIVE_TABLE, ARCHIVE_MAPPER);
+		return db.query("select uuid, name, URL from " + ARCHIVE_TABLE, ARCHIVE_MAPPER);
+	}
+	
+	public List<ItemDAO> getItemList() {
+		return db.query("select uuid, submitter_uuid, archive_uuid, repository_uuid, fuuid, itemtype, itemstate, date_created, date_last_modified, citation_handle from " + ITEM_TABLE, ITEM_MAPPER);
 	}
 	
 	// ...
 	public List<RepositoryDAO> getRepositoryList() {
-		return db.query("select name, URL, query_API_endpoint, query_user, query_pwd, submit_API_endpoint, submit_user, submit_pwd, contactEMail, version, default_collection from "
+		return db.query("select uuid, name, URL, query_API_endpoint, query_user, query_pwd, submit_API_endpoint, submit_user, submit_pwd, contactEMail, version, default_collection from "
 				+ REPOSITORY_TABLE, REPOSITORY_MAPPER);
 	}
 }
