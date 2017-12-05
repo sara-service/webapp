@@ -1,7 +1,5 @@
 #!/bin/bash
 
-cp saradb/create-sara-db.sql schema-pub.sql
-
 if [ -f "udocker.py" ]; then
   echo "UDocker v1.1.1 is downloaded already"
 else
@@ -27,13 +25,12 @@ echo "starting database..."
 
 ./udocker.py \
   run \
-  -v /tmp/sara:/home/postgres \
-  -v $PWD/schema-pub.sql:/home/postgres/schema-pub.sql \
-  -v $PWD/schema.sql:/home/postgres/schema.sql \
+  -v $PWD/saradb:/home/postgres \
+  -v $PWD/schema.sql:/home/postgres/schema-kn.sql \
   -v $PWD/permissions.sql:/home/postgres/permissions.sql \
   -i -t --rm --user postgres \
   c1t4r/sara-server-vre \
-  sh -c '/etc/init.d/postgresql start && /usr/bin/createuser -d -l -R -S test && /usr/bin/createdb -E UTF8 -O test test && psql -d test -f /home/postgres/schema-pub.sql && psql -d test -f /home/postgres/schema.sql && psql -f /home/postgres/permissions.sql && psql -d test && /etc/init.d/postgresql stop'
+  sh -c '/etc/init.d/postgresql start && /usr/bin/createuser -d -l -R -S test && /usr/bin/createdb -E UTF8 -O test test && psql -d test -f /home/postgres/crypto.sql && psql -d test -f /home/postgres/schema.sql && psql -d test -f /home/postgres/config.sql && psql -d test -f /home/postgres/schema-kn.sql && psql -f /home/postgres/permissions.sql && psql -d test && /etc/init.d/postgresql stop'
 
 
 #./udocker.py \
