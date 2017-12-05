@@ -9,7 +9,7 @@ import java.util.Date;
 /* read-only DAO */
 
 public class ItemDAO {
-//	private final UUID uuid;
+	public final UUID uuid;
 	public final UUID submitter_uuid;
 	public final UUID archive_uuid;
 	public final UUID repository_uuid;
@@ -21,7 +21,8 @@ public class ItemDAO {
 	public String citation_handle;
 	
 	// Item for publication
-	public ItemDAO(ItemType t, ItemStatus s, Date crDate, Date lmDate, UUID sRef, UUID pRef, UUID aRef, String fuuid, String doi) {
+	public ItemDAO(UUID id, ItemType t, ItemStatus s, Date crDate, Date lmDate, UUID sRef, UUID pRef, UUID aRef, String fuuid, String doi) {
+		uuid = id;
 		itemType = t; itemStatus = s;
 		dateCreated = crDate; dateLastModified = lmDate;
 		submitter_uuid = sRef; repository_uuid = pRef; archive_uuid = aRef; foreign_uuid = fuuid;
@@ -29,31 +30,12 @@ public class ItemDAO {
 	}
 	
     public void dump() {
+    	System.out.println("UUID=" + uuid.toString());
     	System.out.println("ItemType=" + itemType.toString());
     	System.out.println("ItemStatus=" + itemStatus.toString());
     	System.out.println("DateCreated=" + dateCreated.toString());
     }
-/*	
-	// Item for archival
-	public ItemDAO(ItemType t, ItemStatus s, long crDate, long lmDate, UUID sRef, UUID aRef){ 
-		this(t, s, crDate, lmDate, sRef, null, aRef, null); 
-	}
-	
-	public ItemDAO() {
-		
-	}
-	
-	public ItemDAO(ItemType t) { 
-		this(t, 
-			ItemStatus.created, 
-			System.currentTimeMillis()
-		); 
-	}
-	
-	public ItemDAO() { this(ItemType.archive); };
-*/
-//	public Submitter getSubmitter() { return uuid; }
-//	public Metadata getMetadata() { return uuid; }
+
 	public ItemStatus getStatus() { return itemStatus; }
 	public ItemType getType() { return itemType; }
 

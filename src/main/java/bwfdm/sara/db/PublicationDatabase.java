@@ -52,16 +52,18 @@ public class PublicationDatabase {
 	private static final RowMapper<ArchiveDAO> ARCHIVE_MAPPER = new RowMapper<ArchiveDAO>() {
 		@Override
 		public ArchiveDAO mapRow(final ResultSet rs, final int rowNum) throws SQLException {
+			final UUID id = (UUID) rs.getObject("uuid");
 			final String name = rs.getString("name");
 			final String URL = rs.getString("URL");
 			
-			return new ArchiveDAO(name,URL);
+			return new ArchiveDAO(id,name,URL);
 		}
 	};
 	
 	private static final RowMapper<ItemDAO> ITEM_MAPPER = new RowMapper<ItemDAO>() {
 		@Override
 		public ItemDAO mapRow(final ResultSet rs, final int rowNum) throws SQLException {
+			final UUID id = (UUID) rs.getObject("uuid");
 			final UUID sRef = (UUID)rs.getObject("submitter_uuid");
 			final UUID aRef = (UUID)rs.getObject("archive_uuid");
 			final UUID rRef = (UUID)rs.getObject("repository_uuid");
@@ -72,7 +74,7 @@ public class PublicationDatabase {
 			final Date lmDate = rs.getTimestamp("date_last_modified");
 			final String citationHandle = rs.getString("citation_handle");
 			
-			return new ItemDAO(t,s,crDate,lmDate,sRef,rRef,aRef,fRef,citationHandle);
+			return new ItemDAO(id,t,s,crDate,lmDate,sRef,rRef,aRef,fRef,citationHandle);
 		}
 	};
 
@@ -80,6 +82,7 @@ public class PublicationDatabase {
 	private static final RowMapper<RepositoryDAO> REPOSITORY_MAPPER = new RowMapper<RepositoryDAO>() {
 		@Override
 		public RepositoryDAO mapRow(final ResultSet rs, final int rowNum) throws SQLException {
+			final UUID id = (UUID) rs.getObject("uuid");
 			final String name = rs.getString("name");
 			final String URL = rs.getString("URL");
 			final String query_API_endpoint = rs.getString("query_API_endpoint");
@@ -93,6 +96,7 @@ public class PublicationDatabase {
 		    final String default_collection =rs.getString("default_collection");
 		
 		    return new RepositoryDAO(
+		    	id,
 				name, URL,
 				query_API_endpoint, query_user, query_pwd,
 				submit_API_endpoint, submit_user, submit_pwd,

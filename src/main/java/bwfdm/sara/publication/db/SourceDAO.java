@@ -27,7 +27,7 @@ public class SourceDAO {
     }
     
     public void dump() {
-    	System.out.println("uuid=" + uuid);
+    	System.out.println("UUID=" + uuid);
     	System.out.println("Name=" + name);
     	System.out.println("URL=" + URL);
     }

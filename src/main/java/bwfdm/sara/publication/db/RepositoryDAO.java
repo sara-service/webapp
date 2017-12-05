@@ -1,9 +1,12 @@
 package bwfdm.sara.publication.db;
 
+import java.util.UUID;
+
 /* default read-only DAO, can be used for most SARA DB tables */
 
 public class RepositoryDAO {
 	
+	public final UUID uuid;
 	public final String name;
     public final String URL;
     public final String query_API_endpoint;  // REST query API endpoint
@@ -19,6 +22,7 @@ public class RepositoryDAO {
 	public final String default_collection;         // submit into an default collection.
 
     public RepositoryDAO(
+    		UUID id,
     		String n,
     		String v,
     		String u,
@@ -31,7 +35,7 @@ public class RepositoryDAO {
     		String mailaddr,
     		String defColl
     		) {
-    	name = n; URL = u;
+    	uuid = id; name = n; URL = u;
     	query_API_endpoint = quAPIEP; query_user = quUser; query_pwd = quPwd;
     	submit_API_endpoint = suAPIEP; submit_user = quUser; submit_pwd = quPwd;
     	contactEMail = mailaddr;
@@ -39,6 +43,7 @@ public class RepositoryDAO {
     }
     
     public void dump() {
+    	System.out.println("UUID=" + uuid);
     	System.out.println("Name=" + name);
     	System.out.println("URL=" + URL);
     	System.out.println("contactEMail=" + contactEMail);
