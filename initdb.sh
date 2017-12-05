@@ -7,30 +7,36 @@ else
   chmod u+x udocker.py
 fi
 
+echo -n "check whether running instances exist before we restart the database..."
 if [ "$(./udocker.py ps | grep c1t4r/sara-server-vre)" != "" ]; then
-  echo "kill running instances before you restart database:"
-  echo "./udocker.py ps | awk '/c1t4r.sara-server-vre/{print \$1}' | xargs ./udocker.py rm"
+  echo "YES...killing them..."
   ./udocker.py ps | awk '/c1t4r.sara-server-vre/{print $1}' | xargs ./udocker.py rm
+else
+  echo "NOPE"
 fi
 
-echo "check whether no postgres instances are running:"
-echo "ps aux | grep post[g]res"
+echo -n "check whether no postgres instances are running..."
 if [ "$(ps aux | grep post[g]res)" != "" ]; then
-  echo "kill them:"
+  echo "YES...killing them..."
   echo "ps aux | grep pos[t]gres | awk '{print \$2}' | xargs kill"
   ps aux | grep pos[t]gres | awk '{print $2}' | xargs kill
+else
+  echo "NOPE"
 fi
 
 echo "starting database..."
 
+# TODO mv all sql files into saradb git repo!
 ./udocker.py \
   run \
-  -v $PWD/saradb:/home/postgres \
-  -v $PWD/schema.sql:/home/postgres/schema-kn.sql \
-  -v $PWD/permissions.sql:/home/postgres/permissions.sql \
+  -v $PWD/saradb/crypto.sql:/crypto.sql \
+  -v $PWD/saradb/schema.sql:/schema.sql \
+  -v $PWD/saradb/config.sql:/config.sql \
+  -v $PWD/schema.sql:/schema-kn.sql \
+  -v $PWD/permissions.sql:/permissions.sql \
   -i -t --rm --user postgres \
   c1t4r/sara-server-vre \
-  sh -c '/etc/init.d/postgresql start && /usr/bin/createuser -d -l -R -S test && /usr/bin/createdb -E UTF8 -O test test && psql -d test -f /home/postgres/crypto.sql && psql -d test -f /home/postgres/schema.sql && psql -d test -f /home/postgres/config.sql && psql -d test -f /home/postgres/schema-kn.sql && psql -f /home/postgres/permissions.sql && psql -d test && /etc/init.d/postgresql stop'
+  sh -c '/etc/init.d/postgresql start && createuser -d -l -R -S test && createdb -E UTF8 -O test test && psql -d test -f /crypto.sql && psql -d test -f /schema.sql && psql -d test -f /config.sql && psql -d test -f /schema-kn.sql && psql -f /permissions.sql && psql -d test && /etc/init.d/postgresql stop'
 
 
 #./udocker.py \
