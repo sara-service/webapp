@@ -31,7 +31,9 @@ public class Config implements ServletContextAware {
 
 	private static final String WEBROOT_ATTR = "sara.webroot";
 	private static final String TEMPDIR_ATTR = "temp.dir";
-	private static final String DATASOURCE_PREFIX = "server.context_parameters.spring.datasource.";
+	private static final String CONTEXT_PARAM_PREFIX = "server.context_parameters.";
+	private static final String DATASOURCE_PREFIX = CONTEXT_PARAM_PREFIX
+			+ "spring.datasource.";
 
 	private static final SecureRandom RNG = new SecureRandom();
 	private static final Charset UTF8 = Charset.forName("UTF-8");
@@ -132,7 +134,7 @@ public class Config implements ServletContextAware {
 		else
 			// for testing, just read from the properties file directly.
 			// add prefix so we can use application.properties directly.
-			attr = props.getProperty("server.context_parameters." + name);
+			attr = props.getProperty(CONTEXT_PARAM_PREFIX + name);
 		if (attr == null)
 			throw new ConfigurationException("missing context parameter "
 					+ name);
