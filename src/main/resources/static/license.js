@@ -1,55 +1,5 @@
 "use strict";
 
-function addLicense(license, action) {
-	var option = $("<option>").attr("value", license.id);
-	option.text(action + " " + license.name);
-	option.data("infourl", license.url);
-	$("#declare").append(option);
-}
-
-function initLicenseList(supported, detected, user) {
-	// create the "keep" entry separately. this automatically deals with
-	// the situation where it isn't in the list (ie. "other" or a hidden
-	// license).
-	if (detected != null) {
-		$("#declare_keep").text("keep " + detected.name);
-		$("#declare_keep").data("infourl", detected.url);
-	} else
-		// "keep" makes no sense whatsoever if there is nothing to keep
-		$("#declare_keep").remove();
-
-	$.each(supported, function(_, info) {
-		if (detected == null)
-			addLicense(info, "choose");
-		else if (detected.id != info.id)
-			addLicense(info, "replace with");
-	});
-
-	// select whatever value the user selected last time. if there is no
-	// "last time", or if the user has selected different licenses per
-	// branch, keep the "choose a license" text selected.
-	if (user != null)
-		$("#declare").val(user);
-	else
-		$("#declare_choose").prop("selected", true);
-
-	$("#declare").on("select change", updateInfoButton);
-	updateInfoButton();
-	$("#declare_group").removeAttr("style");
-}
-
-function updateInfoButton() {
-	var lic = $("#declare :selected");
-	var url = lic.data("infourl");
-	if (url != null) {
-		$("#info").removeClass("disabled");
-		$("#info").attr("href", url);
-	} else {
-		$("#info").addClass("disabled");
-		$("#info").removeAttr("href");
-	}
-}
-
 function saveAndContinue() {
 	var lic = $("#declare :selected");
 	console.log($("#declare").val(), lic.val(), lic.attr("value"));
@@ -77,8 +27,17 @@ function loadingFinished(nextButton) {
 }
 
 function initSingleLicense(info) {
+	// this is silly here, but allows for easy code sharing with the 
+	// multiple-licenses page...
+	var form = {};
+	$.each(["declare", "declare_keep", "declare_choose", "info"],
+		function(_, id) {
+			form[id] = $("#" + id);
+		});
+
 	var detected = info.detected.length > 0 ? info.detected[0] : null;
-	initLicenseList(info.supported, detected, info.user);
+	initLicenseList(form, info.supported, detected, info.user);
+	$("#declare_group").removeAttr("style");
 
 	if (detected != null) {
 		// show label naming the detected license
@@ -129,7 +88,6 @@ function initLicense(info) {
 		initMultiLicense(info.detected, info.missing);
 	} else
 		initSingleLicense(info);
-	$("#declare_loading").remove();
 }
 
 function initPage(info) {

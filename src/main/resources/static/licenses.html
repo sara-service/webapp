@@ -9,12 +9,10 @@
 	<link rel="stylesheet" href="lib/bootstrap.min.css" />
 	<link rel="stylesheet" href="lib/sara.css" />
 	<script src="lib/jquery.min.js"></script>
-<!--
+	<script src="lib/uri.min.js"></script>
 	<script src="lib/common.js"></script>
--->
-<!--
+	<script src="licensing.js"></script>
 	<script src="licenses.js"></script>
--->
 	<title>SARA</title>
 </head>
 <body><div class="fluid-container">
@@ -41,69 +39,44 @@
 	</div>
 	<p style="height:3ex"></p>
 	<form class="form-horizontal" id="licenses">
-		<table class="table">
-			<tr><th>branch</th><th>file</th><th>detected license</th><th colspan="2">license to declare in publication / archive</th></tr>
-			<tr>
-				<td style="vertical-align:middle">branch <b>master</b></td>
-				<td style="vertical-align:middle"><tt>LICENSE</tt> <a href="/api/repo/edit?branch=master" class="btn btn-warning btn-sm">edit in git repo</a></td>
-				<td style="vertical-align:middle"><a href="https://www.gnu.org/licenses/gpl-3.0.en.html">GNU GPL 3.0</a></td>
+		<table class="table" id="branch_table">
+			<tr><th>branch</th><th>file</th><th>detected license</th><th colspan="2">license to declare in publication</th></tr>
+			<tr id="template" style="display:none">
+				<td style="vertical-align:middle"><span name="type">branch</span> <b name="name">master</b></td>
 				<td style="vertical-align:middle">
-					<select class="form-control">
-						<option value="keep" selected>keep GNU GPL 3.0</option>
-						<option value="gplv3" selected>replace with MIT License</option>
+					<tt name="file">LICENSE</tt>
+					<a class="btn btn-warning btn-sm" name="edit_branch" style="display:none">edit in git repo</a>
+					<a class="btn btn-warning btn-sm" name="create_branch" style="display:none">create one in git repo</a>
+					<small name="edit_tag" style="display:none">cannot edit a tag</small>
+				</td><td style="vertical-align:middle">
+					<a name="detected" target="_blank" style="display:none">GNU GPL 3.0</a>
+					<span name="noinfo" style="display:none">unrecognized license</span>
+					<b name="missing" style="display:none">license missing</b>
+				</td><td style="vertical-align:middle">
+					<select class="form-control" name="declare">
+						<option name="declare_choose" disabled selected>choose a license...</option>
+						<option value="keep" name="declare_keep">keep GNU GPL 3.0</option>
 					</select>
+				</td><td style="vertical-align:middle">
+					<a class="btn btn-default form-control" name="info" target="_blank">more info</a>
 				</td>
-				<td style="vertical-align:middle"><a href="https://www.gnu.org/licenses/gpl-3.0.en.html" class="btn btn-default form-control">more info</a></td>
-			</tr>
-			<tr>
-				<td style="vertical-align:middle">branch <b>foo</b></td>
-				<td style="vertical-align:middle"><tt>COPYING</tt> <a href="/api/repo/edit?branch=foo" class="btn btn-default btn-sm">edit in git repo</a></td>
-				<td style="vertical-align:middle"><i>unrecognized license</i></td>
-				<td style="vertical-align:middle">
-					<select class="form-control">
-						<option value="keep" selected>keep unrecognized license</option>
-						<option value="gplv3" selected>replace with GNU GPL 3.0</option>
-					</select>
-					<span>Please make sure your choice is <a href="https://en.wikipedia.org/wiki/License_compatibility#Compatibility_of_FOSS_licenses">compatible</a> with your existing license!</span>
-				</td>
-				<td style="vertical-align:middle"><a href="https://www.gnu.org/licenses/gpl-3.0.en.html" class="btn btn-default form-control">more info</a></td>
-			</tr>
-			<tr>
-				<td style="vertical-align:middle">branch <b>webapp</b></td>
-				<td style="vertical-align:middle">&#8213; <a href="/api/repo/edit?branch=foo" class="btn btn-default btn-sm">create one in git repo</a></td>
-				<td style="vertical-align:middle"><b>license missing</b></td>
-				<td style="vertical-align:middle">
-					<select class="form-control col-sm-4">
-						<option value="gplv3" selected>GNU GPL 3.0</option>
-						<option value="gplv2" selected>GNU GPL 2.0</option>
-						<option value="apache2" selected>Apache 2.0</option>
-						<option value="mit" selected>MIT License</option>
-					</select>
-				</td>
-				<td style="vertical-align:middle"><a href="https://www.gnu.org/licenses/gpl-3.0.en.html" class="btn btn-default form-control">more info</a></td>
-			</tr>
-			<tr>
-				<td style="vertical-align:middle">tag <b>test</b></td>
-				<td style="vertical-align:middle"><tt>UNLICENSE</tt> <small>cannot edit a tag</small></td>
-				<td style="vertical-align:middle"><a>The Unlicense</a></td>
-				<td style="vertical-align:middle">
-					<select class="form-control col-sm-4">
-						<option value="keep" selected>keep The Unlicense</option>
-						<option value="gplv2" selected>GNU GPL 2.0</option>
-						<option value="apache2" selected>Apache 2.0</option>
-						<option value="mit" selected>MIT License</option>
-					</select>
-				</td>
-				<td style="vertical-align:middle"><a href="https://www.gnu.org/licenses/gpl-3.0.en.html" class="btn btn-default form-control">more info</a></td>
 			</tr>
 		</table>
+
+		<div class="form-group text-right" id="confirm_group">
+			<p>Please make sure your choice is
+				<a href="https://en.wikipedia.org/wiki/License_compatibility#Compatibility_of_FOSS_licenses">compatible</a>
+				with any existing licenses you are using,<br>
+				particularly if you have copied third-party code or if you are using libraries!<br>
+				You may otherwise be liable for copyright infringement.</p>
+			<a class="btn btn-default btn-danger" id="confirm" style="display:none">confirm choice of licenses</a>
+		</div>
 	</form>
 	<div id="loading" class="loading"><span class="sr-only">loading, please wait...</span></div>
 
 	<p style="height:3ex"></p>
 	<div class="row">
 		<a class="btn btn-default col-sm-3" href="/branches.html">← previous</a>
-		<a class="btn btn-primary col-sm-2 col-sm-offset-7" id="next">next →</a>
 	</div>
 	<p style="height:3ex"></p>
 </div></body>
