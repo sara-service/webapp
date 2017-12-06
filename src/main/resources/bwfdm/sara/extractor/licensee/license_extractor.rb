@@ -12,7 +12,7 @@ module LicenseExtractor extend self
 
     def files
       @files.map do |file|
-        { name: file.name, hash: file.hash }
+        { name: 'LICENSE', hash: file.hash }
       end
     end
 
