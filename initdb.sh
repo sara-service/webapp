@@ -15,7 +15,7 @@ else
   echo "NOPE"
 fi
 
-echo -n "check whether no postgres instances are running..."
+echo -n "check whether any postgres instances are running..."
 if [ "$(ps aux | grep post[g]res)" != "" ]; then
   echo "YES...killing them..."
   echo "ps aux | grep pos[t]gres | awk '{print \$2}' | xargs kill"
@@ -24,19 +24,17 @@ else
   echo "NOPE"
 fi
 
-echo "starting database..."
+cat saradb/crypto.sql saradb/schema.sql saradb/config.sql \
+	schema.sql test.sql licenses.sql permissions.sql >temp.sql
 
+echo "starting database..."
 # TODO mv all sql files into saradb git repo!
-./udocker.py \
-  run \
-  -v $PWD/saradb/crypto.sql:/crypto.sql \
-  -v $PWD/saradb/schema.sql:/schema.sql \
-  -v $PWD/saradb/config.sql:/config.sql \
-  -v $PWD/schema.sql:/schema-kn.sql \
-  -v $PWD/permissions.sql:/permissions.sql \
+exec ./udocker.py run \
+  -v $PWD/temp.sql:/init.sql \
+  -v $PWD/postgresql.sh:/init.sh \
   -i -t --rm --user postgres \
   c1t4r/sara-server-vre \
-  sh -c '/etc/init.d/postgresql start && createuser -d -l -R -S test && createdb -E UTF8 -O test test && psql -d test -f /crypto.sql && psql -d test -f /schema.sql && psql -d test -f /config.sql && psql -d test -f /schema-kn.sql && psql -f /permissions.sql && psql -d test && /etc/init.d/postgresql stop'
+  /init.sh
 
 
 #./udocker.py \
