@@ -10,9 +10,7 @@ public class SourceDAO {
 	public final String name;
     public final String URL;
     public final String api_Endpoint;
-    // Kram von Matthias ...
-    
-    // optionally
+    public final String oauth_id;
     public final String oauth_secret;
     
     public SourceDAO(
@@ -20,10 +18,11 @@ public class SourceDAO {
     		String n,
     		String u,
     		String apie,
+    		String i,
     		String s
     		) {
     	uuid = id; name = n; URL = u;
-    	api_Endpoint = apie; oauth_secret = s;
+    	api_Endpoint = apie; oauth_id = i; oauth_secret = s;
     }
     
     public void dump() {

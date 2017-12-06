@@ -43,9 +43,10 @@ public class PublicationDatabase {
 			final String name = rs.getString("name");
 			final String URL = rs.getString("URL");
 			final String apie = rs.getString("api_Endpoint");
+			final String i = rs.getString("oauth_id");
 			final String s = rs.getString("oauth_secret");
 			
-			return new SourceDAO(id, name,URL,apie,s);
+			return new SourceDAO(id,name,URL,apie,i,s);
 		}
 	};
 	
@@ -91,8 +92,9 @@ public class PublicationDatabase {
 			final String submit_API_endpoint = rs.getString("submit_API_endpoint");
 			final String submit_user = rs.getString("submit_user");
 			final String submit_pwd = rs.getString("submit_pwd");
-			final String contactEMail = rs.getString("contactEMail");
+			final String contactEMail = rs.getString("contactemail");
 		    final String version = rs.getString("version");
+		    final String logo = rs.getString("logo_base64");
 		    final String default_collection =rs.getString("default_collection");
 		
 		    return new RepositoryDAO(
@@ -101,7 +103,7 @@ public class PublicationDatabase {
 				query_API_endpoint, query_user, query_pwd,
 				submit_API_endpoint, submit_user, submit_pwd,
 				contactEMail,
-				version, default_collection
+				version, logo, default_collection
 				);
 			}
 					
@@ -120,7 +122,7 @@ public class PublicationDatabase {
 	}
 	
 	public List<SourceDAO> getSourceList() {
-		return db.query("select uuid, name, URL, api_Endpoint, oauth_secret from " + SOURCE_TABLE, SOURCE_MAPPER);
+		return db.query("select uuid, name, URL, api_Endpoint, oauth_id, oauth_secret from " + SOURCE_TABLE, SOURCE_MAPPER);
 	}
 	
 	public List<ArchiveDAO> getArchiveList() {
@@ -133,7 +135,7 @@ public class PublicationDatabase {
 	
 	// ...
 	public List<RepositoryDAO> getRepositoryList() {
-		return db.query("select uuid, name, URL, query_API_endpoint, query_user, query_pwd, submit_API_endpoint, submit_user, submit_pwd, contactEMail, version, default_collection from "
+		return db.query("select uuid, name, URL, query_API_endpoint, query_user, query_pwd, submit_API_endpoint, submit_user, submit_pwd, contactemail, version, logo_base64, default_collection from "
 				+ REPOSITORY_TABLE, REPOSITORY_MAPPER);
 	}
 }
