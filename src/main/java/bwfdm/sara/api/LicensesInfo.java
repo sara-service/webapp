@@ -68,8 +68,8 @@ public class LicensesInfo {
 			final String file;
 			final License detectedLicense;
 			if (det != null) {
-				// if det.getID() == null, this will use the null key added
-				// above and set detectedLicense = UNRECOGNIZED_LICENSE
+				// if licenseID == null, this will use the null key added above
+				// and set detectedLicense = UNRECOGNIZED_LICENSE
 				detectedLicense = map.get(det.licenseID);
 				file = det.path;
 			} else {
@@ -83,8 +83,7 @@ public class LicensesInfo {
 				if (!map.containsKey(license))
 					// this really shouldn't happen. there's a foreign key
 					// constraint enforcing only supported values in the
-					// license
-					// field...
+					// license field...
 					throw new IllegalStateException("license " + license
 							+ " for branch " + ref.path
 							+ " not present in database!");

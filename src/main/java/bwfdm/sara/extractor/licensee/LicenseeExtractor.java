@@ -1,5 +1,6 @@
 package bwfdm.sara.extractor.licensee;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -43,22 +44,22 @@ public class LicenseeExtractor implements LicenseExtractor {
 	}
 
 	@Override
-	public LicenseFile detectLicense(final TransferRepo repo,
+	public List<LicenseFile> detectLicenses(final TransferRepo repo,
 			final List<RepoFile> files) {
+		final List<LicenseFile> licenses = new ArrayList<>();
+		for (final RepoFile file : files)
+			licenses.add(detectLicense(repo, file));
+		return licenses;
+	}
+
+	private LicenseFile detectLicense(final TransferRepo repo,
+			final RepoFile file) {
+		// TODO should probably cache by SHA-1 here!
 		final LicenseeFile license = container.callMethod(extractor,
-				"detect_license", new Object[] { repo, files },
+				"detect_license", new Object[] { repo, Arrays.asList(file) },
 				LicenseeFile.class);
 		if (license == null)
-			return null;
-
-		// unfortunately Licensee only returns the filename, so we need to
-		// manually find the corresponding file hash now...
-		for (final RepoFile file : files)
-			if (file.getName().equals(license.getFile()))
-				return new LicenseFile(file, license.getID(),
-						license.getScore());
-		throw new IllegalStateException(
-				"licensee detected nonexistent license file "
-						+ license.getFile());
+			return new LicenseFile(file, null, Float.NaN);
+		return new LicenseFile(file, license.getID(), license.getScore());
 	}
 }

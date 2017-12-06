@@ -1,6 +1,7 @@
 package bwfdm.sara.extractor;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -8,6 +9,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import bwfdm.sara.extractor.licensee.LicenseeExtractor;
 import bwfdm.sara.git.GitProject;
@@ -21,6 +23,31 @@ import bwfdm.sara.transfer.TransferRepo;
 
 public class MetadataExtractor {
 	public static final String VERSION_FILE = "VERSION";
+	public static final String PREFERRED_LICENSE_FILE = "LICENSE";
+	private static final String LICENSE = "((UN)?LICEN[SC]E|COPYING(\\.LESSER)?)";
+	private static final String EXTENSION = "(\\.md|\\.markdown|\\.txt)?";
+	/**
+	 * regex for files whose existence implies that the they contain a license
+	 * which almost certainly covers the entire project. the recommended name is
+	 * {@code LICENSE} (or {@code COPYING} in old projects), but some licenses
+	 * (Unlicense, LGPL 3.0) want to be different.
+	 * <p>
+	 * We probably shouldn't support everything here, but The Unlicense and the
+	 * LGPL are just too important to ignore. Eg. the PostgreSQL license
+	 * mentions {@code COPYRIGHT}, but it's not a very common license.
+	 */
+	private static final Pattern OBVIOUS_GLOBAL_LICENSE = Pattern.compile("^"
+			+ LICENSE + EXTENSION + "$", Pattern.CASE_INSENSITIVE);
+	/**
+	 * regex for other files that obviously contain a license. this is
+	 * essentially just {@code LICENSE.*}, but because some projects (JRuby...)
+	 * have files like {@code COPYING.RUBY} which only apply to parts of the
+	 * project, we cannot directly imply that they cover the entire project. if
+	 * there is just one of them, it should be safe though.
+	 */
+	// TODO should this include README.*? full text unlikely there
+	private static final Pattern GLOBAL_LICENSE_OR_SUBLICENSE = Pattern
+			.compile("^" + LICENSE + "\\..+$", Pattern.CASE_INSENSITIVE);
 
 	private final Map<MetadataField, String> meta = new EnumMap<>(
 			MetadataField.class);
@@ -57,28 +84,60 @@ public class MetadataExtractor {
 			throws IOException {
 		licenses.clear();
 		for (final Ref ref : refs) {
-			final LicenseFile license = detectLicense(ref);
+			final LicenseFile license = detectLicenses(ref);
 			if (license != null)
 				licenses.put(ref, license);
 		}
 		return licenses;
 	}
 
-	private LicenseFile detectLicense(final Ref ref) throws IOException {
+	private LicenseFile detectLicenses(final Ref ref) throws IOException {
+		final List<RepoFile> obvious = new ArrayList<>();
+		final List<RepoFile> likely = new ArrayList<>();
+		// final List<RepoFile> possible = new ArrayList<>();
 		final List<RepoFile> files = repo.getFiles(ref, "");
 		for (final Iterator<RepoFile> iter = files.iterator(); iter.hasNext();) {
 			final RepoFile file = iter.next();
 			if (file.getType() != FileType.FILE)
-				iter.remove();
-			// TODO if we see something cached, return immediately
+				continue;
+
+			final String name = file.getName();
+			if (OBVIOUS_GLOBAL_LICENSE.matcher(name).find())
+				obvious.add(file);
+			else if (GLOBAL_LICENSE_OR_SUBLICENSE.matcher(name).find())
+				likely.add(file);
+			// else
+			// possible.add(file);
 		}
-		if (files.isEmpty())
-			return null;
 
 		final LicenseeExtractor extractor = LicenseeExtractor.getInstance();
-		final LicenseFile res = extractor.detectLicense(repo, files);
-		// TODO cache result by file hash
-		return res;
+		if (!obvious.isEmpty())
+			return detectLicenses(extractor, obvious);
+		if (!likely.isEmpty())
+			return detectLicenses(extractor, likely);
+		// if (!possible.isEmpty())
+		// return detectLicenses(extractor, possible);
+		// there really isn't any license file in this branch
+		return null;
+	}
+
+	private LicenseFile detectLicenses(final LicenseeExtractor extractor,
+			final List<RepoFile> files) {
+		final List<LicenseFile> licenses = extractor
+				.detectLicenses(repo, files);
+		// trivial case: only one license file, or missing license
+		if (licenses.size() == 0)
+			return null;
+		if (licenses.size() == 1)
+			return licenses.get(0);
+
+		// multiple license files. even if only one of them matches, the others
+		// could contain licenses we just don't know. treat as unrecognized
+		// license.
+		// TODO maybe we should pick the preferred file here?
+		// the sets are in order of preference anyway, though
+		final RepoFile file = files.get(0);
+		return new LicenseFile(file, null, Float.NaN);
 	}
 
 	public Map<Ref, LicenseFile> getLicenses() {

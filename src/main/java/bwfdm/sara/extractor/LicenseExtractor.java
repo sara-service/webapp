@@ -6,5 +6,6 @@ import bwfdm.sara.transfer.RepoFile;
 import bwfdm.sara.transfer.TransferRepo;
 
 public interface LicenseExtractor {
-	public LicenseFile detectLicense(TransferRepo repo, List<RepoFile> files);
+	public List<LicenseFile> detectLicenses(TransferRepo repo,
+			List<RepoFile> files);
 }
