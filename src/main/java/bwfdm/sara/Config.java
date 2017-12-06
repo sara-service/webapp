@@ -7,53 +7,44 @@ import java.io.InputStream;
 import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.security.SecureRandom;
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.sql.Driver;
 import java.util.Properties;
 
 import javax.servlet.ServletContext;
 import javax.sql.DataSource;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.datasource.SimpleDriverDataSource;
 import org.springframework.stereotype.Component;
 import org.springframework.util.DigestUtils;
 import org.springframework.web.context.ServletContextAware;
 
 import bwfdm.sara.db.ConfigDatabase;
-import bwfdm.sara.git.GitRepo;
-import bwfdm.sara.git.GitRepoFactory;
-import bwfdm.sara.publication.PublicationRepositoryFactory;
-
-import com.fasterxml.jackson.core.JsonParser.Feature;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Component
 public class Config implements ServletContextAware {
+	/**
+	 * Name of the properties file that Spring loads on startup. Use for calling
+	 * {@link #Config(String)} in testcases and support scripts.
+	 */
+	public static final String SPRING_APPLICATION_CONFIG_FILE = "application.properties";
+
 	private static final String WEBROOT_ATTR = "sara.webroot";
 	private static final String TEMPDIR_ATTR = "temp.dir";
-	private static final String IRCONFIG_ATTR = "publish.config";
+	private static final String DATASOURCE_PREFIX = "server.context_parameters.spring.datasource.";
 
 	private static final SecureRandom RNG = new SecureRandom();
 	private static final Charset UTF8 = Charset.forName("UTF-8");
 
-	@Deprecated
-	private final ObjectMapper mapper;
 	private final Properties props;
 	private DataSource db;
 	private ServletContext context;
 	private String webroot;
 	private File temproot;
-	@Deprecated
-	private List<PublicationRepositoryFactory> irConfig;
 	private ConfigDatabase configDB;
 
 	private Config(final Properties props) {
 		this.props = props;
-		mapper = new ObjectMapper();
-		// these are nonstandard but make JSON files much more human-friendly
-		mapper.enable(Feature.ALLOW_COMMENTS);
-		mapper.enable(Feature.ALLOW_UNQUOTED_FIELD_NAMES);
 	}
 
 	/**
@@ -64,6 +55,18 @@ public class Config implements ServletContextAware {
 	@SuppressWarnings("unused")
 	private Config() {
 		this((Properties) null);
+	}
+
+	/**
+	 * Constructor used <b>for testing only</>, when context parameters are
+	 * simply loaded from a properties file. Use
+	 * {@code @Autowired private Config config;} everywhere else!
+	 * 
+	 * @param filename
+	 *            name of the properties file to read
+	 */
+	public Config(final String filename) throws IOException {
+		this(new FileInputStream(filename));
 	}
 
 	/**
@@ -80,12 +83,26 @@ public class Config implements ServletContextAware {
 		this(new Properties());
 		props.load(contextParams);
 		setServletContext(null);
+		setDataSource(createDataSource(props));
 	}
 
-	/**
-	 * Sets the {@link DataSource} to use for database access. Can be uses for
-	 * testing but is also used by Spring to inject the configured database.
-	 */
+	private static DataSource createDataSource(final Properties props)
+			throws IOException {
+		final String klass = props.getProperty(DATASOURCE_PREFIX
+				+ "driver-class-name");
+		Driver driver;
+		try {
+			driver = (Driver) Class.forName(klass).newInstance();
+		} catch (final ReflectiveOperationException e) {
+			throw new IOException("database driver not found", e);
+		}
+
+		final String url = props.getProperty(DATASOURCE_PREFIX + "url");
+		final String user = props.getProperty(DATASOURCE_PREFIX + "username");
+		final String pass = props.getProperty(DATASOURCE_PREFIX + "password");
+		return new SimpleDriverDataSource(driver, url, user, pass);
+	}
+
 	@Autowired
 	public void setDataSource(final DataSource db) {
 		this.db = db;
@@ -96,9 +113,6 @@ public class Config implements ServletContextAware {
 	public void setServletContext(final ServletContext servletContext) {
 		context = servletContext;
 		webroot = getContextParam(WEBROOT_ATTR);
-		irConfig = readRepoConfig(IRCONFIG_ATTR,
-				new TypeReference<List<PublicationRepositoryFactory>>() {
-				});
 
 		temproot = getTempRoot();
 		temproot.mkdirs(); // failure harmless if already there
@@ -123,17 +137,6 @@ public class Config implements ServletContextAware {
 			throw new ConfigurationException("missing context parameter "
 					+ name);
 		return attr;
-	}
-
-	@Deprecated
-	private <T> List<T> readRepoConfig(final String attribute,
-			final TypeReference<List<T>> type) {
-		final String repoConfig = getContextParam(attribute);
-		try {
-			return mapper.readValue(new File(repoConfig), type);
-		} catch (final IOException e) {
-			throw new RuntimeException("cannot parse " + repoConfig, e);
-		}
 	}
 
 	private File getTempRoot() {
@@ -164,22 +167,6 @@ public class Config implements ServletContextAware {
 
 	public String getWebRoot() {
 		return webroot;
-	}
-
-	/**
-	 * @param id
-	 *            name of institutional repository in {@code publish.json}
-	 * @return the {@link GitRepoFactory} for the name {@link GitRepo}
-	 * @deprecated config should be read from database instead
-	 */
-	@Deprecated
-	public PublicationRepositoryFactory getPublicationRepositoryFactory(
-			final String id) {
-		for (final PublicationRepositoryFactory r : irConfig)
-			if (r.getID().equals(id))
-				return r;
-		throw new NoSuchElementException("no publication repository named "
-				+ id);
 	}
 
 	/**

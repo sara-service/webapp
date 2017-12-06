@@ -5,10 +5,8 @@
  */
 package bwfdm.sara.gui;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 
-import bwfdm.sara.Config;
 import bwfdm.sara.publication.DemoDSpaceOrgSix;
 import bwfdm.sara.publication.PublicationRepository;
 import bwfdm.sara.publication.dspace.DSpaceConfig;
@@ -53,8 +51,7 @@ public class MainInt {
 	 */
 	public static void main(final String[] args) throws IOException {
 		// creates a config for testing
-		final Config config = new Config(new FileInputStream(
-				"application.properties"));
+		final ConfigStub config = new ConfigStub();
 		pubRepoOparuFive = config.getPublicationRepositoryFactory("oparu5")
 				.newPublicationRepository();
 		pubRepoOparuSix = config.getPublicationRepositoryFactory("oparu6")

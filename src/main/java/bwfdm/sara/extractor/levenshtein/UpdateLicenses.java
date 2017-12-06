@@ -10,10 +10,6 @@ import bwfdm.sara.db.ConfigDatabase;
 public class UpdateLicenses extends TransacionHelper {
 	private static final String CHOOSEALICENSE_BASE = "https://choosealicense.com/licenses/";
 
-	public UpdateLicenses(final String url, final String user, final String pass) {
-		super(url, user, pass);
-	}
-
 	@Override
 	public void run() throws IOException {
 		// set foreign-key constraints to deferred. this way we can just upsert
@@ -44,14 +40,6 @@ public class UpdateLicenses extends TransacionHelper {
 	}
 
 	public static void main(final String... args) {
-		if (args.length != 3) {
-			System.err
-					.println("usage: java -cp … "
-							+ UpdateLicenses.class.getCanonicalName()
-							+ " jdbc:postgresql://host/database"
-							+ " username password");
-			System.exit(1);
-		}
-		new UpdateLicenses(args[0], args[1], args[2]).executeInTransaction();
+		new UpdateLicenses().executeInTransaction();
 	}
 }

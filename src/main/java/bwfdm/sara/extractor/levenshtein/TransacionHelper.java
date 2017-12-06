@@ -2,23 +2,28 @@ package bwfdm.sara.extractor.levenshtein;
 
 import java.io.IOException;
 
-import org.postgresql.Driver;
+import javax.sql.DataSource;
+
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
-import org.springframework.jdbc.datasource.SimpleDriverDataSource;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import bwfdm.sara.Config;
+
 abstract class TransacionHelper {
-	private static final Driver DRIVER = new Driver();
 	protected final JdbcTemplate db;
 	protected final TransactionTemplate tx;
 
-	protected TransacionHelper(final String url, final String user,
-			final String pass) {
-		final SimpleDriverDataSource ds = new SimpleDriverDataSource(DRIVER,
-				url, user, pass);
+	protected TransacionHelper() {
+		final DataSource ds;
+		try {
+			ds = new Config(Config.SPRING_APPLICATION_CONFIG_FILE)
+					.getDatabase();
+		} catch (final IOException e) {
+			throw new RuntimeException(e);
+		}
 		db = new JdbcTemplate(ds);
 		tx = new TransactionTemplate(new DataSourceTransactionManager(ds));
 	}

@@ -8,11 +8,6 @@ import java.net.URL;
 import bwfdm.sara.db.ConfigDatabase;
 
 public class SetLicensePreference extends TransacionHelper {
-	public SetLicensePreference(final String url, final String user,
-			final String pass) {
-		super(url, user, pass);
-	}
-
 	@Override
 	public void run() throws IOException {
 		// move some preferred licenses to the top of the displayed list. reset
@@ -37,15 +32,6 @@ public class SetLicensePreference extends TransacionHelper {
 	}
 
 	public static void main(final String... args) {
-		if (args.length != 3) {
-			System.err
-					.println("usage: java -cp … "
-							+ SetLicensePreference.class.getCanonicalName()
-							+ " jdbc:postgresql://host/database"
-							+ " username password");
-			System.exit(1);
-		}
-		new SetLicensePreference(args[0], args[1], args[2])
-				.executeInTransaction();
+		new SetLicensePreference().executeInTransaction();
 	}
 }
