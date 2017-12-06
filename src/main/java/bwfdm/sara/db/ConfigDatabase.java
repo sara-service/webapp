@@ -89,6 +89,9 @@ public class ConfigDatabase {
 	}
 
 	/**
+	 * Constructs a new {@link GitRepo} object, using the parameters stored in
+	 * the database for the given id.
+	 * 
 	 * @param id
 	 *            git repo name used in the {@value GITLABS_TABLE} table
 	 * @return a new instance of the named {@link GitRepo}
@@ -101,6 +104,9 @@ public class ConfigDatabase {
 	}
 
 	/**
+	 * Constructs a new {@link ArchiveRepo} object, using the parameters stored
+	 * in the database for the given id.
+	 * 
 	 * @param id
 	 *            git repo name used in the {@value #GITREPOS_TABLE} table
 	 * @return a new instance of the named {@link ArchiveRepo}
