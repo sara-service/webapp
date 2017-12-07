@@ -8,7 +8,6 @@ import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -47,8 +46,8 @@ public class Licenses {
 		project.invalidateMetadata();
 	}
 
-	@PostMapping("{ref}")
-	public void setLicense(@PathVariable("ref") final String refPath,
+	@PostMapping("")
+	public void setLicense(@RequestParam("ref") final String refPath,
 			@RequestParam("license") final String license,
 			final HttpSession session) {
 		final Project project = Project.getInstance(session);

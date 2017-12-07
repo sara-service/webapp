@@ -50,3 +50,28 @@ function updateInfoButton(form) {
 		form.info.removeAttr("href");
 	}
 }
+
+function checkLicenses(forms) {
+	var valid = true;
+	$.each(forms, function(_, form) {
+		// we don't care what the user actually selected as long as
+		// we have a useful license, ie. anything but the "choose a
+		// license" placeholder is valid.
+		if (form.declare.val() == null) {
+			valid = false;
+			form.declare.focus(); // will the user notice?
+		}
+	});
+
+	if (valid)
+		saveAndContinue(forms);
+}
+
+function loadingFinished(nextButton, forms) {
+	var next = $("#" + nextButton);
+	next.removeAttr("style");
+	if (typeof next.attr("href") == "undefined")
+		next.click(function() { checkLicenses(forms); });
+	$("#license").removeAttr("style");
+	$("#loading").remove();
+}

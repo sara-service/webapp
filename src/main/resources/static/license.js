@@ -2,28 +2,10 @@
 
 function saveAndContinue() {
 	var lic = $("#declare :selected");
-	console.log($("#declare").val(), lic.val(), lic.attr("value"));
 	API.post("save license selection", "/api/licenses/all",
 		{ license: lic.val() }, function() {
 			location.href = "/meta.html";
 		});
-}
-
-function loadingFinished(nextButton) {
-	var next = $("#" + nextButton);
-	next.removeAttr("style");
-	if (typeof next.attr("href") == "undefined")
-		next.click(function() {
-			// we don't care what the user actually selected as long as
-			// we have a useful license, ie. anything but the "choose a
-			// license" placeholder is valid.
-			if ($("#declare").val() == null)
-				$("#declare").focus(); // will the user notice?
-			else
-				saveAndContinue();
-		});
-	$("#license").removeAttr("style");
-	$("#loading").remove();
 }
 
 function initSingleLicense(info) {
@@ -35,7 +17,7 @@ function initSingleLicense(info) {
 			form[id] = $("#" + id);
 		});
 
-	var detected = info.detected.length > 0 ? info.detected[0] : null;
+	var detected = info.missing ? null : info.detected[0];
 	initLicenseList(form, info.supported, detected, info.user);
 	$("#declare_group").removeAttr("style");
 
@@ -51,9 +33,9 @@ function initSingleLicense(info) {
 
 	// enable the right button
 	if (info.missing)
-		loadingFinished("confirm_missing");
+		loadingFinished("confirm_missing", [form]);
 	else
-		loadingFinished("confirm_single");
+		loadingFinished("confirm_single", [form]);
 }
 
 function initMultiLicense(licenses, missing) {
@@ -75,18 +57,18 @@ function initMultiLicense(licenses, missing) {
 	// difference is the label. neither actually commits anything to the
 	// server.)
 	if (!missing)
-		loadingFinished("confirm_multi");
+		loadingFinished("confirm_multi", []);
 	else
-		loadingFinished("confirm_edit");
+		loadingFinished("confirm_edit", []);
 }
 
 function initLicense(info) {
-	if (info.detected.length > 1) {
+	if (info.multiple)
 		// multiple licenses detected. user needs to clean up that mess
 		// on the per-branch licenses page (or, even better, in the git
 		// repo).
 		initMultiLicense(info.detected, info.missing);
-	} else
+	else
 		initSingleLicense(info);
 }
 

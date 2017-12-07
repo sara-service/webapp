@@ -22,7 +22,7 @@ var has_block = { meta: false, branches: false };
 
 function blockLoaded(name) {
 	has_block[name] = true;
-	if (!has_block.meta || !has_block.branches)
+	if (Object.values(has_block).indexOf(false) >= 0)
 		return;
 
 	$("#loading").remove();
@@ -48,6 +48,33 @@ function initBranches(info) {
 	blockLoaded("branches");
 }
 
+function initLicenses(info) {
+	if (info.multiple) {
+		$.each(info.branches, function(_, branch) {
+			var line = template("template_licenses");
+			line.type.text(branch.ref.type);
+			line.name.text(branch.ref.name);
+			if (branch.effective == "keep")
+				line.license.text("keep " + branch.detected.id);
+			else if (branch.detected != null)
+				line.license.text("replace with " + branch.effective);
+			else
+				line.license.text("choose " + branch.effective);
+			$("#licenses").append(line.root);
+		});
+	} else {
+		if (info.user == "keep")
+			// note: to get here, the user must have selected "keep" for
+			// ALL branches, AND this must result in all branches having
+			// the same license. IOW: only one license was detected
+			$("#license").text("keep " + info.detected[0].id);
+		else
+			$("#license").text(info.user);
+		$("#license").removeAttr("style");
+	}
+	blockLoaded("licenses");
+}
+
 function initMeta(info) {
 	$.each(["title", "description", "version"],
 		function(_, name) {
@@ -59,6 +86,7 @@ function initMeta(info) {
 function initPage(session) {
 	$("#project").text(session.project);
 	API.get("load metadata fields", "/api/meta", {}, initMeta);
+	API.get("load license choice", "/api/licenses", {}, initLicenses);
 	API.get("load branch list", "/api/repo/actions", {},
 			initBranches);
 }

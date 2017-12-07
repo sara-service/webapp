@@ -108,7 +108,9 @@ public class Repository {
 	@GetMapping("edit-file")
 	public RedirectView getEditURL(@RequestParam("branch") final String branch,
 			@RequestParam("path") final String path, final HttpSession session) {
-		final GitProject repo = Project.getGitProject(session);
+		final Project project = Project.getInstance(session);
+		project.invalidateTransferRepo();
+		final GitProject repo = project.getGitProject();
 		if (repo.getBlob("heads/" + branch, path) != null)
 			return new RedirectView(repo.getEditURL(branch, path));
 		return new RedirectView(repo.getCreateURL(branch, path));
