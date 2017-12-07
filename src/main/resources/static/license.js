@@ -17,7 +17,7 @@ function initSingleLicense(info) {
 			form[id] = $("#" + id);
 		});
 
-	var detected = info.detected.length > 0 ? info.detected[0] : null;
+	var detected = info.missing ? null : info.detected[0];
 	initLicenseList(form, info.supported, detected, info.user);
 	$("#declare_group").removeAttr("style");
 
@@ -63,12 +63,12 @@ function initMultiLicense(licenses, missing) {
 }
 
 function initLicense(info) {
-	if (info.detected.length > 1) {
+	if (info.multiple)
 		// multiple licenses detected. user needs to clean up that mess
 		// on the per-branch licenses page (or, even better, in the git
 		// repo).
 		initMultiLicense(info.detected, info.missing);
-	} else
+	else
 		initSingleLicense(info);
 }
 

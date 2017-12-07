@@ -89,7 +89,7 @@ public class LicensesInfo {
 							+ " not present in database!");
 				userLicense = map.get(license).id;
 			} else
-				userLicense = KEEP_LICENSE;
+				userLicense = null;
 			branches.add(new LicenseInfo(ref, file, detectedLicense,
 					userLicense));
 		}
@@ -113,7 +113,7 @@ public class LicensesInfo {
 	 */
 	@JsonProperty("user")
 	public final String getUserLicense() {
-		if (hasMultipleUserLicenses())
+		if (hasMultipleEffectiveLicenses())
 			return null;
 
 		// possible situations at this point:
@@ -141,7 +141,7 @@ public class LicensesInfo {
 	 * @see LicenseInfo#getEffectiveLicense()
 	 */
 	@JsonProperty("multiple")
-	public boolean hasMultipleUserLicenses() {
+	public boolean hasMultipleEffectiveLicenses() {
 		String license = null;
 		for (final LicenseInfo b : branches) {
 			final String lic = b.getEffectiveLicense();
@@ -207,14 +207,7 @@ public class LicensesInfo {
 		 */
 		@JsonProperty("detected")
 		public final License detected;
-		/**
-		 * ID of the license selected by the user for this branch;
-		 * <code>null</code> if the user selected no license or selected to keep
-		 * the current license (no need to distinguish because in both cases we
-		 * just want to keep the existing license)
-		 */
-		@JsonProperty("user")
-		public final String user;
+		private final String user;
 
 		public LicenseInfo(final Ref ref, final String file,
 				final License detected, final String user) {
@@ -222,6 +215,17 @@ public class LicensesInfo {
 			this.file = file;
 			this.detected = detected;
 			this.user = user;
+		}
+
+		/**
+		 * ID of the license selected by the user for this branch;
+		 * <code>null</code> if the user selected no license or selected to keep
+		 * the current license (no need to distinguish because in both cases we
+		 * just want to keep the existing license)
+		 */
+		@JsonProperty("user")
+		public String getUser() {
+			return mapKeep(user);
 		}
 
 		/**
