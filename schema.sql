@@ -64,7 +64,7 @@ create table fe_gitrepos(
 create table fe_gitrepo_params(
 	id text not null references fe_gitrepos(id) on delete cascade,
 	param text not null,
-	value text,
+	value text not null,
 	primary key (id, param)
 );
 
