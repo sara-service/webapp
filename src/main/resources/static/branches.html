@@ -41,7 +41,7 @@
 			<div>
 				<!--<div style="display:inline-block;height:0px;width:10em"></div>-->
 				<ul>
-				<li class="sara-green">"<strong>Publish full history</strong>"
+				<li>"<strong class="sara-green">Publish full history</strong>"
 					will publish the <strong>entire history</strong> of a branch as-is.
 					This is the <strong>most useful format</strong> for others
 					to continue working with your project,
@@ -52,7 +52,7 @@
 					This is the only option that <strong>retains the commit IDs</strong>,
 					keeping your work fully replicable.
 				</li>
-				<li class="sara-blue">"<strong>Publish abbreviated history</strong>"
+				<li>"<strong class="sara-blue">Publish abbreviated history</strong>"
 					will publish only the <strong>significant points (tags &amp; merges)</strong>
 					of a branch's history. Only merge commits and
 					commits that have been tagged with <kbd>git tag</kbd>
@@ -67,7 +67,7 @@
 					that you are ashamed of it -->
 					if you need to hide parts of your development process.
 				</li>
-				<li class="sara-red">"<strong>Publish latest version only</strong>"
+				<li>"<strong class="sara-red">Publish latest version only</strong>"
 					will publish only the HEAD revision of the branch.
 					If you have previously archived this project,
 					the previously published version(s) will be listed
@@ -78,12 +78,12 @@
 					This option is <strong>not recommended</strong>
 					unless you don't have any other options.
 				</li>
-				<li class="sara-orange">"<strong>Private access, public record</strong>"
+				<li>"<strong class="sara-orange">Private access, public record</strong>"
 					will non-publicly archive the full history of a branch.
 					A public bibliographical record will be created for the archival record.
 					This is suitable for data that you want to (or have to) keep private.
 				</li>
-				<li class="sara-cyan">"<strong>Private access, no record</strong>"
+				<li>"<strong class="sara-cyan">Private access, no record</strong>"
 					will not publish anything (obviously),
 					but will non-publicly archive the full history of a branch.
 					The existence of the archived data will not be publicly disclosed.
@@ -103,7 +103,7 @@
 				<label for="template_commit" class="control-label sr-only">starting point</label>
 				<select class="form-control" name="commit">
 					<option value="HEAD" selected>starting at most recent commit (HEAD of this branch)</option>
-					<option value="IDIOT" disabled>… loading list of commits …</option>
+					<option disabled>… loading list of commits …</option>
 				</select>
 			</div>
 			<div class="col-sm-3 nopad">
