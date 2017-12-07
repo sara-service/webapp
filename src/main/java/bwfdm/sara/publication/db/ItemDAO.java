@@ -1,6 +1,6 @@
 package bwfdm.sara.publication.db;
 
-import bwfdm.sara.publication.db.ItemStatus;
+import bwfdm.sara.publication.db.ItemState;
 import bwfdm.sara.publication.db.ItemType;
 import java.util.UUID;
 import java.util.Date;
@@ -16,14 +16,14 @@ public class ItemDAO {
 	public Date dateCreated;
 	public final Date dateLastModified;
 	public final ItemType itemType;
-	public ItemStatus itemStatus;
+	public ItemState itemState;
 	public String foreign_uuid;
 	public String citation_handle;
 	
 	// Item for publication
-	public ItemDAO(UUID id, ItemType t, ItemStatus s, Date crDate, Date lmDate, UUID sRef, UUID pRef, UUID aRef, String fuuid, String doi) {
+	public ItemDAO(UUID id, ItemType t, ItemState s, Date crDate, Date lmDate, UUID sRef, UUID pRef, UUID aRef, String fuuid, String doi) {
 		uuid = id;
-		itemType = t; itemStatus = s;
+		itemType = t; itemState = s;
 		dateCreated = crDate; dateLastModified = lmDate;
 		submitter_uuid = sRef; repository_uuid = pRef; archive_uuid = aRef; foreign_uuid = fuuid;
 		citation_handle = doi;
@@ -32,15 +32,15 @@ public class ItemDAO {
     public void dump() {
     	System.out.println("UUID=" + uuid.toString());
     	System.out.println("ItemType=" + itemType.toString());
-    	System.out.println("ItemStatus=" + itemStatus.toString());
+    	System.out.println("ItemState=" + itemState.toString());
     	System.out.println("DateCreated=" + dateCreated.toString());
     }
 
-	public ItemStatus getStatus() { return itemStatus; }
+	public ItemState getStatus() { return itemState; }
 	public ItemType getType() { return itemType; }
 
 	public boolean isArchiveOnly() { return itemType == ItemType.archive; }
-	public boolean isArchived() { return itemStatus == ItemStatus.processed; }
-	public boolean isRecorded() { return itemType == ItemType.record && itemStatus == ItemStatus.processed; }
-	public boolean isPublished() { return itemType == ItemType.publication && itemStatus == ItemStatus.processed; }
+	public boolean isArchived() { return itemState == ItemState.processed; }
+	public boolean isRecorded() { return itemType == ItemType.record && itemState == ItemState.processed; }
+	public boolean isPublished() { return itemType == ItemType.publication && itemState == ItemState.processed; }
 }
