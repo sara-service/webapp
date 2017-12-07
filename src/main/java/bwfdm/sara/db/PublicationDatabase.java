@@ -21,7 +21,7 @@ import bwfdm.sara.publication.db.SourceDAO;
 
 import bwfdm.sara.publication.db.ItemDAO;
 import bwfdm.sara.publication.db.ItemType;
-import bwfdm.sara.publication.db.ItemStatus;
+import bwfdm.sara.publication.db.ItemState;
 
 /**
  * Database containing config stuff for the publication backend.
@@ -31,10 +31,25 @@ import bwfdm.sara.publication.db.ItemStatus;
  * but without U) queries.
  */
 public class PublicationDatabase {
+	
 	private static final String ITEM_TABLE = "public.item";
 	private static final String ARCHIVE_TABLE = "public.archive";
 	private static final String REPOSITORY_TABLE = "public.repository";
 	private static final String SOURCE_TABLE = "public.source";
+	
+	private final JdbcTemplate db;
+
+	/**
+	 * Creates a DAO for reading config values.
+	 * 
+	 * @param db
+	 *            the {@link DataSource} to use for all queries
+	 */
+	public PublicationDatabase(final DataSource db) {
+		this.db = new JdbcTemplate(db);
+	}
+
+	private static final String SOURCE_FIELDS = "uuid, name, URL, api_Endpoint, oauth_id, oauth_secret";
 
 	private static final RowMapper<SourceDAO> SOURCE_MAPPER = new RowMapper<SourceDAO>() {
 		@Override
@@ -50,6 +65,12 @@ public class PublicationDatabase {
 		}
 	};
 	
+	public List<SourceDAO> getSourceList() {
+		return db.query("select " + SOURCE_FIELDS + " from " + SOURCE_TABLE, SOURCE_MAPPER);
+	}
+	
+	private static String ARCHIVE_FIELDS = "uuid, name, URL";
+	
 	private static final RowMapper<ArchiveDAO> ARCHIVE_MAPPER = new RowMapper<ArchiveDAO>() {
 		@Override
 		public ArchiveDAO mapRow(final ResultSet rs, final int rowNum) throws SQLException {
@@ -61,6 +82,14 @@ public class PublicationDatabase {
 		}
 	};
 	
+	public List<ArchiveDAO> getArchiveList() {
+		return db.query("select " + ARCHIVE_FIELDS + " from " + ARCHIVE_TABLE, ARCHIVE_MAPPER);
+	}
+	
+	private static final String ITEM_FIELDS = 
+			"uuid, submitter_uuid, archive_uuid, repository_uuid, fuuid, "
+			+ "itemtype, itemstate, date_created, date_last_modified, citation_handle";
+	
 	private static final RowMapper<ItemDAO> ITEM_MAPPER = new RowMapper<ItemDAO>() {
 		@Override
 		public ItemDAO mapRow(final ResultSet rs, final int rowNum) throws SQLException {
@@ -69,8 +98,8 @@ public class PublicationDatabase {
 			final UUID aRef = (UUID)rs.getObject("archive_uuid");
 			final UUID rRef = (UUID)rs.getObject("repository_uuid");
 			final String fRef = rs.getString("fuuid");
-			final ItemType t = ItemType.fromString(rs.getString("itemtype"));
-			final ItemStatus s = ItemStatus.fromString(rs.getString("itemstate"));
+			final ItemType t = ItemType.valueOf(rs.getString("itemtype"));
+			final ItemState s = ItemState.valueOf(rs.getString("itemstate"));
 			final Date crDate = rs.getTimestamp("date_created");
 			final Date lmDate = rs.getTimestamp("date_last_modified");
 			final String citationHandle = rs.getString("citation_handle");
@@ -79,6 +108,13 @@ public class PublicationDatabase {
 		}
 	};
 
+	public List<ItemDAO> getItemList() {
+		return db.query("select " + ITEM_FIELDS + " from " + ITEM_TABLE, ITEM_MAPPER);
+	}
+	
+	private static final String REPOSITORY_FIELDS = 
+			"uuid, name, URL, query_API_endpoint, query_user, query_pwd, submit_API_endpoint, "
+			+ "submit_user, submit_pwd, contactemail, version, logo_base64, default_collection";
 	
 	private static final RowMapper<RepositoryDAO> REPOSITORY_MAPPER = new RowMapper<RepositoryDAO>() {
 		@Override
@@ -108,34 +144,9 @@ public class PublicationDatabase {
 			}
 					
 	};
-
-	private final JdbcTemplate db;
-
-	/**
-	 * Creates a DAO for reading config values.
-	 * 
-	 * @param db
-	 *            the {@link DataSource} to use for all queries
-	 */
-	public PublicationDatabase(final DataSource db) {
-		this.db = new JdbcTemplate(db);
-	}
 	
-	public List<SourceDAO> getSourceList() {
-		return db.query("select uuid, name, URL, api_Endpoint, oauth_id, oauth_secret from " + SOURCE_TABLE, SOURCE_MAPPER);
-	}
-	
-	public List<ArchiveDAO> getArchiveList() {
-		return db.query("select uuid, name, URL from " + ARCHIVE_TABLE, ARCHIVE_MAPPER);
-	}
-	
-	public List<ItemDAO> getItemList() {
-		return db.query("select uuid, submitter_uuid, archive_uuid, repository_uuid, fuuid, itemtype, itemstate, date_created, date_last_modified, citation_handle from " + ITEM_TABLE, ITEM_MAPPER);
-	}
-	
-	// ...
 	public List<RepositoryDAO> getRepositoryList() {
-		return db.query("select uuid, name, URL, query_API_endpoint, query_user, query_pwd, submit_API_endpoint, submit_user, submit_pwd, contactemail, version, logo_base64, default_collection from "
+		return db.query("select " + REPOSITORY_FIELDS + " from "
 				+ REPOSITORY_TABLE, REPOSITORY_MAPPER);
 	}
 }
