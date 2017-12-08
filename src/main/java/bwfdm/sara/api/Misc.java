@@ -4,10 +4,13 @@ import java.util.List;
 
 import javax.servlet.http.HttpSession;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import bwfdm.sara.Config;
+import bwfdm.sara.git.GitRepoFactory;
 import bwfdm.sara.git.ProjectInfo;
 import bwfdm.sara.project.Project;
 
@@ -16,10 +19,17 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @RestController
 @RequestMapping("/api")
 public class Misc {
+	@Autowired
+	private Config config;
+
+	@GetMapping("repo-list")
+	public List<GitRepoFactory> getRepoList() {
+		return config.getConfigDatabase().getGitRepos();
+	}
+
 	@GetMapping("project-list")
 	public List<ProjectInfo> getProjectList(final HttpSession session) {
-		return Project.getInstance(session).getGitRepo()
-				.getProjects();
+		return Project.getInstance(session).getGitRepo().getProjects();
 	}
 
 	@GetMapping("session-info")

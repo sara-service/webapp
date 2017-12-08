@@ -8,7 +8,10 @@
 	<link rel="shortcut icon" href="lib/icon.png" type="image/png"/>
 	<link rel="stylesheet" href="lib/bootstrap.min.css" />
 	<link rel="stylesheet" href="lib/sara.css" />
-	<title>SARA</title>
+	<script src="lib/jquery.min.js"></script>
+	<script src="lib/uri.min.js"></script>
+	<script src="index.js"></script>
+	<title>SARA software publishing</title>
 </head>
 <body>
 	<div class="row">
@@ -28,6 +31,10 @@
 		</div>
 	</div>
 
-	<a class="btn btn-primary" href="/api/auth/login?repo=arbeits-gitlab"><tt>arbeits-gitlab.unikn.netfuture.ch</tt></a>
+	<div id="buttons"></div>
+	<div id="broken" class="hidden"><h2>Error loading list!</h2>
+		<p>If reloading doesn't fix things,
+		you may want to contact the service administrator.</p></div>
+	<div id="loading" class="loading"><span class="sr-only">loading list, please wait...</span></div>
 </body>
 </html>
