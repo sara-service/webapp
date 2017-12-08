@@ -35,12 +35,12 @@ function updateStatusItem(id, step) {
 	line.text.text(step.text);
 
 	if (step.status == "working") {
-		line.progress.css("display", "block");
+		line.progress.removeClass("hidden");
 		var value = step.progress * 100;
 		line.bar.attr("aria-valuenow", value);
 		line.bar.css("width", value + "%");
 	} else
-		line.progress.css("display", "none");
+		line.progress.addClass("hidden");
 }
 
 var _success, _error, _endpoint;

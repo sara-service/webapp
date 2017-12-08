@@ -19,17 +19,17 @@ function initSingleLicense(info) {
 
 	var detected = info.detected.length > 0 ? info.detected[0] : null;
 	initLicenseList(form, info.supported, detected, info.user);
-	$("#declare_group").removeAttr("style");
+	$("#declare_group").removeClass("hidden");
 
 	if (detected != null) {
 		// show label naming the detected license
-		$("#single_existing").removeAttr("style");
+		$("#single_existing").removeClass("hidden");
 		$("#single_detected").text(detected.name);
 		if (detected.url != null)
 			$("#single_detected").attr("href", detected.url);
 	} else
 		// show "missing license" label
-		$("#none_existing").removeAttr("style");
+		$("#none_existing").removeClass("hidden");
 
 	// enable the right button
 	if (info.missing)
@@ -39,7 +39,7 @@ function initSingleLicense(info) {
 }
 
 function initMultiLicense(licenses, missing) {
-	$("#multi_existing").removeAttr("style");
+	$("#multi_existing").removeClass("hidden");
 	// list all the various licenses
 	$.each(licenses, function(index, lic) {
 		if (index > 0)

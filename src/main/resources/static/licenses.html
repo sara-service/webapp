@@ -41,17 +41,17 @@
 	<form class="form-horizontal" id="license">
 		<table class="table" id="branch_table">
 			<tr><th>branch</th><th>file</th><th>detected license</th><th colspan="2">license to declare in publication</th></tr>
-			<tr id="template" style="display:none">
+			<tr id="template" class="hidden">
 				<td style="vertical-align:middle"><span name="type">branch</span> <b name="name">master</b></td>
 				<td style="vertical-align:middle">
 					<tt name="file">LICENSE</tt>
-					<a class="btn btn-warning btn-sm" name="edit_branch" style="display:none">edit in git repo</a>
-					<a class="btn btn-warning btn-sm" name="create_branch" style="display:none">create one in git repo</a>
-					<small name="edit_tag" style="display:none">cannot edit a tag</small>
+					<a class="btn btn-warning btn-sm hidden" name="edit_branch">edit in git repo</a>
+					<a class="btn btn-warning btn-sm hidden" name="create_branch">create one in git repo</a>
+					<small name="edit_tag" class="hidden">cannot edit a tag</small>
 				</td><td style="vertical-align:middle">
-					<a name="detected" target="_blank" style="display:none">GNU GPL 3.0</a>
-					<span name="noinfo" style="display:none">unrecognized license</span>
-					<b name="missing" style="display:none">license missing</b>
+					<a name="detected" target="_blank" class="hidden">GNU GPL 3.0</a>
+					<span name="noinfo" class="hidden">unrecognized license</span>
+					<b name="missing" class="hidden">license missing</b>
 				</td><td style="vertical-align:middle">
 					<select class="form-control" name="declare">
 						<option name="declare_choose" disabled selected>choose a license...</option>
@@ -69,7 +69,7 @@
 				with any existing licenses you are using,<br>
 				particularly if you have copied third-party code or if you are using libraries!<br>
 				You may otherwise be liable for copyright infringement.</p>
-			<a class="btn btn-default btn-danger" id="confirm" style="display:none">confirm choice of licenses</a>
+			<a class="btn btn-default btn-danger hidden" id="confirm">confirm choice of licenses</a>
 		</div>
 	</form>
 	<div id="loading" class="loading"><span class="sr-only">loading, please wait...</span></div>

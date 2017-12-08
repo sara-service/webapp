@@ -3,7 +3,7 @@
 function template(name) {
 	// clone whole subtree and change ID to be unique
 	var root = $("#" + name).clone();
-	root.removeAttr("style");
+	root.removeClass("hidden");
 	template.index++;
 	root.attr("id", "form_" + template.index);
 	var form = { root: root };

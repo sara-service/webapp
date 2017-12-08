@@ -71,7 +71,7 @@ function initFields(info) {
 	setField("title", info);
 	setField("description", info);
 	setField("version", info);
-	$("#main").removeAttr("style");
+	$("#main").removeClass("hidden");
 	$("#main_loading").css("display", "none");
 
 	API.get("load branches and tags marked for publication",
@@ -97,14 +97,14 @@ function initPage(session) {
 	autosave.init("description", save);
 	autosave.configureUpdateButton("description", updateMeta);
 	$("#reset_title").click(function() {
-		$("#reset_title_loading").removeAttr("style");
+		$("#reset_title_loading").removeClass("hidden");
 		API.post("reset to project name and description",
 			"/api/meta/project-info/reset", {}, resetTitle);
 	});
 
 	autosave.init("version", save, validateNotEmpty);
 	$("#reset_version").click(function() {
-		$("#reset_version_loading").removeAttr("style");
+		$("#reset_version_loading").removeClass("hidden");
 		var action = $("#version_branch :selected").data("ref");
 		API.post("reset version number", "/api/meta/version/reset",
 			{ ref: action.ref.path }, resetVersion);

@@ -26,7 +26,7 @@ function blockLoaded(name) {
 		return;
 
 	$("#loading").remove();
-	$("#content").removeAttr("style");
+	$("#content").removeClass("hidden");
 	$("#next_button").click(function() {
 		location.href = "/push.html";
 	});
@@ -70,7 +70,7 @@ function initLicenses(info) {
 			$("#license").text("keep " + info.detected[0].id);
 		else
 			$("#license").text(info.user);
-		$("#license").removeAttr("style");
+		$("#license").removeClass("hidden");
 	}
 	blockLoaded("licenses");
 }

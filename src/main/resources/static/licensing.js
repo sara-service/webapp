@@ -69,9 +69,9 @@ function checkLicenses(forms) {
 
 function loadingFinished(nextButton, forms) {
 	var next = $("#" + nextButton);
-	next.removeAttr("style");
+	next.removeClass("hidden");
 	if (typeof next.attr("href") == "undefined")
 		next.click(function() { checkLicenses(forms); });
-	$("#license").removeAttr("style");
+	$("#license").removeClass("hidden");
 	$("#loading").remove();
 }

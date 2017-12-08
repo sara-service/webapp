@@ -32,9 +32,9 @@ function initBranch(form, ref, file) {
 		edit.attr("href", new URI("/api/repo/edit-file")
 			.addSearch("branch", ref.name)
 			.addSearch("path", file));
-		edit.removeAttr("style");
+		edit.removeClass("hidden");
 	} else
-		form.edit_tag.removeAttr("style");
+		form.edit_tag.removeClass("hidden");
 
 }
 
@@ -47,10 +47,10 @@ function initDetected(form, detected) {
 		} else
 			text = form.noinfo;
 		text.text(detected.name);
-		text.removeAttr("style");
+		text.removeClass("hidden");
 	} else
 		text = form.missing;
-	text.removeAttr("style");
+	text.removeClass("hidden");
 }
 
 function initLicense(info) {

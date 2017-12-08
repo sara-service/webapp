@@ -35,13 +35,13 @@
 		<p class="col-xs-12">Blah blah blah if you need help, <a href="https://choosealicense.com/" target="_blank">choosealicense.com</a>.</p>
 	</div>
 	<p style="height:3ex"></p>
-	<form class="form" id="license" style="display:none">
+	<form class="form hidden" id="license">
 		<div class="form-group">
-			<label class="form-label" id="none_existing" style="display:none">No license detected!</label>
-			<label class="form-label" id="single_existing" style="display:none">Detected license: <a id="single_detected" target="_blank">GNU GPL 3.0</a></label>
-			<label class="form-label" id="multi_existing" style="display:none">Multiple licenses detected: <span id="multi_detected"></span></label>
+			<label class="form-label hidden" id="none_existing">No license detected!</label>
+			<label class="form-label hidden" id="single_existing">Detected license: <a id="single_detected" target="_blank">GNU GPL 3.0</a></label>
+			<label class="form-label hidden" id="multi_existing">Multiple licenses detected: <span id="multi_detected"></span></label>
 		</div>
-		<div class="form-group" id="declare_group" style="display:none">
+		<div class="form-group hidden" id="declare_group">
 			<label for="declare" class="form-label">License to declare in publication / archive</label>
 			<select class="form-control" id="declare">
 				<option id="declare_choose" disabled selected>choose a license...</option>
@@ -60,10 +60,10 @@
 				with any existing licenses you are using,<br>
 				particularly if you have copied third-party code or if you are using libraries!<br>
 				You may otherwise be liable for copyright infringement.</p>
-			<a class="btn btn-default btn-danger" id="confirm_single" style="display:none">confirm choice of license</a>
-			<a class="btn btn-default btn-danger" id="confirm_missing" style="display:none">choose this license for all branches</a>
-			<a class="btn btn-default btn-primary" id="confirm_multi" href="/licenses.html" style="display:none">confirm choice of license for each branch</a>
-			<a class="btn btn-default btn-primary" id="confirm_edit" href="/licenses.html" style="display:none">choose a license for each branch without a license</a>
+			<a class="btn btn-default btn-danger hidden" id="confirm_single">confirm choice of license</a>
+			<a class="btn btn-default btn-danger hidden" id="confirm_missing">choose this license for all branches</a>
+			<a class="btn btn-default btn-primary hidden" id="confirm_multi" href="/licenses.html">confirm choice of license for each branch</a>
+			<a class="btn btn-default btn-primary hidden" id="confirm_edit" href="/licenses.html">choose a license for each branch without a license</a>
 		</div>
 	</form>
 	<div id="loading" class="loading"><span class="sr-only">loading, please wait...</span></div>
