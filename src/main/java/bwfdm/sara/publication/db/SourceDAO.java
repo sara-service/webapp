@@ -7,27 +7,26 @@ import java.util.UUID;
 public class SourceDAO {
 	
 	public final UUID uuid;
-	public final String name;
-    public final String URL;
-    public final String api_Endpoint;
-    public final String oauth_id;
-    public final String oauth_secret;
+	public final String display_name;
+    public final String url;
+    public final String adapter;
+    public final boolean enabled;
     
     public SourceDAO(
     		UUID id,
     		String n,
     		String u,
-    		String apie,
-    		String i,
-    		String s
+    		String a,
+    		Boolean e
     		) {
-    	uuid = id; name = n; URL = u;
-    	api_Endpoint = apie; oauth_id = i; oauth_secret = s;
+    	uuid = id; display_name = n; url = u; adapter = a; enabled = e;
     }
     
     public void dump() {
     	System.out.println("UUID=" + uuid);
-    	System.out.println("Name=" + name);
-    	System.out.println("URL=" + URL);
+    	System.out.println("name=" + display_name);
+    	System.out.println("url=" + url);
+    	System.out.println("adapter=" + adapter);
+    	System.out.println("enabled=" + enabled);
     }
 }

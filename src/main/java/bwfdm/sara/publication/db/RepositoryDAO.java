@@ -7,47 +7,32 @@ import java.util.UUID;
 public class RepositoryDAO {
 	
 	public final UUID uuid;
-	public final String name;
-    public final String URL;
-    public final String query_API_endpoint;  // REST query API endpoint
-    public final String query_user;          // REST user name (queries only, no submissions)
-    public final String query_pwd;           // ...corresponding pwd/key
-    public final String submit_API_endpoint; // SWORD API endpoint
-    public final String submit_user;         // SWORD user name with submission rights
-    public final String submit_pwd;          // ...corresponding pwd/key
-    public final String logo_base64;         // logo image encoded in base 64 for immediate use in <img> elements
-    public final String contactEMail;        // an email address to contact the repository
-    
-    // optionally
-	public final String version;             // Show version info for compatibility.
-	public final String default_collection;         // submit into an default collection.
+	public final String display_name;
+    public final String url;
+    public final String contact_email;        // an email address to contact the repository
+    public final String adapter;
+    public final String logo_base64;
+    public final Boolean enabled;
 
     public RepositoryDAO(
     		UUID id,
     		String n,    		
     		String u,
-    		String quAPIEP,
-    		String quUser,
-    		String quPwd,
-    		String suAPIEP,
-    		String suUser,
-    		String suPwd,
-    		String v,
     		String mailaddr,
     		String logo,
-    		String defColl
+    		String a,
+    		Boolean e
     		) {
-    	uuid = id; name = n; URL = u;
-    	query_API_endpoint = quAPIEP; query_user = quUser; query_pwd = quPwd;
-    	submit_API_endpoint = suAPIEP; submit_user = quUser; submit_pwd = quPwd;
-    	contactEMail = mailaddr;
-    	version = v; logo_base64 = logo;default_collection = defColl;
+    	uuid = id; display_name = n; url = u; contact_email = mailaddr;
+    	adapter = a; logo_base64 = logo; enabled = e;
     }
     
     public void dump() {
     	System.out.println("UUID=" + uuid);
-    	System.out.println("Name=" + name);
-    	System.out.println("URL=" + URL);
-    	System.out.println("contactEMail=" + contactEMail);
+    	System.out.println("name=" + display_name);
+    	System.out.println("url=" + url);
+    	System.out.println("contact_email=" + contact_email);
+    	System.out.println("adapter=" + adapter);
+    	System.out.println("enabled=" + enabled);
     }
 }

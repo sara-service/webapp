@@ -49,19 +49,18 @@ public class PublicationDatabase {
 		this.db = new JdbcTemplate(db);
 	}
 
-	private static final String SOURCE_FIELDS = "uuid, name, URL, api_Endpoint, oauth_id, oauth_secret";
+	private static final String SOURCE_FIELDS = "uuid, display_name, url, adapter, enabled";
 
 	private static final RowMapper<SourceDAO> SOURCE_MAPPER = new RowMapper<SourceDAO>() {
 		@Override
 		public SourceDAO mapRow(final ResultSet rs, final int rowNum) throws SQLException {
 			final UUID id = (UUID) rs.getObject("uuid");
-			final String name = rs.getString("name");
-			final String URL = rs.getString("URL");
-			final String apie = rs.getString("api_Endpoint");
-			final String i = rs.getString("oauth_id");
-			final String s = rs.getString("oauth_secret");
+			final String n = rs.getString("display_name");
+			final String u = rs.getString("url");
+			final String a = rs.getString("adapter");
+			final Boolean e = rs.getBoolean("enabled");
 			
-			return new SourceDAO(id,name,URL,apie,i,s);
+			return new SourceDAO(id, n, u, a, e);
 		}
 	};
 	
@@ -69,16 +68,18 @@ public class PublicationDatabase {
 		return db.query("select " + SOURCE_FIELDS + " from " + SOURCE_TABLE, SOURCE_MAPPER);
 	}
 	
-	private static String ARCHIVE_FIELDS = "uuid, name, URL";
+	private static String ARCHIVE_FIELDS = "uuid, display_name, url, adapter, enabled";
 	
 	private static final RowMapper<ArchiveDAO> ARCHIVE_MAPPER = new RowMapper<ArchiveDAO>() {
 		@Override
 		public ArchiveDAO mapRow(final ResultSet rs, final int rowNum) throws SQLException {
 			final UUID id = (UUID) rs.getObject("uuid");
-			final String name = rs.getString("name");
-			final String URL = rs.getString("URL");
+			final String n = rs.getString("display_name");
+			final String u = rs.getString("url");
+			final String a = rs.getString("adapter");
+			final Boolean e = rs.getBoolean("enabled");
 			
-			return new ArchiveDAO(id,name,URL);
+			return new ArchiveDAO(id, n, u, a, e);
 		}
 	};
 	
@@ -87,24 +88,25 @@ public class PublicationDatabase {
 	}
 	
 	private static final String ITEM_FIELDS = 
-			"uuid, submitter_uuid, archive_uuid, repository_uuid, fuuid, "
-			+ "itemtype, itemstate, date_created, date_last_modified, citation_handle";
+			"uuid, eperson_uuid, source_uuid, archive_uuid, repository_uuid, foreign_uuid, "
+			+ "item_type, item_state, date_created, date_last_modified, in_archive, citation_handle";
 	
 	private static final RowMapper<ItemDAO> ITEM_MAPPER = new RowMapper<ItemDAO>() {
 		@Override
 		public ItemDAO mapRow(final ResultSet rs, final int rowNum) throws SQLException {
 			final UUID id = (UUID) rs.getObject("uuid");
-			final UUID sRef = (UUID)rs.getObject("submitter_uuid");
+			final UUID pRef = (UUID) rs.getObject("eperson_uuid");
+			final UUID sRef = (UUID)rs.getObject("source_uuid");
 			final UUID aRef = (UUID)rs.getObject("archive_uuid");
 			final UUID rRef = (UUID)rs.getObject("repository_uuid");
-			final String fRef = rs.getString("fuuid");
-			final ItemType t = ItemType.valueOf(rs.getString("itemtype"));
-			final ItemState s = ItemState.valueOf(rs.getString("itemstate"));
+			final String fRef = rs.getString("foreign_uuid");
+			final ItemType t = ItemType.valueOf(rs.getString("item_type"));
+			final ItemState s = ItemState.valueOf(rs.getString("item_state"));
 			final Date crDate = rs.getTimestamp("date_created");
 			final Date lmDate = rs.getTimestamp("date_last_modified");
 			final String citationHandle = rs.getString("citation_handle");
 			
-			return new ItemDAO(id,t,s,crDate,lmDate,sRef,rRef,aRef,fRef,citationHandle);
+			return new ItemDAO(id,t,s,crDate,lmDate,pRef,sRef,aRef,rRef,fRef,citationHandle);
 		}
 	};
 
@@ -112,36 +114,21 @@ public class PublicationDatabase {
 		return db.query("select " + ITEM_FIELDS + " from " + ITEM_TABLE, ITEM_MAPPER);
 	}
 	
-	private static final String REPOSITORY_FIELDS = 
-			"uuid, name, URL, query_API_endpoint, query_user, query_pwd, submit_API_endpoint, "
-			+ "submit_user, submit_pwd, contactemail, version, logo_base64, default_collection";
+	private static final String REPOSITORY_FIELDS = "uuid, display_name, url, contact_email, adapter, logo_base64, enabled ";
 	
 	private static final RowMapper<RepositoryDAO> REPOSITORY_MAPPER = new RowMapper<RepositoryDAO>() {
 		@Override
 		public RepositoryDAO mapRow(final ResultSet rs, final int rowNum) throws SQLException {
 			final UUID id = (UUID) rs.getObject("uuid");
-			final String name = rs.getString("name");
-			final String URL = rs.getString("URL");
-			final String query_API_endpoint = rs.getString("query_API_endpoint");
-			final String query_user = rs.getString("query_user");
-			final String query_pwd = rs.getString("query_pwd");
-			final String submit_API_endpoint = rs.getString("submit_API_endpoint");
-			final String submit_user = rs.getString("submit_user");
-			final String submit_pwd = rs.getString("submit_pwd");
-			final String contactEMail = rs.getString("contactemail");
-		    final String version = rs.getString("version");
-		    final String logo = rs.getString("logo_base64");
-		    final String default_collection =rs.getString("default_collection");
+			final String n = rs.getString("display_name");
+			final String u = rs.getString("url");
+			final String m = rs.getString("contact_email");
+		    final String l = rs.getString("logo_base64");
+		    final String a = rs.getString("adapter");
+		    final Boolean e = rs.getBoolean("enabled");
 		
-		    return new RepositoryDAO(
-		    	id,
-				name, URL,
-				query_API_endpoint, query_user, query_pwd,
-				submit_API_endpoint, submit_user, submit_pwd,
-				contactEMail,
-				version, logo, default_collection
-				);
-			}
+		    return new RepositoryDAO(id,n,u,m,l,a,e);
+		}
 					
 	};
 	
