@@ -26,18 +26,18 @@ import bwfdm.sara.git.GitRepoFactory;
  * but without U) queries.
  */
 public class ConfigDatabase {
-	public static final String LICENSES_TABLE = "fe_supported_licenses";
-	private static final String GITREPOS_TABLE = "fe_gitrepos";
-	private static final String GITREPO_PARAM_TABLE = "fe_gitrepo_params";
-	private static final String ARCHIVES_TABLE = "fe_archives";
-	private static final String ARCHIVE_PARAM_TABLE = "fe_archive_params";
+	public static final String LICENSES_TABLE = "public.fe_supported_licenses";
+	private static final String GITREPOS_TABLE = "public.source";
+	private static final String GITREPO_PARAM_TABLE = "public.source_params";
+	private static final String ARCHIVES_TABLE = "public.archive";
+	private static final String ARCHIVE_PARAM_TABLE = "public.archive_params";
 
 	// the kind of name you only get if you use Spring:
 	private static final RowMapper<GitRepoFactory> GIT_REPO_FACTORY_MAPPER = new RowMapper<GitRepoFactory>() {
 		@Override
 		public GitRepoFactory mapRow(final ResultSet rs, final int rowNum)
 				throws SQLException {
-			final String id = rs.getString("id");
+			final String id = rs.getString("uuid");
 			final String displayName = rs.getString("display_name");
 			final String adapter = rs.getString("adapter");
 			return new GitRepoFactory(id, displayName, adapter);
@@ -84,7 +84,7 @@ public class ConfigDatabase {
 
 	/** @return a list of all supported git repos */
 	public List<GitRepoFactory> getGitRepos() {
-		return db.query("select id, display_name, adapter from "
+		return db.query("select uuid, display_name, adapter from "
 				+ GITREPOS_TABLE, GIT_REPO_FACTORY_MAPPER);
 	}
 
@@ -98,9 +98,19 @@ public class ConfigDatabase {
 	 */
 	public GitRepo newGitRepo(final String id) {
 		final GitRepoFactory factory = db.queryForObject(
-				"select id, display_name, adapter from " + GITREPOS_TABLE
-						+ " where id = ?", GIT_REPO_FACTORY_MAPPER, id);
+				"select uuid, display_name, adapter from " + GITREPOS_TABLE
+						+ " where uuid = UUID(?)", GIT_REPO_FACTORY_MAPPER, id);
 		return factory.newGitRepo(readArguments(GITREPO_PARAM_TABLE, id));
+	}
+
+	/**
+	 * @return the ID of the (single) GitArchive
+	 * @deprecated temporary hack until we have IR selection
+	 */
+	@Deprecated
+	public String getGitArchive() {
+		return db.queryForObject("select uuid from " + ARCHIVES_TABLE,
+				String.class);
 	}
 
 	/**
@@ -113,7 +123,7 @@ public class ConfigDatabase {
 	 */
 	public ArchiveRepo newGitArchive(final String id) {
 		final String adapter = db.queryForObject("select adapter from "
-				+ ARCHIVES_TABLE + " where id = ?", String.class, id);
+				+ ARCHIVES_TABLE + " where uuid = UUID(?)", String.class, id);
 		final Map<String, String> args = readArguments(ARCHIVE_PARAM_TABLE, id);
 		return ArchiveRepoFactory.newArchiveRepo(adapter, args);
 	}
@@ -121,7 +131,7 @@ public class ConfigDatabase {
 	private Map<String, String> readArguments(final String table,
 			final String id) {
 		final Map<String, String> args = new HashMap<>();
-		db.query("select param, value from " + table + " where id = ?",
+		db.query("select param, value from " + table + " where id = UUID(?)",
 				new RowCallbackHandler() {
 					@Override
 					public void processRow(final ResultSet rs)

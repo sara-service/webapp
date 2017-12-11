@@ -54,28 +54,3 @@ create index on fe_supported_licenses(hidden asc, preference asc, id asc);
 alter table fe_temp_licenses add constraint fe_temp_valid_license
 	foreign key (license) references fe_supported_licenses(id)
 	on delete no action on update cascade deferrable;
-
-create table fe_gitrepos(
-	id text not null,
-	display_name text not null,
-	adapter text not null,
-	primary key (id)
-);
-create table fe_gitrepo_params(
-	id text not null references fe_gitrepos(id) on delete cascade,
-	param text not null,
-	value text not null,
-	primary key (id, param)
-);
-
-create table fe_archives(
-	id text not null,
-	adapter text not null,
-	primary key (id)
-);
-create table fe_archive_params(
-	id text not null references fe_archives(id) on delete cascade,
-	param text not null,
-	value text,
-	primary key (id, param)
-);
