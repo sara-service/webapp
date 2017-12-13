@@ -49,7 +49,7 @@ class ConfigStub {
 	public PublicationRepositoryFactory getPublicationRepositoryFactory(
 			final String id) {
 		for (final PublicationRepositoryFactory r : irConfig)
-			if (r.getID().equals(id))
+			if (r.dao.display_name.equals(id))
 				return r;
 		throw new NoSuchElementException("no publication repository named "
 				+ id);
