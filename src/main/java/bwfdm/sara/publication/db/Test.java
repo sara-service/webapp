@@ -4,6 +4,7 @@ import java.util.List;
 import javax.sql.DataSource;
 import org.springframework.jdbc.datasource.SimpleDriverDataSource;
 import bwfdm.sara.db.PublicationDatabase;
+import bwfdm.sara.publication.PublicationRepositoryFactory;
 
 class Test {
     public static void main(String[] args) {
@@ -16,7 +17,7 @@ class Test {
         
         PublicationDatabase pdb= new PublicationDatabase(ds);
         
-        List<RepositoryDAO> myIRs = pdb.getRepositoryList();
+        List<PublicationRepositoryFactory> myIRs = pdb.getRepositoryFactoryList();
         List<ArchiveDAO> myArchives = pdb.getArchiveList();
         List<SourceDAO> mySources = pdb.getSourceList();
         List<ItemDAO> myItems = pdb.getItemList();
@@ -25,8 +26,8 @@ class Test {
         System.out.println( "#IRs: " + myIRs.size() );
         
         // institutional repositories
-        for (RepositoryDAO ir : myIRs ) {
-        	ir.dump();
+        for (PublicationRepositoryFactory ir : myIRs ) {
+        	pdb.newPubRepo(ir.dao.uuid.toString()).dump();
         }
         
         // git archives

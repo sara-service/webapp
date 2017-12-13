@@ -5,18 +5,24 @@ import java.sql.SQLException;
 //import java.util.ArrayList;
 //import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.Date;
 //import java.util.Map;
+import java.util.HashMap;
 
 import javax.sql.DataSource;
 
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowCallbackHandler;
 //import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.jdbc.core.RowMapper;
 
 import bwfdm.sara.publication.db.ArchiveDAO;
 import bwfdm.sara.publication.db.RepositoryDAO;
+import bwfdm.sara.git.GitRepoFactory;
+import bwfdm.sara.publication.PublicationRepositoryFactory;
+import bwfdm.sara.publication.PubRepo;
 import bwfdm.sara.publication.db.SourceDAO;
 
 import bwfdm.sara.publication.db.ItemDAO;
@@ -35,9 +41,11 @@ public class PublicationDatabase {
 	private static final String ITEM_TABLE = "public.item";
 	private static final String ARCHIVE_TABLE = "public.archive";
 	private static final String REPOSITORY_TABLE = "public.repository";
+	private static final String REPOSITORY_PARAM_TABLE = "public.repository_params";
 	private static final String SOURCE_TABLE = "public.source";
 	
 	private final JdbcTemplate db;
+	private final DataSource ds;
 
 	/**
 	 * Creates a DAO for reading config values.
@@ -46,8 +54,11 @@ public class PublicationDatabase {
 	 *            the {@link DataSource} to use for all queries
 	 */
 	public PublicationDatabase(final DataSource db) {
+		this.ds = db;
 		this.db = new JdbcTemplate(db);
 	}
+	
+	public final DataSource getDataSource() { return this.ds; }
 
 	private static final String SOURCE_FIELDS = "uuid, display_name, url, adapter, enabled";
 
@@ -116,9 +127,9 @@ public class PublicationDatabase {
 	
 	private static final String REPOSITORY_FIELDS = "uuid, display_name, url, contact_email, adapter, logo_base64, enabled ";
 	
-	private static final RowMapper<RepositoryDAO> REPOSITORY_MAPPER = new RowMapper<RepositoryDAO>() {
+	private static final RowMapper<PublicationRepositoryFactory> REPOSITORY_FACTORY_MAPPER = new RowMapper<PublicationRepositoryFactory>() {
 		@Override
-		public RepositoryDAO mapRow(final ResultSet rs, final int rowNum) throws SQLException {
+		public PublicationRepositoryFactory mapRow(final ResultSet rs, final int rowNum) throws SQLException {
 			final UUID id = (UUID) rs.getObject("uuid");
 			final String n = rs.getString("display_name");
 			final String u = rs.getString("url");
@@ -126,14 +137,33 @@ public class PublicationDatabase {
 		    final String l = rs.getString("logo_base64");
 		    final String a = rs.getString("adapter");
 		    final Boolean e = rs.getBoolean("enabled");
-		
-		    return new RepositoryDAO(id,n,u,m,l,a,e);
+			return new PublicationRepositoryFactory(new RepositoryDAO(id,n,u,m,l,a,e));
 		}
-					
 	};
 	
-	public List<RepositoryDAO> getRepositoryList() {
+	private Map<String, String> readArguments(final String table,
+			final Object id) {
+		final Map<String, String> args = new HashMap<>();
+		db.query("select param, value from " + table + " where id = UUID(?)",
+				new RowCallbackHandler() {
+					@Override
+					public void processRow(final ResultSet rs)
+							throws SQLException {
+						args.put(rs.getString("param"), rs.getString("value"));
+					}
+				}, id);
+		return args;
+	}
+	
+	public PubRepo newPubRepo(final String id) {
+		final PublicationRepositoryFactory factory = db.queryForObject(
+				"select * from " + REPOSITORY_TABLE
+						+ " where uuid = UUID(?)", REPOSITORY_FACTORY_MAPPER, id);
+		return factory.newPubRepo(readArguments(REPOSITORY_PARAM_TABLE, id));
+	}
+	
+	public List<PublicationRepositoryFactory> getRepositoryFactoryList() {
 		return db.query("select " + REPOSITORY_FIELDS + " from "
-				+ REPOSITORY_TABLE, REPOSITORY_MAPPER);
+				+ REPOSITORY_TABLE, REPOSITORY_FACTORY_MAPPER);
 	}
 }

@@ -51,6 +51,9 @@ public class MainInt {
 	 */
 	public static void main(final String[] args) throws IOException {
 		// creates a config for testing
+		/*
+		 * sk: this code is broken by changes in class PublicationRepositoryFactory
+		 * 
 		final ConfigStub config = new ConfigStub();
 		pubRepoOparuFive = config.getPublicationRepositoryFactory("oparu5")
 				.newPublicationRepository();
@@ -58,6 +61,7 @@ public class MainInt {
 				.newPublicationRepository();
 		pubRepoDemoDSpaceOrgSix = config.getPublicationRepositoryFactory(
 				"demo.dspace.org").newPublicationRepository();
+		*/
 
 		// Test Form
 		/* Set the Nimbus look and feel */

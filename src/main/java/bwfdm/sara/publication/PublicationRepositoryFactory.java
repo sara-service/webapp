@@ -3,53 +3,49 @@ package bwfdm.sara.publication;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import bwfdm.sara.publication.db.RepositoryDAO;
+import bwfdm.sara.publication.PubRepo;
+import bwfdm.sara.publication.dspace.DSpace_RESTv5_SWORDv2;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @JsonIgnoreProperties(ignoreUnknown = false)
 public class PublicationRepositoryFactory {
+	//@SuppressWarnings("unchecked")
 	private static final ObjectMapper MAPPER = new ObjectMapper();
-
-	@JsonProperty
-	private String id;
-	@JsonProperty
-	private String displayName;
-	@JsonProperty("class")
-	private String className;
-	@JsonProperty
-	private JsonNode args;
-
-	/** used only by Jackson via reflection */
-	private PublicationRepositoryFactory() {
+	private static final Map<String, Class<? extends PubRepo>> ADAPTERS = new HashMap<>();
+	static {
+		ADAPTERS.put("DSpace_RESTv5_SWORDv2", DSpace_RESTv5_SWORDv2.class);
 	}
 
-	public String getID() {
-		return id;
-	}
+	@JsonProperty
+	public final RepositoryDAO dao;
 
-	public String getDisplayName() {
-		return displayName;
+
+	//@JsonProperty
+	//private JsonNode args;
+
+	public PublicationRepositoryFactory(final RepositoryDAO dao) {
+		this.dao = dao;
 	}
 
 	/**
 	 * Creates a new {@link PublicationRepository} instance.
 	 * <p>
 	 * Uses Jackson to construct the object from JSON. For this to work, the
-	 * constructor must be annotated with {@link JsonCreator}, and all its
-	 * arguments must have {@link JsonProperty} annotation giving the argument's
-	 * name in the JSON, ie. something like {@code @JsonProperty("url")}.
+	 * constructor must be annotated with {@link JsonCreator}, and all its arguments
+	 * must have {@link JsonProperty} annotation giving the argument's name in the
+	 * JSON, ie. something like {@code @JsonProperty("url")}.
 	 * 
 	 * @return a new {@link PublicationRepository}
 	 */
-	public PublicationRepository newPublicationRepository() {
-		try {
-			@SuppressWarnings("unchecked")
-			final Class<PublicationRepository> cls = (Class<PublicationRepository>) Class
-					.forName(className);
-			// convertValue takes a raw JSON tree and creates an object from it
-			return MAPPER.convertValue(args, cls);
-		} catch (final ClassNotFoundException e) {
-			throw new RuntimeException("cannot instantiate " + id, e);
-		}
+	public PubRepo newPubRepo(final Map<String, String> args) {
+		final Class<? extends PubRepo> cls = ADAPTERS.get(dao.adapter);
+		args.put("uuid", dao.uuid.toString());
+		args.put("url", dao.url);
+		return MAPPER.convertValue(args, cls);
 	}
 }

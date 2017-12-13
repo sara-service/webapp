@@ -14,6 +14,7 @@ grant select, insert, update, delete on fe_supported_licenses to test;
 grant select on public.source to test;
 grant select on public.source_params to test;
 grant select on public.repository to test;
+grant select on public.repository_params to test;
 grant select on public.archive to test;
 grant select on public.archive_params to test;
 grant select, insert, update on public.item to test;
