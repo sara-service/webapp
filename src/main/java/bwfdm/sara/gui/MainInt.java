@@ -8,7 +8,7 @@ package bwfdm.sara.gui;
 import java.io.IOException;
 
 import bwfdm.sara.publication.DemoDSpaceOrgSix;
-import bwfdm.sara.publication.PublicationRepository;
+import bwfdm.sara.publication.PublicationRepositoryDeprecated;
 import bwfdm.sara.publication.dspace.DSpaceConfig;
 import bwfdm.sara.publication.dspace.DSpaceRest;
 import bwfdm.sara.publication.dspace.DSpaceVersionFive;
@@ -38,10 +38,10 @@ public class MainInt {
 			DSpaceConfig.SSL_VERIFY_DemoDSpaceOrg_SIX,
 			DSpaceConfig.RESPONSE_STATUS_OK_DemoDSpaceOrg_SIX);
 
-	public static PublicationRepository pubRepo;
-	public static PublicationRepository pubRepoOparuFive;
-	public static PublicationRepository pubRepoOparuSix;
-	public static PublicationRepository pubRepoDemoDSpaceOrgSix;
+	public static PublicationRepositoryDeprecated pubRepo;
+	public static PublicationRepositoryDeprecated pubRepoOparuFive;
+	public static PublicationRepositoryDeprecated pubRepoOparuSix;
+	public static PublicationRepositoryDeprecated pubRepoDemoDSpaceOrgSix;
 
 	public static boolean isOK;
 

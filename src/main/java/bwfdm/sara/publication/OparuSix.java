@@ -11,7 +11,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * 
  * @author vk
  */
-public class OparuSix implements PublicationRepository {
+public class OparuSix implements PublicationRepositoryDeprecated {
 
 	private final DSpaceVersionSix dspaceRepo;
 	private final String urlServer;

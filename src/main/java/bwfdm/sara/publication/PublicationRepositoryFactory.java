@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import bwfdm.sara.publication.db.RepositoryDAO;
-import bwfdm.sara.publication.PubRepo;
+import bwfdm.sara.publication.PublicationRepository;
 import bwfdm.sara.publication.dspace.DSpace_RESTv5_SWORDv2;
 
 import java.util.HashMap;
@@ -16,7 +16,7 @@ import java.util.Map;
 public class PublicationRepositoryFactory {
 	//@SuppressWarnings("unchecked")
 	private static final ObjectMapper MAPPER = new ObjectMapper();
-	private static final Map<String, Class<? extends PubRepo>> ADAPTERS = new HashMap<>();
+	private static final Map<String, Class<? extends PublicationRepository>> ADAPTERS = new HashMap<>();
 	static {
 		ADAPTERS.put("DSpace_RESTv5_SWORDv2", DSpace_RESTv5_SWORDv2.class);
 	}
@@ -42,8 +42,8 @@ public class PublicationRepositoryFactory {
 	 * 
 	 * @return a new {@link PublicationRepository}
 	 */
-	public PubRepo newPubRepo(final Map<String, String> args) {
-		final Class<? extends PubRepo> cls = ADAPTERS.get(dao.adapter);
+	public PublicationRepository newPubRepo(final Map<String, String> args) {
+		final Class<? extends PublicationRepository> cls = ADAPTERS.get(dao.adapter);
 		args.put("uuid", dao.uuid.toString());
 		args.put("url", dao.url);
 		return MAPPER.convertValue(args, cls);

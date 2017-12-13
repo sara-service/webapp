@@ -9,7 +9,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * 
  * @author vk
  */
-public class OparuFive implements PublicationRepository {
+public class OparuFive implements PublicationRepositoryDeprecated {
 
 	private final DSpaceVersionFive dspaceFive;
 	private final String urlServer;

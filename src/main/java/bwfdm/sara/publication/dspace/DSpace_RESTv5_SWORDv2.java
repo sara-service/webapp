@@ -1,6 +1,5 @@
 package bwfdm.sara.publication.dspace;
 
-
 /*
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -13,16 +12,16 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 */
 
-import bwfdm.sara.publication.PubRepo;
-import bwfdm.sara.publication.db.RepositoryDAO;
+import bwfdm.sara.publication.PublicationRepository;
 
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /** high-level abstraction of the DSpace RESTv5 + SWORDv2 API. */
-public class DSpace_RESTv5_SWORDv2 implements PubRepo {
+public class DSpace_RESTv5_SWORDv2 implements PublicationRepository {
 
 	private final UUID repository_uuid;
 	private final String url;
@@ -38,51 +37,76 @@ public class DSpace_RESTv5_SWORDv2 implements PubRepo {
 	 *            URL to GitLab root
 	 */
 	@JsonCreator
-	public DSpace_RESTv5_SWORDv2(
-			@JsonProperty("uuid") final String rRef,
-			@JsonProperty("url") final String u,
-			@JsonProperty("rest_user") final String ru,
-			@JsonProperty("rest_pwd") final String rp, @JsonProperty("rest_api_endpoint") final String re,
-			@JsonProperty("sword_user") final String su, @JsonProperty("sword_pwd") final String sp,
-			@JsonProperty("sword_api_endpoint") final String se) {
+	public DSpace_RESTv5_SWORDv2(@JsonProperty("uuid") final String rRef, @JsonProperty("url") final String u,
+			@JsonProperty("rest_user") final String ru, @JsonProperty("rest_pwd") final String rp,
+			@JsonProperty("rest_api_endpoint") final String re, @JsonProperty("sword_user") final String su,
+			@JsonProperty("sword_pwd") final String sp, @JsonProperty("sword_api_endpoint") final String se) {
 
 		repository_uuid = UUID.fromString(rRef);
 		url = u;
-		
+
 		if (url.endsWith("/"))
 			throw new IllegalArgumentException("url must not end with slash: " + url);
 
-		rest_user = ru; rest_pwd = rp; rest_api_endpoint = re;
-		sword_user = su; sword_pwd = sp; sword_api_endpoint = se;
+		rest_user = ru;
+		rest_pwd = rp;
+		rest_api_endpoint = re;
+		sword_user = su;
+		sword_pwd = sp;
+		sword_api_endpoint = se;
 	}
 
+	@Override
+	public Boolean isAccessible() {
+		System.out.println("Testing REST Access...");
+		System.out.println("Testing SWORD Access...");
+		return false;
+	}
 
 	@Override
 	public UUID getUUID() {
 		return repository_uuid;
 	}
-	
+
 	@Override
-	public List<String> getAvailableCollections() {
+	public Boolean isUserRegistered(String loginName) {
+		// TODO Auto-generated method stub
 		return null;
 	}
 
-    @Override
-    public Boolean isUserRegistered(String loginName) {
-    	// TODO Auto-generated method stub
-    	return null;
-    }
-    
-    @Override
-    public Boolean isUserAssigned(String loginName) {
-    	// TODO Auto-generated method stub
-    	return null;
-    }
-    
-    @Override
-    public void dump() {
-    	System.out.println("id=" + repository_uuid.toString());
-    	System.out.println("url=" + rest_user);
-    	System.out.println("name=" + rest_pwd);
-    }
+	@Override
+	public Boolean isUserAssigned(String loginName) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String getCollectionName(String uuid) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	public String getMetadataName(String uuid) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public Map<String, String> getAvailableCollections() {
+		Map<String, String> coll = new HashMap<>();
+		coll.put("0815", "Coffee-Management");
+		return coll;
+	}
+
+	@Override
+	public void dump() {
+		System.out.println("uuid=" + repository_uuid.toString());
+		System.out.println("url=" + url);
+		System.out.println("rest_user=" + rest_user);
+		System.out.println("rest_pwd=" + rest_pwd);
+		System.out.println("rest_api_endpoint=" + rest_api_endpoint);
+		System.out.println("sword_user=" + sword_user);
+		System.out.println("sword_pwd=" + sword_pwd);
+		System.out.println("sword_api_endpoint=" + sword_api_endpoint);
+	}
 }

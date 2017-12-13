@@ -15,19 +15,24 @@ import javax.sql.DataSource;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowCallbackHandler;
-//import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.jdbc.core.RowMapper;
 
-import bwfdm.sara.publication.db.ArchiveDAO;
-import bwfdm.sara.publication.db.RepositoryDAO;
-import bwfdm.sara.git.GitRepoFactory;
-import bwfdm.sara.publication.PublicationRepositoryFactory;
-import bwfdm.sara.publication.PubRepo;
-import bwfdm.sara.publication.db.SourceDAO;
+
+import bwfdm.sara.publication.db.EPersonDAO;
 
 import bwfdm.sara.publication.db.ItemDAO;
 import bwfdm.sara.publication.db.ItemType;
 import bwfdm.sara.publication.db.ItemState;
+
+import bwfdm.sara.publication.db.SourceDAO;
+import bwfdm.sara.publication.db.ArchiveDAO;
+import bwfdm.sara.publication.db.RepositoryDAO;
+
+import bwfdm.sara.publication.db.CollectionDAO;
+import bwfdm.sara.publication.db.MetadataDAO;
+
+import bwfdm.sara.publication.PublicationRepositoryFactory;
+import bwfdm.sara.publication.PublicationRepository;
 
 /**
  * Database containing config stuff for the publication backend.
@@ -38,11 +43,14 @@ import bwfdm.sara.publication.db.ItemState;
  */
 public class PublicationDatabase {
 	
+	private static final String PERSON_TABLE = "public.eperson";
 	private static final String ITEM_TABLE = "public.item";
 	private static final String ARCHIVE_TABLE = "public.archive";
 	private static final String REPOSITORY_TABLE = "public.repository";
 	private static final String REPOSITORY_PARAM_TABLE = "public.repository_params";
 	private static final String SOURCE_TABLE = "public.source";
+	private static final String COLLECTION_TABLE = "public.collection";
+	private static final String METADATA_TABLE = "public.metadata";
 	
 	private final JdbcTemplate db;
 	private final DataSource ds;
@@ -59,7 +67,27 @@ public class PublicationDatabase {
 	}
 	
 	public final DataSource getDataSource() { return this.ds; }
-
+	
+	
+	
+	private static final String PERSON_FIELDS = "uuid, contact_email, password, last_active";
+	
+	private static final RowMapper<EPersonDAO> PERSON_MAPPER = new RowMapper<EPersonDAO>() {
+		@Override
+		public EPersonDAO mapRow(final ResultSet rs, final int rowNum) throws SQLException {
+			final UUID uuid = (UUID) rs.getObject("uuid");
+			
+			final String contact_email = rs.getString("contact_email");
+			final String password = rs.getString("password");
+			final Date last_active = rs.getTimestamp("last_active");
+			return new EPersonDAO(uuid,contact_email,password,last_active);
+		}
+	};
+	
+	public List<EPersonDAO> getPersonList() {
+		return db.query("select " + PERSON_FIELDS + " from " + PERSON_TABLE, PERSON_MAPPER);
+	}
+	
 	private static final String SOURCE_FIELDS = "uuid, display_name, url, adapter, enabled";
 
 	private static final RowMapper<SourceDAO> SOURCE_MAPPER = new RowMapper<SourceDAO>() {
@@ -155,7 +183,7 @@ public class PublicationDatabase {
 		return args;
 	}
 	
-	public PubRepo newPubRepo(final String id) {
+	public PublicationRepository newPubRepo(final String id) {
 		final PublicationRepositoryFactory factory = db.queryForObject(
 				"select * from " + REPOSITORY_TABLE
 						+ " where uuid = UUID(?)", REPOSITORY_FACTORY_MAPPER, id);
@@ -166,4 +194,41 @@ public class PublicationDatabase {
 		return db.query("select " + REPOSITORY_FIELDS + " from "
 				+ REPOSITORY_TABLE, REPOSITORY_FACTORY_MAPPER);
 	}
+	
+	
+	private static String COLLECTION_FIELDS = "id, foreign_uuid, enabled";
+	
+	private static final RowMapper<CollectionDAO> COLLECTION_MAPPER = new RowMapper<CollectionDAO>() {
+		@Override
+		public CollectionDAO mapRow(final ResultSet rs, final int rowNum) throws SQLException {
+			final UUID id = (UUID) rs.getObject("id");
+			final String foreign_uuid = rs.getString("foreign_uuid");
+			final Boolean enabled = rs.getBoolean("enabled");
+			return new CollectionDAO(id,foreign_uuid,enabled);
+		}
+	};
+	
+	public List<CollectionDAO> getCollectionList(final Object id) {
+		return db.query("select " + COLLECTION_FIELDS + " from " + COLLECTION_TABLE + " where id = UUID(?)", COLLECTION_MAPPER, id);
+	}
+	
+	private static String METADATA_FIELDS = "id, display_name, map_from, map_to, enabled";
+	
+	
+	private static final RowMapper<MetadataDAO> METADATA_MAPPER = new RowMapper<MetadataDAO>() {
+		@Override
+		public MetadataDAO mapRow(final ResultSet rs, final int rowNum) throws SQLException {
+			final UUID id = (UUID) rs.getObject("id");
+			final String display_name = rs.getString("display_name");
+			final Boolean enabled = rs.getBoolean("enabled");
+			final String map_from = rs.getString("map_from");
+			final String map_to = rs.getString("map_to");
+			return new MetadataDAO(id,display_name,map_from, map_to, enabled);
+		}
+	};
+	
+	public List<MetadataDAO> getMetadataList(final Object id) {
+		return db.query("select " + METADATA_FIELDS + " from " + METADATA_TABLE + " where id = UUID(?)", METADATA_MAPPER, id);
+	}
+	
 }

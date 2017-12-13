@@ -7,7 +7,7 @@ import java.util.NoSuchElementException;
 
 import bwfdm.sara.git.GitRepo;
 import bwfdm.sara.git.GitRepoFactory;
-import bwfdm.sara.publication.PublicationRepository;
+import bwfdm.sara.publication.PublicationRepositoryDeprecated;
 import bwfdm.sara.publication.PublicationRepositoryFactory;
 
 import com.fasterxml.jackson.core.JsonParser.Feature;

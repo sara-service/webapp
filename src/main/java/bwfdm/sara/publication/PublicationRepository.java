@@ -1,32 +1,24 @@
 package bwfdm.sara.publication;
 
+import java.util.Map;
+import java.util.UUID;
+
 /**
  * Interface for the publication repository.
  * 
- * Idea - to have some interface, which can allow to implement/connect differen
- * publication repositories.
- * 
- * Repositories for the beginning: - OPARU (Uni Ulm) - KOPS (Uni Konstanz)
- * 
- * TODO: implement all communication with the real repositories via these
- * methods.
- * 
- * @author vk
+ * @author sk
  */
 public interface PublicationRepository {
 
-	public boolean loginPublicationRepository();
+    public UUID getUUID();
 
-	public boolean logoutPublicationRepository();
+    public Boolean isAccessible();
+    public Boolean isUserRegistered(String loginName);
+	public Boolean isUserAssigned(String loginName);
+	
+	public String getCollectionName(String uuid);
+	public String getMetadataName(String uuid);
+	public Map<String, String> getAvailableCollections();
 
-	public boolean publishElement(String publicationLink, String metadata);
-
-	public String changeElement();
-
-	public String deleteElement();
-
-	public String changeElementMetadata();
-
-	public String getRepositoryUrl();
-
+	public void dump();
 }

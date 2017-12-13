@@ -1,6 +1,6 @@
 package bwfdm.sara.publication.dspace;
 
-import bwfdm.sara.publication.PublicationRepository;
+import bwfdm.sara.publication.PublicationRepositoryDeprecated;
 
 /**
  * Configuration of DSpace: login, password, types...
@@ -90,7 +90,7 @@ public class DSpaceConfig {
 	 * @return password string
 	 */
 	public static String getPassword(final String email,
-			final PublicationRepository obj) {
+			final PublicationRepositoryDeprecated obj) {
 
 		switch (email) {
 		case EMAIL_OPARU:
