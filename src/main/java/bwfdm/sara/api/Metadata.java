@@ -129,7 +129,7 @@ public class Metadata {
 		// need to re-run detection because it depends on the ref. this has the
 		// side effect that it crashes if ref is invalid, so it's harder to get
 		// garbage into the versionbranch field...
-		project.getMetadataExtractor().setVersionFromBranch(Ref.fromPath(ref));
+		project.getMetadataExtractor().setVersionFromBranch(new Ref(ref));
 
 		final FrontendDatabase db = project.getFrontendDatabase();
 		db.setMetadata(MetadataField.VERSION_BRANCH, ref);

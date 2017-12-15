@@ -1,9 +1,10 @@
 package bwfdm.sara.project;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import bwfdm.sara.git.Branch;
 import bwfdm.sara.git.Tag;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Ref {
 	/** ref in git syntax, ie. {@code heads/master} or {@code tags/foo} */
@@ -33,12 +34,19 @@ public class Ref {
 		this(RefType.TAG, t.name);
 	}
 
-	public static Ref fromPath(final String path) {
-		for (final RefType type : RefType.values())
-			if (path.startsWith(type.pathPrefix()))
-				return new Ref(type, path.substring(type.pathPrefix().length()));
-		throw new IllegalArgumentException("no RefType matches prefix of "
-				+ path);
+	@JsonCreator
+	public Ref(final String path) {
+		RefType type = null;
+		for (final RefType t : RefType.values())
+			if (path.startsWith(t.pathPrefix()))
+				type = t;
+		if (type == null)
+			throw new IllegalArgumentException(
+					"no RefType matches prefix of " + path);
+
+		this.type = type;
+		name = path.substring(type.pathPrefix().length());
+		this.path = type.pathPrefix() + name;
 	}
 
 	@Override

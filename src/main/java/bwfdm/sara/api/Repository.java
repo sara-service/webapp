@@ -84,7 +84,7 @@ public class Repository {
 			@RequestParam("firstCommit") final String start,
 			final HttpSession session) {
 		final Project project = Project.getInstance(session);
-		project.getFrontendDatabase().setRefAction(Ref.fromPath(refPath),
+		project.getFrontendDatabase().setRefAction(new Ref(refPath),
 				action, start);
 		project.invalidateTransferRepo();
 	}

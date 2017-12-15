@@ -52,7 +52,7 @@ public class Licenses {
 			final HttpSession session) {
 		final Project project = Project.getInstance(session);
 		final FrontendDatabase db = project.getFrontendDatabase();
-		db.setLicense(Ref.fromPath(refPath), LicensesInfo.unmapKeep(license));
+		db.setLicense(new Ref(refPath), LicensesInfo.unmapKeep(license));
 		project.invalidateMetadata();
 	}
 

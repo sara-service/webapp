@@ -129,7 +129,7 @@ public class FrontendDatabase {
 				+ " where repo = ? and project = ?", new RowCallbackHandler() {
 			@Override
 			public void processRow(final ResultSet rs) throws SQLException {
-				final Ref ref = Ref.fromPath(rs.getString("ref"));
+				final Ref ref = new Ref(rs.getString("ref"));
 				meta.put(ref, rs.getString("license"));
 			}
 		}, gitRepo, project);
@@ -201,7 +201,7 @@ public class FrontendDatabase {
 				+ " where repo = ? and project = ?", new RowCallbackHandler() {
 			@Override
 			public void processRow(final ResultSet rs) throws SQLException {
-				final Ref ref = Ref.fromPath(rs.getString("ref"));
+				final Ref ref = new Ref(rs.getString("ref"));
 				final PublicationMethod publish = PublicationMethod.valueOf(rs
 						.getString("action"));
 				final String firstCommit = rs.getString("start");
