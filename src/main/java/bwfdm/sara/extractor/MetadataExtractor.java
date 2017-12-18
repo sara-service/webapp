@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.regex.Pattern;
 
 import bwfdm.sara.extractor.licensee.LicenseeExtractor;
@@ -176,7 +175,7 @@ public class MetadataExtractor {
 		return best;
 	}
 
-	public void detectVersion(final Set<Ref> set) throws IOException {
+	public void detectVersion(final Collection<Ref> set) throws IOException {
 		for (final Ref ref : set) {
 			String data = repo.readString(ref, VERSION_FILE);
 			if (data == null)

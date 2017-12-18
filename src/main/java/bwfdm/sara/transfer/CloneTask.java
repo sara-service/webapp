@@ -4,8 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Map;
-import java.util.Map.Entry;
+import java.util.List;
 
 import org.eclipse.jgit.api.FetchCommand;
 import org.eclipse.jgit.api.Git;
@@ -31,18 +30,22 @@ import bwfdm.sara.project.RefAction;
 public class CloneTask extends Task {
 	private final MetadataExtractor extractor;
 	private final GitProject project;
-	private final Map<Ref, RefAction> actions;
+	private final List<RefAction> actions;
+	private final List<Ref> refs;
 	private final File root;
 	private final TransferRepo transferRepo;
 	private Git git;
 
 	public CloneTask(final TransferRepo transferRepo,
 			final MetadataExtractor extractor, final GitProject project,
-			final Map<Ref, RefAction> actions) {
+			final List<RefAction> actions) {
 		this.transferRepo = transferRepo;
 		this.extractor = extractor;
 		this.project = project;
 		this.actions = actions;
+		refs = new ArrayList<>(actions.size());
+		for (final RefAction a : actions)
+			refs.add(a.ref);
 		root = transferRepo.getRoot();
 	}
 
@@ -57,6 +60,7 @@ public class CloneTask extends Task {
 		initRepo();
 		fetchHeads();
 		pushBackHeads();
+		rewriteHistory();
 		transferRepo.setRepo(git.getRepository());
 		extractMetaData();
 		endTask();
@@ -76,13 +80,13 @@ public class CloneTask extends Task {
 		// due to limitations in the git clone protocol, we have to always
 		// fetch the HEAD, even if we actually want to start archiving a few
 		// commits back.
-		final ArrayList<RefSpec> refs = new ArrayList<RefSpec>(actions.size());
-		for (final Ref r : actions.keySet()) {
+		final ArrayList<RefSpec> spec = new ArrayList<RefSpec>(actions.size());
+		for (final Ref r : refs) {
 			final String path = Constants.R_REFS + r.path;
-			refs.add(new RefSpec().setSourceDestination(path, path)
+			spec.add(new RefSpec().setSourceDestination(path, path)
 					.setForceUpdate(true));
 		}
-		remote.setFetchRefSpecs(refs);
+		remote.setFetchRefSpecs(spec);
 		final StoredConfig config = git.getRepository().getConfig();
 		remote.update(config);
 		config.save();
@@ -123,16 +127,15 @@ public class CloneTask extends Task {
 		// to start fetching at those commit objects directly, but that isn't
 		// possible in the git clone protocol.
 		int pushBacks = 0;
-		for (final RefAction r : actions.values())
-			if (!r.getFirstCommit().equals(RefAction.HEAD_COMMIT))
+		for (final RefAction r : actions)
+			if (!r.firstCommit.equals(RefAction.HEAD_COMMIT))
 				pushBacks++;
 		if (pushBacks == 0)
 			return; // nothing to do
 
 		beginTask("Setting branch starting points", pushBacks);
-		for (final Entry<Ref, RefAction> e : actions.entrySet()) {
-			final String firstCommit = e.getValue().getFirstCommit();
-			if (firstCommit.equals(RefAction.HEAD_COMMIT))
+		for (final RefAction e : actions) {
+			if (e.firstCommit.equals(RefAction.HEAD_COMMIT))
 				continue;
 
 			// TODO how to handle annotated tags?
@@ -145,13 +148,18 @@ public class CloneTask extends Task {
 			// - pointing signed annotated tags at a different commit would
 			//   invalidate the signature so isn't advisable anyway
 			final RefUpdate update = git.getRepository().updateRef(
-					Constants.R_REFS + e.getKey().path);
+					Constants.R_REFS + e.ref.path);
 			update.disableRefLog();
-			update.setNewObjectId(ObjectId.fromString(firstCommit));
+			update.setNewObjectId(ObjectId.fromString(e.firstCommit));
 			update.setCheckConflicting(false);
 			update.forceUpdate();
 			update(1);
 		}
+	}
+
+	private void rewriteHistory() {
+		beginTask("NOT abbreviating history (not implemented yet)", 1);
+		// TODO handle abbreviated history etc, producing @version refs
 	}
 
 	private void extractMetaData() throws IOException {
@@ -159,12 +167,12 @@ public class CloneTask extends Task {
 		extractor.detectProjectInfo();
 		update(1);
 
-		final Ref master = extractor.detectMasterBranch(actions.keySet());
-		extractor.detectVersion(actions.keySet()); // detect for ALL branches
+		final Ref master = extractor.detectMasterBranch(refs);
+		extractor.detectVersion(refs); // detect for ALL branches
 		extractor.setVersionFromBranch(master);
 		update(1);
 
-		extractor.detectLicenses(actions.keySet());
+		extractor.detectLicenses(refs);
 		update(1);
 	}
 }

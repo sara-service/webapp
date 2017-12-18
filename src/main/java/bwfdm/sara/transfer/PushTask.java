@@ -3,6 +3,7 @@ package bwfdm.sara.transfer;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Map;
 
 import org.eclipse.jgit.api.Git;
@@ -21,23 +22,22 @@ import bwfdm.sara.git.ArchiveRepo;
 import bwfdm.sara.git.ArchiveRepo.ProjectExistsException;
 import bwfdm.sara.project.MetadataField;
 import bwfdm.sara.project.Ref;
-import bwfdm.sara.project.RefAction;
 
 public class PushTask extends Task {
 	private static final String TARGET_REMOTE = "target";
 
 	private final Repository repo;
-	private final Map<Ref, RefAction> actions;
+	private final Collection<Ref> refs;
 	private final ArchiveRepo archive;
 	private final Map<MetadataField, String> meta;
 	private final boolean visible;
 	private ArchiveProject project;
 
-	public PushTask(final TransferRepo repo, final Map<Ref, RefAction> actions,
+	public PushTask(final TransferRepo repo, final Collection<Ref> refs,
 			final ArchiveRepo archive, final Map<MetadataField, String> meta,
 			final boolean visible) {
 		this.repo = repo.getRepo();
-		this.actions = actions;
+		this.refs = refs;
 		this.archive = archive;
 		this.meta = meta;
 		this.visible = visible;
@@ -47,7 +47,7 @@ public class PushTask extends Task {
 	protected void cleanup() {
 		if (project == null || !project.isEmpty())
 			return; // never remove projects that we didn't create!
-		// TODO SARA user should not need this permission on the archive
+		// FIXME SARA user should not need this permission on the archive
 		project.deleteProject();
 		project = null;
 	}
@@ -55,8 +55,6 @@ public class PushTask extends Task {
 	@Override
 	protected void execute() throws GitAPIException, URISyntaxException,
 			IOException, ProjectExistsException {
-		beginTask("NOT rewriting history (not implemented yet)", 1);
-		// TODO handle abbreviated history etc, producing @version refs
 		beginTask("NOT committing metadata to git archive"
 				+ " (not implemented yet, either)", 1);
 		// TODO commit submitted_metadata.xml to repo
@@ -81,14 +79,14 @@ public class PushTask extends Task {
 		update(1);
 
 		final PushCommand push = git.push();
-		final ArrayList<RefSpec> refs = new ArrayList<RefSpec>(actions.size());
-		for (final Ref r : actions.keySet()) {
+		final ArrayList<RefSpec> spec = new ArrayList<RefSpec>(refs.size());
+		for (final Ref r : refs) {
 			final String path = Constants.R_REFS + r.path;
 			// TODO send locally-created refs unchanged
-			refs.add(new RefSpec().setSourceDestination(path, path)
+			spec.add(new RefSpec().setSourceDestination(path, path)
 					.setForceUpdate(true));
 		}
-		push.setRefSpecs(refs);
+		push.setRefSpecs(spec);
 		push.setRemote(TARGET_REMOTE);
 
 		project.setCredentials(push);

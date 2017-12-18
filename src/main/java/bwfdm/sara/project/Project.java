@@ -182,9 +182,10 @@ public class Project {
 			final Map<MetadataField, String> meta = metadataExtractor
 					.get(MetadataField.values());
 			meta.putAll(getFrontendDatabase().getMetadata());
-			push = new PushTask(getTransferRepo(), getFrontendDatabase()
-					.getRefActions(), config.getConfigDatabase().newGitArchive(
-					archiveID), meta, true);
+			push = new PushTask(getTransferRepo(),
+					getFrontendDatabase().getSelectedRefs(),
+					config.getConfigDatabase().newGitArchive(archiveID), meta,
+					true);
 		}
 		push.start();
 	}
@@ -240,7 +241,7 @@ public class Project {
 	 * Creates a new {@link Project} instance, overwriting the previous one.
 	 * Meant to be called by the {@link Authorization login / session creation
 	 * code} only!
-	 * 
+	 *
 	 * @param session
 	 *            the user's {@link HttpSession}
 	 * @param repoID

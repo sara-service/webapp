@@ -5,6 +5,8 @@ import java.sql.SQLException;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -12,6 +14,7 @@ import javax.sql.DataSource;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowCallbackHandler;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
@@ -46,7 +49,7 @@ public class FrontendDatabase {
 	 */
 	/**
 	 * Creates a DAO for reading / writing values for a particular project.
-	 * 
+	 *
 	 * @param db
 	 *            the {@link DataSource} to use for all queries
 	 * @param gitRepo
@@ -67,7 +70,7 @@ public class FrontendDatabase {
 	 * Get metadata. The returned map is a snapshot; it doesn't reflect later
 	 * changes made by {@link #setMetadata(MetadataField, String)}! Also, some
 	 * fields will be missing if the user never entered a value for them.
-	 * 
+	 *
 	 * @return all metadata fields in a {@link Map}
 	 */
 	public Map<MetadataField, String> getMetadata() {
@@ -87,7 +90,7 @@ public class FrontendDatabase {
 
 	/**
 	 * Set a single metadata field.
-	 * 
+	 *
 	 * @param field
 	 *            the field to update, not {@code null}
 	 * @param value
@@ -119,7 +122,7 @@ public class FrontendDatabase {
 	 * doesn't reflect later changes made by {@link #setLicense(Ref, String)} or
 	 * {@link #setLicenses(Map)}! Also, refs will not have a value unless the
 	 * user chose a different license for that branch (or for all branches).
-	 * 
+	 *
 	 * @return a {@link Map} giving the user-selected license for each branch /
 	 *         tag
 	 */
@@ -138,7 +141,7 @@ public class FrontendDatabase {
 
 	/**
 	 * Updates the license for a single ref.
-	 * 
+	 *
 	 * @param ref
 	 *            the ref whose license to set, never {@code null}
 	 * @param value
@@ -157,7 +160,7 @@ public class FrontendDatabase {
 	/**
 	 * Updates the license for a set of refs. Only refs that have a
 	 * corresponding key in the set will be modifed.
-	 * 
+	 *
 	 * @param values
 	 *            a {@link Map} providing a license for each ref. refs
 	 *            explicitly mapped to {@code null} are set to keep the existing
@@ -187,33 +190,57 @@ public class FrontendDatabase {
 
 	/**
 	 * Get the list of branches selected for archival / publication. More
-	 * precisely, it provides a {@link RefAction} for each {@link Ref}, which
-	 * can be a branch or a tag. Note that the {@link RefAction} includes the
-	 * {@link Ref} as well; the Map is just for conveniently getting entries by
-	 * Ref. The returned map is a snapshot; it doesn't reflect later changes
-	 * made by {@link #setRefAction(Ref, PublicationMethod, String)}!
-	 * 
-	 * @return a {@link Map} of {@link Ref} to {@link RefAction}
+	 * precisely, it provides a list of {@link RefAction RefActions}. This holds
+	 * both the {@link Ref} identifying the branch or tag, and the actual
+	 * publication info. The returned list is a snapshot; it doesn't reflect
+	 * changes made by {@link #setRefAction(Ref, PublicationMethod, String)}!
+	 *
+	 * @return a {@link List} of {@link RefAction}
 	 */
-	public Map<Ref, RefAction> getRefActions() {
-		final Map<Ref, RefAction> actions = new HashMap<Ref, RefAction>();
-		db.query("select ref, action, start from " + ACTION_TABLE
-				+ " where repo = ? and project = ?", new RowCallbackHandler() {
-			@Override
-			public void processRow(final ResultSet rs) throws SQLException {
-				final Ref ref = new Ref(rs.getString("ref"));
-				final PublicationMethod publish = PublicationMethod.valueOf(rs
-						.getString("action"));
-				final String firstCommit = rs.getString("start");
-				actions.put(ref, new RefAction(ref, publish, firstCommit));
-			}
-		}, gitRepo, project);
-		return Collections.unmodifiableMap(actions);
+	public List<RefAction> getRefActions() {
+		final List<RefAction> actions = new LinkedList<>();
+		db.query(
+				"select ref, action, start from " + ACTION_TABLE
+						+ " where repo = ? and project = ?",
+				new RowCallbackHandler() {
+					@Override
+					public void processRow(final ResultSet rs)
+							throws SQLException {
+						final Ref ref = new Ref(rs.getString("ref"));
+						final PublicationMethod publish = PublicationMethod
+								.valueOf(rs.getString("action"));
+						final String firstCommit = rs.getString("start");
+						actions.add(
+								new RefAction(ref, publish, firstCommit));
+					}
+				}, gitRepo, project);
+		return actions;
+	}
+
+	/**
+	 * Get the list of branches selected for archival / publication. More
+	 * precisely, it provides a list of {@link Ref Refs}, which can be a branch
+	 * or a tag. The returned list is a snapshot; it doesn't reflect later
+	 * changes made by {@link #setRefAction(Ref, PublicationMethod, String)}!
+	 *
+	 * @return a {@link List} of {@link Ref Refs}
+	 */
+	public List<Ref> getSelectedRefs() {
+		return db.query(
+				"select ref from " + ACTION_TABLE
+						+ " where repo = ? and project = ?",
+				new RowMapper<Ref>() {
+					@Override
+					public Ref mapRow(final ResultSet rs, final int rowNum)
+							throws SQLException {
+						return new Ref(rs.getString("ref"));
+					}
+				}, gitRepo, project);
 	}
 
 	/**
 	 * Update the publication action for a single ref.
-	 * 
+	 *
 	 * @param ref
 	 *            the ref to update
 	 * @param method

@@ -5,32 +5,20 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class RefAction {
 	public static final String HEAD_COMMIT = "HEAD";
 
-	private final Ref ref;
+	@JsonProperty("ref")
+	public final Ref ref;
 	/** selected archival option. */
-	private final PublicationMethod publicationMethod;
+	@JsonProperty("publish")
+	public final PublicationMethod publicationMethod;
 	/** ID of first commit to archive. either the SHA-1 or {@link #HEAD_COMMIT} */
-	private final String firstCommit;
+	@JsonProperty("firstCommit")
+	public final String firstCommit;
 
 	public RefAction(final Ref ref, final PublicationMethod publicationMethod,
 			final String firstCommit) {
 		this.ref = ref;
 		this.publicationMethod = publicationMethod;
 		this.firstCommit = firstCommit;
-	}
-
-	@JsonProperty("publish")
-	public PublicationMethod getPublicationMethod() {
-		return publicationMethod;
-	}
-
-	@JsonProperty("firstCommit")
-	public String getFirstCommit() {
-		return firstCommit;
-	}
-
-	@JsonProperty("ref")
-	public Ref getRef() {
-		return ref;
 	}
 
 	public enum PublicationMethod {

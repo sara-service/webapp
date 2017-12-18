@@ -29,7 +29,7 @@ public class Licenses {
 	public LicensesInfo getLicenses(final HttpSession session) {
 		final Project project = Project.getInstance(session);
 		final FrontendDatabase db = project.getFrontendDatabase();
-		return new LicensesInfo(getLicenseList(), db.getRefActions().keySet(),
+		return new LicensesInfo(getLicenseList(), db.getSelectedRefs(),
 				project.getMetadataExtractor().getLicenses(), db.getLicenses());
 	}
 
@@ -40,7 +40,7 @@ public class Licenses {
 		final FrontendDatabase db = project.getFrontendDatabase();
 
 		final Map<Ref, String> licenses = new HashMap<>();
-		for (final Ref ref : db.getRefActions().keySet())
+		for (final Ref ref : db.getSelectedRefs())
 			licenses.put(ref, LicensesInfo.unmapKeep(license));
 		db.setLicenses(licenses);
 		project.invalidateMetadata();

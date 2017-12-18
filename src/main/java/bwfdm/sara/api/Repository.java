@@ -3,6 +3,7 @@ package bwfdm.sara.api;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -39,7 +40,7 @@ public class Repository {
 	@GetMapping("actions")
 	public Collection<RefAction> getRefActions(final HttpSession session) {
 		final Project project = Project.getInstance(session);
-		return project.getFrontendDatabase().getRefActions().values();
+		return project.getFrontendDatabase().getRefActions();
 	}
 
 	private List<RefInfo> getAllRefs(final HttpSession session) {
@@ -56,8 +57,8 @@ public class Repository {
 		final Project project = Project.getInstance(session);
 		final FrontendDatabase db = project.getFrontendDatabase();
 
-		Map<Ref, RefAction> actionMap = db.getRefActions();
-		if (actionMap.isEmpty()) {
+		List<RefAction> actionList = db.getRefActions();
+		if (actionList.isEmpty()) {
 			// default to publishing protected branches (assumed to be the main
 			// branches). other branches are ignored by default to avoid
 			// overloading the user when there are many branches.
@@ -68,14 +69,17 @@ public class Repository {
 				}
 			// fetch the list again to get one with the modifications we just
 			// did. (the list is immutable once obtained.)
-			actionMap = db.getRefActions();
+			actionList = db.getRefActions();
 			// the user changed the list of branches, so we will obviously have
 			// to clone this again
 			project.invalidateTransferRepo();
 		}
 
+		final Map<Ref, RefAction> actions = new HashMap<Ref, RefAction>();
+		for (final RefAction a : db.getRefActions())
+			actions.put(a.ref, a);
 		for (final RefInfo r : refs)
-			r.action = actionMap.get(r.ref);
+			r.action = actions.get(r.ref);
 	}
 
 	@PostMapping("actions")
