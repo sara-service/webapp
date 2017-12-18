@@ -3,11 +3,12 @@ package bwfdm.sara.git;
 import java.util.HashMap;
 import java.util.Map;
 
-import bwfdm.sara.git.gitlab.GitLabArchiveRESTv4;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import bwfdm.sara.db.ConfigDatabase;
+import bwfdm.sara.git.gitlab.GitLabArchiveRESTv4;
 
 public class ArchiveRepoFactory {
 	private static final ObjectMapper MAPPER = new ObjectMapper();
@@ -16,7 +17,28 @@ public class ArchiveRepoFactory {
 		ADAPTERS.put("GitLabArchiveRESTv4", GitLabArchiveRESTv4.class);
 	}
 
-	private ArchiveRepoFactory() {
+	@JsonProperty("id")
+	public final String id;
+	@JsonProperty("display_name")
+	public final String displayName;
+	@JsonProperty("logo")
+	public final String logoURL;
+	private final String adapter;
+
+	/**
+	 * Note: This is called indirectly by {@link ConfigDatabase#getGitArchive()}
+	 * and related functions. The {@link JsonProperty} field names correspond
+	 * directly to database column names.
+	 */
+	@JsonCreator
+	public ArchiveRepoFactory(@JsonProperty("uuid") final String id,
+			@JsonProperty("display_name") final String displayName,
+			@JsonProperty("logo_base64") final String logoURL,
+			@JsonProperty("adapter") final String adapter) {
+		this.id = id;
+		this.displayName = displayName;
+		this.logoURL = logoURL;
+		this.adapter = adapter;
 	}
 
 	/**
@@ -27,11 +49,10 @@ public class ArchiveRepoFactory {
 	 * {@link JsonCreator}, and all its arguments must have {@link JsonProperty}
 	 * annotation giving the argument's name in the JSON, ie. something like
 	 * {@code @JsonProperty("url") String url}.
-	 * 
+	 *
 	 * @return a new {@link ArchiveRepo}
 	 */
-	public static ArchiveRepo newArchiveRepo(final String adapter,
-			final Map<String, String> args) {
+	public ArchiveRepo newArchiveRepo(final Map<String, String> args) {
 		final Class<? extends ArchiveRepo> cls = ADAPTERS.get(adapter);
 		// convertValue takes a Map<String, String> (or many, many other things)
 		// and creates an object from it

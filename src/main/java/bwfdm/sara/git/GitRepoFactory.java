@@ -25,8 +25,10 @@ public class GitRepoFactory {
 	public final String id;
 	@JsonProperty("display_name")
 	public final String displayName;
+	@JsonProperty("logo")
+	public final String logoURL;
 	@JsonIgnore
-	public final String adapter;
+	private final String adapter;
 
 	/**
 	 * Note: This is called indirectly by {@link ConfigDatabase#getGitRepos()}
@@ -36,9 +38,11 @@ public class GitRepoFactory {
 	@JsonCreator
 	public GitRepoFactory(@JsonProperty("uuid") final String id,
 			@JsonProperty("display_name") final String displayName,
+			@JsonProperty("logo_base64") final String logoURL,
 			@JsonProperty("adapter") final String adapter) {
 		this.id = id;
 		this.displayName = displayName;
+		this.logoURL = logoURL;
 		this.adapter = adapter;
 	}
 
