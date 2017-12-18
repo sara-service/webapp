@@ -1,20 +1,11 @@
 package bwfdm.sara.db;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Collections;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import javax.sql.DataSource;
 
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowCallbackHandler;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
@@ -40,7 +31,7 @@ public class FrontendDatabase {
 
 	private final String gitRepo;
 	private final String project;
-	private final JdbcTemplate db;
+	private final JacksonTemplate db;
 	private final TransactionTemplate transaction;
 
 	/*
@@ -61,9 +52,9 @@ public class FrontendDatabase {
 			final String project) {
 		this.gitRepo = gitRepo;
 		this.project = project;
-		this.db = new JdbcTemplate(db);
-		transaction = new TransactionTemplate(new DataSourceTransactionManager(
-				db));
+		this.db = new JacksonTemplate(db);
+		transaction = new TransactionTemplate(
+				new DataSourceTransactionManager(db));
 	}
 
 	/**
@@ -74,18 +65,11 @@ public class FrontendDatabase {
 	 * @return all metadata fields in a {@link Map}
 	 */
 	public Map<MetadataField, String> getMetadata() {
-		final Map<MetadataField, String> meta = new EnumMap<>(
-				MetadataField.class);
-		db.query("select field, value from " + METADATA_TABLE
-				+ " where repo = ? and project = ?", new RowCallbackHandler() {
-			@Override
-			public void processRow(final ResultSet rs) throws SQLException {
-				final MetadataField field = MetadataField.forDisplayName(rs
-						.getString("field"));
-				meta.put(field, rs.getString("value"));
-			}
-		}, gitRepo, project);
-		return Collections.unmodifiableMap(meta);
+		return db.querySingleToMap(
+				"select field, value from " + METADATA_TABLE
+						+ " where repo = ? and project = ?",
+				"field", MetadataField.class, "value", String.class, gitRepo,
+				project);
 	}
 
 	/**
@@ -108,9 +92,10 @@ public class FrontendDatabase {
 	}
 
 	private void updateMetadata(final String field, final String value) {
-		db.update("delete from " + METADATA_TABLE
-				+ " where repo = ? and project = ? and field = ?", gitRepo,
-				project, field);
+		db.update(
+				"delete from " + METADATA_TABLE
+						+ " where repo = ? and project = ? and field = ?",
+				gitRepo, project, field);
 		if (value != null)
 			db.update("insert into " + METADATA_TABLE
 					+ "(repo, project, field, value) values(?, ?, ?, ?)",
@@ -127,16 +112,10 @@ public class FrontendDatabase {
 	 *         tag
 	 */
 	public Map<Ref, String> getLicenses() {
-		final Map<Ref, String> meta = new HashMap<>();
-		db.query("select ref, license from " + LICENSES_TABLE
-				+ " where repo = ? and project = ?", new RowCallbackHandler() {
-			@Override
-			public void processRow(final ResultSet rs) throws SQLException {
-				final Ref ref = new Ref(rs.getString("ref"));
-				meta.put(ref, rs.getString("license"));
-			}
-		}, gitRepo, project);
-		return Collections.unmodifiableMap(meta);
+		return db.querySingleToMap(
+				"select ref, license from " + LICENSES_TABLE
+						+ " where repo = ? and project = ?",
+				"ref", Ref.class, "license", String.class, gitRepo, project);
 	}
 
 	/**
@@ -179,9 +158,10 @@ public class FrontendDatabase {
 	}
 
 	private void updateLicense(final Ref ref, final String value) {
-		db.update("delete from " + LICENSES_TABLE
-				+ " where repo = ? and project = ? and ref = ?", gitRepo,
-				project, ref.path);
+		db.update(
+				"delete from " + LICENSES_TABLE
+						+ " where repo = ? and project = ? and ref = ?",
+				gitRepo, project, ref.path);
 		if (value != null)
 			db.update("insert into " + LICENSES_TABLE
 					+ "(repo, project, ref, license) values(?, ?, ?, ?)",
@@ -198,23 +178,10 @@ public class FrontendDatabase {
 	 * @return a {@link List} of {@link RefAction}
 	 */
 	public List<RefAction> getRefActions() {
-		final List<RefAction> actions = new LinkedList<>();
-		db.query(
+		return db.queryRowToList(
 				"select ref, action, start from " + ACTION_TABLE
 						+ " where repo = ? and project = ?",
-				new RowCallbackHandler() {
-					@Override
-					public void processRow(final ResultSet rs)
-							throws SQLException {
-						final Ref ref = new Ref(rs.getString("ref"));
-						final PublicationMethod publish = PublicationMethod
-								.valueOf(rs.getString("action"));
-						final String firstCommit = rs.getString("start");
-						actions.add(
-								new RefAction(ref, publish, firstCommit));
-					}
-				}, gitRepo, project);
-		return actions;
+				RefAction.class, gitRepo, project);
 	}
 
 	/**
@@ -226,16 +193,10 @@ public class FrontendDatabase {
 	 * @return a {@link List} of {@link Ref Refs}
 	 */
 	public List<Ref> getSelectedRefs() {
-		return db.query(
+		return db.querySingleToList(
 				"select ref from " + ACTION_TABLE
 						+ " where repo = ? and project = ?",
-				new RowMapper<Ref>() {
-					@Override
-					public Ref mapRow(final ResultSet rs, final int rowNum)
-							throws SQLException {
-						return new Ref(rs.getString("ref"));
-					}
-				}, gitRepo, project);
+				Ref.class, gitRepo, project);
 	}
 
 	/**
@@ -257,17 +218,18 @@ public class FrontendDatabase {
 			@Override
 			protected void doInTransactionWithoutResult(
 					final TransactionStatus status) {
-				updateRefAction(ref.path,
-						method != null ? method.name() : null, firstCommit);
+				updateRefAction(ref.path, method != null ? method.name() : null,
+						firstCommit);
 			}
 		});
 	}
 
 	private void updateRefAction(final String refPath, final String method,
 			final String firstCommit) {
-		db.update("delete from " + ACTION_TABLE
-				+ " where repo = ? and project = ? and ref = ?", gitRepo,
-				project, refPath);
+		db.update(
+				"delete from " + ACTION_TABLE
+						+ " where repo = ? and project = ? and ref = ?",
+				gitRepo, project, refPath);
 		if (method == null)
 			// setting method to null is the frontend's way of saying "branch
 			// removed from list".

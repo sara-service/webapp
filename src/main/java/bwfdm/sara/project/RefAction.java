@@ -1,6 +1,9 @@
 package bwfdm.sara.project;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import bwfdm.sara.db.FrontendDatabase;
 
 public class RefAction {
 	public static final String HEAD_COMMIT = "HEAD";
@@ -14,8 +17,15 @@ public class RefAction {
 	@JsonProperty("firstCommit")
 	public final String firstCommit;
 
-	public RefAction(final Ref ref, final PublicationMethod publicationMethod,
-			final String firstCommit) {
+	/**
+	 * Note: This is called indirectly by
+	 * {@link FrontendDatabase#getRefActions()}. The {@link JsonProperty} field
+	 * names correspond directly to database column names.
+	 */
+	@JsonCreator
+	public RefAction(@JsonProperty("ref") final Ref ref,
+			@JsonProperty("action") final PublicationMethod publicationMethod,
+			@JsonProperty("start") final String firstCommit) {
 		this.ref = ref;
 		this.publicationMethod = publicationMethod;
 		this.firstCommit = firstCommit;

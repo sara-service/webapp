@@ -5,13 +5,14 @@ import java.util.Map;
 
 import javax.servlet.http.HttpSession;
 
-import bwfdm.sara.git.gitlab.GitLabRESTv4;
-import bwfdm.sara.project.Project;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import bwfdm.sara.db.ConfigDatabase;
+import bwfdm.sara.git.gitlab.GitLabRESTv4;
+import bwfdm.sara.project.Project;
 
 public class GitRepoFactory {
 	private static final ObjectMapper MAPPER = new ObjectMapper();
@@ -20,15 +21,22 @@ public class GitRepoFactory {
 		ADAPTERS.put("GitLabRESTv4", GitLabRESTv4.class);
 	}
 
-	@JsonProperty
+	@JsonProperty("id")
 	public final String id;
-	@JsonProperty
+	@JsonProperty("display_name")
 	public final String displayName;
 	@JsonIgnore
 	public final String adapter;
 
-	public GitRepoFactory(final String id, final String displayName,
-			final String adapter) {
+	/**
+	 * Note: This is called indirectly by {@link ConfigDatabase#getGitRepos()}
+	 * and related functions. The {@link JsonProperty} field names correspond
+	 * directly to database column names.
+	 */
+	@JsonCreator
+	public GitRepoFactory(@JsonProperty("uuid") final String id,
+			@JsonProperty("display_name") final String displayName,
+			@JsonProperty("adapter") final String adapter) {
 		this.id = id;
 		this.displayName = displayName;
 		this.adapter = adapter;
@@ -43,7 +51,7 @@ public class GitRepoFactory {
 	 * {@link JsonCreator}, and all its arguments must have {@link JsonProperty}
 	 * annotation giving the argument's name in the JSON, ie. something like
 	 * {@code @JsonProperty("url") String url}.
-	 * 
+	 *
 	 * @return a new {@link GitRepo}
 	 */
 	public GitRepo newGitRepo(final Map<String, String> args) {
