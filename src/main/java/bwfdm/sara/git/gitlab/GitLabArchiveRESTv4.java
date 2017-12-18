@@ -7,14 +7,14 @@ import java.util.NoSuchElementException;
 
 import org.springframework.core.ParameterizedTypeReference;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import bwfdm.sara.auth.AuthenticatedREST;
 import bwfdm.sara.git.ArchiveProject;
 import bwfdm.sara.git.ArchiveRepo;
 import bwfdm.sara.project.MetadataField;
-
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class GitLabArchiveRESTv4 implements ArchiveRepo {
 	/**
@@ -46,11 +46,21 @@ public class GitLabArchiveRESTv4 implements ArchiveRepo {
 	 *            root URL of GitLab webserver, without trailing slash
 	 * @param apiToken
 	 *            private token used to access the GitLab API
+	 * @param tempNamespace
+	 *            GitLab namespace used for temporarily-archived data
 	 * @param projectNamespace
-	 *            namespace in which to create projects
-	 * @param sshKeyFile
-	 *            path to SSH private key file; the public key file has
-	 *            {@code .pub} appended
+	 *            GitLab namespace for the final archived data
+	 * @param darkNamespace
+	 *            GitLab namespace for the dark archive
+	 * @param sshPrivateKey
+	 *            full contents of SSH private key file (usually named
+	 *            {@code id_ecdsa})
+	 * @param sshPublicKey
+	 *            full contents of SSH public key file (usually named
+	 *            {@code id_ecdsa.pub})
+	 * @param knownHostsFile
+	 *            all {@code known_hosts} file entries for to the GitLab
+	 *            server's SSH host key, separated by newlines
 	 */
 	@JsonCreator
 	public GitLabArchiveRESTv4(@JsonProperty("url") final String root,
@@ -83,7 +93,8 @@ public class GitLabArchiveRESTv4 implements ArchiveRepo {
 		final Map<String, String> args = new HashMap<>();
 		args.put("path", "p" + id);
 		// FIXME filter name:
-		// "Name can contain only letters, digits, emojis, '_', '.', dash, space."
+		// "Name can contain only letters, digits, emojis, '_', '.', dash,
+		// space."
 		// it's probably ok if we don't support the emojis...
 		// FIXME check whether there is a length limit!
 		final String name = meta.get(MetadataField.TITLE) + " "
@@ -104,15 +115,15 @@ public class GitLabArchiveRESTv4 implements ArchiveRepo {
 	}
 
 	private int getNamespaceID(final String namespace) {
-		final List<Namespace> namespaces = rest.getList(rest.uri("/namespaces")
-				.queryParam("search", namespace),
+		final List<Namespace> namespaces = rest.getList(
+				rest.uri("/namespaces").queryParam("search", namespace),
 				new ParameterizedTypeReference<List<Namespace>>() {
 				});
 		for (final Namespace ns : namespaces)
 			if (ns.path.equals(namespace))
 				return ns.id;
-		throw new NoSuchElementException("namespace " + namespace
-				+ " not found on server");
+		throw new NoSuchElementException(
+				"namespace " + namespace + " not found on server");
 	}
 
 	@JsonIgnoreProperties(ignoreUnknown = true)
@@ -131,14 +142,14 @@ public class GitLabArchiveRESTv4 implements ArchiveRepo {
 	}
 
 	private GLProjectInfo getProjectInfo(final String id) {
-		final List<GLProjectInfo> projects = rest.getList(rest.uri("/projects")
-				.queryParam("search", id),
+		final List<GLProjectInfo> projects = rest.getList(
+				rest.uri("/projects").queryParam("search", id),
 				new ParameterizedTypeReference<List<GLProjectInfo>>() {
 				});
 		for (final GLProjectInfo p : projects)
 			if (p.name.equals(id))
 				return p;
-		throw new NoSuchElementException("namespace " + projectNamespace
-				+ " not found on server");
+		throw new NoSuchElementException(
+				"namespace " + projectNamespace + " not found on server");
 	}
 }
