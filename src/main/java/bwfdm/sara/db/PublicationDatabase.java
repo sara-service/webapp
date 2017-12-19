@@ -146,7 +146,11 @@ public class PublicationDatabase {
 			if (fn.equals(lmStr) & !primaryKey.contains(lmStr)) {
 				fn_value = "now()";
 			} else {
-				fn_value = d.get(fn).toString();
+				Object fnObj = d.get(fn);
+				if (fnObj == null)
+					fn_value = "null";
+				else
+					fn_value = fnObj.toString();
 			}
 			// quote all possibly contained 's
 			fn_value = "'" + fn_value.replaceAll("'", "''") + "'";
@@ -180,7 +184,12 @@ public class PublicationDatabase {
 		String whereString = "";
 
 		for (String fn : fieldNames) {
-			String fn_value = d.get(fn).toString();
+			String fn_value;
+			Object fn_obj = d.get(fn);
+			if (fn_obj == null)
+				fn_value = "null";
+			else
+			  fn_value = fn_obj.toString();
 
 			// quote all possibly contained 's
 			fn_value = "'" + fn_value.replaceAll("'", "''") + "'";

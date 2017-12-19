@@ -18,6 +18,9 @@ class Test {
 		System.out.println("#Sources:" + myPersons.size());
 		for (DAO p : myPersons ) {
 			p.dump();
+			pdb.updateFromDB(p);
+			p.set("contact_email", "Tri Tra Trullalala der Kasper der ist wieder da");
+			pdb.updateInDB(p);
 		}
 	}
 	
@@ -27,6 +30,9 @@ class Test {
         System.out.println("#Sources:" + mySources.size());
         for (DAO s : mySources ) {
         	s.dump();
+        	pdb.updateFromDB(s);
+        	s.set("display_name", "Kasperletheater");
+        	//pdb.updateInDB(s);
         }
 	}
 	
@@ -36,6 +42,9 @@ class Test {
         System.out.println("#Archives:" + myArchives.size());
         for (DAO a : myArchives ) {
         	a.dump();
+        	pdb.updateFromDB(a);
+        	a.set("display_name", "Kasperletheater");
+        	//pdb.updateInDB(a);
         }};
 	/*
 	public static void testPubRepos() {        

@@ -7,15 +7,12 @@ import jersey.repackaged.com.google.common.collect.Lists;
 
 public class DAOImpl implements DAO {
 	
-	public Boolean isModified = false;
-	
 	@Override
 	public void set(String fieldName, Object value) {
 		try {
 			Field field = this.getClass().getDeclaredField(fieldName);
 			field.setAccessible(true);
 			field.set(this, value);
-			isModified = true;
 		}
 		catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
 			e.printStackTrace();
@@ -45,7 +42,9 @@ public class DAOImpl implements DAO {
 			Field[] fields = this.getClass().getFields();
 			for (Field f : fields) {
 				fn_str = f.getName();
-				fn.add(fn_str);
+				// treat all lower case members as DB fields
+				if (fn_str.equals(fn_str.toLowerCase()))
+					fn.add(fn_str);
 			}
 			return fn;
 		}

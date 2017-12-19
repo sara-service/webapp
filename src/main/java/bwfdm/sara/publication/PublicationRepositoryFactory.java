@@ -17,6 +17,7 @@ public class PublicationRepositoryFactory {
 	//@SuppressWarnings("unchecked")
 	private static final ObjectMapper MAPPER = new ObjectMapper();
 	private static final Map<String, Class<? extends PublicationRepository>> ADAPTERS = new HashMap<>();
+	
 	static {
 		ADAPTERS.put("DSpace_RESTv5_SWORDv2", DSpace_RESTv5_SWORDv2.class);
 	}
