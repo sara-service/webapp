@@ -1,7 +1,10 @@
 package bwfdm.sara.publication;
+import bwfdm.sara.publication.db.ItemDAO;
 
 import java.util.Map;
 import java.util.UUID;
+
+
 
 /**
  * Interface for the publication repository.
@@ -17,8 +20,10 @@ public interface PublicationRepository {
 	public Boolean isUserAssigned(String loginName);
 	
 	public String getCollectionName(String uuid);
-	public String getMetadataName(String uuid);
+	public String getMetadataName(String uuid);	
 	public Map<String, String> getAvailableCollections();
+	
+	public Boolean publishItem(ItemDAO item);
 
 	public void dump();
 }

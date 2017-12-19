@@ -91,7 +91,9 @@ class Test {
         		if (!IR.isUserRegistered(user_email)) {
         			System.out.println("User is NOT registered. Items cannot be submitted on behalf of him/her");
         		} else {
-        			System.out.println("User is registered. Items can be submitted on behalf of him/her");
+        			System.out.println("User is registered. Items can be submitted on behalf of him/her. Trying...");
+        			ItemDAO i = myItems.get(0);
+        			IR.publishItem(pdb.withEMailVerified(i, true));
         		}
         	}
         	
@@ -102,7 +104,10 @@ class Test {
         System.out.println("===ITEMS===");
         System.out.println("#Items:" + myItems.size());
         for (ItemDAO i : myItems ) {
-        	i.dump();
+        	i.set("email_verified", true);
+        	//i.dump();
+        	pdb.writeToDB(i);
+        	i=(ItemDAO) pdb.updateFromDB(i);
         }};
 	
     public static void main(String[] args) {
@@ -114,19 +119,28 @@ class Test {
         		"test", 
         		"test");
         
-        pdb= new PublicationDatabase(ds);
+        pdb = new PublicationDatabase(ds);
         
         myPersons = pdb.getPersonList();
         myIRs = pdb.getRepositoryFactoryList();
         myArchives = pdb.getArchiveList();
         mySources = pdb.getSourceList();
         myItems = pdb.getItemList();
-
-        testPersons();
-        testSources();
-        testArchives();
-        testItems();
         
-        testPubRepos();
+        List<DAO> elems = pdb.getList(ItemDAO.TABLE);
+        ItemDAO i = (ItemDAO) elems.get(0);
+        
+        i.dump();
+
+        i.set("citation_handle", "MeineTolleDOI!");
+        i = (ItemDAO)pdb.insertInDB(i);
+        i.dump();
+
+        //testPersons();
+        //testSources();
+        //testArchives();
+        //testItems();
+        
+        //testPubRepos();
     }
 }
