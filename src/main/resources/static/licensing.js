@@ -14,6 +14,18 @@ function initLicenseList(form, supported, detected, user) {
 	if (detected != null) {
 		form.declare_keep.text("keep " + detected.name);
 		form.declare_keep.data("infourl", detected.url);
+		// if the user selected that license last time, then updated the
+		// git repo to match, its entry will now be called "keep" in the
+		// selection field.
+		// we could just fix that here by setting user = "keep", but
+		// then we'd have to write that back somehow. as this is a rare
+		// situation, just force the user to pick a license. this will
+		// trigger the required writeback, and having an explicit
+		// confirmation here is probably not a bad idea anyway since
+		// "replace with X" isn't exactly identical to "keep X" for
+		// licenses that contain placeholders.
+		if (user == detected.id)
+			user = null;
 	} else
 		// "keep" makes no sense whatsoever if there is nothing to keep
 		form.declare_keep.remove();
