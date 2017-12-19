@@ -61,10 +61,8 @@ class Test {
     		r.dump();
     		pdb.updateFromDB(r);
     		r.set("display_name", "Kasperletheater");
-    		PublicationRepositoryFactory myIR = new PublicationRepositoryFactory((RepositoryDAO)r);
     		
-    		Map<String, String> args = pdb.readArguments("Repository_Params", r.get("uuid"));
-			PublicationRepository ir = myIR.newPubRepo(args);
+			PublicationRepository ir = pdb.newPublicationRepository((RepositoryDAO)r);
 			ir.dump();
         	// not allowed as of permissions.sql
         	//pdb.updateInDB(r);

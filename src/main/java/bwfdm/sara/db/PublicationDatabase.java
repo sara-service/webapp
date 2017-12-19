@@ -18,6 +18,7 @@ import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 
 import bwfdm.sara.publication.db.DAO;
+import bwfdm.sara.publication.db.RepositoryDAO;
 import bwfdm.sara.publication.PublicationRepositoryFactory;
 import bwfdm.sara.publication.PublicationRepository;
 
@@ -209,7 +210,7 @@ public class PublicationDatabase {
 		return d;
 	}
 	
-	public Map<String, String> readArguments(final String table, final Object id) {
+	private Map<String, String> readArguments(final String table, final Object id) {
 		final Map<String, String> args = new HashMap<>();
 		db.query("select param, value from " + table + " where id = UUID(?)", new RowCallbackHandler() {
 			@Override
@@ -218,5 +219,11 @@ public class PublicationDatabase {
 			}
 		}, id);
 		return args;
+	}
+	
+	public PublicationRepository newPublicationRepository(RepositoryDAO r) {
+		PublicationRepositoryFactory factory = new PublicationRepositoryFactory(r);
+		Map<String, String> args = readArguments("Repository_Params", r.get("uuid"));
+		return factory.newPubRepo(args);
 	}
 }
