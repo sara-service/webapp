@@ -1,10 +1,13 @@
 package bwfdm.sara.publication.db;
 
 import java.util.List;
+import java.util.Map;
+
 import javax.sql.DataSource;
 import org.springframework.jdbc.datasource.SimpleDriverDataSource;
 import bwfdm.sara.db.PublicationDatabase;
 import bwfdm.sara.publication.PublicationRepositoryFactory;
+import jersey.repackaged.com.google.common.collect.Maps;
 import bwfdm.sara.publication.PublicationRepository;
 
 class Test {
@@ -32,6 +35,7 @@ class Test {
         	s.dump();
         	pdb.updateFromDB(s);
         	s.set("display_name", "Kasperletheater");
+        	// not allowed as of permissions.sql
         	//pdb.updateInDB(s);
         }
 	}
@@ -44,8 +48,28 @@ class Test {
         	a.dump();
         	pdb.updateFromDB(a);
         	a.set("display_name", "Kasperletheater");
+        	// not allowed as of permissions.sql
         	//pdb.updateInDB(a);
-        }};
+        }
+    };
+        
+    public static void testRepositories() {
+		// institutional repositories
+        System.out.println("===REPOSITORIES===");
+        System.out.println( "#IRs: " + myRepositories.size() );
+    	for (DAO r: myRepositories) {
+    		r.dump();
+    		pdb.updateFromDB(r);
+    		r.set("display_name", "Kasperletheater");
+    		PublicationRepositoryFactory myIR = new PublicationRepositoryFactory((RepositoryDAO)r);
+    		
+    		Map<String, String> args = pdb.readArguments("Repository_Params", r.get("uuid"));
+			PublicationRepository ir = myIR.newPubRepo(args);
+			ir.dump();
+        	// not allowed as of permissions.sql
+        	//pdb.updateInDB(r);
+    	}
+    }
 	/*
 	public static void testPubRepos() {        
 		// institutional repositories
@@ -127,27 +151,15 @@ class Test {
         pdb = new PublicationDatabase(ds);
         
         myPersons = pdb.getList(EPersonDAO.TABLE);
-        // myIRs = pdb.getRepositoryFactoryList();
+        myRepositories = pdb.getList(RepositoryDAO.TABLE);
         myArchives = pdb.getList(ArchiveDAO.TABLE);
         mySources = pdb.getList(SourceDAO.TABLE);
         myItems = pdb.getList(ItemDAO.TABLE);
         
-        /*
-        ItemDAO i = (ItemDAO) myItems.get(0);
-        
-        i.dump();
-
-        i.set("citation_handle", "MeineTolleDOI!");
-        i = (ItemDAO)pdb.insertInDB(i);
-        i.dump();
-
-         */
-        
-        testPersons();
-        testSources();
-        testArchives();
+        //testPersons();
+        //testSources();
+        //testArchives();
+        testRepositories();
         //testItems();
-        
-        //testPubRepos();
     }
 }

@@ -13,6 +13,7 @@ import org.springframework.web.servlet.view.RedirectView;
 */
 
 import bwfdm.sara.publication.PublicationRepository;
+import bwfdm.sara.publication.db.RepositoryDAO;
 import bwfdm.sara.publication.db.ItemDAO;
 import bwfdm.sara.publication.db.ItemState;
 

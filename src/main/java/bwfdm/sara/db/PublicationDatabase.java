@@ -209,9 +209,7 @@ public class PublicationDatabase {
 		return d;
 	}
 	
-	
-
-	private Map<String, String> readArguments(final String table, final Object id) {
+	public Map<String, String> readArguments(final String table, final Object id) {
 		final Map<String, String> args = new HashMap<>();
 		db.query("select param, value from " + table + " where id = UUID(?)", new RowCallbackHandler() {
 			@Override

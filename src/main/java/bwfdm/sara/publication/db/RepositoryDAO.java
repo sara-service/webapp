@@ -1,10 +1,10 @@
 package bwfdm.sara.publication.db;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 
-/* default read-only DAO, can be used for most SARA DB tables */
-
-public class RepositoryDAO {
+public class RepositoryDAO extends DAOImpl {
 	
 	public final UUID uuid;
 	public final String display_name;
@@ -13,6 +13,9 @@ public class RepositoryDAO {
     public final String adapter;
     public final String logo_base64;
     public final Boolean enabled;
+    
+    public static String TABLE = "Repository";
+    public static List<String> FIELDS = Arrays.asList("uuid", "display_name", "url", "contact_email", "adapter", "logo_base64", "enabled");
 
     public RepositoryDAO() {
     	uuid = null; display_name = null; url = null; contact_email = null;
