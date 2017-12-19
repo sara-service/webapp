@@ -11,16 +11,12 @@ class Test {
 	
 	static PublicationDatabase pdb;
 	
-	static List<EPersonDAO> myPersons;
-	static List<SourceDAO> mySources;
-	static List<ArchiveDAO> myArchives;
-	static List<PublicationRepositoryFactory> myIRs;
-	static List<ItemDAO> myItems;
+	static List<DAO> myPersons, mySources, myArchives, myRepositories, myItems;
 	
 	public static void testPersons() {
 		System.out.println("===PERSONS===");
 		System.out.println("#Sources:" + myPersons.size());
-		for (EPersonDAO p : myPersons ) {
+		for (DAO p : myPersons ) {
 			p.dump();
 		}
 	}
@@ -29,7 +25,7 @@ class Test {
         // git sources
         System.out.println("===SOURCES===");
         System.out.println("#Sources:" + mySources.size());
-        for (SourceDAO s : mySources ) {
+        for (DAO s : mySources ) {
         	s.dump();
         }
 	}
@@ -38,10 +34,10 @@ class Test {
         // git archives
         System.out.println("===ARCHIVES===");
         System.out.println("#Archives:" + myArchives.size());
-        for (ArchiveDAO a : myArchives ) {
+        for (DAO a : myArchives ) {
         	a.dump();
         }};
-	
+	/*
 	public static void testPubRepos() {        
 		// institutional repositories
         System.out.println("===REPOSITORIES===");
@@ -98,15 +94,15 @@ class Test {
         	}
         	
         }};
-	
+	*/
 	public static void testItems() {        
 		// publication items
         System.out.println("===ITEMS===");
         System.out.println("#Items:" + myItems.size());
-        for (ItemDAO i : myItems ) {
+        for (DAO i : myItems ) {
         	i.set("email_verified", true);
-        	//i.dump();
-        	pdb.writeToDB(i);
+        	pdb.updateInDB(i);
+        	i.dump();
         	i=(ItemDAO) pdb.updateFromDB(i);
         }};
 	
@@ -121,14 +117,14 @@ class Test {
         
         pdb = new PublicationDatabase(ds);
         
-        myPersons = pdb.getPersonList();
-        myIRs = pdb.getRepositoryFactoryList();
-        myArchives = pdb.getArchiveList();
-        mySources = pdb.getSourceList();
-        myItems = pdb.getItemList();
+        myPersons = pdb.getList(EPersonDAO.TABLE);
+        // myIRs = pdb.getRepositoryFactoryList();
+        myArchives = pdb.getList(ArchiveDAO.TABLE);
+        mySources = pdb.getList(SourceDAO.TABLE);
+        myItems = pdb.getList(ItemDAO.TABLE);
         
-        List<DAO> elems = pdb.getList(ItemDAO.TABLE);
-        ItemDAO i = (ItemDAO) elems.get(0);
+        /*
+        ItemDAO i = (ItemDAO) myItems.get(0);
         
         i.dump();
 
@@ -136,9 +132,11 @@ class Test {
         i = (ItemDAO)pdb.insertInDB(i);
         i.dump();
 
-        //testPersons();
-        //testSources();
-        //testArchives();
+         */
+        
+        testPersons();
+        testSources();
+        testArchives();
         //testItems();
         
         //testPubRepos();

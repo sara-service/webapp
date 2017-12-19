@@ -14,25 +14,8 @@ public class RepositoryDAO {
     public final String logo_base64;
     public final Boolean enabled;
 
-    public RepositoryDAO(
-    		UUID id,
-    		String n,    		
-    		String u,
-    		String mailaddr,
-    		String logo,
-    		String a,
-    		Boolean e
-    		) {
-    	uuid = id; display_name = n; url = u; contact_email = mailaddr;
-    	adapter = a; logo_base64 = logo; enabled = e;
-    }
-    
-    public void dump() {
-    	System.out.println("UUID=" + uuid);
-    	System.out.println("name=" + display_name);
-    	System.out.println("url=" + url);
-    	System.out.println("contact_email=" + contact_email);
-    	System.out.println("adapter=" + adapter);
-    	System.out.println("enabled=" + enabled);
+    public RepositoryDAO() {
+    	uuid = null; display_name = null; url = null; contact_email = null;
+    	adapter = null; logo_base64 = null; enabled = null;
     }
 }

@@ -1,23 +1,27 @@
 package bwfdm.sara.publication.db;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 
-/* default read-only DAO, can be used for most SARA DB tables */
+import jersey.repackaged.com.google.common.collect.Lists;
 
-public class CollectionDAO {
+public class CollectionDAO extends DAOImpl {
 	public final UUID id;
 	public final String foreign_uuid;
 	public final Boolean enabled;
 
+	public static String TABLE = "Collection";
+	public static List<String> FIELDS = Arrays.asList("id","foreign_uuid","enabled");
+	
 	public CollectionDAO(UUID id, String foreign_uuid, Boolean enabled) {
 		this.id = id;
 		this.foreign_uuid = foreign_uuid;
 		this.enabled = enabled;
 	}
-
-	public void dump() {
-		System.out.println("ID (Reference to Repository)=" + id.toString());
-		System.out.println("foreign_uuid=" + foreign_uuid);
-		System.out.println("enabled=" + enabled.toString());
+	
+	@Override
+	public List<String> getPrimaryKey() {
+		return Lists.newArrayList("id", "foreign_uuid");
 	}
 }
