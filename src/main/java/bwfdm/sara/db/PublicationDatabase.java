@@ -57,7 +57,8 @@ public class PublicationDatabase {
 	 * @return
 	 * 		list of entries of the given table contained in the database
 	 */
-	public List<DAO> getList(String tableName) {
+	@SuppressWarnings("unchecked")
+	public <D extends DAO> List<D> getList(String tableName) {
 		List<Map<String, Object>> mapList = db.queryForList("select * from " + tableName);
 		
 		List<DAO> elems = Lists.newArrayList();
@@ -71,12 +72,12 @@ public class PublicationDatabase {
 			} 
 			for(Entry<String, Object> entry : entryMap.entrySet())
 			{
-				System.out.println(entry.getKey() + " / " + entry.getValue());
+				//System.out.println(entry.getKey() + " / " + entry.getValue());
 				elem.set(entry.getKey(), entry.getValue());
 				elems.add(elem);
 			}
 		}
-		return elems;
+		return (List<D>)elems;
 	}
 
 	/**
@@ -175,7 +176,7 @@ public class PublicationDatabase {
 	 * @return
 	 * 		The updated DAO representing the current state of the database
 	 */
-	public DAO updateFromDB(DAO d) {
+	public <D extends DAO> D updateFromDB(D d) {
 		System.out.println(d.getDynamicFieldNames());
 
 		List<String> fieldNames = d.getDynamicFieldNames();
