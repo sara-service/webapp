@@ -1,13 +1,10 @@
 package bwfdm.sara.publication.db;
 
 import java.util.List;
-import java.util.Map;
 
 import javax.sql.DataSource;
 import org.springframework.jdbc.datasource.SimpleDriverDataSource;
 import bwfdm.sara.db.PublicationDatabase;
-import bwfdm.sara.publication.PublicationRepositoryFactory;
-import jersey.repackaged.com.google.common.collect.Maps;
 import bwfdm.sara.publication.PublicationRepository;
 
 class Test {
@@ -66,6 +63,32 @@ class Test {
 			ir.dump();
         	// not allowed as of permissions.sql
         	//pdb.updateInDB(r);
+			
+			System.out.println("Configured Collections");
+			List<DAO> colls = pdb.getList(CollectionDAO.TABLE);
+			for (DAO coll_:colls) {
+				CollectionDAO coll = (CollectionDAO)coll_;
+				System.out.print("UUID=" + coll.foreign_uuid);
+				System.out.print(" Name=" + ir.getCollectionName(coll.foreign_uuid));
+        		if (coll.enabled) {
+        			System.out.println(" ENABLED");
+        		} else {
+        			System.out.println(" DISABLED");
+        		}
+			}
+			
+			System.out.println("Configured Metadata Mappings");
+			List<DAO> mms = pdb.getList(MetadataDAO.TABLE);
+			for (DAO mm_:mms) {
+				MetadataDAO mm = (MetadataDAO)mm_;
+				System.out.print("Mapping from " + mm.map_from + " to " + mm.map_to + " Name=" + ir.getMetadataName(mm.map_to));
+        		if (mm.enabled) {
+        			System.out.println(" ENABLED");
+        		} else {
+        			System.out.println(" DISABLED");
+        		}
+			}
+			
     	}
     }
 	/*

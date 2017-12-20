@@ -17,8 +17,8 @@ public class MetadataDAO extends DAOImpl {
 	public static List<String> FIELDS = Arrays.asList("id", "display_name", "map_from", "map_to", "enabled");
 	
     public MetadataDAO() {
-    	this.id = null; this.display_name = null; this.enabled = null;
-    	this.map_from = null; this.map_to = null;
+    	id = null; display_name = null; enabled = null;
+    	map_from = null; map_to = null;
     }
     
     @Override

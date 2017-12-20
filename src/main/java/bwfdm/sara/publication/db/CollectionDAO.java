@@ -14,10 +14,8 @@ public class CollectionDAO extends DAOImpl {
 	public static String TABLE = "Collection";
 	public static List<String> FIELDS = Arrays.asList("id","foreign_uuid","enabled");
 	
-	public CollectionDAO(UUID id, String foreign_uuid, Boolean enabled) {
-		this.id = id;
-		this.foreign_uuid = foreign_uuid;
-		this.enabled = enabled;
+	public CollectionDAO() {
+		id = null; foreign_uuid = null; this.enabled = null;
 	}
 	
 	@Override
