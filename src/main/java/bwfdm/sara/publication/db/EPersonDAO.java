@@ -7,9 +7,9 @@ import java.util.List;
 
 public class EPersonDAO extends DAOImpl {
     public final UUID uuid;
-    public final String contact_email;
-    public final String password; 
-    public final Date last_active;
+    public String contact_email;
+    public String password; 
+    public Date last_active;
     
 	public static String TABLE = "EPerson";
 	public static List<String> FIELDS = Arrays.asList("uuid", "contact_email", "password", "last_active");

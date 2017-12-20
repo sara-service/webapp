@@ -8,10 +8,10 @@ import jersey.repackaged.com.google.common.collect.Lists;
 
 public class MetadataDAO extends DAOImpl {
 	public final UUID id;
-	public final String display_name;
+	public String display_name;
     public final String map_from;
     public final String map_to;
-    public final Boolean enabled; 
+    public Boolean enabled; 
  
 	public static String TABLE = "Metadata";
 	public static List<String> FIELDS = Arrays.asList("id", "display_name", "map_from", "map_to", "enabled");

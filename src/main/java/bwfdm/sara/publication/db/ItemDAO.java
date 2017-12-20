@@ -14,15 +14,15 @@ public class ItemDAO extends DAOImpl {
 	public final UUID eperson_uuid;
 	public final UUID source_uuid;
 	public final UUID archive_uuid;
-	public final UUID repository_uuid;
+	public UUID repository_uuid;
 	public final Date date_created;
-	public final Date date_last_modified;
+	public Date date_last_modified;
 	public final String item_type;
-	public final String item_state;
-	public final String foreign_uuid;
-	public final String citation_handle;
-	public final Boolean email_verified;
-	public final Boolean in_archive;
+	public String item_state;
+	public String foreign_uuid;
+	public String citation_handle;
+	public Boolean email_verified;
+	public Boolean in_archive;
 	
 	public static String TABLE = "Item"; 
 	public static List<String> FIELDS =

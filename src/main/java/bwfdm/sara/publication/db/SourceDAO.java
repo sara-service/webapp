@@ -9,12 +9,12 @@ import jersey.repackaged.com.google.common.collect.Lists;
 public class SourceDAO extends DAOImpl{
 	
 	public final UUID uuid;
-	public final String display_name;
-    public final String url;
-    public final String contact_email;
-    public final String adapter;
-    public final String logo_base64;
-    public final Boolean enabled;
+	public String display_name;
+    public String url;
+    public String contact_email;
+    public String adapter;
+    public String logo_base64;
+    public Boolean enabled;
     
     public static String TABLE = "Source";
     public static List<String> FIELDS = 

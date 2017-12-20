@@ -6,17 +6,15 @@ import java.util.UUID;
 
 import jersey.repackaged.com.google.common.collect.Lists; // TODO get rid of it!!!!
 
-/* default read-only DAO, can be used for most SARA DB tables */
-
 public class ArchiveDAO extends DAOImpl {
 	
 	public final UUID uuid;
-	public final String display_name;
-	public final String contact_email;
-    public final String url;
-    public final String adapter;
-    public final String logo_base64;
-    public final Boolean enabled;
+	public String display_name;
+	public String contact_email;
+    public String url;
+    public String adapter;
+    public String logo_base64;
+    public Boolean enabled;
     
     public static String TABLE = "Archive";
     public static List<String> FIELDS = 
