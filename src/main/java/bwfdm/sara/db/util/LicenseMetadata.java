@@ -1,4 +1,4 @@
-package bwfdm.sara.extractor.levenshtein;
+package bwfdm.sara.db.util;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;

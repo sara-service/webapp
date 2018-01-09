@@ -1,4 +1,4 @@
-package bwfdm.sara.extractor.levenshtein;
+package bwfdm.sara.db.util;
 
 import java.io.BufferedReader;
 import java.io.File;

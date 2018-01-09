@@ -1,4 +1,4 @@
-package bwfdm.sara.extractor.levenshtein;
+package bwfdm.sara.db.util;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -8,6 +8,10 @@ import java.io.IOException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
+/**
+ * Parses a file from choosealicense.com's {@code _licenses} directory into a
+ * {@link LicenseMetadata} object. Not thread safe.
+ */
 class ChoosealicenseParser {
 	private static final String YAML_OBJECT_SEPARATOR = "---";
 
