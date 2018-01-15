@@ -8,7 +8,7 @@ import bwfdm.sara.publication.PublicationDatabase;
 import bwfdm.sara.publication.PublicationRepository;
 import bwfdm.sara.publication.db.*;
 
-class Test {
+class DBTest {
 	
 	static PublicationDatabase pdb;
 	
