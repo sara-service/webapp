@@ -12,12 +12,14 @@ public class CollectionDAO extends DAOImpl {
 	public Boolean enabled;
 
 	public static String TABLE = "Collection";
-	public static List<String> FIELDS = Arrays.asList("id","foreign_uuid","enabled");
-	
+	public static List<String> FIELDS = Arrays.asList("id", "foreign_uuid", "enabled");
+
 	public CollectionDAO() {
-		id = null; foreign_uuid = null; this.enabled = null;
+		id = null;
+		foreign_uuid = null;
+		this.enabled = null;
 	}
-	
+
 	@Override
 	public List<String> getPrimaryKey() {
 		return Lists.newArrayList("id", "foreign_uuid");

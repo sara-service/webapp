@@ -2,16 +2,15 @@ package bwfdm.sara.publication;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+//import java.util.Map;
+import java.util.HashMap;
 //import java.util.ArrayList;
 //import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-//import java.util.Map;
-import java.util.HashMap;
 
 import javax.sql.DataSource;
-import jersey.repackaged.com.google.common.collect.Lists;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowCallbackHandler;
@@ -19,8 +18,7 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 
 import bwfdm.sara.publication.db.DAO;
 import bwfdm.sara.publication.db.RepositoryDAO;
-import bwfdm.sara.publication.PublicationRepositoryFactory;
-import bwfdm.sara.publication.PublicationRepository;
+import jersey.repackaged.com.google.common.collect.Lists;
 
 /**
  * Database containing config stuff for the publication backend.
@@ -53,82 +51,80 @@ public class PublicationDatabase {
 	 * Retrieves a list of DAO entries for given table
 	 * 
 	 * @param tableName
-	 * 		the name of the table in the database
-	 * @return
-	 * 		list of entries of the given table contained in the database
+	 *            the name of the table in the database
+	 * @return list of entries of the given table contained in the database
 	 */
 	@SuppressWarnings("unchecked")
 	public <D extends DAO> List<D> getList(String tableName) {
 		List<Map<String, Object>> mapList = db.queryForList("select * from " + tableName);
-		
+
 		List<DAO> elems = Lists.newArrayList();
-		for(Map<String, Object> entryMap : mapList)
-		{
+		for (Map<String, Object> entryMap : mapList) {
 			DAO elem = null;
 			try {
-				elem = (DAO)Class.forName("bwfdm.sara.publication.db." + tableName + "DAO").newInstance();
+				elem = (DAO) Class.forName("bwfdm.sara.publication.db." + tableName + "DAO").newInstance();
 			} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
 				e.printStackTrace();
-			} 
-			for(Entry<String, Object> entry : entryMap.entrySet())
-			{
-				//System.out.println(entry.getKey() + " / " + entry.getValue());
+			}
+			for (Entry<String, Object> entry : entryMap.entrySet()) {
+				// System.out.println(entry.getKey() + " / " + entry.getValue());
 				elem.set(entry.getKey(), entry.getValue());
 				elems.add(elem);
 			}
 		}
-		return (List<D>)elems;
+		return (List<D>) elems;
 	}
 
 	/**
-	 * Inserts a DAO into its database table returning a valid primary key.
-	 * The targeting table is determined automatically.
-	 * Parameters might violate constraints in the DB tables and hence throw SQL exceptions.
-	 * FIXME this needs to be extended to tables that do not use UUID as primary keys!
+	 * Inserts a DAO into its database table returning a valid primary key. The
+	 * targeting table is determined automatically. Parameters might violate
+	 * constraints in the DB tables and hence throw SQL exceptions. FIXME this needs
+	 * to be extended to tables that do not use UUID as primary keys!
 	 * 
 	 * @param d
-	 * 		The DAO to be inserted
-	 * @return
-	 * 		The original DAO updated with the primary key which has been created in the DB automatically
+	 *            The DAO to be inserted
+	 * @return The original DAO updated with the primary key which has been created
+	 *         in the DB automatically
 	 */
 	public DAO insertInDB(DAO d) {
 		// create a database entry
 		List<String> fns = d.getDynamicFieldNames();
-		String tableName = (String)d.get("TABLE");
-		String pkey = d.getPrimaryKey().get(0);  // FIXME solve that for pkeys consisting of multiple fields
+		String tableName = (String) d.get("TABLE");
+		String pkey = d.getPrimaryKey().get(0); // FIXME solve that for pkeys consisting of multiple fields
 		SimpleJdbcInsert insert;
-		
+
 		Map<String, Object> values = new HashMap<String, Object>();
-		
+
 		if (fns.contains(pkey)) {
 			insert = new SimpleJdbcInsert(db).withTableName(tableName).usingGeneratedKeyColumns(pkey);
 		} else {
 			insert = new SimpleJdbcInsert(db).withTableName(tableName);
 		}
-		
-		for (String fn: fns) {
+
+		for (String fn : fns) {
 			if (!fn.equals(pkey))
 				values.put(fn, d.get(fn));
 			else
 				insert.usingGeneratedKeyColumns(pkey);
 		}
-		
+
 		if (fns.contains(pkey)) {
 			d.set(pkey, insert.executeAndReturnKeyHolder(values).getKeys().get(pkey));
 		} else {
 			insert.execute(values);
 		}
-		
+
 		return d;
 	}
-	
+
 	/**
 	 * Updates the database table entry using an existing DAO and its primary key.
-	 * Parameters might violate constraints in the DB tables and hence throw SQL exceptions.
-	 * FIXME this needs to be extended to tables that do not use UUID as primary keys!
+	 * Parameters might violate constraints in the DB tables and hence throw SQL
+	 * exceptions. FIXME this needs to be extended to tables that do not use UUID as
+	 * primary keys!
 	 * 
 	 * @param d
-	 * 		The DAO and all its values to be updated.
+	 *            The DAO and all its values to be updated.
 	 */
 	public void updateInDB(DAO d) {
 		final String lmStr = "date_last_modified";
@@ -170,11 +166,12 @@ public class PublicationDatabase {
 	}
 
 	/**
-	 * Updates the DAO database table entry using an existing database entry and its primary key.
+	 * Updates the DAO database table entry using an existing database entry and its
+	 * primary key.
+	 * 
 	 * @param d
-	 * 		The possibly out-dated DAO containing the primary key.
-	 * @return
-	 * 		The updated DAO representing the current state of the database
+	 *            The possibly out-dated DAO containing the primary key.
+	 * @return The updated DAO representing the current state of the database
 	 */
 	public <D extends DAO> D updateFromDB(D d) {
 		System.out.println(d.getDynamicFieldNames());
@@ -191,7 +188,7 @@ public class PublicationDatabase {
 			if (fn_obj == null)
 				fn_value = "null";
 			else
-			  fn_value = fn_obj.toString();
+				fn_value = fn_obj.toString();
 
 			// quote all possibly contained 's
 			fn_value = "'" + fn_value.replaceAll("'", "''") + "'";
@@ -210,7 +207,7 @@ public class PublicationDatabase {
 		}
 		return d;
 	}
-	
+
 	private Map<String, String> readArguments(final String table, final Object id) {
 		final Map<String, String> args = new HashMap<>();
 		db.query("select param, value from " + table + " where id = UUID(?)", new RowCallbackHandler() {
@@ -221,7 +218,7 @@ public class PublicationDatabase {
 		}, id);
 		return args;
 	}
-	
+
 	public PublicationRepository newPublicationRepository(RepositoryDAO r) {
 		PublicationRepositoryFactory factory = new PublicationRepositoryFactory(r);
 		Map<String, String> args = readArguments("Repository_Params", r.get("uuid"));

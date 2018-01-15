@@ -1,3 +1,5 @@
 package bwfdm.sara.publication.db;
 
-public enum ItemType { archive, record, publication; }
+public enum ItemType {
+	archive, record, publication;
+}
