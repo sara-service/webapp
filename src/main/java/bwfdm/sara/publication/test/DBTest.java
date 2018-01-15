@@ -1,4 +1,4 @@
-package bwfdm.sara.publication.db;
+package bwfdm.sara.publication.test;
 
 import java.util.List;
 
@@ -6,6 +6,7 @@ import javax.sql.DataSource;
 import org.springframework.jdbc.datasource.SimpleDriverDataSource;
 import bwfdm.sara.publication.PublicationDatabase;
 import bwfdm.sara.publication.PublicationRepository;
+import bwfdm.sara.publication.db.*;
 
 class Test {
 	
