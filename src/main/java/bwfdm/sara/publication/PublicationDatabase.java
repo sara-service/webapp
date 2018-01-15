@@ -1,4 +1,4 @@
-package bwfdm.sara.db;
+package bwfdm.sara.publication;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

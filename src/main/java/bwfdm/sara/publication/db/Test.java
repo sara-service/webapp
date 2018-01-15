@@ -4,7 +4,7 @@ import java.util.List;
 
 import javax.sql.DataSource;
 import org.springframework.jdbc.datasource.SimpleDriverDataSource;
-import bwfdm.sara.db.PublicationDatabase;
+import bwfdm.sara.publication.PublicationDatabase;
 import bwfdm.sara.publication.PublicationRepository;
 
 class Test {
