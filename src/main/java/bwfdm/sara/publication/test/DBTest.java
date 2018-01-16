@@ -92,27 +92,35 @@ class DBTest {
 			// not allowed as of permissions.sql
 			// pdb.updateInDB(r);
 
-			System.out.println("Configured Collections");
 			List<CollectionDAO> colls = pdb.getList(CollectionDAO.TABLE);
+			System.out.println("Configured Collections");
 			for (CollectionDAO coll : colls) {
-				System.out.print("UUID=" + coll.foreign_uuid);
-				System.out.print(" Name=" + ir.getCollectionName(coll.foreign_uuid));
-				if (coll.enabled) {
-					System.out.println(" ENABLED");
+				if (coll.id.equals(ir.getDAO().uuid)) {
+					System.out.print("UUID=" + coll.foreign_uuid);
+					System.out.print(" Name=" + ir.getCollectionName(coll.foreign_uuid));
+					if (coll.enabled) {
+						System.out.println(" [ENABLED]");
+					} else {
+						System.out.println(" [DISABLED]");
+					}
 				} else {
-					System.out.println(" DISABLED");
+					System.out.println("No metadata for this IR: " + coll.id);
 				}
 			}
 
 			System.out.println("Configured Metadata Mappings");
 			List<MetadataDAO> mms = pdb.getList(MetadataDAO.TABLE);
 			for (MetadataDAO mm : mms) {
-				System.out.print(
-						"Mapping from " + mm.map_from + " to " + mm.map_to + " Name=" + ir.getMetadataName(mm.map_to));
-				if (mm.enabled) {
-					System.out.println(" ENABLED");
+				if (mm.id.equals(ir.getDAO().uuid)) {
+					System.out.print("Mapping " + mm.display_name + " from " + mm.map_from + " to " + mm.map_to
+							+ ", Name in IR = " + ir.getMetadataName(mm.map_to));
+					if (mm.enabled) {
+						System.out.println(" [ENABLED]");
+					} else {
+						System.out.println(" [DISABLED]");
+					}
 				} else {
-					System.out.println(" DISABLED");
+					System.out.println("No metadata for this IR: " + mm.id);
 				}
 			}
 
