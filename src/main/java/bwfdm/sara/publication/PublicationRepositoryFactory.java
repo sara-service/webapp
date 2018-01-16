@@ -45,10 +45,8 @@ public class PublicationRepositoryFactory {
 	 * 
 	 * @return a new {@link PublicationRepository}
 	 */
-	public PublicationRepository newPubRepo(final Map<String, String> args) {
+	public PublicationRepository newPublicationRepository(final Map<String, Object> args) {
 		final Class<? extends PublicationRepository> cls = ADAPTERS.get(dao.adapter);
-		args.put("uuid", dao.uuid.toString());
-		args.put("url", dao.url);
 		return MAPPER.convertValue(args, cls);
 	}
 }

@@ -7,13 +7,13 @@ package bwfdm.sara.publication;
  */
 
 import java.util.Map;
-import java.util.UUID;
 
 import bwfdm.sara.publication.db.ItemDAO;
+import bwfdm.sara.publication.db.RepositoryDAO;
 
 public interface PublicationRepository {
 
-	public UUID getUUID();
+	public RepositoryDAO getDAO();
 
 	public Boolean isAccessible();
 

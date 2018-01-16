@@ -13,6 +13,7 @@ public interface DAO {
 
 	public List<String> getDynamicFieldNames();
 
+	// FIXME this should be a set not a list!!!
 	public List<String> getPrimaryKey();
 
 	void dump();

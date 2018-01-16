@@ -1,15 +1,6 @@
 package bwfdm.sara.publication;
 
-/**
- * @author sk
- */
-
-import java.sql.ResultSet;
-import java.sql.SQLException;
-//import java.util.Map;
 import java.util.HashMap;
-//import java.util.ArrayList;
-//import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -18,7 +9,6 @@ import javax.sql.DataSource;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 
 import bwfdm.sara.publication.db.DAO;
@@ -65,10 +55,9 @@ public class PublicationDatabase {
 				e.printStackTrace();
 			}
 			for (Entry<String, Object> entry : entryMap.entrySet()) {
-				// System.out.println(entry.getKey() + " / " + entry.getValue());
 				elem.set(entry.getKey(), entry.getValue());
-				elems.add(elem);
 			}
+			elems.add(elem);
 		}
 		return (List<D>) elems;
 	}
@@ -206,20 +195,21 @@ public class PublicationDatabase {
 		return d;
 	}
 
-	private Map<String, String> readArguments(final String table, final Object id) {
-		final Map<String, String> args = new HashMap<>();
-		db.query("select param, value from " + table + " where id = UUID(?)", new RowCallbackHandler() {
-			@Override
-			public void processRow(final ResultSet rs) throws SQLException {
-				args.put(rs.getString("param"), rs.getString("value"));
-			}
-		}, id);
-		return args;
-	}
+	/*
+	 * private Map<String, Object> readArguments(final String table, final Object
+	 * id) { final Map<String, Object> args = new HashMap<>();
+	 * db.query("select param, value from " + table + " where id = UUID(?)", new
+	 * RowCallbackHandler() {
+	 * 
+	 * @Override public void processRow(final ResultSet rs) throws SQLException {
+	 * args.put(rs.getString("param"), rs.getString("value")); } }, id); return
+	 * args; }
+	 */
 
 	public PublicationRepository newPublicationRepository(RepositoryDAO r) {
 		PublicationRepositoryFactory factory = new PublicationRepositoryFactory(r);
-		Map<String, String> args = readArguments("Repository_Params", r.get("uuid"));
-		return factory.newPubRepo(args);
+		Map<String, Object> args = new HashMap<>(); // = readArguments("Repository_Params", r.get("uuid"));
+		args.put("dao", r);
+		return factory.newPublicationRepository(args);
 	}
 }
