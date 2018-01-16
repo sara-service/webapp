@@ -1,12 +1,25 @@
 package bwfdm.sara.publication.test;
 
+/**
+ * @author sk
+ */
+
 import java.util.List;
 
 import javax.sql.DataSource;
+
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.datasource.SimpleDriverDataSource;
+
 import bwfdm.sara.publication.PublicationDatabase;
 import bwfdm.sara.publication.PublicationRepository;
-import bwfdm.sara.publication.db.*;
+import bwfdm.sara.publication.db.ArchiveDAO;
+import bwfdm.sara.publication.db.CollectionDAO;
+import bwfdm.sara.publication.db.EPersonDAO;
+import bwfdm.sara.publication.db.ItemDAO;
+import bwfdm.sara.publication.db.MetadataDAO;
+import bwfdm.sara.publication.db.RepositoryDAO;
+import bwfdm.sara.publication.db.SourceDAO;
 
 class DBTest {
 
@@ -38,7 +51,12 @@ class DBTest {
 			pdb.updateFromDB(s);
 			s.display_name = "Kasperletheater";
 			// not allowed as of permissions.sql
-			// pdb.updateInDB(s);
+			try {
+				pdb.updateInDB(s);
+			} catch (DataAccessException ex) {
+				System.out.println("GOOD! Exception because permission is not granted to update this table!");
+				ex.printStackTrace();
+			}
 		}
 	}
 
@@ -51,7 +69,12 @@ class DBTest {
 			pdb.updateFromDB(a);
 			a.display_name = "Kasperletheater";
 			// not allowed as of permissions.sql
-			// pdb.updateInDB(a);
+			try {
+				pdb.updateInDB(a);
+			} catch (DataAccessException ex) {
+				System.out.println("GOOD! Exception because permission is not granted to update this table!");
+				ex.printStackTrace();
+			}
 		}
 	};
 
@@ -103,8 +126,24 @@ class DBTest {
 		for (ItemDAO i : myItems) {
 			i.dump();
 			i.email_verified = true;
-			pdb.updateInDB(i);
+			try {
+				pdb.updateInDB(i);
+			} catch (DataAccessException ex) {
+				System.out.println(ex.getStackTrace());
+			}
 			i.dump();
+			i = pdb.updateFromDB(i);
+
+			// this should raise an exception
+			i.set("archive_uuid", i.eperson_uuid);
+			try {
+				pdb.updateInDB(i);
+				System.out.println("WARNING! The schema lacks foreign key constraints!");
+			} catch (DataAccessException ex) {
+				final String ss = ex.getMessage();
+				System.out.println("GOOD! Exception when FK constraint is violated!");
+				System.out.println(ss);
+			}
 			i = pdb.updateFromDB(i);
 		}
 	};
