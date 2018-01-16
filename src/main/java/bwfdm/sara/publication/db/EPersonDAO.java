@@ -1,5 +1,9 @@
 package bwfdm.sara.publication.db;
 
+/**
+ * @author sk
+ */
+
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;

@@ -1,5 +1,9 @@
 package bwfdm.sara.publication.db;
 
+/**
+ * @author sk
+ */
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;

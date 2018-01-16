@@ -1,5 +1,9 @@
 package bwfdm.sara.publication;
 
+/**
+ * @author sk
+ */
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 //import java.util.Map;
@@ -12,6 +16,7 @@ import java.util.Map.Entry;
 
 import javax.sql.DataSource;
 
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
@@ -20,13 +25,6 @@ import bwfdm.sara.publication.db.DAO;
 import bwfdm.sara.publication.db.RepositoryDAO;
 import jersey.repackaged.com.google.common.collect.Lists;
 
-/**
- * Database containing config stuff for the publication backend.
- * <p>
- * Implementation should work with PostgreSQL, MySQL (untested) and HSQL
- * (embedded database used for development) because it only uses trivial (CRUD,
- * but without U) queries.
- */
 public class PublicationDatabase {
 
 	private final JdbcTemplate db;
@@ -86,7 +84,7 @@ public class PublicationDatabase {
 	 * @return The original DAO updated with the primary key which has been created
 	 *         in the DB automatically
 	 */
-	public DAO insertInDB(DAO d) {
+	public DAO insertInDB(DAO d) throws DataAccessException {
 		// create a database entry
 		List<String> fns = d.getDynamicFieldNames();
 		String tableName = (String) d.get("TABLE");
@@ -126,7 +124,7 @@ public class PublicationDatabase {
 	 * @param d
 	 *            The DAO and all its values to be updated.
 	 */
-	public void updateInDB(DAO d) {
+	public void updateInDB(DAO d) throws DataAccessException {
 		final String lmStr = "date_last_modified";
 		List<String> fieldNames = d.getDynamicFieldNames();
 		List<String> primaryKey = d.getPrimaryKey();
@@ -173,7 +171,7 @@ public class PublicationDatabase {
 	 *            The possibly out-dated DAO containing the primary key.
 	 * @return The updated DAO representing the current state of the database
 	 */
-	public <D extends DAO> D updateFromDB(D d) {
+	public <D extends DAO> D updateFromDB(D d) throws DataAccessException {
 		System.out.println(d.getDynamicFieldNames());
 
 		List<String> fieldNames = d.getDynamicFieldNames();

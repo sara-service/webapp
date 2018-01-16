@@ -1,23 +1,26 @@
 package bwfdm.sara.publication;
 
+/** 
+ * @author sk
+ */
+
+import java.util.HashMap;
+import java.util.Map;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import bwfdm.sara.publication.db.RepositoryDAO;
-import bwfdm.sara.publication.PublicationRepository;
 import bwfdm.sara.publication.dspace.DSpace_RESTv5_SWORDv2;
-
-import java.util.HashMap;
-import java.util.Map;
 
 @JsonIgnoreProperties(ignoreUnknown = false)
 public class PublicationRepositoryFactory {
-	//@SuppressWarnings("unchecked")
+	// @SuppressWarnings("unchecked")
 	private static final ObjectMapper MAPPER = new ObjectMapper();
 	private static final Map<String, Class<? extends PublicationRepository>> ADAPTERS = new HashMap<>();
-	
+
 	static {
 		ADAPTERS.put("DSpace_RESTv5_SWORDv2", DSpace_RESTv5_SWORDv2.class);
 	}
@@ -25,9 +28,8 @@ public class PublicationRepositoryFactory {
 	@JsonProperty
 	public final RepositoryDAO dao;
 
-
-	//@JsonProperty
-	//private JsonNode args;
+	// @JsonProperty
+	// private JsonNode args;
 
 	public PublicationRepositoryFactory(final RepositoryDAO dao) {
 		this.dao = dao;

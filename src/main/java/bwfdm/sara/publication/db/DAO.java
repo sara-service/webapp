@@ -1,5 +1,9 @@
 package bwfdm.sara.publication.db;
 
+/**
+ * @author sk
+ */
+
 import java.util.List;
 
 public interface DAO {
