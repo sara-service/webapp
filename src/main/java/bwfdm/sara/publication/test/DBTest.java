@@ -17,7 +17,7 @@ import bwfdm.sara.publication.db.ArchiveDAO;
 import bwfdm.sara.publication.db.CollectionDAO;
 import bwfdm.sara.publication.db.EPersonDAO;
 import bwfdm.sara.publication.db.ItemDAO;
-import bwfdm.sara.publication.db.MetadataDAO;
+import bwfdm.sara.publication.db.MetadataMappingDAO;
 import bwfdm.sara.publication.db.RepositoryDAO;
 import bwfdm.sara.publication.db.SourceDAO;
 
@@ -109,9 +109,9 @@ class DBTest {
 			}
 
 			System.out.println("Configured Metadata Mappings");
-			List<MetadataDAO> mms = pdb.getList(MetadataDAO.TABLE);
-			for (MetadataDAO mm : mms) {
-				if (mm.id.equals(ir.getDAO().uuid)) {
+			List<MetadataMappingDAO> mms = pdb.getList(MetadataMappingDAO.TABLE);
+			for (MetadataMappingDAO mm : mms) {
+				if (mm.repository_uuid.equals(ir.getDAO().uuid)) {
 					System.out.print("Mapping " + mm.display_name + " from " + mm.map_from + " to " + mm.map_to
 							+ ", Name in IR = " + ir.getMetadataName(mm.map_to));
 					if (mm.enabled) {
@@ -120,7 +120,7 @@ class DBTest {
 						System.out.println(" [DISABLED]");
 					}
 				} else {
-					System.out.println("No metadata for this IR: " + mm.id);
+					System.out.println("No metadata for this IR: " + mm.repository_uuid);
 				}
 			}
 
