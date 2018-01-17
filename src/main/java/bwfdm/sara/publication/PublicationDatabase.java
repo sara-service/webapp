@@ -77,7 +77,9 @@ public class PublicationDatabase {
 		// create a database entry
 		List<String> fns = d.getDynamicFieldNames();
 		String tableName = (String) d.get("TABLE");
-		String pkey = d.getPrimaryKey().get(0); // FIXME solve that for pkeys consisting of multiple fields
+		// String pkey = d.getPrimaryKey().get(0); // FIXME solve that for pkeys
+		// consisting of multiple fields
+		final String pkey = "uuid";
 		SimpleJdbcInsert insert;
 
 		Map<String, Object> values = new HashMap<String, Object>();

@@ -27,7 +27,9 @@ public class MetadataValueDAO extends DAOImpl {
 	}
 
 	@Override
+	// FIXME this does NOT WORK!
 	public List<String> getPrimaryKey() {
-		return Lists.newArrayList("item_uuid", "metadata_mapping_uuid");
+		return Lists.newArrayList("metadata_mapping_uuid");
 	}
+
 }

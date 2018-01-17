@@ -13,10 +13,11 @@ import jersey.repackaged.com.google.common.collect.Lists; // TODO get rid of it!
 
 public class ItemDAO extends DAOImpl {
 	public final UUID uuid;
-	public final UUID eperson_uuid;
-	public final UUID source_uuid;
-	public final UUID archive_uuid;
+	public UUID eperson_uuid;
+	public UUID source_uuid;
+	public UUID archive_uuid;
 	public UUID repository_uuid;
+	public UUID collection_uuid;
 	public final Date date_created;
 	public Date date_last_modified;
 	public final String item_type;
