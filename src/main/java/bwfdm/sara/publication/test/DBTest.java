@@ -5,6 +5,7 @@ package bwfdm.sara.publication.test;
  */
 
 import java.util.List;
+import java.util.UUID;
 
 import javax.sql.DataSource;
 
@@ -55,7 +56,7 @@ class DBTest {
 				pdb.updateInDB(s);
 			} catch (DataAccessException ex) {
 				System.out.println("GOOD! Exception because permission is not granted to update this table!");
-				ex.printStackTrace();
+				System.out.println(ex.getMessage());
 			}
 		}
 	}
@@ -73,7 +74,7 @@ class DBTest {
 				pdb.updateInDB(a);
 			} catch (DataAccessException ex) {
 				System.out.println("GOOD! Exception because permission is not granted to update this table!");
-				ex.printStackTrace();
+				System.out.println(ex.getMessage());
 			}
 		}
 	};
@@ -134,11 +135,7 @@ class DBTest {
 		for (ItemDAO i : myItems) {
 			i.dump();
 			i.email_verified = true;
-			try {
-				pdb.updateInDB(i);
-			} catch (DataAccessException ex) {
-				System.out.println(ex.getStackTrace());
-			}
+			pdb.updateInDB(i);
 			i.dump();
 			i = pdb.updateFromDB(i);
 
@@ -148,11 +145,19 @@ class DBTest {
 				pdb.updateInDB(i);
 				System.out.println("WARNING! The schema lacks foreign key constraints!");
 			} catch (DataAccessException ex) {
-				final String ss = ex.getMessage();
 				System.out.println("GOOD! Exception when FK constraint is violated!");
-				System.out.println(ss);
+				System.out.println(ex.getMessage());
 			}
 			i = pdb.updateFromDB(i);
+			System.out.println("ItemDAO exists in DB : " + pdb.exists(i));
+			i.set("uuid", UUID.fromString("ff2a1271-b84b-4ac9-a07e-5f2419909e97"));
+			System.out.println("ItemDAO exists in DB : " + pdb.exists(i));
+			try {
+				pdb.deleteFromDB(i);
+			} catch (DataAccessException ex) {
+				System.out.println("GOOD! The item table grants no DELETE rights!");
+				System.out.println(ex.getMessage());
+			}
 		}
 	};
 
