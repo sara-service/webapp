@@ -6,6 +6,8 @@ package bwfdm.sara.publication.db;
 
 import java.lang.reflect.Field;
 import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import jersey.repackaged.com.google.common.collect.Lists;
 
@@ -56,8 +58,10 @@ public class DAOImpl implements DAO {
 	}
 
 	@Override
-	public List<String> getPrimaryKey() {
-		return Lists.newArrayList("uuid");
+	public SortedSet<String> getPrimaryKey() {
+		SortedSet<String> s = new TreeSet<String>();
+		s.add("uuid");
+		return s;
 	}
 
 	@Override

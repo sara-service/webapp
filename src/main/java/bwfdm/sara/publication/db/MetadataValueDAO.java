@@ -6,9 +6,9 @@ package bwfdm.sara.publication.db;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.UUID;
-
-import jersey.repackaged.com.google.common.collect.Lists;
 
 public class MetadataValueDAO extends DAOImpl {
 	public UUID item_uuid;
@@ -28,8 +28,12 @@ public class MetadataValueDAO extends DAOImpl {
 
 	@Override
 	// FIXME this does NOT WORK!
-	public List<String> getPrimaryKey() {
-		return Lists.newArrayList("metadata_mapping_uuid");
+	public SortedSet<String> getPrimaryKey() {
+		SortedSet<String> s = new TreeSet<String>();
+		s.add("metadata_mapping_uuid");
+		s.add("map_from");
+		s.add("item_uuid");
+		return s;
 	}
 
 }

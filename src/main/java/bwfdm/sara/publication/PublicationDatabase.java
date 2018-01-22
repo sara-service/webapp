@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.SortedSet;
 
 import javax.sql.DataSource;
 
@@ -118,7 +119,7 @@ public class PublicationDatabase {
 	public void updateInDB(DAO d) throws DataAccessException {
 		final String lmStr = "date_last_modified";
 		List<String> fieldNames = d.getDynamicFieldNames();
-		List<String> primaryKey = d.getPrimaryKey();
+		SortedSet<String> primaryKey = d.getPrimaryKey();
 
 		// get table name
 		String tableName = d.get("TABLE").toString();
@@ -166,7 +167,7 @@ public class PublicationDatabase {
 		System.out.println(d.getDynamicFieldNames());
 
 		List<String> fieldNames = d.getDynamicFieldNames();
-		List<String> primaryKey = d.getPrimaryKey();
+		SortedSet<String> primaryKey = d.getPrimaryKey();
 
 		String tableName = d.get("TABLE").toString();
 		String whereString = "";

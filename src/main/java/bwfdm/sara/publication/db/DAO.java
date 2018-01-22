@@ -5,6 +5,7 @@ package bwfdm.sara.publication.db;
  */
 
 import java.util.List;
+import java.util.SortedSet;
 
 public interface DAO {
 	void set(String fieldName, Object value);
@@ -13,8 +14,7 @@ public interface DAO {
 
 	public List<String> getDynamicFieldNames();
 
-	// FIXME this should be a set not a list!!!
-	public List<String> getPrimaryKey();
+	public SortedSet<String> getPrimaryKey();
 
 	void dump();
 }

@@ -6,9 +6,9 @@ package bwfdm.sara.publication.db;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.UUID;
-
-import jersey.repackaged.com.google.common.collect.Lists;
 
 public class CollectionDAO extends DAOImpl {
 	public final UUID id;
@@ -27,7 +27,11 @@ public class CollectionDAO extends DAOImpl {
 	}
 
 	@Override
-	public List<String> getPrimaryKey() {
-		return Lists.newArrayList("id", "display_name", "foreign_uuid");
+	public SortedSet<String> getPrimaryKey() {
+		SortedSet<String> s = new TreeSet<String>();
+		s.add("id");
+		s.add("display_name");
+		s.add("foreign_uuid");
+		return s;
 	}
 }
