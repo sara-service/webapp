@@ -30,12 +30,21 @@ public class DSpace_RESTv5_SWORDv2 implements PublicationRepository {
 	public final RepositoryDAO dao;
 
 	/**
-	 * @param appID
-	 *            OAuth application ID
-	 * @param appSecret
-	 *            OAuth application secret
-	 * @param gitlab
-	 *            URL to GitLab root
+	 * @param rest_user
+	 *            User Name used for RESTv5 access to DSpace
+	 * @param rest_pwd
+	 *            Password used for RESTv5 access to DSpace
+	 * @param rest_api_endpoint
+	 *            API end point used for RESTv5 access to DSpace e.g. 'rest'
+	 * @param sword_user
+	 *            User name used for SWORDv2 access to DSpace
+	 * @param sword_password
+	 *            Password used for SWORDv2 access to DSpace
+	 * @param sword_api_endpoint
+	 *            API end point used for SWORDv2 access to DSpace e.g. 'sword'
+	 * @param dao
+	 *            Data Access Object 'RepositoryDAO' carrying remaining info about
+	 *            the IR
 	 */
 	@JsonCreator
 	public DSpace_RESTv5_SWORDv2(@JsonProperty("rest_user") final String ru, @JsonProperty("rest_pwd") final String rp,
