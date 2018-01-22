@@ -36,6 +36,44 @@ public class PublicationDatabase {
 		return this.ds;
 	}
 
+	private Object[] getPrimaryKeyObjects(DAO d) {
+		final SortedSet<String> pKey = d.getPrimaryKey();
+		Object[] objs = new Object[pKey.size()];
+		int i = 0;
+		for (String fn : pKey) {
+			objs[i] = d.get(fn);
+		}
+		return objs;
+	}
+
+	public Boolean exists(DAO d) {
+		String tableName = d.get("TABLE").toString();
+		String whereString = "";
+
+		for (String fn : d.getPrimaryKey()) {
+			String fn_value;
+			Object fn_obj = d.get(fn);
+			if (fn_obj == null)
+				fn_value = "null";
+			else
+				fn_value = fn_obj.toString();
+
+			// quote all possibly contained 's
+			fn_value = "'" + fn_value.replaceAll("'", "''") + "'";
+
+			whereString += " " + fn + "=?,";
+		}
+
+		whereString = whereString.substring(0, whereString.length() - 1) + " ";
+		int count = db.queryForObject("SELECT count(*) FROM " + tableName + " WHERE " + whereString,
+				getPrimaryKeyObjects(d), Integer.class);
+
+		if (count > 1) {
+			System.out.println("pKey ERROR: must be unique!");
+		}
+		return (count == 1);
+	}
+
 	/**
 	 * Retrieves a list of DAO entries for given table
 	 * 
@@ -202,7 +240,7 @@ public class PublicationDatabase {
 		return d;
 	}
 
-	public void deleteFromDB(DAO d) {
+	public Boolean deleteFromDB(DAO d) throws DataAccessException {
 		String whereString = "";
 
 		for (String fn : d.getPrimaryKey()) {
@@ -218,7 +256,13 @@ public class PublicationDatabase {
 			whereString += " " + fn + "=" + fn_value + " and";
 		}
 		whereString = whereString.substring(0, whereString.length() - 4) + " ";
-		db.execute("delete from " + d.get("TABLE") + " where " + whereString);
+		if (exists(d)) {
+			db.execute("delete from " + d.get("TABLE") + " where " + whereString);
+			return true;
+		} else {
+			return false;
+		}
+
 	}
 
 	public PublicationRepository newPublicationRepository(RepositoryDAO r) {
