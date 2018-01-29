@@ -1,35 +1,46 @@
 package bwfdm.sara.publication.db;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 
-/* default read-only DAO, can be used for most SARA DB tables */
+import jersey.repackaged.com.google.common.collect.Lists; // TODO get rid of it!!!!
 
-public class ArchiveDAO {
-	
+public class ArchiveDAO extends DAOImpl {
+
 	public final UUID uuid;
-	public final String display_name;
-    public final String url;
-    public final String adapter;
-    public final Boolean enabled;
-    // Kram von Matthias ...
-    
-    // optionally
-    // ...
-    
-    public ArchiveDAO(
-    		UUID id,
-    		String n,
-    		String u,
-    		String a,
-    		Boolean e
-    		) {
-    	uuid = id; display_name = n; url = u; adapter = a; enabled = e; 
-    }
-    
-    public void dump() {
-    	System.out.println("UUID=" + uuid.toString());
-    	System.out.println("display_name=" + display_name);
-    	System.out.println("url=" + url);
-    	System.out.println("adapter=" + adapter);
-    }
+	public String display_name;
+	public String contact_email;
+	public String url;
+	public String adapter;
+	public String logo_base64;
+	public Boolean enabled;
+
+	public static String TABLE = "Archive";
+	public static List<String> FIELDS = Arrays.asList("uuid", "display_name", "url", "contact_email", "adapter",
+			"enabled");
+
+	public ArchiveDAO() {
+		uuid = null;
+		display_name = null;
+		url = null;
+		contact_email = null;
+		adapter = null;
+		logo_base64 = null;
+		enabled = null;
+	}
+
+	public List<String> getDynamicFieldNames() {
+		List<String> fn = Lists.newArrayList();
+		fn.clear();
+		List<String> dyn_fn = super.getDynamicFieldNames();
+		for (String s : FIELDS) {
+			if (dyn_fn.contains(s)) {
+				fn.add(s);
+			} else {
+				System.out.println("WARNING! " + s + " is used in FIELDS but not declared as member! Skipping...");
+			}
+		}
+		return fn;
+	}
 }

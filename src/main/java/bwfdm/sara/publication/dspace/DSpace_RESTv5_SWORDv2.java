@@ -13,6 +13,9 @@ import org.springframework.web.servlet.view.RedirectView;
 */
 
 import bwfdm.sara.publication.PublicationRepository;
+import bwfdm.sara.publication.db.RepositoryDAO;
+import bwfdm.sara.publication.db.ItemDAO;
+import bwfdm.sara.publication.db.ItemState;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -60,7 +63,7 @@ public class DSpace_RESTv5_SWORDv2 implements PublicationRepository {
 	public Boolean isAccessible() {
 		System.out.println("Testing REST Access...");
 		System.out.println("Testing SWORD Access...");
-		return false;
+		return true;
 	}
 
 	@Override
@@ -71,13 +74,13 @@ public class DSpace_RESTv5_SWORDv2 implements PublicationRepository {
 	@Override
 	public Boolean isUserRegistered(String loginName) {
 		// TODO Auto-generated method stub
-		return null;
+		return true;
 	}
 
 	@Override
 	public Boolean isUserAssigned(String loginName) {
 		// TODO Auto-generated method stub
-		return null;
+		return true;
 	}
 
 	@Override
@@ -92,10 +95,28 @@ public class DSpace_RESTv5_SWORDv2 implements PublicationRepository {
 		return null;
 	}
 
+	@Override
 	public Map<String, String> getAvailableCollections() {
 		Map<String, String> coll = new HashMap<>();
-		coll.put("0815", "Coffee-Management");
+		coll.put("0815", "Coffee Management");
 		return coll;
+	}
+	
+	@Override
+	public Boolean publishItem(ItemDAO item) {
+		// TODO Auto-generated method stub
+		if (item.isArchiveOnly()) {
+			System.out.println("Item is not meant to be published (archive-only)");
+			return false;
+		}
+		
+		if (item.isVerified()) {
+			System.out.println("Not yet implemented!");
+			return false;
+		} else {
+			System.out.println("ItemState needs to be verified");
+			return false;
+		}
 	}
 
 	@Override
