@@ -10,7 +10,7 @@ import java.util.UUID;
 
 @TableName("repository")
 public class RepositoryDAO extends DAOImpl {
-
+	@PrimaryKey
 	public final UUID uuid;
 	public String display_name;
 	public String url;

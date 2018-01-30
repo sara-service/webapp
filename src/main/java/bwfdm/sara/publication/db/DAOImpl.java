@@ -58,10 +58,13 @@ public class DAOImpl implements DAO {
 	}
 
 	@Override
-	public SortedSet<String> getPrimaryKey() {
-		SortedSet<String> s = new TreeSet<String>();
-		s.add("uuid");
-		return s;
+	public final SortedSet<String> getPrimaryKey() {
+		// FIXME this method should be in PublicationDatabase instead
+		final SortedSet<String> fields = new TreeSet<>();
+		for (final Field f : this.getClass().getFields())
+			if (f.isAnnotationPresent(PrimaryKey.class))
+				fields.add(f.getName());
+		return fields;
 	}
 
 	@Override

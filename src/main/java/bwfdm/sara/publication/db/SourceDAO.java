@@ -12,7 +12,7 @@ import jersey.repackaged.com.google.common.collect.Lists;
 
 @TableName("source")
 public class SourceDAO extends DAOImpl {
-
+	@PrimaryKey
 	public final UUID uuid;
 	public String display_name;
 	public String url;

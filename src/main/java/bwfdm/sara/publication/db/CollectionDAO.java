@@ -6,14 +6,15 @@ package bwfdm.sara.publication.db;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.SortedSet;
-import java.util.TreeSet;
 import java.util.UUID;
 
 @TableName("collection")
 public class CollectionDAO extends DAOImpl {
+	@PrimaryKey
 	public final UUID id;
+	@PrimaryKey
 	public final String foreign_uuid;
+	@PrimaryKey // FIXME why is this part of the primary key???
 	public final String display_name;
 	public Boolean enabled;
 
@@ -24,14 +25,5 @@ public class CollectionDAO extends DAOImpl {
 		foreign_uuid = null;
 		display_name = null;
 		enabled = null;
-	}
-
-	@Override
-	public SortedSet<String> getPrimaryKey() {
-		SortedSet<String> s = new TreeSet<String>();
-		s.add("id");
-		s.add("display_name");
-		s.add("foreign_uuid");
-		return s;
 	}
 }

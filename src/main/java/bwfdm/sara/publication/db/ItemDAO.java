@@ -13,6 +13,7 @@ import jersey.repackaged.com.google.common.collect.Lists; // TODO get rid of it!
 
 @TableName("item")
 public class ItemDAO extends DAOImpl {
+	@PrimaryKey
 	public final UUID uuid;
 	public UUID eperson_uuid;
 	public UUID source_uuid;

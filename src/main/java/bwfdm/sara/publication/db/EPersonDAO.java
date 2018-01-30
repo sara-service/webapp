@@ -11,6 +11,7 @@ import java.util.UUID;
 
 @TableName("eperson")
 public class EPersonDAO extends DAOImpl {
+	@PrimaryKey
 	public final UUID uuid;
 	public String contact_email;
 	public String password;

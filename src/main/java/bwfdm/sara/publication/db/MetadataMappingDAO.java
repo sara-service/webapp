@@ -10,6 +10,7 @@ import java.util.UUID;
 
 @TableName("MetadataMapping")
 public class MetadataMappingDAO extends DAOImpl {
+	@PrimaryKey
 	public final UUID uuid;
 	public final UUID repository_uuid;
 	public String display_name;

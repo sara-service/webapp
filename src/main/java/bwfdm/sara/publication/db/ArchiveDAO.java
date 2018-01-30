@@ -12,7 +12,7 @@ import jersey.repackaged.com.google.common.collect.Lists; // TODO get rid of it!
 
 @TableName("archive")
 public class ArchiveDAO extends DAOImpl {
-
+	@PrimaryKey
 	public final UUID uuid;
 	public String display_name;
 	public String contact_email;

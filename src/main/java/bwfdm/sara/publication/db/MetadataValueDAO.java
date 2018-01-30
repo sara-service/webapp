@@ -6,14 +6,15 @@ package bwfdm.sara.publication.db;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.SortedSet;
-import java.util.TreeSet;
 import java.util.UUID;
 
 @TableName("metadatavalue")
 public class MetadataValueDAO extends DAOImpl {
+	@PrimaryKey
 	public UUID item_uuid;
+	@PrimaryKey
 	public UUID metadatamapping_uuid;
+	@PrimaryKey
 	public String map_from;
 	public String data;
 
@@ -25,15 +26,4 @@ public class MetadataValueDAO extends DAOImpl {
 		map_from = null;
 		data = null;
 	}
-
-	@Override
-	// FIXME this does NOT WORK!
-	public SortedSet<String> getPrimaryKey() {
-		SortedSet<String> s = new TreeSet<String>();
-		s.add("metadata_mapping_uuid");
-		s.add("map_from");
-		s.add("item_uuid");
-		return s;
-	}
-
 }
