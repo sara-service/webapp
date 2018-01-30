@@ -5,13 +5,13 @@ package bwfdm.sara.publication.db;
  */
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import jersey.repackaged.com.google.common.collect.Lists;
-
 public class DAOImpl implements DAO {
+	// FIXME all of these methods could go into PublicationDatabase instead
 
 	@Override
 	public void set(String fieldName, Object value) {
@@ -37,29 +37,17 @@ public class DAOImpl implements DAO {
 	}
 
 	@Override
-	public List<String> getDynamicFieldNames() {
-		try {
-			List<String> fn = Lists.newArrayList();
-			String fn_str;
-			fn.clear();
-			// Field[] fields = this.getClass().getDeclaredFields();
-			Field[] fields = this.getClass().getFields();
-			for (Field f : fields) {
-				fn_str = f.getName();
-				// treat all lower case members as DB fields
-				if (fn_str.equals(fn_str.toLowerCase()))
-					fn.add(fn_str);
-			}
-			return fn;
-		} catch (SecurityException e) {
-			e.printStackTrace();
-			return null;
-		}
+	public final List<String> getDynamicFieldNames() {
+		final List<String> fields = new ArrayList<>();
+		for (final Field f : this.getClass().getFields())
+			if (f.isAnnotationPresent(PrimaryKey.class)
+					|| f.isAnnotationPresent(DatabaseField.class))
+				fields.add(f.getName());
+		return fields;
 	}
 
 	@Override
 	public final SortedSet<String> getPrimaryKey() {
-		// FIXME this method should be in PublicationDatabase instead
 		final SortedSet<String> fields = new TreeSet<>();
 		for (final Field f : this.getClass().getFields())
 			if (f.isAnnotationPresent(PrimaryKey.class))

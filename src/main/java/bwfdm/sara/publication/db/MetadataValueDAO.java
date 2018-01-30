@@ -16,6 +16,7 @@ public class MetadataValueDAO extends DAOImpl {
 	public UUID metadatamapping_uuid;
 	@PrimaryKey
 	public String map_from;
+	@DatabaseField
 	public String data;
 
 	public static List<String> FIELDS = Arrays.asList("item_uuid", "metadatamapping_uuid", "map_from", "data");

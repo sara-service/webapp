@@ -1,26 +1,22 @@
 package bwfdm.sara.publication.db;
 
-/**
- * @author sk
- */
-
-import java.util.Arrays;
-import java.util.List;
 import java.util.UUID;
 
 @TableName("MetadataMapping")
 public class MetadataMappingDAO extends DAOImpl {
 	@PrimaryKey
 	public final UUID uuid;
+	@DatabaseField
 	public final UUID repository_uuid;
+	@DatabaseField
 	public String display_name;
+	@DatabaseField
 	public final String map_from;
+	@DatabaseField
 	public final String map_to;
 	public final String remark;
+	@DatabaseField
 	public Boolean enabled;
-
-	public static List<String> FIELDS = Arrays.asList("uuid", "repository_uuid", "display_name", "map_from", "map_to",
-			"enabled");
 
 	public MetadataMappingDAO() {
 		uuid = null;

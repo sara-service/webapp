@@ -1,26 +1,23 @@
 package bwfdm.sara.publication.db;
 
-/**
- * @author sk
- */
-
-import java.util.Arrays;
-import java.util.List;
 import java.util.UUID;
 
 @TableName("repository")
 public class RepositoryDAO extends DAOImpl {
 	@PrimaryKey
 	public final UUID uuid;
+	@DatabaseField
 	public String display_name;
+	@DatabaseField
 	public String url;
+	@DatabaseField
 	public String contact_email; // an email address to contact the repository
+	@DatabaseField
 	public String adapter;
+	@DatabaseField
 	public String logo_base64;
+	@DatabaseField
 	public Boolean enabled;
-
-	public static List<String> FIELDS = Arrays.asList("uuid", "display_name", "url", "contact_email", "adapter",
-			"logo_base64", "enabled");
 
 	public RepositoryDAO() {
 		uuid = null;

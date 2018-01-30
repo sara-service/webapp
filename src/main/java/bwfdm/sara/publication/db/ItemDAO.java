@@ -9,24 +9,34 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
-import jersey.repackaged.com.google.common.collect.Lists; // TODO get rid of it!!!
-
 @TableName("item")
 public class ItemDAO extends DAOImpl {
 	@PrimaryKey
 	public final UUID uuid;
+	@DatabaseField
 	public UUID eperson_uuid;
+	@DatabaseField
 	public UUID source_uuid;
+	@DatabaseField
 	public UUID archive_uuid;
+	@DatabaseField
 	public UUID repository_uuid;
 	public UUID collection_uuid;
+	@DatabaseField
 	public final Date date_created;
+	@DatabaseField
 	public Date date_last_modified;
+	@DatabaseField
 	public final String item_type;
+	@DatabaseField
 	public String item_state;
+	@DatabaseField
 	public String foreign_uuid;
+	@DatabaseField
 	public String citation_handle;
+	@DatabaseField
 	public Boolean email_verified;
+	@DatabaseField
 	public Boolean in_archive;
 
 	public static List<String> FIELDS = Arrays.asList("uuid", "eperson_uuid", "source_uuid", "archive_uuid",
@@ -55,20 +65,6 @@ public class ItemDAO extends DAOImpl {
 
 	public ItemType getType() {
 		return ItemType.valueOf(item_type);
-	}
-
-	public List<String> getDynamicFieldNames() {
-		List<String> fn = Lists.newArrayList();
-		fn.clear();
-		List<String> dyn_fn = super.getDynamicFieldNames();
-		for (String s : FIELDS) {
-			if (dyn_fn.contains(s)) {
-				fn.add(s);
-			} else {
-				System.out.println("WARNING! " + s + " is used in FIELDS but not declared as member! Skipping...");
-			}
-		}
-		return fn;
 	}
 
 	public boolean isArchiveOnly() {
