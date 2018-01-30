@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
+@TableName("repository")
 public class RepositoryDAO extends DAOImpl {
 
 	public final UUID uuid;
@@ -18,7 +19,6 @@ public class RepositoryDAO extends DAOImpl {
 	public String logo_base64;
 	public Boolean enabled;
 
-	public static String TABLE = "Repository";
 	public static List<String> FIELDS = Arrays.asList("uuid", "display_name", "url", "contact_email", "adapter",
 			"logo_base64", "enabled");
 

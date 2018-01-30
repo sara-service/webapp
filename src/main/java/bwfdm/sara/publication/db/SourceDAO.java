@@ -10,6 +10,7 @@ import java.util.UUID;
 
 import jersey.repackaged.com.google.common.collect.Lists;
 
+@TableName("source")
 public class SourceDAO extends DAOImpl {
 
 	public final UUID uuid;
@@ -20,7 +21,6 @@ public class SourceDAO extends DAOImpl {
 	public String logo_base64;
 	public Boolean enabled;
 
-	public static String TABLE = "Source";
 	public static List<String> FIELDS = Arrays.asList("uuid", "display_name", "contact_email", "url", "adapter",
 			"logo_base64", "enabled");
 

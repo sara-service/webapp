@@ -9,13 +9,13 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+@TableName("eperson")
 public class EPersonDAO extends DAOImpl {
 	public final UUID uuid;
 	public String contact_email;
 	public String password;
 	public Date last_active;
 
-	public static String TABLE = "EPerson";
 	public static List<String> FIELDS = Arrays.asList("uuid", "contact_email", "password", "last_active");
 
 	public EPersonDAO() {

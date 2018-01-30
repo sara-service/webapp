@@ -11,6 +11,7 @@ import java.util.UUID;
 
 import jersey.repackaged.com.google.common.collect.Lists; // TODO get rid of it!!!
 
+@TableName("item")
 public class ItemDAO extends DAOImpl {
 	public final UUID uuid;
 	public UUID eperson_uuid;
@@ -27,7 +28,6 @@ public class ItemDAO extends DAOImpl {
 	public Boolean email_verified;
 	public Boolean in_archive;
 
-	public static String TABLE = "Item";
 	public static List<String> FIELDS = Arrays.asList("uuid", "eperson_uuid", "source_uuid", "archive_uuid",
 			"repository_uuid", "date_created", "date_last_modified", "item_type", "item_state", "foreign_uuid",
 			"citation_handle", "email_verified", "in_archive");

@@ -10,13 +10,13 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.UUID;
 
+@TableName("metadatavalue")
 public class MetadataValueDAO extends DAOImpl {
 	public UUID item_uuid;
 	public UUID metadatamapping_uuid;
 	public String map_from;
 	public String data;
 
-	public static String TABLE = "MetadataValue";
 	public static List<String> FIELDS = Arrays.asList("item_uuid", "metadatamapping_uuid", "map_from", "data");
 
 	public MetadataValueDAO() {

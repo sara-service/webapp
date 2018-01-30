@@ -35,9 +35,9 @@ class IRTest {
 
 		System.out.println("Select the working gitlab / archive gitlab / institutional repository from DB!");
 
-		SourceDAO mySource = (SourceDAO) pdb.getList(SourceDAO.TABLE).get(0);
-		ArchiveDAO myArchive = (ArchiveDAO) pdb.getList(ArchiveDAO.TABLE).get(0);
-		RepositoryDAO myRepository = (RepositoryDAO) pdb.getList(RepositoryDAO.TABLE).get(0);
+		SourceDAO mySource = pdb.getList(SourceDAO.class).get(0);
+		ArchiveDAO myArchive = pdb.getList(ArchiveDAO.class).get(0);
+		RepositoryDAO myRepository = pdb.getList(RepositoryDAO.class).get(0);
 
 		System.out.println("Create an eperson");
 
@@ -67,7 +67,8 @@ class IRTest {
 
 		PublicationRepository oparu = pdb.newPublicationRepository(myRepository);
 
-		List<MetadataMappingDAO> metadataMappings = pdb.getList(MetadataMappingDAO.TABLE);
+		List<MetadataMappingDAO> metadataMappings = pdb
+				.getList(MetadataMappingDAO.class);
 
 		MetadataValueDAO m = new MetadataValueDAO();
 
@@ -118,7 +119,7 @@ class IRTest {
 
 		System.out.println("Repository " + oparu.getDAO().display_name + " offers the following collections: ");
 
-		List<CollectionDAO> myCollections = pdb.getList(CollectionDAO.TABLE);
+		List<CollectionDAO> myCollections = pdb.getList(CollectionDAO.class);
 
 		boolean noCollection = true;
 		for (CollectionDAO c : myCollections) {

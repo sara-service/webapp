@@ -93,7 +93,7 @@ class DBTest {
 			// not allowed as of permissions.sql
 			// pdb.updateInDB(r);
 
-			List<CollectionDAO> colls = pdb.getList(CollectionDAO.TABLE);
+			List<CollectionDAO> colls = pdb.getList(CollectionDAO.class);
 			System.out.println("Configured Collections");
 			for (CollectionDAO coll : colls) {
 				if (coll.id.equals(ir.getDAO().uuid)) {
@@ -110,7 +110,8 @@ class DBTest {
 			}
 
 			System.out.println("Configured Metadata Mappings");
-			List<MetadataMappingDAO> mms = pdb.getList(MetadataMappingDAO.TABLE);
+			List<MetadataMappingDAO> mms = pdb
+					.getList(MetadataMappingDAO.class);
 			for (MetadataMappingDAO mm : mms) {
 				if (mm.repository_uuid.equals(ir.getDAO().uuid)) {
 					System.out.print("Mapping " + mm.display_name + " from " + mm.map_from + " to " + mm.map_to
@@ -169,11 +170,11 @@ class DBTest {
 
 		pdb = new PublicationDatabase(ds);
 
-		myPersons = pdb.getList(EPersonDAO.TABLE);
-		myRepositories = pdb.getList(RepositoryDAO.TABLE);
-		myArchives = pdb.getList(ArchiveDAO.TABLE);
-		mySources = pdb.getList(SourceDAO.TABLE);
-		myItems = pdb.getList(ItemDAO.TABLE);
+		myPersons = pdb.getList(EPersonDAO.class);
+		myRepositories = pdb.getList(RepositoryDAO.class);
+		myArchives = pdb.getList(ArchiveDAO.class);
+		mySources = pdb.getList(SourceDAO.class);
+		myItems = pdb.getList(ItemDAO.class);
 
 		testPersons();
 		testSources();

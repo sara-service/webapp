@@ -14,6 +14,7 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 
 import bwfdm.sara.publication.db.DAO;
 import bwfdm.sara.publication.db.RepositoryDAO;
+import bwfdm.sara.publication.db.TableName;
 import jersey.repackaged.com.google.common.collect.Lists;
 
 public class PublicationDatabase {
@@ -47,7 +48,7 @@ public class PublicationDatabase {
 	}
 
 	public Boolean exists(DAO d) {
-		String tableName = d.get("TABLE").toString();
+		String tableName = getTableName(d);
 		String whereString = "";
 
 		for (String fn : d.getPrimaryKey()) {
@@ -81,24 +82,25 @@ public class PublicationDatabase {
 	 *            the name of the table in the database
 	 * @return list of entries of the given table contained in the database
 	 */
-	@SuppressWarnings("unchecked")
-	public <D extends DAO> List<D> getList(String tableName) {
+	public <D extends DAO> List<D> getList(Class<D> cls) {
+		final String tableName = getTableName(cls);
 		List<Map<String, Object>> mapList = db.queryForList("select * from " + tableName);
 
-		List<DAO> elems = Lists.newArrayList();
+		List<D> elems = Lists.newArrayList();
 		for (Map<String, Object> entryMap : mapList) {
-			DAO elem = null;
+			D elem = null;
 			try {
-				elem = (DAO) Class.forName("bwfdm.sara.publication.db." + tableName + "DAO").newInstance();
-			} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
-				e.printStackTrace();
+				elem = cls.newInstance();
+			} catch (ReflectiveOperationException e) {
+				throw new RuntimeException(
+						"cannot instantiate " + cls.getSimpleName());
 			}
 			for (Entry<String, Object> entry : entryMap.entrySet()) {
 				elem.set(entry.getKey(), entry.getValue());
 			}
 			elems.add(elem);
 		}
-		return (List<D>) elems;
+		return elems;
 	}
 
 	/**
@@ -117,7 +119,7 @@ public class PublicationDatabase {
 		final String exclude = "uuid";
 		Boolean hadUUID = fns.remove(exclude);
 
-		String tableName = (String) d.get("TABLE");
+		String tableName = getTableName(d);
 		SimpleJdbcInsert insert;
 
 		Map<String, Object> values = new HashMap<String, Object>();
@@ -126,7 +128,7 @@ public class PublicationDatabase {
 		if (hadUUID) {
 			insert = new SimpleJdbcInsert(db).withTableName(tableName).usingGeneratedKeyColumns(exclude);
 		} else {
-			insert = new SimpleJdbcInsert(db).withTableName(tableName);
+			insert = new SimpleJdbcInsert(db).withTableName(tableName).usingGeneratedKeyColumns();
 		}
 
 		// set all values except for 'uuid' field which might have been removed
@@ -142,6 +144,7 @@ public class PublicationDatabase {
 		// execute query and return a 'uuid'
 		Map<String, Object> complete_pkey = insert.executeAndReturnKeyHolder(values).getKeys();
 		for (Map.Entry<String, Object> partial_key : complete_pkey.entrySet()) {
+			// FIXME we definitely shouldn't be settings final fields here...
 			d.set(partial_key.getKey(), partial_key.getValue());
 		}
 
@@ -163,7 +166,7 @@ public class PublicationDatabase {
 		SortedSet<String> primaryKey = d.getPrimaryKey();
 
 		// get table name
-		String tableName = d.get("TABLE").toString();
+		String tableName = getTableName(d);
 		String setString = "";
 		String whereString = "";
 
@@ -197,6 +200,14 @@ public class PublicationDatabase {
 		db.update("update " + tableName + " set " + setString + " where " + whereString);
 	}
 
+	private String getTableName(Class<?> cls) {
+		return cls.getAnnotation(TableName.class).value();
+	}
+
+	private <D extends DAO> String getTableName(D dao) {
+		return getTableName(dao.getClass());
+	}
+
 	/**
 	 * Updates the DAO using an existing database entry and its primary key.
 	 * 
@@ -211,7 +222,7 @@ public class PublicationDatabase {
 		List<String> fieldNames = d.getDynamicFieldNames();
 		SortedSet<String> primaryKey = d.getPrimaryKey();
 
-		String tableName = d.get("TABLE").toString();
+		String tableName = getTableName(d);
 		String whereString = "";
 
 		for (String fn : fieldNames) {
@@ -257,7 +268,7 @@ public class PublicationDatabase {
 		}
 		whereString = whereString.substring(0, whereString.length() - 4) + " ";
 		if (exists(d)) {
-			db.execute("delete from " + d.get("TABLE") + " where " + whereString);
+			db.execute("delete from " + getTableName(d) + " where " + whereString);
 			return true;
 		} else {
 			return false;

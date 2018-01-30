@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
+@TableName("MetadataMapping")
 public class MetadataMappingDAO extends DAOImpl {
 	public final UUID uuid;
 	public final UUID repository_uuid;
@@ -17,7 +18,6 @@ public class MetadataMappingDAO extends DAOImpl {
 	public final String remark;
 	public Boolean enabled;
 
-	public static String TABLE = "MetadataMapping";
 	public static List<String> FIELDS = Arrays.asList("uuid", "repository_uuid", "display_name", "map_from", "map_to",
 			"enabled");
 

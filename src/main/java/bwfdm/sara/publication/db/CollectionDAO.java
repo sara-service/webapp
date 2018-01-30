@@ -10,13 +10,13 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.UUID;
 
+@TableName("collection")
 public class CollectionDAO extends DAOImpl {
 	public final UUID id;
 	public final String foreign_uuid;
 	public final String display_name;
 	public Boolean enabled;
 
-	public static String TABLE = "Collection";
 	public static List<String> FIELDS = Arrays.asList("id", "foreign_uuid", "display_name", "enabled");
 
 	public CollectionDAO() {

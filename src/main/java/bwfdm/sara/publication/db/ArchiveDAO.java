@@ -10,6 +10,7 @@ import java.util.UUID;
 
 import jersey.repackaged.com.google.common.collect.Lists; // TODO get rid of it!!!!
 
+@TableName("archive")
 public class ArchiveDAO extends DAOImpl {
 
 	public final UUID uuid;
@@ -20,7 +21,6 @@ public class ArchiveDAO extends DAOImpl {
 	public String logo_base64;
 	public Boolean enabled;
 
-	public static String TABLE = "Archive";
 	public static List<String> FIELDS = Arrays.asList("uuid", "display_name", "url", "contact_email", "adapter",
 			"enabled");
 
