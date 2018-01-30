@@ -1,8 +1,8 @@
 "use strict";
 
-function addLicense(form, license, action) {
+function addLicense(form, license) {
 	var option = $("<option>").attr("value", license.id);
-	option.text(action + " " + license.name);
+	option.text(license.name);
 	option.data("infourl", license.url);
 	form.declare.append(option);
 }
@@ -32,9 +32,9 @@ function initLicenseList(form, supported, detected, user) {
 
 	$.each(supported, function(_, info) {
 		if (detected == null)
-			addLicense(form, info, "choose");
+			addLicense(form, info);
 		else if (detected.id != info.id)
-			addLicense(form, info, "replace with");
+			addLicense(form, info);
 	});
 
 	// select whatever value the user selected last time. if there is no
