@@ -57,9 +57,9 @@ class IRTest {
 		myItem.in_archive = false;
 		myItem.item_state = "created";
 		myItem.email_verified = true;
-		myItem.set("date_created", new Date());
+		myItem.date_created = new Date();
 		myItem.date_last_modified = myItem.date_created;
-		myItem.set("item_type", "publication");
+		myItem.item_type = "publication";
 
 		myItem = pdb.insertInDB(myItem);
 

@@ -1,10 +1,12 @@
 package bwfdm.sara.publication;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
+import java.util.TreeSet;
 
 import javax.sql.DataSource;
 
@@ -15,7 +17,8 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import bwfdm.sara.publication.db.DAO;
-import bwfdm.sara.publication.db.DAOImpl;
+import bwfdm.sara.publication.db.DatabaseField;
+import bwfdm.sara.publication.db.PrimaryKey;
 import bwfdm.sara.publication.db.RepositoryDAO;
 import bwfdm.sara.publication.db.TableName;
 
@@ -47,9 +50,8 @@ public class PublicationDatabase {
 				"SELECT count(*) FROM " + getTableName(d) + where.getClause(),
 				where.getParams(d), Integer.class);
 
-		if (count > 1) {
-			System.out.println("pKey ERROR: must be unique!");
-		}
+		if (count > 1)
+			throw new IllegalStateException("pKey ERROR: must be unique!");
 		return (count == 1);
 	}
 
@@ -72,13 +74,13 @@ public class PublicationDatabase {
 			Map<String, Object> fields) {
 		// create empty object from just the primary key columns
 		Map<String, Object> pkey = new HashMap<>(fields);
-		pkey.keySet().retainAll(DAOImpl.getPrimaryKey(cls));
+		pkey.keySet().retainAll(PublicationDatabase.getPrimaryKey(cls));
 		final D elem = MAPPER.convertValue(pkey, cls);
 
 		// explicitly set the remaining fields from the remaining columns
 		fields.keySet().removeAll(pkey.keySet());
-		for (String field : DAOImpl.getDynamicFieldNames(cls))
-			elem.set(field, fields.get(field));
+		for (String field : PublicationDatabase.getDynamicFieldNames(cls))
+			setField(elem, field, fields.get(field));
 		return elem;
 	}
 
@@ -94,12 +96,12 @@ public class PublicationDatabase {
 	 */
 	public <D extends DAO> D insertInDB(D d) throws DataAccessException {
 		Map<String, Object> values = new HashMap<String, Object>();
-		for (String field : d.getDynamicFieldNames())
-			values.put(field, d.get(field));
+		for (String field : getDynamicFieldNames(d.getClass()))
+			values.put(field, getField(d, field));
 
 		SimpleJdbcInsert insert = new SimpleJdbcInsert(db)
 				.withTableName(getTableName(d));
-		final SortedSet<String> keys = d.getPrimaryKey();
+		final SortedSet<String> keys = getPrimaryKey(d.getClass());
 		if (keys.contains(GENERATED_PRIMARY_KEY)) {
 			if (keys.size() != 1)
 				throw new IllegalArgumentException(GENERATED_PRIMARY_KEY
@@ -134,7 +136,7 @@ public class PublicationDatabase {
 	public void updateInDB(DAO d) throws DataAccessException {
 		final StringBuilder set = new StringBuilder();
 
-		final List<String> fieldNames = d.getDynamicFieldNames();
+		final List<String> fieldNames = getDynamicFieldNames(d.getClass());
 		if (fieldNames.remove(LAST_MODIFIED_COLUMN)) {
 			// if table has a last modified field update it to current server
 			// time
@@ -149,7 +151,7 @@ public class PublicationDatabase {
 		int i = 0;
 		for (String fn : fieldNames) {
 			set.append(',').append(fn).append("=?");
-			values[i++] = d.get(fn);
+			values[i++] = getField(d, fn);
 		}
 
 		final WhereClause<DAO> where = new WhereClause<>(d.getClass());
@@ -196,5 +198,42 @@ public class PublicationDatabase {
 		Map<String, Object> args = new HashMap<>();
 		args.put("dao", r);
 		return factory.newPublicationRepository(args);
+	}
+
+	public static SortedSet<String> getPrimaryKey(Class<? extends DAO> cls) {
+		final SortedSet<String> fields = new TreeSet<>();
+		for (final Field f : cls.getFields())
+			if (f.isAnnotationPresent(PrimaryKey.class))
+				fields.add(f.getName());
+		return fields;
+	}
+
+	public static List<String> getDynamicFieldNames(Class<? extends DAO> cls) {
+		final List<String> fields = new ArrayList<>();
+		for (final Field f : cls.getFields())
+			if (f.isAnnotationPresent(DatabaseField.class))
+				fields.add(f.getName());
+		return fields;
+	}
+
+	public static void setField(DAO d, String fieldName, Object value) {
+		try {
+			Field field = d.getClass().getDeclaredField(fieldName);
+			// TODO re-enable if there are any access problems
+			// field.setAccessible(true);
+			field.set(d, value);
+		} catch (ReflectiveOperationException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static Object getField(DAO d, String fieldName) {
+		try {
+			Field field = d.getClass().getDeclaredField(fieldName);
+			return field.get(d);
+		} catch (ReflectiveOperationException e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 }

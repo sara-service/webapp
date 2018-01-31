@@ -141,7 +141,7 @@ class DBTest {
 			i = pdb.updateFromDB(i);
 
 			// this should raise an exception
-			i.set("archive_uuid", i.eperson_uuid);
+			i.archive_uuid = i.eperson_uuid;
 			try {
 				pdb.updateInDB(i);
 				System.out.println("WARNING! The schema lacks foreign key constraints!");
@@ -151,7 +151,8 @@ class DBTest {
 			}
 			i = pdb.updateFromDB(i);
 			System.out.println("ItemDAO exists in DB : " + pdb.exists(i));
-			i.set("uuid", UUID.fromString("ff2a1271-b84b-4ac9-a07e-5f2419909e97"));
+			i = new ItemDAO(
+					UUID.fromString("ff2a1271-b84b-4ac9-a07e-5f2419909e97"));
 			System.out.println("ItemDAO exists in DB : " + pdb.exists(i));
 			try {
 				pdb.deleteFromDB(i);

@@ -43,7 +43,7 @@ class WhereClause<D extends DAO> {
 
 		int i = existing.length;
 		for (String f : fields)
-			params[i++] = obj.get(f);
+			params[i++] = PublicationDatabase.getField(obj, f);
 		return params;
 	}
 
