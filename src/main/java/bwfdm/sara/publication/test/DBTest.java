@@ -37,7 +37,7 @@ class DBTest {
 		System.out.println("#Sources:" + myPersons.size());
 		for (EPersonDAO p : myPersons) {
 			p.dump();
-			pdb.updateFromDB(p);
+			p = pdb.updateFromDB(p);
 			p.contact_email = "Tri Tra Trullalala der Kasper der ist wieder da";
 			pdb.updateInDB(p);
 		}
@@ -49,7 +49,7 @@ class DBTest {
 		System.out.println("#Sources:" + mySources.size());
 		for (SourceDAO s : mySources) {
 			s.dump();
-			pdb.updateFromDB(s);
+			s = pdb.updateFromDB(s);
 			s.display_name = "Kasperletheater";
 			// not allowed as of permissions.sql
 			try {
@@ -67,7 +67,7 @@ class DBTest {
 		System.out.println("#Archives:" + myArchives.size());
 		for (ArchiveDAO a : myArchives) {
 			a.dump();
-			pdb.updateFromDB(a);
+			a = pdb.updateFromDB(a);
 			a.display_name = "Kasperletheater";
 			// not allowed as of permissions.sql
 			try {
@@ -85,7 +85,7 @@ class DBTest {
 		System.out.println("#IRs: " + myRepositories.size());
 		for (RepositoryDAO r : myRepositories) {
 			r.dump();
-			pdb.updateFromDB(r);
+			r = pdb.updateFromDB(r);
 			r.display_name = "Kasperletheater";
 
 			PublicationRepository ir = pdb.newPublicationRepository(r);

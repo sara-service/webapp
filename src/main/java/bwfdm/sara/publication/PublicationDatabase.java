@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.SortedSet;
 
 import javax.sql.DataSource;
@@ -213,67 +212,24 @@ public class PublicationDatabase {
 	 * @param d
 	 *            The possibly out-dated DAO containing the primary key.
 	 * 
-	 * @return The updated DAO representing the current state of the database
+	 * @return An entirely new DAO representing the current state of the
+	 *         database
 	 */
 	public <D extends DAO> D updateFromDB(D d) throws DataAccessException {
-		System.out.println(d.getDynamicFieldNames());
-
-		List<String> fieldNames = d.getDynamicFieldNames();
-		SortedSet<String> primaryKey = d.getPrimaryKey();
-		fieldNames.addAll(primaryKey);
-
-		String tableName = getTableName(d);
-		String whereString = "";
-
-		for (String fn : fieldNames) {
-			String fn_value;
-			Object fn_obj = d.get(fn);
-			if (fn_obj == null)
-				fn_value = "null";
-			else
-				fn_value = fn_obj.toString();
-
-			// quote all possibly contained 's
-			fn_value = "'" + fn_value.replaceAll("'", "''") + "'";
-
-			if (primaryKey.contains(fn)) {
-				whereString += " " + fn + "=" + fn_value + ",";
-			}
-		}
-		whereString = whereString.substring(0, whereString.length() - 1) + " ";
-
-		Map<String, Object> singleMap = db.queryForMap("select * from " + tableName + " where " + whereString);
-
-		for (Entry<String, Object> entry : singleMap.entrySet()) {
-			System.out.println(entry.getKey() + " / " + entry.getValue());
-			d.set(entry.getKey(), entry.getValue());
-		}
-		return d;
+ 		@SuppressWarnings("unchecked")
+		final Class<? extends D> cls = (Class<? extends D>) d.getClass();
+		final WhereClause<D> where = new WhereClause<D>(cls);
+		final Map<String, Object> singleMap = db.queryForMap(
+				"select * from " + getTableName(d) + where.getClause(),
+				where.getParams(d));
+		return createDAO(cls, singleMap);
 	}
 
-	public Boolean deleteFromDB(DAO d) throws DataAccessException {
-		String whereString = "";
-
-		for (String fn : d.getPrimaryKey()) {
-			String fn_value;
-			Object fn_obj = d.get(fn);
-			if (fn_obj == null)
-				fn_value = "null";
-			else
-				fn_value = fn_obj.toString();
-
-			// quote all possibly contained 's
-			fn_value = "'" + fn_value.replaceAll("'", "''") + "'";
-			whereString += " " + fn + "=" + fn_value + " and";
-		}
-		whereString = whereString.substring(0, whereString.length() - 4) + " ";
-		if (exists(d)) {
-			db.execute("delete from " + getTableName(d) + " where " + whereString);
-			return true;
-		} else {
-			return false;
-		}
-
+	public boolean deleteFromDB(DAO d) throws DataAccessException {
+		final WhereClause<DAO> where = new WhereClause<DAO>(
+				(Class<? extends DAO>) d.getClass());
+		return db.update("delete from " + getTableName(d) + where.getClause(),
+				where.getParams(d)) > 0;
 	}
 
 	public PublicationRepository newPublicationRepository(RepositoryDAO r) {
