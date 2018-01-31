@@ -37,7 +37,7 @@ class WhereClause<D extends DAO> {
 		return appendParams(NOTHING, obj);
 	}
 
-	private Object[] appendParams(Object[] existing, final D obj) {
+	public Object[] appendParams(Object[] existing, final D obj) {
 		final Object[] params = new Object[existing.length + fields.size()];
 		System.arraycopy(existing, 0, params, 0, existing.length);
 
