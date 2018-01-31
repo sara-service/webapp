@@ -16,6 +16,7 @@ public class MetadataMappingDAO extends DAOImpl {
 	public String map_from;
 	@DatabaseField
 	public String map_to;
+	@DatabaseField
 	public String remark;
 	@DatabaseField
 	public Boolean enabled;
