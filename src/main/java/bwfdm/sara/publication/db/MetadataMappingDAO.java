@@ -2,7 +2,7 @@ package bwfdm.sara.publication.db;
 
 import java.util.UUID;
 
-@TableName("MetadataMapping")
+@TableName("metadatamapping")
 public class MetadataMappingDAO extends DAOImpl {
 	@PrimaryKey
 	public final UUID uuid;

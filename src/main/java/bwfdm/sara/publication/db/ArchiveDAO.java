@@ -14,6 +14,7 @@ public class ArchiveDAO extends DAOImpl {
 	public String url;
 	@DatabaseField
 	public String adapter;
+	@DatabaseField
 	public String logo_base64;
 	@DatabaseField
 	public Boolean enabled;

@@ -4,8 +4,6 @@ package bwfdm.sara.publication.db;
  * @author sk
  */
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.UUID;
 
 @TableName("metadatavalue")
@@ -18,8 +16,6 @@ public class MetadataValueDAO extends DAOImpl {
 	public String map_from;
 	@DatabaseField
 	public String data;
-
-	public static List<String> FIELDS = Arrays.asList("item_uuid", "metadatamapping_uuid", "map_from", "data");
 
 	public MetadataValueDAO() {
 		item_uuid = null;

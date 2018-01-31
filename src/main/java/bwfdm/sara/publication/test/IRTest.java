@@ -125,7 +125,7 @@ class IRTest {
 		for (CollectionDAO c : myCollections) {
 			if (c.enabled && c.id == myRepository.uuid) {
 				System.out.println(
-						"Collection '" + oparu.getCollectionName(c.foreign_uuid) + "' (" + c.foreign_uuid + ")");
+						"Collection '" + oparu.getCollectionName(c.foreign_collection_uuid) + "' (" + c.foreign_collection_uuid + ")");
 				noCollection = false;
 			}
 		}
@@ -141,10 +141,10 @@ class IRTest {
 			}
 		}
 
-		myItem.foreign_uuid = "0815";
+		myItem.foreign_collection_uuid = "0815";
 
 		System.out.println(
-				"Publishing the item to " + oparu.getDAO().display_name + " collection uuid " + myItem.foreign_uuid);
+				"Publishing the item to " + oparu.getDAO().display_name + " collection uuid " + myItem.foreign_collection_uuid);
 		if (oparu.publishItem(myItem)) {
 			System.out.println("Item has been published successfully. Waiting for DOI...");
 		} else {

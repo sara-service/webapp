@@ -97,8 +97,8 @@ class DBTest {
 			System.out.println("Configured Collections");
 			for (CollectionDAO coll : colls) {
 				if (coll.id.equals(ir.getDAO().uuid)) {
-					System.out.print("UUID=" + coll.foreign_uuid);
-					System.out.print(" Name=" + ir.getCollectionName(coll.foreign_uuid));
+					System.out.print("UUID=" + coll.foreign_collection_uuid);
+					System.out.print(" Name=" + ir.getCollectionName(coll.foreign_collection_uuid));
 					if (coll.enabled) {
 						System.out.println(" [ENABLED]");
 					} else {
