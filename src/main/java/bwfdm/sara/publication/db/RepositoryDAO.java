@@ -21,8 +21,7 @@ public class RepositoryDAO extends DAOImpl {
 	@DatabaseField
 	public Boolean enabled;
 
-	@SuppressWarnings("unused")
-	private RepositoryDAO(@JsonProperty("uuid") UUID uuid) {
+	public RepositoryDAO(@JsonProperty("uuid") UUID uuid) {
 		this.uuid = uuid;
 	}
 

@@ -40,8 +40,7 @@ public class ItemDAO extends DAOImpl {
 	@DatabaseField
 	public Boolean in_archive;
 
-	@SuppressWarnings("unused")
-	private ItemDAO(@JsonProperty("uuid") UUID uuid) {
+	public ItemDAO(@JsonProperty("uuid") UUID uuid) {
 		this.uuid = uuid;
 	}
 

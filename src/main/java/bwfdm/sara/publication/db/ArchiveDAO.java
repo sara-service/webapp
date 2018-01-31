@@ -21,8 +21,7 @@ public class ArchiveDAO extends DAOImpl {
 	@DatabaseField
 	public Boolean enabled;
 
-	@SuppressWarnings("unused")
-	private ArchiveDAO(@JsonProperty("uuid") UUID uuid) {
+	public ArchiveDAO(@JsonProperty("uuid") UUID uuid) {
 		this.uuid = uuid;
 	}
 

@@ -21,8 +21,7 @@ public class SourceDAO extends DAOImpl {
 	@DatabaseField
 	public Boolean enabled;
 
-	@SuppressWarnings("unused")
-	private SourceDAO(@JsonProperty("uuid") UUID uuid) {
+	public SourceDAO(@JsonProperty("uuid") UUID uuid) {
 		this.uuid = uuid;
 	}
 

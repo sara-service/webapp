@@ -21,8 +21,7 @@ public class MetadataMappingDAO extends DAOImpl {
 	@DatabaseField
 	public Boolean enabled;
 
-	@SuppressWarnings("unused")
-	private MetadataMappingDAO(@JsonProperty("uuid") UUID uuid) {
+	public MetadataMappingDAO(@JsonProperty("uuid") UUID uuid) {
 		this.uuid = uuid;
 	}
 	public MetadataMappingDAO() {

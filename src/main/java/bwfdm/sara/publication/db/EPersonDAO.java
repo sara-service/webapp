@@ -16,8 +16,7 @@ public class EPersonDAO extends DAOImpl {
 	@DatabaseField
 	public Date last_active;
 
-	@SuppressWarnings("unused")
-	private EPersonDAO(@JsonProperty("uuid") UUID uuid) {
+	public EPersonDAO(@JsonProperty("uuid") UUID uuid) {
 		this.uuid = uuid;
 	}
 	public EPersonDAO() {
