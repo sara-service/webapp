@@ -7,6 +7,8 @@ package bwfdm.sara.publication.db;
 import java.util.Date;
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 @TableName("item")
 public class ItemDAO extends DAOImpl {
 	@PrimaryKey
@@ -20,11 +22,11 @@ public class ItemDAO extends DAOImpl {
 	@DatabaseField
 	public UUID repository_uuid;
 	@DatabaseField
-	public final Date date_created;
+	public Date date_created;
 	@DatabaseField
 	public Date date_last_modified;
 	@DatabaseField
-	public final String item_type;
+	public String item_type;
 	@DatabaseField
 	public String item_state;
 	@DatabaseField
@@ -38,21 +40,13 @@ public class ItemDAO extends DAOImpl {
 	@DatabaseField
 	public Boolean in_archive;
 
+	@SuppressWarnings("unused")
+	private ItemDAO(@JsonProperty("uuid") UUID uuid) {
+		this.uuid = uuid;
+	}
+
 	public ItemDAO() {
 		uuid = null;
-		item_type = null;
-		item_state = null;
-		date_created = null;
-		date_last_modified = null;
-		eperson_uuid = null;
-		source_uuid = null;
-		archive_uuid = null;
-		repository_uuid = null;
-		foreign_collection_uuid = null;
-		foreign_item_uuid = null;
-		persistent_identifier = null;
-		email_verified = null;
-		in_archive = null;
 	}
 
 	public ItemState getState() {

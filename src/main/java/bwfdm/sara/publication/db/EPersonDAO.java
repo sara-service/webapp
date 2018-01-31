@@ -3,6 +3,8 @@ package bwfdm.sara.publication.db;
 import java.util.Date;
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 @TableName("eperson")
 public class EPersonDAO extends DAOImpl {
 	@PrimaryKey
@@ -14,10 +16,11 @@ public class EPersonDAO extends DAOImpl {
 	@DatabaseField
 	public Date last_active;
 
+	@SuppressWarnings("unused")
+	private EPersonDAO(@JsonProperty("uuid") UUID uuid) {
+		this.uuid = uuid;
+	}
 	public EPersonDAO() {
 		this.uuid = null;
-		this.contact_email = null;
-		this.password = null;
-		this.last_active = null;
 	}
 }

@@ -38,18 +38,25 @@ public class DAOImpl implements DAO {
 
 	@Override
 	public final List<String> getDynamicFieldNames() {
+		return getDynamicFieldNames(this.getClass());
+	}
+
+	public static List<String> getDynamicFieldNames(Class<? extends DAO> cls) {
 		final List<String> fields = new ArrayList<>();
-		for (final Field f : this.getClass().getFields())
-			if (f.isAnnotationPresent(PrimaryKey.class)
-					|| f.isAnnotationPresent(DatabaseField.class))
+		for (final Field f : cls.getFields())
+			if (f.isAnnotationPresent(DatabaseField.class))
 				fields.add(f.getName());
 		return fields;
 	}
 
 	@Override
 	public final SortedSet<String> getPrimaryKey() {
+		return getPrimaryKey(this.getClass());
+	}
+
+	public static SortedSet<String> getPrimaryKey(Class<? extends DAO> cls) {
 		final SortedSet<String> fields = new TreeSet<>();
-		for (final Field f : this.getClass().getFields())
+		for (final Field f : cls.getFields())
 			if (f.isAnnotationPresent(PrimaryKey.class))
 				fields.add(f.getName());
 		return fields;
@@ -59,7 +66,9 @@ public class DAOImpl implements DAO {
 	public void dump() {
 		System.out.println(this.getClass().getName());
 		System.out.println("=========================");
-		for (String s : getDynamicFieldNames()) {
+		List<String> fields = getDynamicFieldNames();
+		fields.addAll(getPrimaryKey());
+		for (String s : fields) {
 			System.out.println(s + "==" + get(s));
 		}
 

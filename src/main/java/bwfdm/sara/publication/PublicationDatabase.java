@@ -1,5 +1,6 @@
 package bwfdm.sara.publication;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,13 +13,16 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import bwfdm.sara.publication.db.DAO;
+import bwfdm.sara.publication.db.DAOImpl;
 import bwfdm.sara.publication.db.RepositoryDAO;
 import bwfdm.sara.publication.db.TableName;
-import jersey.repackaged.com.google.common.collect.Lists;
 
 public class PublicationDatabase {
-
+	private static final ObjectMapper MAPPER = new ObjectMapper();
+	private static final String GENERATED_PRIMARY_KEY = "uuid";
 	private final JdbcTemplate db;
 	private final DataSource ds;
 
@@ -83,24 +87,25 @@ public class PublicationDatabase {
 	 * @return list of entries of the given table contained in the database
 	 */
 	public <D extends DAO> List<D> getList(Class<D> cls) {
-		final String tableName = getTableName(cls);
-		List<Map<String, Object>> mapList = db.queryForList("select * from " + tableName);
-
-		List<D> elems = Lists.newArrayList();
-		for (Map<String, Object> entryMap : mapList) {
-			D elem = null;
-			try {
-				elem = cls.newInstance();
-			} catch (ReflectiveOperationException e) {
-				throw new RuntimeException(
-						"cannot instantiate " + cls.getSimpleName());
-			}
-			for (Entry<String, Object> entry : entryMap.entrySet()) {
-				elem.set(entry.getKey(), entry.getValue());
-			}
-			elems.add(elem);
-		}
+		List<Map<String, Object>> mapList = db.queryForList("select * from " + getTableName(cls));
+		List<D> elems = new ArrayList<>();
+		for (Map<String, Object> entryMap : mapList)
+			elems.add(createDAO(cls, entryMap));
 		return elems;
+	}
+
+	private <D extends DAO> D createDAO(Class<? extends D> cls,
+			Map<String, Object> fields) {
+		// create empty object from just the primary key columns
+		Map<String, Object> pkey = new HashMap<>(fields);
+		pkey.keySet().retainAll(DAOImpl.getPrimaryKey(cls));
+		final D elem = MAPPER.convertValue(pkey, cls);
+
+		// explicitly set the remaining fields from the remaining columns
+		fields.keySet().removeAll(pkey.keySet());
+		for (String field : DAOImpl.getDynamicFieldNames(cls))
+			elem.set(field, fields.get(field));
+		return elem;
 	}
 
 	/**
@@ -113,42 +118,34 @@ public class PublicationDatabase {
 	 * @return The original DAO updated with the 'uuid' key which has been created
 	 *         in the DB automatically. If the table uses a 'uuid'.
 	 */
-	public DAO insertInDB(DAO d) throws DataAccessException {
-		// create a database entry
-		List<String> fns = d.getDynamicFieldNames();
-		final String exclude = "uuid";
-		Boolean hadUUID = fns.remove(exclude);
-
-		String tableName = getTableName(d);
-		SimpleJdbcInsert insert;
-
+	public <D extends DAO> D insertInDB(D d) throws DataAccessException {
 		Map<String, Object> values = new HashMap<String, Object>();
+		for (String field : d.getDynamicFieldNames())
+			values.put(field, d.get(field));
 
-		// is the pkey entirely contained within the field names?
-		if (hadUUID) {
-			insert = new SimpleJdbcInsert(db).withTableName(tableName).usingGeneratedKeyColumns(exclude);
-		} else {
-			insert = new SimpleJdbcInsert(db).withTableName(tableName).usingGeneratedKeyColumns();
-		}
+		SimpleJdbcInsert insert = new SimpleJdbcInsert(db)
+				.withTableName(getTableName(d));
+		final SortedSet<String> keys = d.getPrimaryKey();
+		if (keys.contains(GENERATED_PRIMARY_KEY)) {
+			if (keys.size() != 1)
+				throw new IllegalArgumentException(GENERATED_PRIMARY_KEY
+						+ " should be the only primary key for "
+						+ insert.getTableName() + ": " + keys);
+			if (values.get(GENERATED_PRIMARY_KEY) != null)
+				throw new IllegalArgumentException(
+						"generated primary key " + GENERATED_PRIMARY_KEY
+								+ " must be null for insert into "
+								+ insert.getTableName() + ": "
+								+ values.get(GENERATED_PRIMARY_KEY));
+			values.putAll(insert.usingGeneratedKeyColumns(GENERATED_PRIMARY_KEY)
+					.executeAndReturnKeyHolder(values).getKeys());
+		} else
+			insert.execute(values);
 
-		// set all values except for 'uuid' field which might have been removed
-		// beforehand
-		for (String fn : fns) {
-			values.put(fn, d.get(fn));
-		}
-
-		if (hadUUID) {
-			fns.add(exclude);
-		}
-
-		// execute query and return a 'uuid'
-		Map<String, Object> complete_pkey = insert.executeAndReturnKeyHolder(values).getKeys();
-		for (Map.Entry<String, Object> partial_key : complete_pkey.entrySet()) {
-			// FIXME we definitely shouldn't be settings final fields here...
-			d.set(partial_key.getKey(), partial_key.getValue());
-		}
-
-		return d;
+		// TODO determine why we need that cast here... we shouldn't.
+		@SuppressWarnings("unchecked")
+		Class<? extends D> cls = (Class<? extends D>) d.getClass();
+		return createDAO(cls, values);
 	}
 
 	/**
@@ -164,6 +161,7 @@ public class PublicationDatabase {
 		final String lmStr = "date_last_modified";
 		List<String> fieldNames = d.getDynamicFieldNames();
 		SortedSet<String> primaryKey = d.getPrimaryKey();
+		fieldNames.addAll(primaryKey);
 
 		// get table name
 		String tableName = getTableName(d);
@@ -185,6 +183,7 @@ public class PublicationDatabase {
 					fn_value = fnObj.toString();
 			}
 			// quote all possibly contained 's
+			// FIXME FIXME FIXME here be SQL injections FIXME FIXME FIXME
 			fn_value = "'" + fn_value.replaceAll("'", "''") + "'";
 
 			if (primaryKey.contains(fn)) {
@@ -221,6 +220,7 @@ public class PublicationDatabase {
 
 		List<String> fieldNames = d.getDynamicFieldNames();
 		SortedSet<String> primaryKey = d.getPrimaryKey();
+		fieldNames.addAll(primaryKey);
 
 		String tableName = getTableName(d);
 		String whereString = "";

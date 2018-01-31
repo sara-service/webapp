@@ -45,7 +45,7 @@ class IRTest {
 		myEPerson.contact_email = "stefan.kombrink@uni-ulm.de";
 		myEPerson.password = null;
 		myEPerson.last_active = new Date(); // set current time
-		myEPerson = (EPersonDAO) pdb.insertInDB(myEPerson);
+		myEPerson = pdb.insertInDB(myEPerson);
 
 		System.out.println("Create an item");
 
@@ -61,7 +61,7 @@ class IRTest {
 		myItem.date_last_modified = myItem.date_created;
 		myItem.set("item_type", "publication");
 
-		myItem = (ItemDAO) pdb.insertInDB(myItem);
+		myItem = pdb.insertInDB(myItem);
 
 		System.out.println("Attach metadata");
 
@@ -70,12 +70,9 @@ class IRTest {
 		List<MetadataMappingDAO> metadataMappings = pdb
 				.getList(MetadataMappingDAO.class);
 
-		MetadataValueDAO m = new MetadataValueDAO();
-
-		m.item_uuid = myItem.uuid;
+		MetadataValueDAO m = new MetadataValueDAO(myItem.uuid, null,
+				"dc.title");
 		m.data = "my important research project";
-		m.map_from = "dc.title";
-		m.metadatamapping_uuid = null;
 
 		for (MetadataMappingDAO mm : metadataMappings) {
 			if (m.map_from.equals(mm.map_from)) {

@@ -1,12 +1,8 @@
 package bwfdm.sara.publication.db;
 
-/**
- * @author sk
- */
-
-import java.util.Arrays;
-import java.util.List;
 import java.util.UUID;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @TableName("source")
 public class SourceDAO extends DAOImpl {
@@ -25,16 +21,12 @@ public class SourceDAO extends DAOImpl {
 	@DatabaseField
 	public Boolean enabled;
 
-	public static List<String> FIELDS = Arrays.asList("uuid", "display_name", "contact_email", "url", "adapter",
-			"logo_base64", "enabled");
+	@SuppressWarnings("unused")
+	private SourceDAO(@JsonProperty("uuid") UUID uuid) {
+		this.uuid = uuid;
+	}
 
 	public SourceDAO() {
 		uuid = null;
-		display_name = null;
-		url = null;
-		contact_email = null;
-		adapter = null;
-		logo_base64 = null;
-		enabled = null;
 	}
 }

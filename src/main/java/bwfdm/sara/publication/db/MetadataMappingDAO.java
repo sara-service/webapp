@@ -2,29 +2,29 @@ package bwfdm.sara.publication.db;
 
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 @TableName("metadatamapping")
 public class MetadataMappingDAO extends DAOImpl {
 	@PrimaryKey
 	public final UUID uuid;
 	@DatabaseField
-	public final UUID repository_uuid;
+	public UUID repository_uuid;
 	@DatabaseField
 	public String display_name;
 	@DatabaseField
-	public final String map_from;
+	public String map_from;
 	@DatabaseField
-	public final String map_to;
-	public final String remark;
+	public String map_to;
+	public String remark;
 	@DatabaseField
 	public Boolean enabled;
 
+	@SuppressWarnings("unused")
+	private MetadataMappingDAO(@JsonProperty("uuid") UUID uuid) {
+		this.uuid = uuid;
+	}
 	public MetadataMappingDAO() {
 		uuid = null;
-		repository_uuid = null;
-		display_name = null;
-		enabled = null;
-		map_from = null;
-		map_to = null;
-		remark = null;
 	}
 }
