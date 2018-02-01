@@ -1,27 +1,25 @@
 package bwfdm.sara.publication.db;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.UUID;
 
-import jersey.repackaged.com.google.common.collect.Lists;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
+@TableName("collection")
 public class CollectionDAO extends DAOImpl {
+	@PrimaryKey
 	public final UUID id;
-	public final String foreign_uuid;
-	public Boolean enabled;
+	@PrimaryKey
+	public final String foreign_collection_uuid;
+	@PrimaryKey // FIXME why is this part of the primary key???
+	public final String display_name;
+	@DatabaseField
+	public boolean enabled;
 
-	public static String TABLE = "Collection";
-	public static List<String> FIELDS = Arrays.asList("id", "foreign_uuid", "enabled");
-
-	public CollectionDAO() {
-		id = null;
-		foreign_uuid = null;
-		this.enabled = null;
-	}
-
-	@Override
-	public List<String> getPrimaryKey() {
-		return Lists.newArrayList("id", "foreign_uuid");
+	public CollectionDAO(@JsonProperty("id") UUID id,
+			@JsonProperty("foreign_collection_uuid") String foreign_collection_uuid,
+			@JsonProperty("display_name") String display_name) {
+		this.id = id;
+		this.foreign_collection_uuid = foreign_collection_uuid;
+		this.display_name = display_name;
 	}
 }

@@ -4,28 +4,27 @@ import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-@TableName("archive")
-public class ArchiveDAO extends DAOImpl {
+@TableName("metadatamapping")
+public class MetadataMappingDAO extends DAOImpl {
 	@PrimaryKey
 	public final UUID uuid;
 	@DatabaseField
+	public UUID repository_uuid;
+	@DatabaseField
 	public String display_name;
 	@DatabaseField
-	public String contact_email;
+	public String map_from;
 	@DatabaseField
-	public String url;
+	public String map_to;
 	@DatabaseField
-	public String adapter;
-	@DatabaseField
-	public String logo_base64;
+	public String remark;
 	@DatabaseField
 	public Boolean enabled;
 
-	public ArchiveDAO(@JsonProperty("uuid") UUID uuid) {
+	public MetadataMappingDAO(@JsonProperty("uuid") UUID uuid) {
 		this.uuid = uuid;
 	}
-
-	public ArchiveDAO() {
+	public MetadataMappingDAO() {
 		uuid = null;
 	}
 }

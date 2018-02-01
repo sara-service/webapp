@@ -18,8 +18,8 @@ grant select on public.repository_params to test;
 grant select on public.archive to test;
 grant select on public.archive_params to test;
 grant select on public.collection to test;
+grant select on public.metadatamapping to test;
 
 grant select, insert, update on public.eperson to test;
 grant select, insert, update on public.item to test;
-grant select, insert, update on public.metadata to test;
-
+grant select, insert, update on public.metadatavalue to test;
