@@ -96,7 +96,9 @@ public class PublicationDatabase {
 	 */
 	public <D extends DAO> D insertInDB(D d) throws DataAccessException {
 		Map<String, Object> values = new HashMap<String, Object>();
-		for (String field : getDynamicFieldNames(d.getClass()))
+		List<String> fields = getDynamicFieldNames(d.getClass());
+		fields.addAll(getPrimaryKey(d.getClass()));
+		for (String field : fields)
 			values.put(field, getField(d, field));
 
 		SimpleJdbcInsert insert = new SimpleJdbcInsert(db)
