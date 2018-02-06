@@ -8,16 +8,16 @@ import javax.sql.DataSource;
 
 import org.springframework.jdbc.datasource.SimpleDriverDataSource;
 
-import bwfdm.sara.publication.PublicationDatabase;
+import bwfdm.sara.publication.Archive;
+import bwfdm.sara.publication.Collection;
+import bwfdm.sara.publication.EPerson;
+import bwfdm.sara.publication.Item;
+import bwfdm.sara.publication.MetadataMapping;
+import bwfdm.sara.publication.MetadataValue;
 import bwfdm.sara.publication.PublicationRepository;
-import bwfdm.sara.publication.db.ArchiveDAO;
-import bwfdm.sara.publication.db.CollectionDAO;
-import bwfdm.sara.publication.db.EPersonDAO;
-import bwfdm.sara.publication.db.ItemDAO;
-import bwfdm.sara.publication.db.MetadataMappingDAO;
-import bwfdm.sara.publication.db.MetadataValueDAO;
-import bwfdm.sara.publication.db.RepositoryDAO;
-import bwfdm.sara.publication.db.SourceDAO;
+import bwfdm.sara.publication.Repository;
+import bwfdm.sara.publication.Source;
+import bwfdm.sara.publication.db.PublicationDatabase;
 
 /**
  * @author sk
@@ -35,13 +35,13 @@ class IRTest {
 
 		System.out.println("Select the working gitlab / archive gitlab / institutional repository from DB!");
 
-		SourceDAO mySource = pdb.getList(SourceDAO.class).get(0);
-		ArchiveDAO myArchive = pdb.getList(ArchiveDAO.class).get(0);
-		RepositoryDAO myRepository = pdb.getList(RepositoryDAO.class).get(0);
+		Source mySource = pdb.getList(Source.class).get(0);
+		Archive myArchive = pdb.getList(Archive.class).get(0);
+		Repository myRepository = pdb.getList(Repository.class).get(0);
 
 		System.out.println("Create an eperson");
 
-		EPersonDAO myEPerson = new EPersonDAO();
+		EPerson myEPerson = new EPerson();
 		myEPerson.contact_email = "stefan.kombrink@uni-ulm.de";
 		myEPerson.password = null;
 		myEPerson.last_active = new Date(); // set current time
@@ -49,7 +49,7 @@ class IRTest {
 
 		System.out.println("Create an item");
 
-		ItemDAO myItem = new ItemDAO();
+		Item myItem = new Item();
 		myItem.source_uuid = mySource.uuid;
 		myItem.archive_uuid = myArchive.uuid;
 		myItem.repository_uuid = myRepository.uuid;
@@ -67,14 +67,14 @@ class IRTest {
 
 		PublicationRepository oparu = pdb.newPublicationRepository(myRepository);
 
-		List<MetadataMappingDAO> metadataMappings = pdb
-				.getList(MetadataMappingDAO.class);
+		List<MetadataMapping> metadataMappings = pdb
+				.getList(MetadataMapping.class);
 
-		MetadataValueDAO m = new MetadataValueDAO(myItem.uuid, null,
+		MetadataValue m = new MetadataValue(myItem.uuid, null,
 				"dc.title");
 		m.data = "my important research project";
 
-		for (MetadataMappingDAO mm : metadataMappings) {
+		for (MetadataMapping mm : metadataMappings) {
 			if (m.map_from.equals(mm.map_from)) {
 				m.metadatamapping_uuid = mm.uuid;
 				final String mmname = oparu.getMetadataName(mm.map_to);
@@ -95,7 +95,7 @@ class IRTest {
 		m.map_from = "dc.archive_link";
 		m.metadatamapping_uuid = null;
 
-		for (MetadataMappingDAO mm : metadataMappings) {
+		for (MetadataMapping mm : metadataMappings) {
 			if (m.map_from.equals(mm.map_from)) {
 				m.metadatamapping_uuid = mm.uuid;
 				final String mmname = oparu.getMetadataName(mm.map_to);
@@ -116,10 +116,10 @@ class IRTest {
 
 		System.out.println("Repository " + oparu.getDAO().display_name + " offers the following collections: ");
 
-		List<CollectionDAO> myCollections = pdb.getList(CollectionDAO.class);
+		List<Collection> myCollections = pdb.getList(Collection.class);
 
 		boolean noCollection = true;
-		for (CollectionDAO c : myCollections) {
+		for (Collection c : myCollections) {
 			if (c.enabled && c.id == myRepository.uuid) {
 				System.out.println(
 						"Collection '" + oparu.getCollectionName(c.foreign_collection_uuid) + "' (" + c.foreign_collection_uuid + ")");

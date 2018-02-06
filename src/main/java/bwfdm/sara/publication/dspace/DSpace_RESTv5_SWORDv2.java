@@ -6,6 +6,8 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import bwfdm.sara.publication.Item;
+
 /*
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -19,15 +21,14 @@ import org.springframework.web.servlet.view.RedirectView;
 */
 
 import bwfdm.sara.publication.PublicationRepository;
-import bwfdm.sara.publication.db.ItemDAO;
-import bwfdm.sara.publication.db.RepositoryDAO;
+import bwfdm.sara.publication.Repository;
 
 /** high-level abstraction of the DSpace RESTv5 + SWORDv2 API. */
 public class DSpace_RESTv5_SWORDv2 implements PublicationRepository {
 
 	private final String rest_user, rest_pwd, rest_api_endpoint;
 	private final String sword_user, sword_pwd, sword_api_endpoint;
-	public final RepositoryDAO dao;
+	public final Repository dao;
 
 	/**
 	 * @param rest_user
@@ -50,7 +51,7 @@ public class DSpace_RESTv5_SWORDv2 implements PublicationRepository {
 	public DSpace_RESTv5_SWORDv2(@JsonProperty("rest_user") final String ru, @JsonProperty("rest_pwd") final String rp,
 			@JsonProperty("rest_api_endpoint") final String re, @JsonProperty("sword_user") final String su,
 			@JsonProperty("sword_pwd") final String sp, @JsonProperty("sword_api_endpoint") final String se,
-			@JsonProperty("dao") final RepositoryDAO dao) {
+			@JsonProperty("dao") final Repository dao) {
 
 		this.dao = dao;
 
@@ -104,7 +105,7 @@ public class DSpace_RESTv5_SWORDv2 implements PublicationRepository {
 	}
 
 	@Override
-	public Boolean publishItem(ItemDAO item) {
+	public Boolean publishItem(Item item) {
 		// TODO Auto-generated method stub
 		if (item.isArchiveOnly()) {
 			System.out.println("Item is not meant to be published (archive-only)");
@@ -134,7 +135,7 @@ public class DSpace_RESTv5_SWORDv2 implements PublicationRepository {
 	}
 
 	@Override
-	public RepositoryDAO getDAO() {
+	public Repository getDAO() {
 		return dao;
 	}
 }

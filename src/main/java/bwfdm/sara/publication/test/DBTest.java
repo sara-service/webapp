@@ -12,31 +12,31 @@ import javax.sql.DataSource;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.datasource.SimpleDriverDataSource;
 
-import bwfdm.sara.publication.PublicationDatabase;
+import bwfdm.sara.publication.Archive;
+import bwfdm.sara.publication.Collection;
+import bwfdm.sara.publication.EPerson;
+import bwfdm.sara.publication.Item;
+import bwfdm.sara.publication.MetadataMapping;
 import bwfdm.sara.publication.PublicationRepository;
-import bwfdm.sara.publication.db.ArchiveDAO;
-import bwfdm.sara.publication.db.CollectionDAO;
+import bwfdm.sara.publication.Repository;
+import bwfdm.sara.publication.Source;
 import bwfdm.sara.publication.db.DAO;
-import bwfdm.sara.publication.db.EPersonDAO;
-import bwfdm.sara.publication.db.ItemDAO;
-import bwfdm.sara.publication.db.MetadataMappingDAO;
-import bwfdm.sara.publication.db.RepositoryDAO;
-import bwfdm.sara.publication.db.SourceDAO;
+import bwfdm.sara.publication.db.PublicationDatabase;
 
 class DBTest {
 
 	static PublicationDatabase pdb;
 
-	static List<EPersonDAO> myPersons;
-	static List<SourceDAO> mySources;
-	static List<ArchiveDAO> myArchives;
-	static List<RepositoryDAO> myRepositories;
-	static List<ItemDAO> myItems;
+	static List<EPerson> myPersons;
+	static List<Source> mySources;
+	static List<Archive> myArchives;
+	static List<Repository> myRepositories;
+	static List<Item> myItems;
 
 	public static void testPersons() {
 		System.out.println("===PERSONS===");
 		System.out.println("#Sources:" + myPersons.size());
-		for (EPersonDAO p : myPersons) {
+		for (EPerson p : myPersons) {
 			dump(p);
 			p = pdb.updateFromDB(p);
 			p.contact_email = "Tri Tra Trullalala der Kasper der ist wieder da";
@@ -48,7 +48,7 @@ class DBTest {
 		// git sources
 		System.out.println("===SOURCES===");
 		System.out.println("#Sources:" + mySources.size());
-		for (SourceDAO s : mySources) {
+		for (Source s : mySources) {
 			dump(s);
 			s = pdb.updateFromDB(s);
 			s.display_name = "Kasperletheater";
@@ -66,7 +66,7 @@ class DBTest {
 		// git archives
 		System.out.println("===ARCHIVES===");
 		System.out.println("#Archives:" + myArchives.size());
-		for (ArchiveDAO a : myArchives) {
+		for (Archive a : myArchives) {
 			dump(a);
 			a = pdb.updateFromDB(a);
 			a.display_name = "Kasperletheater";
@@ -84,7 +84,7 @@ class DBTest {
 		// institutional repositories
 		System.out.println("===REPOSITORIES===");
 		System.out.println("#IRs: " + myRepositories.size());
-		for (RepositoryDAO r : myRepositories) {
+		for (Repository r : myRepositories) {
 			dump(r);
 			r = pdb.updateFromDB(r);
 			r.display_name = "Kasperletheater";
@@ -94,9 +94,9 @@ class DBTest {
 			// not allowed as of permissions.sql
 			// pdb.updateInDB(r);
 
-			List<CollectionDAO> colls = pdb.getList(CollectionDAO.class);
+			List<Collection> colls = pdb.getList(Collection.class);
 			System.out.println("Configured Collections");
-			for (CollectionDAO coll : colls) {
+			for (Collection coll : colls) {
 				if (coll.id.equals(ir.getDAO().uuid)) {
 					System.out.print("UUID=" + coll.foreign_collection_uuid);
 					System.out.print(" Name=" + ir.getCollectionName(coll.foreign_collection_uuid));
@@ -111,9 +111,9 @@ class DBTest {
 			}
 
 			System.out.println("Configured Metadata Mappings");
-			List<MetadataMappingDAO> mms = pdb
-					.getList(MetadataMappingDAO.class);
-			for (MetadataMappingDAO mm : mms) {
+			List<MetadataMapping> mms = pdb
+					.getList(MetadataMapping.class);
+			for (MetadataMapping mm : mms) {
 				if (mm.repository_uuid.equals(ir.getDAO().uuid)) {
 					System.out.print("Mapping " + mm.display_name + " from " + mm.map_from + " to " + mm.map_to
 							+ ", Name in IR = " + ir.getMetadataName(mm.map_to));
@@ -134,7 +134,7 @@ class DBTest {
 		// publication items
 		System.out.println("===ITEMS===");
 		System.out.println("#Items:" + myItems.size());
-		for (ItemDAO i : myItems) {
+		for (Item i : myItems) {
 			dump(i);
 			i.email_verified = true;
 			pdb.updateInDB(i);
@@ -152,7 +152,7 @@ class DBTest {
 			}
 			i = pdb.updateFromDB(i);
 			System.out.println("ItemDAO exists in DB : " + pdb.exists(i));
-			i = new ItemDAO(
+			i = new Item(
 					UUID.fromString("ff2a1271-b84b-4ac9-a07e-5f2419909e97"));
 			System.out.println("ItemDAO exists in DB : " + pdb.exists(i));
 			try {
@@ -185,11 +185,11 @@ class DBTest {
 
 		pdb = new PublicationDatabase(ds);
 
-		myPersons = pdb.getList(EPersonDAO.class);
-		myRepositories = pdb.getList(RepositoryDAO.class);
-		myArchives = pdb.getList(ArchiveDAO.class);
-		mySources = pdb.getList(SourceDAO.class);
-		myItems = pdb.getList(ItemDAO.class);
+		myPersons = pdb.getList(EPerson.class);
+		myRepositories = pdb.getList(Repository.class);
+		myArchives = pdb.getList(Archive.class);
+		mySources = pdb.getList(Source.class);
+		myItems = pdb.getList(Item.class);
 
 		testPersons();
 		testSources();

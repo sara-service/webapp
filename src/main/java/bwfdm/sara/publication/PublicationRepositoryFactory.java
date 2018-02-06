@@ -12,7 +12,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import bwfdm.sara.publication.db.RepositoryDAO;
 import bwfdm.sara.publication.dspace.DSpace_RESTv5_SWORDv2;
 
 @JsonIgnoreProperties(ignoreUnknown = false)
@@ -26,12 +25,12 @@ public class PublicationRepositoryFactory {
 	}
 
 	@JsonProperty
-	public final RepositoryDAO dao;
+	public final Repository dao;
 
 	// @JsonProperty
 	// private JsonNode args;
 
-	public PublicationRepositoryFactory(final RepositoryDAO dao) {
+	public PublicationRepositoryFactory(final Repository dao) {
 		this.dao = dao;
 	}
 

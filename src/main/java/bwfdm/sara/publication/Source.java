@@ -1,11 +1,16 @@
-package bwfdm.sara.publication.db;
+package bwfdm.sara.publication;
 
 import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import bwfdm.sara.publication.db.DAO;
+import bwfdm.sara.publication.db.DatabaseField;
+import bwfdm.sara.publication.db.PrimaryKey;
+import bwfdm.sara.publication.db.TableName;
+
 @TableName("source")
-public class SourceDAO implements DAO {
+public class Source implements DAO {
 	@PrimaryKey
 	public final UUID uuid;
 	@DatabaseField
@@ -21,11 +26,11 @@ public class SourceDAO implements DAO {
 	@DatabaseField
 	public Boolean enabled;
 
-	public SourceDAO(@JsonProperty("uuid") UUID uuid) {
+	public Source(@JsonProperty("uuid") UUID uuid) {
 		this.uuid = uuid;
 	}
 
-	public SourceDAO() {
+	public Source() {
 		uuid = null;
 	}
 }

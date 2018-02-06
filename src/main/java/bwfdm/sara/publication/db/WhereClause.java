@@ -1,12 +1,10 @@
-package bwfdm.sara.publication;
+package bwfdm.sara.publication.db;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
-import bwfdm.sara.publication.db.DAO;
-import bwfdm.sara.publication.db.MetadataValueDAO;
-import bwfdm.sara.publication.db.PrimaryKey;
+import bwfdm.sara.publication.MetadataValue;
 
 class WhereClause<D extends DAO> {
 	private static final Object[] NOTHING = {};
@@ -48,8 +46,8 @@ class WhereClause<D extends DAO> {
 	}
 
 	public static void main(String[] args) {
-		WhereClause<MetadataValueDAO> where = new WhereClause<>(
-				MetadataValueDAO.class);
+		WhereClause<MetadataValue> where = new WhereClause<>(
+				MetadataValue.class);
 		System.out.println(where.getClause());
 	}
 }

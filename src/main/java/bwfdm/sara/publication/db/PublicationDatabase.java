@@ -1,4 +1,4 @@
-package bwfdm.sara.publication;
+package bwfdm.sara.publication.db;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -16,11 +16,9 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import bwfdm.sara.publication.db.DAO;
-import bwfdm.sara.publication.db.DatabaseField;
-import bwfdm.sara.publication.db.PrimaryKey;
-import bwfdm.sara.publication.db.RepositoryDAO;
-import bwfdm.sara.publication.db.TableName;
+import bwfdm.sara.publication.PublicationRepository;
+import bwfdm.sara.publication.PublicationRepositoryFactory;
+import bwfdm.sara.publication.Repository;
 
 public class PublicationDatabase {
 	private static final ObjectMapper MAPPER = new ObjectMapper();
@@ -195,7 +193,7 @@ public class PublicationDatabase {
 				where.getParams(d)) > 0;
 	}
 
-	public PublicationRepository newPublicationRepository(RepositoryDAO r) {
+	public PublicationRepository newPublicationRepository(Repository r) {
 		PublicationRepositoryFactory factory = new PublicationRepositoryFactory(r);
 		Map<String, Object> args = new HashMap<>();
 		args.put("dao", r);

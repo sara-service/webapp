@@ -1,4 +1,4 @@
-package bwfdm.sara.publication.db;
+package bwfdm.sara.publication;
 
 /**
  * @author sk
@@ -9,8 +9,13 @@ import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import bwfdm.sara.publication.db.DAO;
+import bwfdm.sara.publication.db.DatabaseField;
+import bwfdm.sara.publication.db.PrimaryKey;
+import bwfdm.sara.publication.db.TableName;
+
 @TableName("item")
-public class ItemDAO implements DAO {
+public class Item implements DAO {
 	@PrimaryKey
 	public final UUID uuid;
 	@DatabaseField
@@ -40,11 +45,11 @@ public class ItemDAO implements DAO {
 	@DatabaseField
 	public Boolean in_archive;
 
-	public ItemDAO(@JsonProperty("uuid") UUID uuid) {
+	public Item(@JsonProperty("uuid") UUID uuid) {
 		this.uuid = uuid;
 	}
 
-	public ItemDAO() {
+	public Item() {
 		uuid = null;
 	}
 

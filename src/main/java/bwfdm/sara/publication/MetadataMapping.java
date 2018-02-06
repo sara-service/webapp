@@ -1,11 +1,16 @@
-package bwfdm.sara.publication.db;
+package bwfdm.sara.publication;
 
 import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import bwfdm.sara.publication.db.DAO;
+import bwfdm.sara.publication.db.DatabaseField;
+import bwfdm.sara.publication.db.PrimaryKey;
+import bwfdm.sara.publication.db.TableName;
+
 @TableName("metadatamapping")
-public class MetadataMappingDAO implements DAO {
+public class MetadataMapping implements DAO {
 	@PrimaryKey
 	public final UUID uuid;
 	@DatabaseField
@@ -21,10 +26,10 @@ public class MetadataMappingDAO implements DAO {
 	@DatabaseField
 	public Boolean enabled;
 
-	public MetadataMappingDAO(@JsonProperty("uuid") UUID uuid) {
+	public MetadataMapping(@JsonProperty("uuid") UUID uuid) {
 		this.uuid = uuid;
 	}
-	public MetadataMappingDAO() {
+	public MetadataMapping() {
 		uuid = null;
 	}
 }

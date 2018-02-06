@@ -1,4 +1,4 @@
-package bwfdm.sara.publication.db;
+package bwfdm.sara.publication;
 
 /**
  * @author sk

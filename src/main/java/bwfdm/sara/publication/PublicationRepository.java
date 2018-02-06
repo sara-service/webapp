@@ -8,12 +8,9 @@ package bwfdm.sara.publication;
 
 import java.util.Map;
 
-import bwfdm.sara.publication.db.ItemDAO;
-import bwfdm.sara.publication.db.RepositoryDAO;
-
 public interface PublicationRepository {
 
-	public RepositoryDAO getDAO();
+	public Repository getDAO();
 
 	public Boolean isAccessible();
 
@@ -27,7 +24,7 @@ public interface PublicationRepository {
 
 	public Map<String, String> getAvailableCollections();
 
-	public Boolean publishItem(ItemDAO item);
+	public Boolean publishItem(Item item);
 
 	public void dump();
 }

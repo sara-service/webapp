@@ -1,11 +1,16 @@
-package bwfdm.sara.publication.db;
+package bwfdm.sara.publication;
 
 import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import bwfdm.sara.publication.db.DAO;
+import bwfdm.sara.publication.db.DatabaseField;
+import bwfdm.sara.publication.db.PrimaryKey;
+import bwfdm.sara.publication.db.TableName;
+
 @TableName("collection")
-public class CollectionDAO implements DAO {
+public class Collection implements DAO {
 	@PrimaryKey
 	public final UUID id;
 	@PrimaryKey
@@ -15,7 +20,7 @@ public class CollectionDAO implements DAO {
 	@DatabaseField
 	public boolean enabled;
 
-	public CollectionDAO(@JsonProperty("id") UUID id,
+	public Collection(@JsonProperty("id") UUID id,
 			@JsonProperty("foreign_collection_uuid") String foreign_collection_uuid,
 			@JsonProperty("display_name") String display_name) {
 		this.id = id;
