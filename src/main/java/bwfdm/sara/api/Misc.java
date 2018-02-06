@@ -14,8 +14,7 @@ import bwfdm.sara.git.GitRepoFactory;
 import bwfdm.sara.git.ProjectInfo;
 import bwfdm.sara.project.Project;
 
-import bwfdm.sara.publication.PublicationDatabase;
-import bwfdm.sara.publication.db.RepositoryDAO;
+import bwfdm.sara.publication.Repository;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -25,16 +24,14 @@ public class Misc {
 	@Autowired
 	private Config config;
 	
-	private PublicationDatabase pdb;
-
 	@GetMapping("repo-list")
 	public List<GitRepoFactory> getRepoList() {
 		return config.getConfigDatabase().getGitRepos();
 	}
 	
 	@GetMapping("pubrepo-list")
-	public List<RepositoryDAO> getPubRepoList() {
-		return pdb.getList(RepositoryDAO.class);
+	public List<Repository> getPubRepoList() {
+		return config.getPublicationDatabase().getList(Repository.class);
 	}
 
 	@GetMapping("project-list")
