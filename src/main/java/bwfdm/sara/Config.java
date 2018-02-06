@@ -20,6 +20,7 @@ import org.springframework.util.DigestUtils;
 import org.springframework.web.context.ServletContextAware;
 
 import bwfdm.sara.db.ConfigDatabase;
+import bwfdm.sara.publication.db.PublicationDatabase;
 
 @Component
 public class Config implements ServletContextAware {
@@ -44,6 +45,7 @@ public class Config implements ServletContextAware {
 	private String webroot;
 	private File temproot;
 	private ConfigDatabase configDB;
+	private PublicationDatabase pubDB;
 
 	private Config(final Properties props) {
 		this.props = props;
@@ -109,6 +111,7 @@ public class Config implements ServletContextAware {
 	public void setDataSource(final DataSource db) {
 		this.db = db;
 		configDB = new ConfigDatabase(db);
+		pubDB = new PublicationDatabase(db);
 	}
 
 	@Override
@@ -125,6 +128,10 @@ public class Config implements ServletContextAware {
 
 	public ConfigDatabase getConfigDatabase() {
 		return configDB;
+	}
+
+	public PublicationDatabase getPublicationDatabase() {
+		return pubDB;
 	}
 
 	private String getContextParam(final String name) {
