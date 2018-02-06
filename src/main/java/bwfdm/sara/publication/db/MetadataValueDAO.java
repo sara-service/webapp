@@ -9,7 +9,7 @@ import java.util.UUID;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @TableName("metadatavalue")
-public class MetadataValueDAO extends DAOImpl {
+public class MetadataValueDAO implements DAO {
 	@PrimaryKey
 	public UUID item_uuid;
 	@PrimaryKey

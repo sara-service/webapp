@@ -5,7 +5,7 @@ import java.util.UUID;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @TableName("source")
-public class SourceDAO extends DAOImpl {
+public class SourceDAO implements DAO {
 	@PrimaryKey
 	public final UUID uuid;
 	@DatabaseField

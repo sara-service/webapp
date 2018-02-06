@@ -16,6 +16,7 @@ import bwfdm.sara.publication.PublicationDatabase;
 import bwfdm.sara.publication.PublicationRepository;
 import bwfdm.sara.publication.db.ArchiveDAO;
 import bwfdm.sara.publication.db.CollectionDAO;
+import bwfdm.sara.publication.db.DAO;
 import bwfdm.sara.publication.db.EPersonDAO;
 import bwfdm.sara.publication.db.ItemDAO;
 import bwfdm.sara.publication.db.MetadataMappingDAO;
@@ -36,7 +37,7 @@ class DBTest {
 		System.out.println("===PERSONS===");
 		System.out.println("#Sources:" + myPersons.size());
 		for (EPersonDAO p : myPersons) {
-			p.dump();
+			dump(p);
 			p = pdb.updateFromDB(p);
 			p.contact_email = "Tri Tra Trullalala der Kasper der ist wieder da";
 			pdb.updateInDB(p);
@@ -48,7 +49,7 @@ class DBTest {
 		System.out.println("===SOURCES===");
 		System.out.println("#Sources:" + mySources.size());
 		for (SourceDAO s : mySources) {
-			s.dump();
+			dump(s);
 			s = pdb.updateFromDB(s);
 			s.display_name = "Kasperletheater";
 			// not allowed as of permissions.sql
@@ -66,7 +67,7 @@ class DBTest {
 		System.out.println("===ARCHIVES===");
 		System.out.println("#Archives:" + myArchives.size());
 		for (ArchiveDAO a : myArchives) {
-			a.dump();
+			dump(a);
 			a = pdb.updateFromDB(a);
 			a.display_name = "Kasperletheater";
 			// not allowed as of permissions.sql
@@ -84,7 +85,7 @@ class DBTest {
 		System.out.println("===REPOSITORIES===");
 		System.out.println("#IRs: " + myRepositories.size());
 		for (RepositoryDAO r : myRepositories) {
-			r.dump();
+			dump(r);
 			r = pdb.updateFromDB(r);
 			r.display_name = "Kasperletheater";
 
@@ -134,10 +135,10 @@ class DBTest {
 		System.out.println("===ITEMS===");
 		System.out.println("#Items:" + myItems.size());
 		for (ItemDAO i : myItems) {
-			i.dump();
+			dump(i);
 			i.email_verified = true;
 			pdb.updateInDB(i);
-			i.dump();
+			dump(i);
 			i = pdb.updateFromDB(i);
 
 			// this should raise an exception
@@ -162,6 +163,19 @@ class DBTest {
 			}
 		}
 	};
+
+	public static void dump(DAO d) {
+		System.out.println(d.getClass().getName());
+		System.out.println("=========================");
+		List<String> fields = PublicationDatabase
+				.getDynamicFieldNames(d.getClass());
+		fields.addAll(PublicationDatabase.getPrimaryKey(d.getClass()));
+		for (String s : fields) {
+			System.out
+					.println(s + "==" + PublicationDatabase.getField(d, s));
+		}
+
+	}
 
 	public static void main(String[] args) {
 		System.out.println("SARA-DB Test Program!"); // Display the string.

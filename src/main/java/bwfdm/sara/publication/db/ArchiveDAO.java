@@ -5,7 +5,7 @@ import java.util.UUID;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @TableName("archive")
-public class ArchiveDAO extends DAOImpl {
+public class ArchiveDAO implements DAO {
 	@PrimaryKey
 	public final UUID uuid;
 	@DatabaseField

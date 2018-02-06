@@ -5,7 +5,7 @@ import java.util.UUID;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @TableName("metadatamapping")
-public class MetadataMappingDAO extends DAOImpl {
+public class MetadataMappingDAO implements DAO {
 	@PrimaryKey
 	public final UUID uuid;
 	@DatabaseField
