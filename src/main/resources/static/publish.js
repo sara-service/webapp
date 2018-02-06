@@ -19,6 +19,6 @@ function fail(xhr, status, http) {
 }
 
 $(function() {
-	$.ajax("/api/repo-list",
+	$.ajax("/api/pubrepo-list",
 		{ method: "GET", success: initRepos, error: fail });
 });
