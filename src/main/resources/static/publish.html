@@ -10,10 +10,11 @@
 	<link rel="stylesheet" href="lib/sara.css" />
 	<script src="lib/jquery.min.js"></script>
 	<script src="lib/uri.min.js"></script>
+	<script src="lib/common.js"></script>
 	<script src="publish.js"></script>
 	<title>SARA software publishing</title>
 </head>
-<body>
+<body><div class="fluid-container">
 	<div class="row">
 		<div class="col-sm-9 col-xs-12">
 			<img src="lib/header.svg" class="logo-header" />
@@ -36,5 +37,15 @@
 		<p>If reloading doesn't fix things,
 		you may want to contact the service administrator.</p></div>
 	<div id="loading" class="loading"><span class="sr-only">loading list, please wait...</span></div>
-</body>
+
+	<p style="height:3ex"></p>
+	<div class="row">
+		<a class="btn btn-default col-sm-3" href="/branches.html">← previous</a>
+		<a class="btn btn-primary col-sm-2 col-sm-offset-7" href="/meta.html">next →</a>
+<!--
+		<button class="btn btn-primary col-sm-2 col-sm-offset-7" id="next_button">next →</button>
+-->
+	</div>
+	<p style="height:3ex"></p>
+</div></body>
 </html>

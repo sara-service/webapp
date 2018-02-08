@@ -12,13 +12,7 @@ function initRepos(list) {
 	$("#loading").remove();
 }
 
-function fail(xhr, status, http) {
-	console.log("load failure", status, http, xhr.responseText);
-	$("#broken").removeClass("hidden");
-	$("#loading").remove();
+function initPage(session) {
+	API.get("load list of publication repositories",
+		"/api/pubrepo-list", {}, initRepos);
 }
-
-$(function() {
-	$.ajax("/api/pubrepo-list",
-		{ method: "GET", success: initRepos, error: fail });
-});
