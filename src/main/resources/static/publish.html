@@ -25,12 +25,34 @@
 			</a>
 		</div>
 	</div>
-
+	
+		
 	<div class="row">
 		<div class="col-xs-12 action-header">
 			<h1>Where do you want to publish?</h1>
 		</div>
 	</div>
+	
+	<form class="form-horizontal">
+		<div class="form-group" id="template">
+			<label class="col-sm-2 control-label">institutional repository</label>
+			<div class="col-sm-6 nopad">
+				<label for="template_commit" class="control-label sr-only">target collection</label>
+				<select class="form-control" name="commit" id="irs">
+					<option disabled>… loading list of institutional repositories …</option>
+				</select>
+			</div>
+		</div>
+		<div class="form-group" id="template">
+			<label class="col-sm-2 control-label">target collection</label>
+			<div class="col-sm-6 nopad">
+				<label for="template_commit" class="control-label sr-only">target collection</label>
+				<select class="form-control" name="commit" id="irs">
+					<option disabled>… loading list of target collections …</option>
+				</select>
+			</div>
+		</div>
+	</form>
 
 	<div id="buttons"></div>
 	<div id="broken" class="hidden"><h2>Error loading list!</h2>
