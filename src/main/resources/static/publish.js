@@ -1,57 +1,43 @@
 "use strict";
 
-function initRepos(list) {
+function initPubRepos(list) {
 	console.log(list);
 	var select = $("#irs");
 	select.empty();
 	$.each(list, function(_, repo) {
 		var option = $("<option>").attr("value", repo.display_name)
-		.text(repo.display_name).data(repo.uuid, "coffee management");
+		.text(repo.display_name).data("id", repo.uuid);
 		select.append(option);
 	});
+
+	$("#irs").on('change', function () {
+		var repo_uuid = $(this).children(':selected').data("id");
+		initCollectionList(repo_uuid);
+	});
+
 	$("#loading").remove();
 }
 
-function initPage(session) {
-	API.get("load list of publication repositories",
-		"/api/pubrepo-list", {}, initRepos);
-}
-
-
-/*
-$(function() {
-	$.ajax("/api/pubrepo-list",
-		{ method: "GET", success: initRepos, error: fail });
-});
-*/
-
-function addBranches(branches) {
-	// update list of branches
-	var select = $("#add_branch");
+function setCollectionList(list) {
+	console.log(list);
+	var select = $("#collections");
 	select.empty();
-	$.each(branches, function(_, branch) {
-		var name = branch.ref.type + " " + branch.ref.name;
-		var option = $("<option>").attr("value", branch.ref.path)
-			.text(name).data("branch", branch);
+	$.each(list, function(_, coll) {
+		var option = $("<option>").attr("value", coll.foreign_collection_uuid)
+		.text(coll.display_name  + "("coll.foreign_collection_uuid + ")").data("id", coll.id);
 		select.append(option);
 	});
-	// add all branches which have an action set
-	$.each(branches, function(_, branch) {
-		if (branch.action)
-			addBranch(branch);
-	});
-	// event handler for "add" button
-	$("#add_button").click(function() {
-		var branch = $("#add_branch :selected").data("branch");
-		addBranch(branch);
-		// save immediately because the user might not change the
-		// selection before clicking next
-		save(branch);
-	});
-	// enable the "next" button only after branches have been loaded.
-	// this prevents the user from clicking it before we have a valid
-	// branch selection.
-	$("#next_button").attr("href", "/clone.html");
+	$("#next_button").attr("href", "/meta.html");
 	$("#next_button").removeClass("disabled");
-	$("#loading").remove();	
+}
+
+function initCollectionList(repo_uuid) {
+	API.get("loading collections for selected repositories",
+			"api/collection-list", {repo_uuid}, setCollectionList);
+}
+
+function initPage(session) {
+	API.get("loading list of publication repositories",
+			"/api/pubrepo-list", {}, initPubRepos);
+	// TODO initCollectionList(...)
 }

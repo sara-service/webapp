@@ -1,12 +1,15 @@
 package bwfdm.sara.api;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import bwfdm.sara.Config;
@@ -15,6 +18,7 @@ import bwfdm.sara.git.ProjectInfo;
 import bwfdm.sara.project.Project;
 
 import bwfdm.sara.publication.Repository;
+import bwfdm.sara.publication.Collection;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -32,6 +36,21 @@ public class Misc {
 	@GetMapping("pubrepo-list")
 	public List<Repository> getPubRepoList() {
 		return config.getPublicationDatabase().getList(Repository.class);
+	}
+	
+	@GetMapping("collection-list")
+	public List<Collection> getCollections(@RequestParam("repo_uuid") final String repo_uuid) {
+		List<Collection> allColls = config.getPublicationDatabase().getList(Collection.class);
+		List<Collection> colls = new ArrayList<Collection>();
+		for (final Collection c: allColls) {
+			if (UUID.fromString(repo_uuid).equals(c.id)) {
+				colls.add(c);
+			}
+		}
+		if (colls.isEmpty()) {
+			// query ALL collections via REST
+		}
+		return colls;
 	}
 
 	@GetMapping("project-list")

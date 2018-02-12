@@ -47,7 +47,7 @@
 			<label class="col-sm-2 control-label">target collection</label>
 			<div class="col-sm-6 nopad">
 				<label for="template_commit" class="control-label sr-only">target collection</label>
-				<select class="form-control" name="commit" id="irs">
+				<select class="form-control" name="commit" id="collections">
 					<option disabled>… loading list of target collections …</option>
 				</select>
 			</div>
@@ -70,7 +70,7 @@
 	<p style="height:3ex"></p>
 	<div class="row">
 		<a class="btn btn-default col-sm-3" href="/branches.html">← previous</a>
-		<a class="btn btn-primary col-sm-2 col-sm-offset-7" href="/meta.html">next →</a>
+		<a class="btn btn-primary col-sm-2 col-sm-offset-7 disabled" id = "next_button" href="/none">next →</a>
 <!--
 		<button class="btn btn-primary col-sm-2 col-sm-offset-7" id="next_button">next →</button>
 -->

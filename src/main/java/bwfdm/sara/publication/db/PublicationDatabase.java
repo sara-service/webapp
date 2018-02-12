@@ -16,6 +16,7 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import bwfdm.sara.git.GitRepoFactory;
 import bwfdm.sara.publication.PublicationRepository;
 import bwfdm.sara.publication.PublicationRepositoryFactory;
 import bwfdm.sara.publication.Repository;
@@ -67,7 +68,7 @@ public class PublicationDatabase {
 			elems.add(createDAO(cls, entryMap));
 		return elems;
 	}
-
+	
 	private <D extends DAO> D createDAO(Class<? extends D> cls,
 			Map<String, Object> fields) {
 		// create empty object from just the primary key columns
@@ -199,7 +200,18 @@ public class PublicationDatabase {
 		args.put("dao", r);
 		return factory.newPublicationRepository(args);
 	}
-
+	
+	/** @return a list of all supported publication repositories */
+	
+	public List<PublicationRepository> getPubRepos() {
+	 
+		List<PublicationRepository> repos = new ArrayList<PublicationRepository>();
+		for (final Repository r: getList(Repository.class)) {
+			repos.add(newPublicationRepository(r));
+		}
+		return repos;
+	}
+    
 	public static SortedSet<String> getPrimaryKey(Class<? extends DAO> cls) {
 		final SortedSet<String> fields = new TreeSet<>();
 		for (final Field f : cls.getFields())
