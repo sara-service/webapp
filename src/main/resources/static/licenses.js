@@ -4,7 +4,7 @@ function saveAndContinue(forms) {
 	var lic = $("#declare :selected");
 	API.get("check licenses", "/api/licenses", {}, function(info) {
 			if (!info.undefined)
-				location.href = "/meta.html";
+				location.href = "/publish.html";
 		});
 }
 

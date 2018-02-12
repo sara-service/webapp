@@ -103,6 +103,6 @@ public class Authorization {
 			return new RedirectView("/projects.html");
 		// else go to branch selection
 		project.initializeProject();
-		return new RedirectView("/publish.html");
+		return new RedirectView("/branches.html");
 	}
 }
