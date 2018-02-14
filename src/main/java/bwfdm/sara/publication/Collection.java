@@ -16,7 +16,7 @@ public class Collection implements DAO {
 	@PrimaryKey
 	public final String foreign_collection_uuid;
 	@DatabaseField
-	public final String display_name;
+	public String display_name;
 	@DatabaseField
 	public boolean enabled;
 
