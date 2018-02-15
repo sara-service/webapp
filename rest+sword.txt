@@ -1,0 +1,40 @@
+# get important info from REST (without login)
+curl -s -H "Accept: application/json" http://oparu.rz.uni-ulm.de/rest/items/3952/metadata | python -m json.tool
+curl -s -H "Accept: application/json" http://oparu.rz.uni-ulm.de/rest/items | python -m json.tool
+curl -s -H "Accept: application/json" http://oparu.rz.uni-ulm.de/rest/communities | python -m json.tool
+curl -s -H "Accept: application/json" http://vtstest.rz.uni-ulm.de/rest/collections | python -m json.tool > collections.json
+
+# submit item with SARA submit user, on-behalf user (Nachweis, no bitstreams attached!)
+cat << 'EOF' > Atom_MDF.xml
+<?xml version='1.0' encoding='UTF-8'?> 
+<entry xmlns="http://www.w3.org/2005/Atom"
+           xmlns:dc="http://purl.org/dc/elements/1.1/"
+           xmlns:dcterms="http://purl.org/dc/terms/"       
+           xmlns:uulm="http://oparu.uni-ulm.de/namespace/metadataschema-uulm"
+           xmlns:dummy="http://oparu.uni-ulm.de/namespace/metadataschema-dummy"
+           xmlns:source="http://oparu.uni-ulm.de/namespace/metadataschema-source">
+
+
+    <title>CURL</title>
+    <id>urn:uuid:1225c695-cfb8-4ebb-aaaa-80da344efa6a</id>
+    <updated>2005-10-07T17:17:08Z</updated>
+    <author><name>Author kk</name></author>
+    <summary type="text">The abstract summery</summary>
+        <creator><name>>creator kk name</name></creator>
+        <subject type="text">subject 11</subject>
+        <bemerkung type="text">bemerkung text</bemerkung>
+
+    <!-- some embedded metadata -->
+    <dcterms:abstract>The abstract</dcterms:abstract>
+    <dcterms:type>Type Atom</dcterms:type>
+        <dc:type>Type Atom dc</dc:type>
+        <dcterms:type>Type Atom dcterms</dcterms:type>
+        <dcterms:alternative>alternative</dcterms:alternative>
+        <dcterms:creator>Creator Test dcterms</dcterms:creator>
+        <dcterms:subject>subject Test dcterms</dcterms:subject>
+        <dcterms:bemerkung>UULM bemerkung</dcterms:bemerkung>
+
+</entry>
+EOF
+
+curl -i http://vtstest.rz.uni-ulm.de/swordv2/collection/123456789/10383 --data-binary "@Atom_MDF.xml" -H "Content-Type: application/atom+xml" -H "In-Progress: true" -H "on-behalf-of: stefan.kombrink@uni-ulm.de" --user "project-sara@uni-konstanz.de:SaraTest"
