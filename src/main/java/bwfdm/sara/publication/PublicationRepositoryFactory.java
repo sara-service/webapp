@@ -12,7 +12,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import bwfdm.sara.publication.dspace.DSpace_RESTv5_SWORDv2;
+import bwfdm.sara.publication.dspace.DSpace_RESTv6_SWORDv2;
 
 @JsonIgnoreProperties(ignoreUnknown = false)
 public class PublicationRepositoryFactory {
@@ -21,7 +21,7 @@ public class PublicationRepositoryFactory {
 	private static final Map<String, Class<? extends PublicationRepository>> ADAPTERS = new HashMap<>();
 
 	static {
-		ADAPTERS.put("DSpace_RESTv5_SWORDv2", DSpace_RESTv5_SWORDv2.class);
+		ADAPTERS.put("DSpace_RESTv6_SWORDv2", DSpace_RESTv6_SWORDv2.class);
 	}
 
 	@JsonProperty
