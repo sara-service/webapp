@@ -38,8 +38,22 @@ public class Misc {
 		return config.getPublicationDatabase().getList(Repository.class);
 	}
 	
+	@GetMapping("canUserSubmit")
+	public boolean canUserSubmit(
+			@RequestParam("repo_uuid") final String repo_uuid,
+			@RequestParam("user_email") final String user_email) {
+		return user_email.equals("stefan.kombrink@uni-ulm.de") && !repo_uuid.equals("");
+	}
+	
 	@GetMapping("collection-list")
-	public List<Collection> getCollections(@RequestParam("repo_uuid") final String repo_uuid) {
+	public List<Collection> getCollections(
+			@RequestParam("repo_uuid") final String repo_uuid, 
+			@RequestParam("user_email") final String user_email) {
+		
+		if (!canUserSubmit(repo_uuid, user_email)) {
+			return new ArrayList<Collection>();
+		}
+		
 		List<Collection> allColls = config.getPublicationDatabase().getList(Collection.class);
 		List<Collection> colls = new ArrayList<Collection>();
 		for (final Collection c: allColls) {
