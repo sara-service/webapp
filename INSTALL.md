@@ -69,7 +69,7 @@
 	SSLCertificateKeyFile /etc/ssl/private/ssl-cert-snakeoil.key
 </VirtualHost>
 ```
-
+- enable sites: `sudo a2dissite 000-default`, `sudo a2ensite redirect`, `sudo a2ensite proxy`
 - install Letsencrypt (`sudo apt install letsencrypt`)
 - get SSL certificate: `sudo letsencrypt certonly --webroot -w /var/www/letsencrypt -d saradomain`
 - edit `/etc/apache2/sites-available/proxy.conf`. delete the snakeoil lines and set
