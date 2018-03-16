@@ -1,8 +1,8 @@
 # Deploying the SARA Server
 
-# Deploying the webapp
-
 **This is untested** and probably doesn't completely work...
+
+# Deploying the webapp
 
 ## Set up PostgreSQL
 
@@ -98,3 +98,117 @@
 
 this is trivial
 
+
+# Setting up a GitLab
+
+## Install the GitLab Omnibus package
+
+follow https://about.gitlab.com/installation/#ubuntu
+(or read the the script it wgets into a root shell.
+ all it really does is add an apt repo and key...)
+*make sure you install `gitlab-ce` (not `-ee`)!!*
+
+omnibus will make itself at home on the system.
+probably much more than you wanted it to.
+
+## Set up SSL:
+
+- in `/etc/gitlab/gitlab.rb`, set
+```
+nginx['custom_gitlab_server_config'] = "location ^~ /.well-known { root /var/www/letsencrypt; }"
+```
+- reconfigure and restart gitlab (`sudo gitlab-ctl reconfigure`)
+- get SSL certificate: `sudo letsencrypt certonly --webroot -w /var/www/letsencrypt -d saradomain`
+- again in `/etc/gitlab/gitlab.rb`, set
+```
+nginx['redirect_http_to_https'] = true
+nginx['ssl_certificate'] = "/etc/letsencrypt/live/saradomain/fullchain.pem"
+nginx['ssl_certificate_key'] = "/etc/letsencrypt/live/saradomain/privkey.pem"
+```
+- reconfigure and restart gitlab again (`sudo gitlab-ctl reconfigure`)
+- visit `https://www.ssllabs.com/ssltest/analyze.html?d=saradomain` (replacing `saradomain` in URL!). if you don't get at least a "B", apply config from https://mozilla.github.io/server-side-tls/ssl-config-generator/
+- set up periodic renewal: create `/etc/cron.d/letsencrypt` containing
+```cron
+15 3 * * * root /usr/bin/letsencrypt renew && service apache2 reload
+```
+
+# Setting up a Git Repository using GitLab
+
+## Install GitLab
+
+follow "Setting up a Git Repository using GitLab"
+
+## Register OAuth Application
+
+log in as admin and go to `https://saradomain/admin/applications/new`.
+
+- Name: "SARA-Server" (configurable, but shown to users)
+- Callback url: `https://saradomain/api/auth/redirect` (for local development, add `http://localhost:8080/api/auth/redirect`)
+- Trusted: NO (except for development)
+- Scopes: `api`, `read_user` (?)
+
+note "Application Id" and "Secret"
+
+## Create Repo in Database
+
+create a repo with parameters:
+
+- Type: `GitLabRESTv4`
+- `url`: `https://saradomain` (no trailing slash!)
+- `oauthID`: "Application Id" from GitLab
+- `oauthSecret`: "Secret" from GitLab
+
+
+# Setting up a Git Archive using GitLab
+
+## Install GitLab
+
+follow "Setting up a Git Repository using GitLab"
+
+## Create Users and Groups
+
+log in as admin:
+
+- create a regular user for SARA
+	- Name: "Software Archiving of Research Artefacts"
+	- Username: "sara-user" (configurable)
+	- Email: anything (it's irrelevant)
+	- Password: run `apg` to create one
+	- Projects limit: 100000 (or more!)
+	- Regular user, cannot create group, not external
+- create a group for temporary archive
+	- Path: "temp" (configurable)
+	- Name: "Temporary Archive"
+	- Description: "Stuff stored here will either be moved to the permanent archive or deleted, if the publication is accepted or rejected, respectively."
+	- Visibility: Private, don't allow request access
+- add `sara-user` to `temp` as **Owner**
+- create a group for permanent archive
+	- Path: "archive" (configurable)
+	- Name: "Archive" (or something more useful)
+	- Visibility: Public, don't allow request access
+- add `sara-user` to `archive` as **Master** (not Owner – this way it cannot delete projects there!)
+
+## Set Up SARA User
+
+log in as `sara-user`:
+
+- create an SSH key: `ssh-keygen -t ed25519 -f temp`
+	- `ed25519` is good; so is `ecdsa`
+	- `rsa` works but is huge
+	- `dsa` and `rsa1` are *insecure*; never use these!
+- on the server, run `sed 's/^/saradomain /' /etc/ssh/*.pub >known_hosts`
+- in `https://saradomain/profile/personal_access_tokens`, create a token with `api` rights. note "Your New Personal Access Token"
+- in `https://saradomain/profile/keys`, add the public key from `temp.pub`
+- remember to `shred -u temp` after you've installed the key!
+
+## Create Archive in Database
+
+- Type: `GitLabArchiveRESTv4`
+- `url`: `https://saradomain` (no trailing slash!)
+- `temp-namespace`: `temp` (or whatever you called the group)
+- `main-namespace`: `archive` (or whatever you called the group)
+- `dark-namespace`: currently unused; set to `dark-archive` for now
+- `token`: the token GitLab generated for `sara-user`
+- `private-key`: the private SSH key from `temp` (preserve the linebreaks)
+- `public-key`: the public SSH key from `temp.pub` (should be a single line)
+- `known-hosts`: the contents of `known_hosts` as created above (preserve the linebreaks)
