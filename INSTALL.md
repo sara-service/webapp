@@ -9,11 +9,11 @@
 - install PostgreSQL (`sudo apt install postgresql`)
 - create user: `sudo -u postgres createuser -d -l -R -S sarauser`
 	- FIXME: `-l -R -S` is the default; `-d` should be unnecessary (user doesn't need to create databases)
-- set a password: `sudo -u postgres psql -d test -c "ALTER USER sarauser WITH PASSWORD 'sarapassword'"`
-- create database: `sudo -u postgres createdb -E UTF8 -O seruser saradb`
-- create tables: undocumented. best guess right now:
+- set a password: `sudo -u postgres psql -d test -c "ALTER USER sarauser WITH PASSWORD 'sarapassword'"` (run `apg` to create a good one)
+- create database: `sudo -u postgres createdb -E UTF8 -O sarauser saradb`
+- create tables: undocumented (FIXME). best guess right now:
 	- search `initdb.sh` for the line that does `cat saradb/… … ….sql >temp.sql`
-	- remove the files that just create test data, then concatenate the rest
+	- remove the files that just create test data, then concatenate the rest *in the right order*
 	- run `sudo -u postgres psql -d saradb -f temp.sql`
 
 ## Set up the Apache proxy
@@ -36,7 +36,7 @@
 ```
 - create config for proxy to Tomcat, eg. `/etc/apache2/sites-available/proxy.conf`:
 ```apache
-<VirtualHost _default_:443>
+<VirtualHost *:443>
 	ServerName saradomain # change
 	ServerAdmin webmaster@localhost # change
 
@@ -106,7 +106,8 @@ this is trivial
 follow https://about.gitlab.com/installation/#ubuntu
 (or read the the script it wgets into a root shell.
  all it really does is add an apt repo and key...)
-*make sure you install `gitlab-ce` (not `-ee`)!!*
+
+*make sure you install `gitlab-ce` (not `gitlab-ee`)!!*
 
 omnibus will make itself at home on the system.
 probably much more than you wanted it to.
@@ -114,13 +115,13 @@ probably much more than you wanted it to.
 ## Set up SSL:
 
 - in `/etc/gitlab/gitlab.rb`, set
-```
+```ruby
 nginx['custom_gitlab_server_config'] = "location ^~ /.well-known { root /var/www/letsencrypt; }"
 ```
 - reconfigure and restart gitlab (`sudo gitlab-ctl reconfigure`)
 - get SSL certificate: `sudo letsencrypt certonly --webroot -w /var/www/letsencrypt -d saradomain`
 - again in `/etc/gitlab/gitlab.rb`, set
-```
+```ruby
 nginx['redirect_http_to_https'] = true
 nginx['ssl_certificate'] = "/etc/letsencrypt/live/saradomain/fullchain.pem"
 nginx['ssl_certificate_key'] = "/etc/letsencrypt/live/saradomain/privkey.pem"
@@ -172,8 +173,8 @@ log in as admin:
 - create a regular user for SARA
 	- Name: "Software Archiving of Research Artefacts"
 	- Username: "sara-user" (configurable)
-	- Email: anything (it's irrelevant)
-	- Password: run `apg` to create one
+	- Email: anything (it's irrelevant, but if deliverable will get mail)
+	- Password: run `apg` to create a good one
 	- Projects limit: 100000 (or more!)
 	- Regular user, cannot create group, not external
 - create a group for temporary archive
