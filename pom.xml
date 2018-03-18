@@ -12,6 +12,17 @@
 		<maven.compiler.target>1.7</maven.compiler.target>
 	</properties> 
 	
+	<repositories>
+        <!-- JitPack package repository to use libraries 
+             not only from maven repository, but also from GitHub.
+             More info: https://jitpack.io/docs/#jitpackio
+        -->
+        <repository>
+            <id>jitpack-repo</id>
+            <url>https://jitpack.io</url>
+        </repository>
+    </repositories>
+	
 	<dependencies>
 		<dependency>
 			<groupId>org.glassfish.jersey.core</groupId>
@@ -94,6 +105,14 @@
 			<groupId>org.eclipse.jgit</groupId>
 			<artifactId>org.eclipse.jgit</artifactId>
 			<version>4.8.0.201706111038-r</version>
+		</dependency>
+		<!-- SWORDv2 Java Client from GitHub 
+		     Connection works via JitPack (see "repositories" part above) 
+		     Link: https://github.com/swordapp/JavaClient2.0 -->
+		<dependency>
+			<groupId>com.github.swordapp</groupId>
+			<artifactId>JavaClient2.0</artifactId>
+			<version>master-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 </project>
