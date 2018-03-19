@@ -38,8 +38,8 @@ public class Misc {
 		return config.getPublicationDatabase().getList(Repository.class);
 	}
 	
-	@GetMapping("canUserSubmit")
-	public boolean canUserSubmit(
+	@GetMapping("check-user-exists")
+	public boolean checkUserExists(
 			@RequestParam("repo_uuid") final String repo_uuid,
 			@RequestParam("user_email") final String user_email) {
 		return user_email.equals("stefan.kombrink@uni-ulm.de") && !repo_uuid.equals("");
@@ -50,7 +50,7 @@ public class Misc {
 			@RequestParam("repo_uuid") final String repo_uuid, 
 			@RequestParam("user_email") final String user_email) {
 		
-		if (!canUserSubmit(repo_uuid, user_email)) {
+		if (!checkUserExists(repo_uuid, user_email)) {
 			return new ArrayList<Collection>();
 		}
 		
