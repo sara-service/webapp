@@ -30,10 +30,11 @@ function setCollectionList(list) {
 	});
 }
 
+/*
 function initCollectionList(repo_uuid, user_email) {
 	API.get("loading collections for selected repositories",
 			"api/collection-list", {repo_uuid, user_email}, setCollectionList);
-}
+}*/
 
 function validateEmail(email) {
     var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -48,8 +49,11 @@ function setNextButtonEnabled(enabled) {
 	}
 }
 
-function onUserExists(yesno) {
+function processHierarchy(hierarchy) {
+	alert(hierarchy);
+	/*
 	if (yesno) {
+		API.get("retrieve list of collections the user has access rights to");
 		$("#user_status").text("Good - this email corresponds to a registered user!");
 		$("#user_status").css("color","green");
 	} else {
@@ -57,12 +61,13 @@ function onUserExists(yesno) {
 		$("#user_status").text("Bad - this email does not correspond to any registered user!");
 	}
 	setNextButtonEnabled(yesno);
+	setCollectionList(collection_list);*/
 }
 
 var timerId="";
 
 function initPage(session) {
-	API.get("loading list of publication repositories",
+	API.get("loading list of confgured publication repositories",
 			"/api/pubrepo-list", {}, initPubRepos);
 
 	$('body').on('input', '#login_email', function() {
@@ -73,7 +78,7 @@ function initPage(session) {
 			$("#user_status").css("color","red");
 			$("#user_status").text("Bad - this is not even a valid email address!");
 		} else {
-			$("#user_status").css("color","gray");
+			$("#user_status").css("color","brown");
 			$("#user_status").text("Checking ... wait a moment, please!");
 			
 			timerId = setTimeout(
@@ -82,7 +87,7 @@ function initPage(session) {
 						var repo_uuid = $("#irs").children(':selected').data("id");
 
 						API.get("check whether user exists on pub-repo",
-							"/api/check-user-exists", {repo_uuid, user_email}, onUserExists);
+							"/api/query-hierarchy", {repo_uuid, user_email}, processHierarchy);
 						}, 1000 );
 		}
 	});
