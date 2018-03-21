@@ -11,14 +11,17 @@ function initPubRepos(list) {
 	});
 
 	$("#irs").on('change', function () {
-		var repo_uuid = $(this).children(':selected').data("id");
-		var user_email = $("#login_email").val();
-		initCollectionList(repo_uuid, user_email);
+		$("#login_email").setVal("");
+		$("#irs").empty();
+		//var repo_uuid = $(this).children(':selected').data("id");
+		//var user_email = $("#login_email").val();
+		//initCollectionList(repo_uuid, user_email);
 	});
 	//initCollectionList($("#irs option:first-child").data("id"),"");
 	$("#loading").remove();
 }
 
+/*
 function setCollectionList(list) {
 	console.log(list);
 	var select = $("#collections");
@@ -28,6 +31,21 @@ function setCollectionList(list) {
 		.text(coll.display_name).data("id", coll.id);
 		select.append(option);
 	});
+}*/
+
+function setCollectionList(collection_path, hierarchy) {
+	if (hierarchy.children.length != 0) {
+		var child;
+		$.each(hierarchy.children, function(_, child) {
+			collection_path += " -> ";
+			collection_path += child.data;
+			setCollectionList(collection_path, child);
+		});
+	} else {
+		var select = $("#collections");
+		var option = $("<option>").attr("value", collection_path).text(collection_path);
+		select.append(option);
+	}
 }
 
 /*
@@ -50,18 +68,19 @@ function setNextButtonEnabled(enabled) {
 }
 
 function processHierarchy(hierarchy) {
-	alert(hierarchy);
-	/*
-	if (yesno) {
-		API.get("retrieve list of collections the user has access rights to");
+	if (hierarchy=="") {
+		$("#user_status").css("color","red");
+		$("#user_status").text("Bad - this email does not correspond to any registered user!");		
+	} else if (hierarchy.children.length == 0) {
+		$("#user_status").css("color","red");
+		$("#user_status").text("Bad - user is registered, but cannot submit to any collection!");
+	} else {
 		$("#user_status").text("Good - this email corresponds to a registered user!");
 		$("#user_status").css("color","green");
-	} else {
-		$("#user_status").css("color","red");
-		$("#user_status").text("Bad - this email does not correspond to any registered user!");
+		setNextButtonEnabled(true);
+		$("#collections").empty();
+		setCollectionList("", hierarchy);
 	}
-	setNextButtonEnabled(yesno);
-	setCollectionList(collection_list);*/
 }
 
 var timerId="";

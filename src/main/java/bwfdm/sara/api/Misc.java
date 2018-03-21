@@ -48,13 +48,16 @@ public class Misc {
 			return null;
 		} else {
 			Hierarchy root = new Hierarchy("Bibliography");
-			root.addChild("Psychopathie");
-			/*
-			root.addChildren(Arrays.asList(
-			        new Hierarchy("Informatik"),
-			        new Hierarchy("Elektrotechnik"),
-			        new Hierarchy("Psychopathie")
-			));*/
+			
+			Hierarchy inf = new Hierarchy("Informatik");
+			Hierarchy ele = new Hierarchy("Elektrotechnik");
+			Hierarchy psy = new Hierarchy("Psychopathie");
+			
+			inf.addChild("Forschungsdaten"); inf.addChild("Publikationen");
+			ele.addChild("Forschungsdaten"); inf.addChild("Publikationen");
+			psy.addChild("Amokläufe");
+			
+			root.addChildren(Arrays.asList(inf,ele,psy));
 			return root;
 		}
 	}
@@ -91,7 +94,11 @@ public class Misc {
 	    public String getData() {
 	        return data;
 	    }
-
+	    
+	    public List<Hierarchy> getChildren() {
+	        return children;
+	    }
+	    
 	    public void setData(String data) {
 	        this.data = data;
 	    }
