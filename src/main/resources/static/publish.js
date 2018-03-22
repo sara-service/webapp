@@ -13,33 +13,23 @@ function initPubRepos(list) {
 	$("#irs").on('change', function () {
 		$("#login_email").setVal("");
 		$("#irs").empty();
-		//var repo_uuid = $(this).children(':selected').data("id");
-		//var user_email = $("#login_email").val();
-		//initCollectionList(repo_uuid, user_email);
+		var user_email = $("#login_email").val();
+		var repo_uuid = $("#irs").children(':selected').data("id");
+
+		API.get("check whether user exists on pub-repo",
+			"/api/query-hierarchy", {repo_uuid, user_email}, processHierarchy);
 	});
-	//initCollectionList($("#irs option:first-child").data("id"),"");
 	$("#loading").remove();
 }
-
-/*
-function setCollectionList(list) {
-	console.log(list);
-	var select = $("#collections");
-	select.empty();
-	$.each(list, function(_, coll) {
-		var option = $("<option>").attr("value", coll.foreign_collection_uuid)
-		.text(coll.display_name).data("id", coll.id);
-		select.append(option);
-	});
-}*/
 
 function setCollectionList(collection_path, hierarchy) {
 	if (hierarchy.children.length != 0) {
 		var child;
 		$.each(hierarchy.children, function(_, child) {
-			collection_path += " -> ";
-			collection_path += child.data;
-			setCollectionList(collection_path, child);
+			var cp = collection_path;
+			cp += " -> ";
+			cp += child.data;
+			setCollectionList(cp, child);
 		});
 	} else {
 		var select = $("#collections");
@@ -47,12 +37,6 @@ function setCollectionList(collection_path, hierarchy) {
 		select.append(option);
 	}
 }
-
-/*
-function initCollectionList(repo_uuid, user_email) {
-	API.get("loading collections for selected repositories",
-			"api/collection-list", {repo_uuid, user_email}, setCollectionList);
-}*/
 
 function validateEmail(email) {
     var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -68,6 +52,9 @@ function setNextButtonEnabled(enabled) {
 }
 
 function processHierarchy(hierarchy) {
+	$("#collections").empty();
+	setNextButtonEnabled(false);
+	
 	if (hierarchy=="") {
 		$("#user_status").css("color","red");
 		$("#user_status").text("Bad - this email does not correspond to any registered user!");		
@@ -78,7 +65,6 @@ function processHierarchy(hierarchy) {
 		$("#user_status").text("Good - this email corresponds to a registered user!");
 		$("#user_status").css("color","green");
 		setNextButtonEnabled(true);
-		$("#collections").empty();
 		setCollectionList("", hierarchy);
 	}
 }
