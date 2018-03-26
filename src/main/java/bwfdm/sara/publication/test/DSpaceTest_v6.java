@@ -17,7 +17,7 @@ public class DSpace_v6_Test {
 		
 		//URL 
 		String serviceDocumentURL = "http://134.60.51.65:8080/swordv2/servicedocument";
-		String restURL = "http://134.60.51.55:8080/rest";
+		String restURL = "http://134.60.51.65:8080/rest";
 		
 		//SARA credentials
 		String saraUser = "project-sara@uni-konstanz.de";
@@ -52,28 +52,28 @@ public class DSpace_v6_Test {
 		// Check if the user is allowed to publish in the repository -- OK
 		System.out.println("Is \"" + userLogin + "\" assigned:" + dspaceRepository.isUserAssigned(userLogin));
 			
-		// Get all available collections for the user
+		// Get all available collection titles for the user
 		userCollections = dspaceRepository.getUserAvailableCollectionTitles(userLogin);
 		System.out.println("User available collections: " + userCollections);
 		for(String key: userCollections.keySet()) {
 			System.out.println("-- " + userCollections.get(key));
 		}
 		
-		// Get Sara-User available collections
+		// Get general available collection titles (for SARA-User)
 		saraCollections = dspaceRepository.getAvailableCollectionTitles();
 		System.out.println("SARA available collections: " + saraCollections);
 		for(String key: saraCollections.keySet()) {
 			System.out.println("-- " + key + " : " + saraCollections.get(key));
 		}
 		
-		// Get communities for every collection
-		for(Map.Entry<String, String> collection: dspaceRepository.getAvailableCollectionTitles().entrySet()) {
-			System.out.println("Communities of the collection \"" + collection.getValue() + "\"");
-			communities = dspaceRepository.getCommunitiesForCollection(collection.getKey());
-			for(String community: communities) {
-				System.out.println("-- " + community);
-			}
-		}
+//		// Get communities for every collection
+//		for(Map.Entry<String, String> collection: dspaceRepository.getAvailableCollectionTitles().entrySet()) {
+//			System.out.println("Communities of the collection \"" + collection.getValue() + "\"");
+//			communities = dspaceRepository.getCommunitiesForCollection(collection.getKey());
+//			for(String community: communities) {
+//				System.out.println("-- " + community);
+//			}
+//		}
 		
 		
 		

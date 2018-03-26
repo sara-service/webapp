@@ -27,6 +27,7 @@ import org.swordapp.client.ServiceDocument;
 import bwfdm.sara.publication.Item;
 import bwfdm.sara.publication.PublicationRepository;
 import bwfdm.sara.publication.Repository;
+import bwfdm.sara.publication.dspace.dto.CommunityObject_v6;
 import bwfdm.sara.utils.WebUtils;
 
 public class DSpace_v6 implements PublicationRepository{
@@ -120,6 +121,7 @@ public class DSpace_v6 implements PublicationRepository{
 		return collections;
 	}
 	
+	
 	/**
 	 * Get a list of communities for the collection
 	 * @return
@@ -131,7 +133,10 @@ public class DSpace_v6 implements PublicationRepository{
 		invocationBuilder.header("Accept", MediaType.APPLICATION_JSON);
 		final Response response = invocationBuilder.get();
 
-		System.out.println(WebUtils.readResponseEntity(String.class, response));
+		//System.out.println(WebUtils.readResponseEntity(String.class, response));
+		
+		System.out.println(WebUtils.readResponseEntity(CommunityObject_v6.class, response));
+		
 		//WebUtils.readResponseEntity(String.class, response);
 		
 		return null;
@@ -139,11 +144,12 @@ public class DSpace_v6 implements PublicationRepository{
 		
 	}
 	
-
+	//TODO
 	public String convertHandleToURL(String URL) {
 		return null;
 	}
 	
+	//TODO
 	public String convertURLToHandle(String handle) {
 		return null;
 	}
@@ -286,7 +292,7 @@ public class DSpace_v6 implements PublicationRepository{
 
 
 	@Override
-	public String getCollectionTitle(String URL) {
+	public String getCollectionTitleByURL(String URL) {
 		// TODO Auto-generated method stub
 		return null;
 	}

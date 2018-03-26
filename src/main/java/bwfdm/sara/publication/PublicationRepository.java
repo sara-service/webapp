@@ -3,7 +3,7 @@ package bwfdm.sara.publication;
 /**
  * General Interface for the publication repository.
  * 
- * @author sk
+ * @author sk, vk
  */
 
 import java.util.Map;
@@ -98,7 +98,7 @@ public interface PublicationRepository {
 	 * @param URL
 	 * @return
 	 */
-	public String getCollectionTitle(String URL);
+	public String getCollectionTitleByURL(String URL);
 	
 	
 	/**
