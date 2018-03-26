@@ -94,6 +94,7 @@ class DBTest {
 			// not allowed as of permissions.sql
 			// pdb.updateInDB(r);
 
+			/*
 			List<Collection> colls = pdb.getList(Collection.class);
 			System.out.println("Configured Collections");
 			for (Collection coll : colls) {
@@ -109,6 +110,7 @@ class DBTest {
 					System.out.println("No metadata for this IR: " + coll.id);
 				}
 			}
+			*/
 
 			System.out.println("Configured Metadata Mappings");
 			List<MetadataMapping> mms = pdb
