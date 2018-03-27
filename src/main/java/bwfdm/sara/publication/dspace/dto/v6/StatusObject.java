@@ -1,10 +1,10 @@
-package bwfdm.sara.publication.dspace.dto;
+package bwfdm.sara.publication.dspace.dto.v6;
 
 /**
  * 
  * @author vk
  */
-public class StatusObject_v6 {
+public class StatusObject {
 
 	private boolean okay;
 	private boolean authenticated;

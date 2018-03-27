@@ -1,4 +1,4 @@
-package bwfdm.sara.publication.dspace.dto;
+package bwfdm.sara.publication.dspace.dto.v6;
 
 import java.io.BufferedReader;
 import java.io.IOException;

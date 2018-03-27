@@ -1,4 +1,4 @@
-package bwfdm.sara.publication.dspace.dto;
+package bwfdm.sara.publication.dspace.dto.v6;
 
 import java.util.List;
 
@@ -6,7 +6,7 @@ import java.util.List;
  * 
  * @author vk
  */
-public class ItemObject_v6 {
+public class ItemObject {
 
 	public String uuid;
 	public String name;
