@@ -133,7 +133,7 @@ nginx['custom_gitlab_server_config'] = "location ^~ /.well-known { root /var/www
 - visit `https://www.ssllabs.com/ssltest/analyze.html?d=saradomain` (replacing `saradomain` in URL!). if you don't get at least a "B", apply config from https://mozilla.github.io/server-side-tls/ssl-config-generator/
 - set up periodic renewal: create `/etc/cron.d/letsencrypt` containing
 ```cron
-15 3 * * * root /usr/bin/letsencrypt renew && service apache2 reload
+15 3 * * * root /usr/bin/letsencrypt renew && gitlab-ctl restart nginx
 ```
 
 # Setting up a Git Repository using GitLab
