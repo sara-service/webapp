@@ -114,17 +114,20 @@ probably much more than you wanted it to.
 
 ## Set up SSL:
 
-- in `/etc/gitlab/gitlab.rb`, set
+- in `/etc/gitlab/gitlab.rb`, set variables as follows (unless you need other things, that's actually the entire config!)
 ```ruby
+external_url 'http://saradomain' # note http://; no SSL yet!
 nginx['custom_gitlab_server_config'] = "location ^~ /.well-known { root /var/www/letsencrypt; }"
 ```
 - reconfigure and restart gitlab (`sudo gitlab-ctl reconfigure`)
 - get SSL certificate: `sudo letsencrypt certonly --webroot -w /var/www/letsencrypt -d saradomain`
-- again in `/etc/gitlab/gitlab.rb`, set
+- again in `/etc/gitlab/gitlab.rb`, set (again, that's usually the entire config)
 ```ruby
+external_url 'https://saradomain' # note https:// now!
 nginx['redirect_http_to_https'] = true
 nginx['ssl_certificate'] = "/etc/letsencrypt/live/saradomain/fullchain.pem"
 nginx['ssl_certificate_key'] = "/etc/letsencrypt/live/saradomain/privkey.pem"
+nginx['custom_gitlab_server_config'] = "location ^~ /.well-known { root /var/www/letsencrypt; }"
 ```
 - reconfigure and restart gitlab again (`sudo gitlab-ctl reconfigure`)
 - visit `https://www.ssllabs.com/ssltest/analyze.html?d=saradomain` (replacing `saradomain` in URL!). if you don't get at least a "B", apply config from https://mozilla.github.io/server-side-tls/ssl-config-generator/
