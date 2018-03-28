@@ -5,13 +5,26 @@ import java.util.NoSuchElementException;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
-/** REST helper with {@code Authorization: Bearer t0k3N} authentication. */
+/**
+ * REST helper with {@code Authorization: Bearer t0k3N} authentication. Can
+ * actually use any string instead of "Bearer", for weird providers that want
+ * more intuitive strings there (GitHub...).
+ */
 public class OAuthREST extends AuthenticatedREST {
 	final MultiValueMap<String, String> authMap = new LinkedMultiValueMap<String, String>();
 	private String token;
+	private String method;
 
-	public OAuthREST(final String root) {
+	/**
+	 * @param root
+	 *            URL root, passed directly to {@link AuthenticatedREST}
+	 * @param method
+	 *            string to use before the token, ie.
+	 *            {@code Authorization: method t0k3N}
+	 */
+	public OAuthREST(final String root, String method) {
 		super(root);
+		this.method = method;
 	}
 
 	/**
@@ -28,7 +41,7 @@ public class OAuthREST extends AuthenticatedREST {
 			return;
 		}
 
-		authMap.set("Authorization", "Bearer " + token);
+		authMap.set("Authorization", method + " " + token);
 		setAuth(authMap);
 	}
 
@@ -40,6 +53,6 @@ public class OAuthREST extends AuthenticatedREST {
 
 	/** @return <code>true</code> if a token has been set */
 	public boolean hasToken() {
-		return hasAuth();
+		return token != null;
 	}
 }

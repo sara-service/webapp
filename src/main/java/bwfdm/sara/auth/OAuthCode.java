@@ -17,6 +17,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class OAuthCode {
 	private static final SecureRandom RNG = new SecureRandom();
 
+	private final Map<String, String> customAttributes = new HashMap<>();
 	private final String appID;
 	private final String appSecret;
 	private final String authorizeEndpoint;
@@ -60,6 +61,10 @@ public class OAuthCode {
 		this(appID, appSecret, oauthRoot + "/authorize", oauthRoot + "/token");
 	}
 
+	public void addAttribute(String key, String value) {
+		customAttributes.put(key, value);
+	}
+
 	/**
 	 * Triggers a new authentication / authorization process, invalidation the
 	 * previous one.
@@ -82,9 +87,10 @@ public class OAuthCode {
 		state = DatatypeConverter.printBase64Binary(random);
 
 		// standard OAuth query
+		for (String attr : customAttributes.keySet())
+			redir.addAttribute(attr, customAttributes.get(attr));
 		redir.addAttribute("client_id", appID);
 		redir.addAttribute("redirect_uri", redirURI);
-		redir.addAttribute("response_type", "code");
 		redir.addAttribute("state", state);
 		return new RedirectView(authorizeEndpoint);
 	}

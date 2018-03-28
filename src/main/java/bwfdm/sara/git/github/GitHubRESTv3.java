@@ -1,4 +1,4 @@
-package bwfdm.sara.git.gitlab;
+package bwfdm.sara.git.github;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -20,21 +20,25 @@ import bwfdm.sara.git.GitRepo;
 import bwfdm.sara.git.ProjectInfo;
 
 /** high-level abstraction of the GitLab REST API. */
-public class GitLabRESTv4 implements GitRepo {
+public class GitHubRESTv3 implements GitRepo {
+	/** URL for accessing the GitHub API. */
+	private static final String API_URL = "https://api.github.com";
+	/** GitHub API version to request. */
+	private static final String API_VERSION = "application/vnd.github.v3+json";
+	/** Home page, used for "back to git repo". */
+	private static final String HOME_URL = "https://www.github.com";
+	/** OAuth2 authorization endpoint. */
+	private static final String OAUTH_AUTHORIZE = "https://github.com/login/oauth/authorize";
+	/** OAuth2 token service endpoint. */
+	private static final String OAUTH_TOKEN = "https://github.com/login/oauth/access_token";
 	/**
-	 * URL prefix for accessing the API. also defines which API version will be
-	 * used.
+	 * date format pattern used by GitHub, {@link SimpleDateFormat} style.
+	 * currently ISO8601 ({@code 2012-09-20T11:50:22+03:00}).
 	 */
-	private static final String API_PREFIX = "/api/v4";
-	/**
-	 * date format pattern used by GitLab, {@link SimpleDateFormat} style.
-	 * currently ISO8601 ({@code 2012-09-20T11:50:22.000+03:00}).
-	 */
-	static final String DATE_FORMAT_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX";
+	static final String DATE_FORMAT_PATTERN = "yyyy-MM-dd'T'HH:mm:ssXXX";
 
 	private final OAuthREST authRest;
 	private final RESTHelper rest;
-	private final String root;
 	private final String appID;
 	private final String appSecret;
 	private OAuthCode auth;
@@ -49,25 +53,19 @@ public class GitLabRESTv4 implements GitRepo {
 	 *            URL to GitLab root
 	 */
 	@JsonCreator
-	public GitLabRESTv4(@JsonProperty("url") final String root,
-			@JsonProperty("oauthID") final String appID,
+	public GitHubRESTv3(@JsonProperty("oauthID") final String appID,
 			@JsonProperty("oauthSecret") final String appSecret) {
-		if (root.endsWith("/"))
-			throw new IllegalArgumentException(
-					"root URL must not end with slash: " + root);
-
-		authRest = new OAuthREST(root + API_PREFIX, "Bearer");
+		authRest = new OAuthREST(API_URL, "token");
+		authRest.addHeader("Accept", API_VERSION);
 		rest = new RESTHelper(authRest, "");
-		this.root = root;
 		this.appID = appID;
 		this.appSecret = appSecret;
 	}
 
 	@Override
 	public GitProject getGitProject(final String project) {
-		// not invalidating the old token here. it should work for any project
-		// (as long as it hasn't expired yet).
-		return new GitLabProject(authRest, root, project, authRest.getToken());
+		// return new GitHubProject(authRest, project);
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
@@ -75,14 +73,12 @@ public class GitLabRESTv4 implements GitRepo {
 		if (!authRest.hasToken())
 			return false;
 
-		// looks like we do have a token. send a dummy API request to see
-		// whether it's a WORKING token. downloads the user info because that
-		// should always be available and doesn't depend on the project.
+		// test token by retrieving user info. this throws a 401 if executed
+		// without a token.
 		try {
 			rest.getBlob(rest.uri("/user"));
 			return true;
 		} catch (final Exception e) {
-			// doesn't look like that token is working...
 			authRest.setToken(null);
 			return false;
 		}
@@ -94,8 +90,8 @@ public class GitLabRESTv4 implements GitRepo {
 		if (hasWorkingToken())
 			return null;
 
-		auth = new OAuthCode(appID, appSecret, root + "/oauth");
-		auth.addAttribute("response_type", "code");
+		auth = new OAuthCode(appID, appSecret, OAUTH_AUTHORIZE, OAUTH_TOKEN);
+		auth.addAttribute("scope", "read:user repo");
 		return auth.trigger(redirURI, redir);
 	}
 
@@ -113,21 +109,24 @@ public class GitLabRESTv4 implements GitRepo {
 
 	@Override
 	public String getHomePageURL() {
-		return root;
+		return HOME_URL;
 	}
 
 	@Override
 	public List<ProjectInfo> getProjects() {
+		// only list projects that the user is a member of, either directly by
+		// ownership, or indirectly by group membership
 		return toDataObject(rest.getList(
-				rest.uri("/projects").queryParam("simple", "true")
-						.queryParam("membership", "true"),
-				new ParameterizedTypeReference<List<GLProjectInfo>>() {
+				rest.uri("/user/repos").queryParam("affiliation",
+						"owner,organization_member"),
+				new ParameterizedTypeReference<List<GHProjectInfo>>() {
 				}));
 	}
 
-	static <T> List<T> toDataObject(final List<? extends GLDataObject<T>> items) {
+	static <T> List<T> toDataObject(
+			final List<? extends GHDataObject<T>> items) {
 		final ArrayList<T> list = new ArrayList<>(items.size());
-		for (final GLDataObject<T> gldo : items)
+		for (final GHDataObject<T> gldo : items)
 			list.add(gldo.toDataObject());
 		return list;
 	}

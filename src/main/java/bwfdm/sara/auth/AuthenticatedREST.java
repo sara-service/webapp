@@ -6,6 +6,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -16,12 +17,26 @@ import org.springframework.web.util.UriComponentsBuilder;
  */
 public abstract class AuthenticatedREST {
 	private final RestTemplate rest = new RestTemplate();
+	private final MultiValueMap<String, String> defaultHeaders = new LinkedMultiValueMap<>();
 	private final String root;
-	private MultiValueMap<String, String> authMap;
 	private HttpEntity<Void> auth;
+	private MultiValueMap<String, String> headers;
 
 	protected AuthenticatedREST(final String root) {
 		this.root = root;
+	}
+
+	/**
+	 * Sets a header to send in all requests.
+	 * 
+	 * @param key
+	 *            header name
+	 * @param values
+	 *            header value(s)
+	 */
+	public void addHeader(final String key, String... values) {
+		for (String value : values)
+			defaultHeaders.add(key, value);
 	}
 
 	/**
@@ -32,11 +47,23 @@ public abstract class AuthenticatedREST {
 	 *            <code>null</code> to invalidate authorization
 	 */
 	protected void setAuth(final MultiValueMap<String, String> authMap) {
-		this.authMap = authMap;
+		this.headers = mergeHeaders(defaultHeaders, authMap);
 		if (authMap != null)
-			auth = new HttpEntity<Void>(authMap);
+			auth = new HttpEntity<Void>(headers);
 		else
 			auth = null;
+	}
+
+	@SafeVarargs
+	private final MultiValueMap<String, String> mergeHeaders(
+			MultiValueMap<String, String>... maps) {
+		MultiValueMap<String, String> res = new LinkedMultiValueMap<>();
+		for (MultiValueMap<String, String> map : maps)
+			if (map != null)
+				for (String key : map.keySet())
+					for (String value : map.get(key))
+						res.add(key, value);
+		return res;
 	}
 
 	/** @return <code>true</code> if authorization headers have been set */
@@ -60,7 +87,7 @@ public abstract class AuthenticatedREST {
 	public void post(final UriComponentsBuilder ucb,
 			final Map<String, String> args) {
 		rest.exchange(ucb.build(true).toUri(), HttpMethod.POST,
-				new HttpEntity<>(args, authMap), (Class<?>) null);
+				new HttpEntity<>(args, headers), (Class<?>) null);
 	}
 
 	/**
@@ -80,7 +107,7 @@ public abstract class AuthenticatedREST {
 			final Map<String, String> args,
 			final ParameterizedTypeReference<T> type) {
 		return rest.exchange(ucb.build(true).toUri(), HttpMethod.POST,
-				new HttpEntity<>(args, authMap), type).getBody();
+				new HttpEntity<>(args, headers), type).getBody();
 	}
 
 	/**
@@ -95,7 +122,7 @@ public abstract class AuthenticatedREST {
 	 */
 	public void put(final UriComponentsBuilder ucb, final Object args) {
 		rest.exchange(ucb.build(true).toUri(), HttpMethod.PUT,
-				new HttpEntity<>(args, authMap), (Class<?>) null);
+				new HttpEntity<>(args, headers), (Class<?>) null);
 	}
 
 	/**

@@ -146,7 +146,7 @@ follow "Setting up a Git Repository using GitLab"
 
 log in as admin and go to `https://saradomain/admin/applications/new`.
 
-- Name: "SARA-Server" (configurable, but shown to users)
+- Name: "SARA-Server" (configurable, but will be shown to users)
 - Callback url: `https://saradomain/api/auth/redirect` (for local development, add `http://localhost:8080/api/auth/redirect`)
 - Trusted: NO (except for development)
 - Scopes: `api`, `read_user` (?)

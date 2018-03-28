@@ -11,6 +11,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import bwfdm.sara.db.ConfigDatabase;
+import bwfdm.sara.git.github.GitHubRESTv3;
 import bwfdm.sara.git.gitlab.GitLabRESTv4;
 import bwfdm.sara.project.Project;
 
@@ -19,6 +20,7 @@ public class GitRepoFactory {
 	private static final Map<String, Class<? extends GitRepo>> ADAPTERS = new HashMap<>();
 	static {
 		ADAPTERS.put("GitLabRESTv4", GitLabRESTv4.class);
+		ADAPTERS.put("GitHubRESTv3", GitHubRESTv3.class);
 	}
 
 	@JsonProperty("id")
