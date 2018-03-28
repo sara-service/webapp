@@ -15,6 +15,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import bwfdm.sara.auth.OAuthCode;
 import bwfdm.sara.auth.OAuthREST;
+import bwfdm.sara.git.DataObject;
 import bwfdm.sara.git.GitProject;
 import bwfdm.sara.git.GitRepo;
 import bwfdm.sara.git.ProjectInfo;
@@ -125,9 +126,9 @@ public class GitLabRESTv4 implements GitRepo {
 				}));
 	}
 
-	static <T> List<T> toDataObject(final List<? extends GLDataObject<T>> items) {
+	static <T> List<T> toDataObject(final List<? extends DataObject<T>> items) {
 		final ArrayList<T> list = new ArrayList<>(items.size());
-		for (final GLDataObject<T> gldo : items)
+		for (final DataObject<T> gldo : items)
 			list.add(gldo.toDataObject());
 		return list;
 	}

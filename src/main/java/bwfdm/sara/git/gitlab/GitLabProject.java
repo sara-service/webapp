@@ -16,9 +16,9 @@ import org.springframework.web.util.UriComponentsBuilder;
 import bwfdm.sara.auth.AuthenticatedREST;
 import bwfdm.sara.git.Branch;
 import bwfdm.sara.git.Commit;
+import bwfdm.sara.git.DataObject;
 import bwfdm.sara.git.GitProject;
 import bwfdm.sara.git.ProjectInfo;
-import bwfdm.sara.git.RepoFile;
 import bwfdm.sara.git.Tag;
 import bwfdm.sara.utils.UrlEncode;
 
@@ -129,16 +129,6 @@ public class GitLabProject implements GitProject {
 	}
 
 	@Override
-	@Deprecated
-	public List<RepoFile> getFiles(final String ref, final String path) {
-		final UriComponentsBuilder req = rest.uri("/repository/tree")
-				.queryParam("path", path).queryParam("ref", ref);
-		return toDataObject(rest.getList(req,
-				new ParameterizedTypeReference<List<GLRepoFile>>() {
-				}));
-	}
-
-	@Override
 	public void enableClone(final boolean enable) {
 		// we already have access to the repo by using our OAuth token, so
 		// nothing to be done here
@@ -166,7 +156,7 @@ public class GitLabProject implements GitProject {
 	}
 
 	private static <T> List<T> toDataObject(
-			final List<? extends GLDataObject<T>> items) {
+			final List<? extends DataObject<T>> items) {
 		return GitLabRESTv4.toDataObject(items);
 	}
 }

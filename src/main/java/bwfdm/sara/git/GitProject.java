@@ -123,15 +123,4 @@ public interface GitProject {
 	 */
 	public void putBlob(String branch, String path, String commitMessage,
 			byte[] data);
-
-	/**
-	 * @param ref
-	 *            branch or tag containing the directory to list, in git ref
-	 *            format (ie. {@code heads/master} or {@code tags/test})
-	 * @param path
-	 *            full path to a directory in the repo, without the initial
-	 *            slash (ie. the root directory is {@code ""})
-	 * @return a list of files in that directory
-	 */
-	public List<RepoFile> getFiles(String ref, String path);
 }

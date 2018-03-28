@@ -1,5 +1,6 @@
 package bwfdm.sara.git.gitlab;
 
+import bwfdm.sara.git.DataObject;
 import bwfdm.sara.git.ProjectInfo;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -10,7 +11,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /** data class for GitLab project info. */
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
-class GLProjectInfo implements GLDataObject<ProjectInfo> {
+class GLProjectInfo implements DataObject<ProjectInfo> {
 	/** default branch, <code>master</code> by default. */
 	@JsonProperty("default_branch")
 	String master;

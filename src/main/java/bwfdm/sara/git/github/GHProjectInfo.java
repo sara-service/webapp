@@ -5,12 +5,13 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import bwfdm.sara.git.DataObject;
 import bwfdm.sara.git.ProjectInfo;
 
 /** data class for GitLab project info. */
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
-class GHProjectInfo implements GHDataObject<ProjectInfo> {
+class GHProjectInfo implements DataObject<ProjectInfo> {
 	/** default branch, <code>master</code> by default. */
 	@JsonProperty("default_branch")
 	String master;
@@ -27,7 +28,8 @@ class GHProjectInfo implements GHDataObject<ProjectInfo> {
 	@JsonProperty("name")
 	String name;
 	/** repo clone URL */
-	@JsonProperty("ssh_url")
+	// FIXME this may be ssh_url if clone-by-token doesn't work
+	@JsonProperty("clone_url")
 	String cloneURL;
 	/** web root URL of project */
 	@JsonProperty("html_url")

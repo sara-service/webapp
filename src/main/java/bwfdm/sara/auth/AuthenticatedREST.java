@@ -185,5 +185,4 @@ public abstract class AuthenticatedREST {
 		return rest.exchange(ucb.build(true).toUri(), HttpMethod.GET, auth,
 				byte[].class).getBody();
 	}
-
 }

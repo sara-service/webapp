@@ -15,6 +15,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import bwfdm.sara.auth.OAuthCode;
 import bwfdm.sara.auth.OAuthREST;
+import bwfdm.sara.git.DataObject;
 import bwfdm.sara.git.GitProject;
 import bwfdm.sara.git.GitRepo;
 import bwfdm.sara.git.ProjectInfo;
@@ -22,7 +23,7 @@ import bwfdm.sara.git.ProjectInfo;
 /** high-level abstraction of the GitLab REST API. */
 public class GitHubRESTv3 implements GitRepo {
 	/** URL for accessing the GitHub API. */
-	private static final String API_URL = "https://api.github.com";
+	static final String API_URL = "https://api.github.com";
 	/** GitHub API version to request. */
 	private static final String API_VERSION = "application/vnd.github.v3+json";
 	/** Home page, used for "back to git repo". */
@@ -33,7 +34,8 @@ public class GitHubRESTv3 implements GitRepo {
 	private static final String OAUTH_TOKEN = "https://github.com/login/oauth/access_token";
 	/**
 	 * date format pattern used by GitHub, {@link SimpleDateFormat} style.
-	 * currently ISO8601 ({@code 2012-09-20T11:50:22+03:00}).
+	 * currently ISO8601 ({@code 2012-09-20T11:50:22+03:00}). Note lack of
+	 * milliseconds, which are present in GitLab...
 	 */
 	static final String DATE_FORMAT_PATTERN = "yyyy-MM-dd'T'HH:mm:ssXXX";
 
@@ -64,8 +66,7 @@ public class GitHubRESTv3 implements GitRepo {
 
 	@Override
 	public GitProject getGitProject(final String project) {
-		// return new GitHubProject(authRest, project);
-		throw new UnsupportedOperationException();
+		return new GitHubProject(authRest, project, token);
 	}
 
 	@Override
@@ -124,9 +125,9 @@ public class GitHubRESTv3 implements GitRepo {
 	}
 
 	static <T> List<T> toDataObject(
-			final List<? extends GHDataObject<T>> items) {
+			final List<? extends DataObject<T>> items) {
 		final ArrayList<T> list = new ArrayList<>(items.size());
-		for (final GHDataObject<T> gldo : items)
+		for (final DataObject<T> gldo : items)
 			list.add(gldo.toDataObject());
 		return list;
 	}
