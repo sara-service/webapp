@@ -1,6 +1,8 @@
 package bwfdm.sara.publication.dspace;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,11 +25,12 @@ import org.swordapp.client.SWORDCollection;
 import org.swordapp.client.SWORDWorkspace;
 import org.swordapp.client.ServiceDocument;
 
-
 import bwfdm.sara.publication.Item;
 import bwfdm.sara.publication.PublicationRepository;
 import bwfdm.sara.publication.Repository;
-import bwfdm.sara.publication.dspace.dto.CommunityObject_v6;
+import bwfdm.sara.publication.dspace.dto.v6.CollectionObject;
+import bwfdm.sara.publication.dspace.dto.v6.HierarchyObject;
+import bwfdm.sara.utils.JsonUtils;
 import bwfdm.sara.utils.WebUtils;
 
 public class DSpace_v6 implements PublicationRepository{
@@ -52,6 +55,7 @@ public class DSpace_v6 implements PublicationRepository{
 	protected final WebTarget itemsWebTarget;
 	protected final WebTarget bitstreamsWebTarget;
 	protected final WebTarget handleWebTarget;
+	protected final WebTarget hierarchyWebTarget;
 	protected String token;
 	protected Cookie cookie;
 	protected Client client;
@@ -77,7 +81,8 @@ public class DSpace_v6 implements PublicationRepository{
 		itemsWebTarget = restWebTarget.path("items");
 		bitstreamsWebTarget = restWebTarget.path("bitstreams");
 		handleWebTarget = restWebTarget.path("handle");
-		
+		hierarchyWebTarget = restWebTarget.path("hierarchy");
+				
 	}
 	
 		
@@ -103,11 +108,11 @@ public class DSpace_v6 implements PublicationRepository{
 	
 	
 	/**
-	 * Get collections via SWORD v2
+	 * Get available collections via SWORD v2
 	 * 
 	 * @return Map<String, String> where key=URL, value=Title
 	 */
-	private Map<String, String> getCollectionsSWORD(AuthCredentials authCredentials){
+	private Map<String, String> getAvailableCollectionsViaSWORD(AuthCredentials authCredentials){
 		Map<String, String> collections = new HashMap<String, String>();
 		SWORDClient swordClient = new SWORDClient();
 		ServiceDocument serviceDocument = this.getServiceDocument(swordClient, urlServiceDocument, authCredentials);
@@ -124,34 +129,89 @@ public class DSpace_v6 implements PublicationRepository{
 	
 	/**
 	 * Get a list of communities for the collection
-	 * @return
+	 * Specific only for DSpace-6.
+	 * <p>
+	 * REST and SWORD requests are used.
+	 * 
+	 * @return a {@code List<String>} of communities (0 or more communities are possible) 
+	 * 		   or {@code null} if a collection was not found
 	 */
 	public List<String> getCommunitiesForCollection(String collectionURL){
-
-		final Invocation.Builder invocationBuilder = communitiesWebTarget.request();
-		invocationBuilder.header("Content-Type", MediaType.APPLICATION_JSON);
-		invocationBuilder.header("Accept", MediaType.APPLICATION_JSON);
+		
+		String collectionHandle = getCollectionHandle(collectionURL);
+		if(collectionHandle == null) {
+			return null;
+		}
+		
+		List<String> communityList = new ArrayList<String>(0);
+		
+		final Response response = getResponse(hierarchyWebTarget, MediaType.APPLICATION_JSON, MediaType.APPLICATION_JSON);
+		final HierarchyObject hierarchy = JsonUtils.jsonStringToObject(
+					WebUtils.readResponseEntity(String.class, response), HierarchyObject.class);
+		
+		// Get List of communities or "null", if collection is not found
+		communityList = hierarchy.getCommunityListForCollection(hierarchy, collectionHandle, communityList);
+		
+		if(communityList != null) {
+			communityList.remove(0); 	//remove "Workspace" - it is not a community, 
+							    	   	//but it is in the first level of the hierarchy
+		}
+		return communityList; // List of communities ( >= 0) or "null"
+	}
+	
+	
+	/**
+	 * Get a collection handle based on the collection URL.
+	 * <p> 
+	 * REST and SWORDv2 requests are used.
+	 * 
+	 * @param collectionURL
+	 * @return String with a handle or {@code null} if collectionURL was not found 
+	 */
+	public String getCollectionHandle(String collectionURL) {
+		
+		String swordCollectionPath = ""; //collectionURL without a hostname and port
+		
+		// Find a collectionURL inside of all avaialble collections. SWORD is used.
+		SWORDClient swordClient = new SWORDClient();
+		AuthCredentials authCredentials = new AuthCredentials(saraUser, saraPassword);
+		ServiceDocument serviceDocument = this.getServiceDocument(swordClient, urlServiceDocument, authCredentials);
+		
+		for(SWORDWorkspace workspace : serviceDocument.getWorkspaces()) {
+			for (SWORDCollection collection : workspace.getCollections()) {
+				if(collection.getHref().toString().equals(collectionURL)) {
+					swordCollectionPath = collection.getHref().getPath();
+				}				
+			}
+		}	
+		
+		// Get all collections via REST to check, if swordCollectionPath contains a REST-handle
+		final Response response = getResponse(collectionsWebTarget, MediaType.APPLICATION_JSON, MediaType.APPLICATION_JSON);				
+		final CollectionObject[] collections = JsonUtils.jsonStringToObject(
+					WebUtils.readResponseEntity(String.class, response), CollectionObject[].class);
+		
+		// Compare REST-handle and swordCollectionPath
+		for(CollectionObject collection: collections) {
+			if(swordCollectionPath.contains(collection.handle)) {
+				return collection.handle;
+			}
+		}		
+		return null; //collectionURL was not found	
+	}
+	
+	
+	/**
+	 * Get REST-request to the webTarget
+	 * 
+	 * @param webTarget
+	 * @return
+	 */
+	private Response getResponse(WebTarget webTarget, String contentType, String acceptType) {
+		final Invocation.Builder invocationBuilder = webTarget.request();
+		invocationBuilder.header("Content-Type", contentType);
+		invocationBuilder.header("Accept", acceptType);
 		final Response response = invocationBuilder.get();
-
-		//System.out.println(WebUtils.readResponseEntity(String.class, response));
-		
-		System.out.println(WebUtils.readResponseEntity(CommunityObject_v6.class, response));
-		
-		//WebUtils.readResponseEntity(String.class, response);
-		
-		return null;
-		
-		
-	}
-	
-	//TODO
-	public String convertHandleToURL(String URL) {
-		return null;
-	}
-	
-	//TODO
-	public String convertURLToHandle(String handle) {
-		return null;
+		return response;
 	}
 	
 	
@@ -204,9 +264,6 @@ public class DSpace_v6 implements PublicationRepository{
 	}
 
 	
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public Boolean isUserAssigned(String loginName) {
 		SWORDClient swordClient = new SWORDClient();
@@ -226,7 +283,7 @@ public class DSpace_v6 implements PublicationRepository{
 	public Map<String, String> getUserAvailableCollectionTitles(String loginName) {
 		
 		AuthCredentials authCredentials = new AuthCredentials(saraUser, saraPassword, loginName); // "on-behalf-of: loginName"		
-		return this.getCollectionsSWORD(authCredentials);
+		return this.getAvailableCollectionsViaSWORD(authCredentials);
 	}
 
 	
@@ -234,7 +291,7 @@ public class DSpace_v6 implements PublicationRepository{
 	public Map<String, String> getAvailableCollectionTitles() {
 		
 		AuthCredentials authCredentials = new AuthCredentials(saraUser, saraPassword); // login as "saraUser"		
-		return this.getCollectionsSWORD(authCredentials);
+		return this.getAvailableCollectionsViaSWORD(authCredentials);
 	}
 	
 	
@@ -303,5 +360,5 @@ public class DSpace_v6 implements PublicationRepository{
 		// TODO Auto-generated method stub
 		return null;
 	}
-
+	
 }

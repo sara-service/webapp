@@ -2,18 +2,23 @@ package bwfdm.sara.publication.test;
 
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 
-import bwfdm.sara.publication.dspace.DSpace_v6;
+import org.hibernate.validator.internal.util.privilegedactions.GetConstraintValidatorList;
 
-public class DSpace_v6_Test {
+import bwfdm.sara.publication.dspace.DSpace_v6;
+import bwfdm.sara.utils.JsonUtils;
+
+public class DSpaceTest_v6 {
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		
+		String output = "";
 		
 		//URL 
 		String serviceDocumentURL = "http://134.60.51.65:8080/swordv2/servicedocument";
@@ -44,40 +49,50 @@ public class DSpace_v6_Test {
 		DSpace_v6 dspaceRepository = new DSpace_v6(serviceDocumentURL, restURL, saraUser, saraPassword);
 		
 		// Check if repository is accessible -- OK
-		System.out.println("Is repo accessible: " + dspaceRepository.isAccessible());
+		output += "Is repo accessible: " + dspaceRepository.isAccessible() +"\n";
 		
 		// Check if the user is registered -- OK
-		System.out.println("Is \"" + userLogin + "\" " + "registered: " + dspaceRepository.isUserRegistered(userLogin));
+		output += "Is \"" + userLogin + "\" " + "registered: " + dspaceRepository.isUserRegistered(userLogin) + "\n";
 		
 		// Check if the user is allowed to publish in the repository -- OK
-		System.out.println("Is \"" + userLogin + "\" assigned:" + dspaceRepository.isUserAssigned(userLogin));
+		output += "Is \"" + userLogin + "\" assigned:" + dspaceRepository.isUserAssigned(userLogin) + "\n";
 			
 		// Get all available collection titles for the user
 		userCollections = dspaceRepository.getUserAvailableCollectionTitles(userLogin);
-		System.out.println("User available collections: " + userCollections);
+		output += "User available collections: " + userCollections + "\n";
 		for(String key: userCollections.keySet()) {
-			System.out.println("-- " + userCollections.get(key));
+			output += "-- " + userCollections.get(key) + "\n";
 		}
 		
 		// Get general available collection titles (for SARA-User)
 		saraCollections = dspaceRepository.getAvailableCollectionTitles();
-		System.out.println("SARA available collections: " + saraCollections);
+		output += "SARA available collections: " + saraCollections + "\n";
 		for(String key: saraCollections.keySet()) {
-			System.out.println("-- " + key + " : " + saraCollections.get(key));
+			output += "-- " + key + " : " + saraCollections.get(key) + "\n";
 		}
 		
-//		// Get communities for every collection
-//		for(Map.Entry<String, String> collection: dspaceRepository.getAvailableCollectionTitles().entrySet()) {
-//			System.out.println("Communities of the collection \"" + collection.getValue() + "\"");
-//			communities = dspaceRepository.getCommunitiesForCollection(collection.getKey());
-//			for(String community: communities) {
-//				System.out.println("-- " + community);
-//			}
-//		}
+		
+		
+		// Get communities for every collection
+		for(Map.Entry<String, String> collection: dspaceRepository.getAvailableCollectionTitles().entrySet()) {
+			output += "Communities of the collection \"" + collection.getValue() + "\"\n" ;
+			communities = dspaceRepository.getCommunitiesForCollection(collection.getKey());
+			for(String community: communities) {
+				output += "-- " + community + "\n";
+			}
+		}
+		
+		
+		// Get collection handle based on the URL (for SARA-user)
+		for(Map.Entry<String, String> collection: dspaceRepository.getAvailableCollectionTitles().entrySet()) {
+			output += "Handle of the collection \"" + collection.getValue() + "\"" + "\n";
+			output += "-- URL:  " + collection.getKey() + 
+							   " -> Handle: " + dspaceRepository.getCollectionHandle(collection.getKey()) + "\n";
+		}
 		
 		
 		
-		
+		System.out.println(output);
 		
 		
 		
