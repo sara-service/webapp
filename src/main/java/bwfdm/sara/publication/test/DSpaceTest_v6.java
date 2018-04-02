@@ -58,14 +58,14 @@ public class DSpaceTest_v6 {
 		output += "Is \"" + userLogin + "\" assigned:" + dspaceRepository.isUserAssigned(userLogin) + "\n";
 			
 		// Get all available collection titles for the user
-		userCollections = dspaceRepository.getUserAvailableCollectionTitles(userLogin);
+		userCollections = dspaceRepository.getUserAvailableCollectionsWithTitle(userLogin);
 		output += "User available collections: " + userCollections + "\n";
 		for(String key: userCollections.keySet()) {
 			output += "-- " + userCollections.get(key) + "\n";
 		}
 		
 		// Get general available collection titles (for SARA-User)
-		saraCollections = dspaceRepository.getAvailableCollectionTitles();
+		saraCollections = dspaceRepository.getSaraAvailableCollectionsWithTitle();
 		output += "SARA available collections: " + saraCollections + "\n";
 		for(String key: saraCollections.keySet()) {
 			output += "-- " + key + " : " + saraCollections.get(key) + "\n";
@@ -74,7 +74,7 @@ public class DSpaceTest_v6 {
 		
 		
 		// Get communities for every collection
-		for(Map.Entry<String, String> collection: dspaceRepository.getAvailableCollectionTitles().entrySet()) {
+		for(Map.Entry<String, String> collection: dspaceRepository.getSaraAvailableCollectionsWithTitle().entrySet()) {
 			output += "Communities of the collection \"" + collection.getValue() + "\"\n" ;
 			communities = dspaceRepository.getCommunitiesForCollection(collection.getKey());
 			for(String community: communities) {
@@ -84,12 +84,20 @@ public class DSpaceTest_v6 {
 		
 		
 		// Get collection handle based on the URL (for SARA-user)
-		for(Map.Entry<String, String> collection: dspaceRepository.getAvailableCollectionTitles().entrySet()) {
+		for(Map.Entry<String, String> collection: dspaceRepository.getSaraAvailableCollectionsWithTitle().entrySet()) {
 			output += "Handle of the collection \"" + collection.getValue() + "\"" + "\n";
 			output += "-- URL:  " + collection.getKey() + 
 							   " -> Handle: " + dspaceRepository.getCollectionHandle(collection.getKey()) + "\n";
 		}
 		
+		
+		// Get user available collectons with full names
+		output += "\n" + "== User available colections with full name \n";
+		for(Map.Entry<String, String> collection: dspaceRepository.getUserAvailableCollectionsWithFullName(saraUser, "//").entrySet()) {
+			output += collection.getValue() + "\n";
+			output += "-- URL:  " + collection.getKey() + 
+							   " -> Handle: " + dspaceRepository.getCollectionHandle(collection.getKey()) + "\n";
+		}
 		
 		
 		System.out.println(output);

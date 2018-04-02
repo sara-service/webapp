@@ -38,8 +38,8 @@ public class DSpace_v6 implements PublicationRepository{
 	protected static final Logger logger = LoggerFactory.getLogger(DSpace_v6.class);
 	
 	// For SWORD
-	protected final String saraUser;
-	protected final String saraPassword;
+	protected String saraUser;
+	protected String saraPassword;
 	protected final String urlServiceDocument;
 		
 	// For REST
@@ -201,7 +201,7 @@ public class DSpace_v6 implements PublicationRepository{
 	
 	
 	/**
-	 * Get REST-request to the webTarget
+	 * Get response to the REST-request
 	 * 
 	 * @param webTarget
 	 * @return
@@ -280,7 +280,7 @@ public class DSpace_v6 implements PublicationRepository{
 	
 	
 	@Override
-	public Map<String, String> getUserAvailableCollectionTitles(String loginName) {
+	public Map<String, String> getUserAvailableCollectionsWithTitle(String loginName) {
 		
 		AuthCredentials authCredentials = new AuthCredentials(saraUser, saraPassword, loginName); // "on-behalf-of: loginName"		
 		return this.getAvailableCollectionsViaSWORD(authCredentials);
@@ -288,7 +288,7 @@ public class DSpace_v6 implements PublicationRepository{
 
 	
 	@Override
-	public Map<String, String> getAvailableCollectionTitles() {
+	public Map<String, String> getSaraAvailableCollectionsWithTitle() {
 		
 		AuthCredentials authCredentials = new AuthCredentials(saraUser, saraPassword); // login as "saraUser"		
 		return this.getAvailableCollectionsViaSWORD(authCredentials);
@@ -323,7 +323,8 @@ public class DSpace_v6 implements PublicationRepository{
 	@Override
 	public void setCredentials(String user, String password) {
 		// TODO Auto-generated method stub
-		
+		this.saraUser = user;
+		this.saraPassword = password;
 	}
 
 
@@ -334,15 +335,29 @@ public class DSpace_v6 implements PublicationRepository{
 	}
 
 
+	/**
+	 * {@inheritDoc}	 
+	 * */
 	@Override
-	public Map<String, String> getUserAvailableCollectionFullNames(String loginName) {
-		// TODO Auto-generated method stub
-		return null;
+	public Map<String, String> getUserAvailableCollectionsWithFullName(String loginName, String fullNameSeparator) {
+		AuthCredentials authCredentials = new AuthCredentials(saraUser, saraPassword, loginName); // "on-behalf-of: loginName"		
+		Map<String, String> collectionsMap = this.getAvailableCollectionsViaSWORD(authCredentials);
+		
+		for(String url: collectionsMap.keySet()) {
+			List<String> communities = this.getCommunitiesForCollection(url);
+			String fullName = "";
+			for(String community: communities) {
+				fullName += community + fullNameSeparator; // add community + separator
+			}
+			fullName += collectionsMap.get(url); // add title
+			collectionsMap.put(url, fullName);
+		}		
+		return collectionsMap;
 	}
 
 
 	@Override
-	public Map<String, String> getAvailableCollectionFullNames() {
+	public Map<String, String> getSaraAvailableCollectionsWithFullName(String separator) {
 		// TODO Auto-generated method stub
 		return null;
 	}

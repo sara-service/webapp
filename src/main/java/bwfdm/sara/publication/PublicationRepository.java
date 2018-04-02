@@ -59,7 +59,7 @@ public interface PublicationRepository {
 	 * @param loginName
 	 * @return Map of Strings, where key="Collection full URL", value="Collection title"
 	 */
-	public Map<String, String> getUserAvailableCollectionTitles(String loginName);
+	public Map<String, String> getUserAvailableCollectionsWithTitle(String loginName);
 	
 	
 	/**
@@ -68,10 +68,10 @@ public interface PublicationRepository {
 	 * <p>
 	 * Could be, that user has an access only for some specific collections.
 	 *  
-	 * @param loginName
+	 * @param loginName, nameSeparator
 	 * @return Map of Strings, where key="Collection full URL", value="Collection full name"
 	 */
-	public Map<String, String> getUserAvailableCollectionFullNames(String loginName);
+	public Map<String, String> getUserAvailableCollectionsWithFullName(String loginName, String fullNameSeparator);
 	
 	
 	/**
@@ -80,20 +80,23 @@ public interface PublicationRepository {
 	 * 
 	 * @return Map of Strings, where key="Collection full URL", value="Collection title" 
 	 */
-	public Map<String, String> getAvailableCollectionTitles();
+	public Map<String, String> getSaraAvailableCollectionsWithTitle();
 	
 	
 	/**
 	 * Get available for the SARA-service collections with full name
 	 * (e.g. for DSpace-repository it means "community/subcommunity/collection")
 	 *  
+	 * @param fullNameSeparator 
 	 * @return Map of Strings, where key="Collection full URL", value="Collection full name" 
 	 */
-	public Map<String, String> getAvailableCollectionFullNames();
+	public Map<String, String> getSaraAvailableCollectionsWithFullName(String fullNameSeparator);
 	
 	
 	/**
 	 * Get title of the collection, based on the URL
+	 * 
+	 * TODO: remove it.
 	 * 
 	 * @param URL
 	 * @return
@@ -105,6 +108,8 @@ public interface PublicationRepository {
 	 * Get full name of the collection based on the URL
 	 * If publication repository is DSpace, 
 	 * then full name has to include "community/subcommunity/collection-title"
+	 * 
+	 * TODO: remove it
 	 * 
 	 * @param URL
 	 * @return
