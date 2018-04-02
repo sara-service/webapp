@@ -1,5 +1,8 @@
 package bwfdm.sara.publication.dspace;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -18,12 +21,17 @@ import javax.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.swordapp.client.AuthCredentials;
+import org.swordapp.client.Deposit;
+import org.swordapp.client.DepositReceipt;
+import org.swordapp.client.EntryPart;
 import org.swordapp.client.ProtocolViolationException;
 import org.swordapp.client.SWORDClient;
 import org.swordapp.client.SWORDClientException;
 import org.swordapp.client.SWORDCollection;
+import org.swordapp.client.SWORDError;
 import org.swordapp.client.SWORDWorkspace;
 import org.swordapp.client.ServiceDocument;
+import org.swordapp.client.UriRegistry;
 
 import bwfdm.sara.publication.Item;
 import bwfdm.sara.publication.PublicationRepository;
@@ -215,6 +223,131 @@ public class DSpace_v6 implements PublicationRepository{
 	}
 	
 	
+	private SWORDCollection getSWORDCollectionByURL(String url) {
+		SWORDClient swordClient = new SWORDClient();
+		AuthCredentials authCredentials = new AuthCredentials(saraUser, saraPassword);
+		ServiceDocument serviceDocument = this.getServiceDocument(swordClient, urlServiceDocument, authCredentials);
+		
+		for(SWORDWorkspace workspace : serviceDocument.getWorkspaces()) {
+			for (SWORDCollection collection : workspace.getCollections()) {
+				// key = full URL, value = Title
+				if(collection.getHref().toString().equals(url)) {
+					return collection;
+				}
+			}
+		}
+		return null;		
+	}
+	
+	
+	public boolean publishElementZipArchiveOnly(String userLogin, String collectionURL, File zipArchiveFile) {
+		
+		if(publishElement(userLogin, collectionURL, zipArchiveFile, null) != null) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
+	
+	public boolean publishElementMetadataOnly(String userLogin, String collectionURL, Map<String, String> metadataMap) {
+		
+		if(publishElement(userLogin, collectionURL, null, metadataMap) != null) {
+			return true;
+		} else {
+			return false;
+		}		
+	}
+	
+	
+	public boolean publishElementZipArchiveAndMetadata(String userLogin, String collectionURL, File zipArchiveFile, Map<String, String> metadataMap) {
+		
+		String editLink = publishElement(userLogin, collectionURL, zipArchiveFile, null); //publish zip-archive
+		if ((editLink != null) && (publishElement(userLogin, editLink, null, metadataMap) != null)) { //add metadata
+			return true;
+		} else {
+			return false;
+		}
+		
+//		//Replace order --> Server ERROR, 400
+//		String editLink = publishElement(userLogin, collectionURL, null, metadataMap); //publish metadata at first
+//		if ((editLink != null) && (publishElement(userLogin, editLink, zipArchiveFile, null) != null)) { //add file
+//			return true;
+//		} else {
+//			return false;
+//		}
+		
+	}
+	
+	
+	
+	private String publishElement(String userLogin, String collectionURL, File file, Map<String, String> metadataMap) {
+		
+		//TODO: check with both - metadata + file!
+		
+		if( ((file != null)&&(metadataMap != null)) || ((file == null)&&(metadataMap == null)) ) {
+			return null; // error, only 1 parameter should be used! (metadata OR zip-archive)
+		}
+		
+		SWORDClient swordClient = new SWORDClient();
+		AuthCredentials authCredentials = new AuthCredentials(saraUser, saraPassword, userLogin);
+//		SWORDCollection swordCollection = null;
+//		if(!isEditRequest) {
+//			swordCollection = getSWORDCollectionByURL(collectionURL);
+//		} else {
+//			swordCollection = 
+//		}
+//		if(swordCollection == null) {
+//			logger.error("Collection is not found!");
+//			return null;
+//		}
+		
+		Deposit deposit = new Deposit();
+		
+		try {
+			// Check metadata-only
+			if(metadataMap != null) {
+				EntryPart ep = new EntryPart();
+				for(Map.Entry<String, String> metadataEntry : metadataMap.entrySet()) {
+					ep.addDublinCore(metadataEntry.getKey(), metadataEntry.getValue());
+				}
+				deposit.setEntryPart(ep);
+			}
+			// Check file-only
+			if(file != null) {
+				deposit.setFile(new FileInputStream(file));
+				deposit.setFilename(file.getName());
+			}
+			
+			deposit.setMimeType("application/zip");
+			deposit.setPackaging(UriRegistry.PACKAGE_SIMPLE_ZIP);
+			deposit.setInProgress(true);
+			//deposit.setMd5("fileMD5");
+			//deposit.setSuggestedIdentifier("abcdefg");
+			
+			//TODO: remove
+			//DepositReceipt receipt = swordClient.deposit(swordCollection, deposit, authCredentials);
+			DepositReceipt receipt = swordClient.deposit(collectionURL, deposit, authCredentials);
+			
+			System.out.println("Receipt status code = " + receipt.getStatusCode());
+			System.out.println("Receipt link = " + receipt.getLocation());
+			
+			return receipt.getLocation();
+			
+		} catch (FileNotFoundException e) {
+			logger.error("Exception by accessing a file: " 
+					+ e.getClass().getSimpleName() + ": " + e.getMessage());
+			return null;
+			
+		} catch (SWORDClientException | SWORDError | ProtocolViolationException e) {
+			logger.error("Exception by making deposit: " 
+					+ e.getClass().getSimpleName() + ": " + e.getMessage());
+			return null;
+		} 
+		
+	}
+	
+	
 	/*
 	 * -------- Interface functions
 	 */
@@ -357,9 +490,9 @@ public class DSpace_v6 implements PublicationRepository{
 
 
 	@Override
-	public Map<String, String> getSaraAvailableCollectionsWithFullName(String separator) {
-		// TODO Auto-generated method stub
-		return null;
+	public Map<String, String> getSaraAvailableCollectionsWithFullName(String fullNameSeparator) {
+		
+		return this.getUserAvailableCollectionsWithFullName(this.saraUser, fullNameSeparator);
 	}
 
 
