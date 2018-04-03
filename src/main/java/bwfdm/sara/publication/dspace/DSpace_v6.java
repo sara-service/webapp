@@ -4,14 +4,11 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Cookie;
@@ -93,7 +90,9 @@ public class DSpace_v6 implements PublicationRepository{
 				
 	}
 	
-		
+	//=== Private methods ===
+	
+	
 	/**
 	 * Get service document via SWORD v2
 	 * 
@@ -133,6 +132,45 @@ public class DSpace_v6 implements PublicationRepository{
 		}
 		return collections;
 	}
+	
+	
+	private String getFileExtension(String fileName) {
+		
+		String extension = "";
+		int i = fileName.lastIndexOf('.');
+		if(i>0) {
+			extension = fileName.substring(i+1);
+		}
+		return extension;		
+	}
+	
+	
+	private String getPackageFormat(String fileName) {
+		String extension = this.getFileExtension(fileName);
+		
+		if(extension.toLowerCase().equals("zip")) {
+			return UriRegistry.PACKAGE_SIMPLE_ZIP;
+		}
+		return UriRegistry.PACKAGE_BINARY;
+	}
+	
+	
+	/**
+	 * Get response to the REST-request
+	 * 
+	 * @param webTarget
+	 * @return
+	 */
+	private Response getResponse(WebTarget webTarget, String contentType, String acceptType) {
+		final Invocation.Builder invocationBuilder = webTarget.request();
+		invocationBuilder.header("Content-Type", contentType);
+		invocationBuilder.header("Accept", acceptType);
+		final Response response = invocationBuilder.get();
+		return response;
+	}
+	
+	
+	//=== DSpace specific public methods ===
 	
 	
 	/**
@@ -209,103 +247,35 @@ public class DSpace_v6 implements PublicationRepository{
 	
 	
 	/**
-	 * Get response to the REST-request
+	 * Publish a file or metadata. Private method.
+	 * <p>
+	 * IMPORTANT - you can use ONLY 1 possibility in the same time (only file, or only metadata). 
+	 * "Multipart" is not supported!
 	 * 
-	 * @param webTarget
-	 * @return
+	 * @param userLogin
+	 * @param collectionURL - could be link to the collection (from the service document) 
+	 * 		  or a link to edit the collection ("Location" field in the response)
+	 * @param mimeFormat - use e.g. {@code "application/atom+xml"} or {@code "application/zip"}
+	 * @param packageFormat - see {@link UriRegistry.PACKAGE_SIMPLE_ZIP} or {@linkplain UriRegistry.PACKAGE_BINARY}
+	 * @param file
+	 * @param metadataMap
+	 * @return "Location" parameter from the response, or {@code null} in case of error
 	 */
-	private Response getResponse(WebTarget webTarget, String contentType, String acceptType) {
-		final Invocation.Builder invocationBuilder = webTarget.request();
-		invocationBuilder.header("Content-Type", contentType);
-		invocationBuilder.header("Accept", acceptType);
-		final Response response = invocationBuilder.get();
-		return response;
-	}
-	
-	
-	private SWORDCollection getSWORDCollectionByURL(String url) {
-		SWORDClient swordClient = new SWORDClient();
-		AuthCredentials authCredentials = new AuthCredentials(saraUser, saraPassword);
-		ServiceDocument serviceDocument = this.getServiceDocument(swordClient, urlServiceDocument, authCredentials);
+	private String publishElement(String userLogin, String collectionURL, String mimeFormat, String packageFormat, File file, Map<String, String> metadataMap) {
 		
-		for(SWORDWorkspace workspace : serviceDocument.getWorkspaces()) {
-			for (SWORDCollection collection : workspace.getCollections()) {
-				// key = full URL, value = Title
-				if(collection.getHref().toString().equals(url)) {
-					return collection;
-				}
-			}
-		}
-		return null;		
-	}
-	
-	
-	public boolean publishElementZipArchiveOnly(String userLogin, String collectionURL, File zipArchiveFile) {
-		
-		if(publishElement(userLogin, collectionURL, zipArchiveFile, null) != null) {
-			return true;
-		} else {
-			return false;
-		}
-	}
-	
-	
-	public boolean publishElementMetadataOnly(String userLogin, String collectionURL, Map<String, String> metadataMap) {
-		
-		if(publishElement(userLogin, collectionURL, null, metadataMap) != null) {
-			return true;
-		} else {
-			return false;
-		}		
-	}
-	
-	
-	public boolean publishElementZipArchiveAndMetadata(String userLogin, String collectionURL, File zipArchiveFile, Map<String, String> metadataMap) {
-		
-		String editLink = publishElement(userLogin, collectionURL, zipArchiveFile, null); //publish zip-archive
-		if ((editLink != null) && (publishElement(userLogin, editLink, null, metadataMap) != null)) { //add metadata
-			return true;
-		} else {
-			return false;
-		}
-		
-//		//Replace order --> Server ERROR, 400
-//		String editLink = publishElement(userLogin, collectionURL, null, metadataMap); //publish metadata at first
-//		if ((editLink != null) && (publishElement(userLogin, editLink, zipArchiveFile, null) != null)) { //add file
-//			return true;
-//		} else {
-//			return false;
-//		}
-		
-	}
-	
-	
-	
-	private String publishElement(String userLogin, String collectionURL, File file, Map<String, String> metadataMap) {
-		
-		//TODO: check with both - metadata + file!
-		
+		// Check if only 1 parameter is used (metadata OR file). 
+		// Multipart is not supported.
 		if( ((file != null)&&(metadataMap != null)) || ((file == null)&&(metadataMap == null)) ) {
-			return null; // error, only 1 parameter should be used! (metadata OR zip-archive)
+			return null; 
 		}
 		
 		SWORDClient swordClient = new SWORDClient();
 		AuthCredentials authCredentials = new AuthCredentials(saraUser, saraPassword, userLogin);
-//		SWORDCollection swordCollection = null;
-//		if(!isEditRequest) {
-//			swordCollection = getSWORDCollectionByURL(collectionURL);
-//		} else {
-//			swordCollection = 
-//		}
-//		if(swordCollection == null) {
-//			logger.error("Collection is not found!");
-//			return null;
-//		}
 		
 		Deposit deposit = new Deposit();
 		
 		try {
-			// Check metadata-only
+			// Check if "metadata as a Map"
 			if(metadataMap != null) {
 				EntryPart ep = new EntryPart();
 				for(Map.Entry<String, String> metadataEntry : metadataMap.entrySet()) {
@@ -313,46 +283,172 @@ public class DSpace_v6 implements PublicationRepository{
 				}
 				deposit.setEntryPart(ep);
 			}
-			// Check file-only
+			
+			// Check if "file"
 			if(file != null) {
 				deposit.setFile(new FileInputStream(file));
-				deposit.setFilename(file.getName());
+				deposit.setFilename(file.getName()); 	// deposit works properly ONLY with a "filename" parameter 
+														// --> in curl: -H "Content-Disposition: filename=file.zip"
 			}
 			
-			deposit.setMimeType("application/zip");
-			deposit.setPackaging(UriRegistry.PACKAGE_SIMPLE_ZIP);
+			deposit.setMimeType(mimeFormat);
+			deposit.setPackaging(packageFormat);
 			deposit.setInProgress(true);
 			//deposit.setMd5("fileMD5");
 			//deposit.setSuggestedIdentifier("abcdefg");
 			
-			//TODO: remove
-			//DepositReceipt receipt = swordClient.deposit(swordCollection, deposit, authCredentials);
 			DepositReceipt receipt = swordClient.deposit(collectionURL, deposit, authCredentials);
-			
-			System.out.println("Receipt status code = " + receipt.getStatusCode());
-			System.out.println("Receipt link = " + receipt.getLocation());
-			
-			return receipt.getLocation();
+			return receipt.getLocation(); // "Location" parameter from the response
 			
 		} catch (FileNotFoundException e) {
-			logger.error("Exception by accessing a file: " 
-					+ e.getClass().getSimpleName() + ": " + e.getMessage());
-			return null;
-			
+			logger.error("Exception by accessing a file: " + e.getClass().getSimpleName() + ": " + e.getMessage());
+			return null;	
+		
 		} catch (SWORDClientException | SWORDError | ProtocolViolationException e) {
-			logger.error("Exception by making deposit: " 
-					+ e.getClass().getSimpleName() + ": " + e.getMessage());
+			logger.error("Exception by making deposit: " + e.getClass().getSimpleName() + ": " + e.getMessage());
 			return null;
 		} 
-		
 	}
 	
 	
-	/*
-	 * -------- Interface functions
+	//=== PublicationRepository interface methods ===
+	
+	
+	/**
+	 * {@inheritDoc}
+	 * <p> 
+	 * In DSpace SWORD-v2 protocol will be used.
+	 *  	
+	 * @param userLogin
+	 * @param collectionURL
+	 * @param fileFullPath
+	 * @return
 	 */
+	@Override
+	public boolean publishFile(String userLogin, String collectionURL, File fileFullPath) {
+		
+		String mimeFormat = "application/zip"; // for every file type, to publish even "XML" files as a normal file
+		String packageFormat = getPackageFormat(fileFullPath.getName()); //zip-archive or separate file
+		
+		if(publishElement(userLogin, collectionURL, mimeFormat, packageFormat, fileFullPath, null) != null) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+		
+	
+	/**
+	 * {@inheritDoc}
+	 * Publish metadata as a Map.
+	 * 
+	 * @param userLogin
+	 * @param collectionURL
+	 * @param metadataMap
+	 * @return
+	 */
+	@Override
+	public boolean publishMetadata(String userLogin, String collectionURL, Map<String, String> metadataMap) {
+		
+		String mimeFormat = "application/atom+xml";
+		String packageFormat = UriRegistry.PACKAGE_BINARY;
+		
+		if(publishElement(userLogin, collectionURL, mimeFormat, packageFormat, null, metadataMap) != null) {
+			return true;
+		} else {
+			return false;
+		}		
+	}
 	
 	
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * Publish metadata as a XML-file in ATOM-format.
+	 * 
+	 * @param userLogin
+	 * @param collectionURL
+	 * @param metadataFileXML - file in XML-format (ATOM format of the metadata description) and with an XML-extension
+	 * @return 
+	 */
+	@Override
+	public boolean publishMetadata(String userLogin, String collectionURL, File metadataFileXML) {
+		
+		// Check if file has an XML-extension
+		if(!getFileExtension(metadataFileXML.getName()).toLowerCase().equals("xml")) {
+			return false;
+		}
+		
+		String mimeFormat = "application/atom+xml";
+		String packageFormat = getPackageFormat(metadataFileXML.getName());
+		
+		if(publishElement(userLogin, collectionURL, mimeFormat, packageFormat, metadataFileXML, null) != null) {
+			return true;
+		} else {
+			return false;
+		}		
+	}
+	
+	
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * In DSpace SWORD-v2 protocol will be used.
+	 */
+	@Override
+	public boolean publishFileAndMetadata(String userLogin, String collectionURL, File fileFullPath, Map<String, String> metadataMap) {
+		
+		String mimeFormat = "application/zip"; //as a common file (even for XML)
+		String packageFormat = getPackageFormat(fileFullPath.getName());
+		
+		// Step 1: publish file (as file or archive), without metadata
+		String editLink = publishElement(userLogin, collectionURL, mimeFormat, packageFormat, fileFullPath, null);
+		
+		// Step 2: add metadata (as a Map structure)
+		if (editLink != null) {
+			return publishMetadata(userLogin, editLink, metadataMap);
+		} else {
+			return false;
+		}
+		
+		//If replace order (step 1: metadata, step 2: file) --> Bad request, ERROR 400		
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * In DSpace SWORD-v2 protocol will be used.
+	 */
+	@Override
+	public boolean publishFileAndMetadata(String userLogin, String collectionURL, File fileFullPath, File metadataFileXML) {
+		
+		// Check if metadata file has an XML-extension
+		if (!getFileExtension(metadataFileXML.getName()).toLowerCase().equals("xml")) {
+			return false;
+		}
+		
+		String mimeFormat = "application/zip"; //as a common file (even for XML)
+		String packageFormat = getPackageFormat(fileFullPath.getName());
+		
+		// Step 1: publish file (as file or archive), without metadata
+		String editLink = publishElement(userLogin, collectionURL, mimeFormat, packageFormat, fileFullPath, null); 
+		
+		// Step 2: add metadata (as XML-file)
+		if (editLink != null) {
+			return publishMetadata(userLogin, editLink, metadataFileXML); 
+		} else {
+			return false;
+		}
+		
+		//If replace order (step 1: metadata, step 2: file) --> Bad request, ERROR 400
+	}
+	
+	
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * Not implemented yet!
+	 */
 	@Override
 	public Repository getDAO() {
 		// TODO Auto-generated method stub
@@ -382,6 +478,7 @@ public class DSpace_v6 implements PublicationRepository{
 	
 	/**
 	 * {@inheritDoc}
+	 * <p>
 	 * In DSpace it will be checked via access to the service document (SWORD-protocol)
 	 */
 	@Override
@@ -396,7 +493,11 @@ public class DSpace_v6 implements PublicationRepository{
 		}
 	}
 
-	
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * In DSpace it will be checked via access to the service document (SWORD-protocol)
+	 */
 	@Override
 	public Boolean isUserAssigned(String loginName) {
 		SWORDClient swordClient = new SWORDClient();
@@ -411,7 +512,9 @@ public class DSpace_v6 implements PublicationRepository{
 		return ((collectionCount > 0) ? true : false);
 	}
 	
-	
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public Map<String, String> getUserAvailableCollectionsWithTitle(String loginName) {
 		
@@ -419,40 +522,61 @@ public class DSpace_v6 implements PublicationRepository{
 		return this.getAvailableCollectionsViaSWORD(authCredentials);
 	}
 
-	
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public Map<String, String> getSaraAvailableCollectionsWithTitle() {
-		
 		AuthCredentials authCredentials = new AuthCredentials(saraUser, saraPassword); // login as "saraUser"		
 		return this.getAvailableCollectionsViaSWORD(authCredentials);
 	}
 	
-	
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * Not implemented yet!
+	 */
 	@Override
 	public String getCollectionName(String uuid) {
+		// TODO Auto-generated method stub
 		return null;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * Not implemented yet!
+	 */
 	@Override
 	public String getMetadataName(String uuid) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 	
-	
-
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * Not implemented yet!
+	 */
 	@Override
 	public Boolean publishItem(Item item) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * Not implemented yet!
+	 */
 	@Override
 	public void dump() {
-		// TODO Auto-generated method stub
-		
+		// TODO Auto-generated method stub	
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void setCredentials(String user, String password) {
 		// TODO Auto-generated method stub
@@ -461,16 +585,9 @@ public class DSpace_v6 implements PublicationRepository{
 	}
 
 
-	@Override
-	public String getCollectionURL(String uuid) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-
 	/**
-	 * {@inheritDoc}	 
-	 * */
+	 * {@inheritDoc}	  
+	 */
 	@Override
 	public Map<String, String> getUserAvailableCollectionsWithFullName(String loginName, String fullNameSeparator) {
 		AuthCredentials authCredentials = new AuthCredentials(saraUser, saraPassword, loginName); // "on-behalf-of: loginName"		
@@ -493,20 +610,6 @@ public class DSpace_v6 implements PublicationRepository{
 	public Map<String, String> getSaraAvailableCollectionsWithFullName(String fullNameSeparator) {
 		
 		return this.getUserAvailableCollectionsWithFullName(this.saraUser, fullNameSeparator);
-	}
-
-
-	@Override
-	public String getCollectionTitleByURL(String URL) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-
-	@Override
-	public String getCollectionFullNameByURL(String URL) {
-		// TODO Auto-generated method stub
-		return null;
 	}
 	
 }
