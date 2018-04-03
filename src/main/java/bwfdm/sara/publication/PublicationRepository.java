@@ -88,18 +88,6 @@ public interface PublicationRepository {
 	public Map<String, String> getSaraAvailableCollectionsWithFullName(String fullNameSeparator);
 	
 	/**
-	 * Get full name of the collection based on the URL
-	 * If publication repository is DSpace, 
-	 * then full name has to include "community/subcommunity/collection-title"
-	 * 
-	 * TODO: remove it
-	 * 
-	 * @param URL
-	 * @return
-	 */
-	public String getCollectionFullNameByURL(String URL);
-		
-	/**
 	 * Publish a file to some collections, which is available for the user.
 	 * 
 	 * @param userLogin
