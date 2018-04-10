@@ -128,10 +128,7 @@ public interface PublicationRepository {
 	 * @return
 	 */
 	public boolean publishFileAndMetadata(String userLogin, String collectionURL, File fileFullPath, File metadataFileXML);
-	
-	
-	
-	// Old methods
+
 	
 	public Repository getDAO();
 
