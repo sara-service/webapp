@@ -2,18 +2,12 @@ package bwfdm.sara.publication.test;
 
 
 import java.io.File;
-import java.util.AbstractMap;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 
-import org.hibernate.validator.internal.util.privilegedactions.GetConstraintValidatorList;
-
 import bwfdm.sara.publication.dspace.DSpace_v6;
-import bwfdm.sara.utils.JsonUtils;
 
 public class DSpaceTest_v6 {
 
@@ -40,11 +34,6 @@ public class DSpaceTest_v6 {
 		//Communities
 		List<String> communities;
 		
-		//Default collection
-		String defaultCollectionTitle = "Amokläufe";
-		String defaultCollectionIRI = "http://134.60.51.65:8080/swordv2/collection/123456789/40";
-		
-				
 		System.out.println("=== DSpace_v6 testing ===");
 				
 		// Create DSpace_v6 repository
