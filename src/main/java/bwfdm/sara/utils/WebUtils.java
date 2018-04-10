@@ -26,31 +26,47 @@ import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.Response;
 
-/**
- * Method is got from the "https://dzone.com/articles/jersey-ignoring-ssl"
- * @return Client client
- * @throws Exception 
- * @author vk
- */
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import bwfdm.sara.publication.dspace.DSpace_v6;
+
+
 public class WebUtils {
-
-    public static Client IgnoreSSLClient() throws Exception {
-    SSLContext sslcontext = SSLContext.getInstance("TLS");
-    sslcontext.init(null, new TrustManager[]{new X509TrustManager() {
-        @Override
-        public void checkClientTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {}
-        @Override
-        public void checkServerTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {}
-        @Override
-        public X509Certificate[] getAcceptedIssuers() { return new X509Certificate[0]; }
-
-    }}, new java.security.SecureRandom());
-    return ClientBuilder.newBuilder().sslContext(sslcontext).hostnameVerifier(new HostnameVerifier() {
-		@Override
-		public boolean verify(String hostname, SSLSession session) {
-			return true;
-			}
-		}).build();
+	
+	private static final Logger logger = LoggerFactory.getLogger(DSpace_v6.class);
+	
+	/**
+	 * Get JAX-RS client without SSL 
+	 * Method is got from {@link https://dzone.com/articles/jersey-ignoring-ssl}
+	 * 
+	 * @return Client client
+	 * @throws Exception 
+	 * @author vk
+	 */
+    public static Client getClientWithoutSSL() {
+	    try {
+		    SSLContext sslcontext = SSLContext.getInstance("TLS");
+		    sslcontext.init(null, new TrustManager[]{new X509TrustManager() {
+		        @Override
+		        public void checkClientTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {}
+		        @Override
+		        public void checkServerTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {}
+		        @Override
+		        public X509Certificate[] getAcceptedIssuers() { return new X509Certificate[0]; }
+		
+		    }}, new java.security.SecureRandom());
+		    return ClientBuilder.newBuilder().sslContext(sslcontext).hostnameVerifier(new HostnameVerifier() {
+				@Override
+				public boolean verify(String hostname, SSLSession session) {
+					return true;
+					}
+				}).build();
+	    } catch (Exception e) {
+	    	logger.error("Exception by ignoring SSL varification: " 
+					+ e.getClass().getSimpleName() + ": " + e.getMessage());
+	    	return null;
+	    }
     }
     
     /**
@@ -69,8 +85,9 @@ public class WebUtils {
         } else {
             try {
                 handleResponseStatus(response);
-            } catch (WebApplicationException ex){
-                ex.printStackTrace(); // TODO: replace with logger!!
+            } catch (WebApplicationException e){
+            	logger.error("Exception by reading the response entity: " 
+    					+ e.getClass().getSimpleName() + ": " + e.getMessage());
             } finally {
                 response.close();
             }
@@ -80,7 +97,7 @@ public class WebUtils {
     
     /**
      * Handle response status, analyze errors.
-     * An idea is got from "https://github.com/ctu-developers/DSpace-REST-client/blob/master/src/main/java/cz/cvut/dspace/rest/client/impl/AbstractDSpaceRESTClient.java"
+     * The idea is got from {@link https://github.com/ctu-developers/DSpace-REST-client/blob/master/src/main/java/cz/cvut/dspace/rest/client/impl/AbstractDSpaceRESTClient.java}
      *
      * @param response
      * @throws WebApplicationException 

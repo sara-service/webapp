@@ -129,7 +129,7 @@ class IRTest {
 
 		if (noCollection) {
 			System.out.println("Querying...");
-			Map<String, String> myColls = oparu.getAvailableCollections();
+			Map<String, String> myColls = oparu.getAvailableCollectionTitles();
 
 			for (Map.Entry<String, String> entry : myColls.entrySet()) {
 				final String map_from = entry.getKey();
