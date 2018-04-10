@@ -464,7 +464,7 @@ public class DSpace_v6 implements PublicationRepository{
 	 * @return {@code true} if service document is accessible, and {@code false} if not (e.g. by Error 403).  
 	 */
 	@Override
-	public Boolean isAccessible() {
+	public boolean isAccessible() {
 		SWORDClient swordClient = new SWORDClient();
 		AuthCredentials authCredentials = new AuthCredentials(saraUser, saraPassword);
 		
@@ -482,7 +482,7 @@ public class DSpace_v6 implements PublicationRepository{
 	 * In DSpace it will be checked via access to the service document (SWORD-protocol)
 	 */
 	@Override
-	public Boolean isUserRegistered(String loginName) {	
+	public boolean isUserRegistered(String loginName) {	
 		SWORDClient swordClient = new SWORDClient();
 		AuthCredentials authCredentials = new AuthCredentials(saraUser, saraPassword, loginName);// "on-behalf-of: loginName"
 		
@@ -499,7 +499,7 @@ public class DSpace_v6 implements PublicationRepository{
 	 * In DSpace it will be checked via access to the service document (SWORD-protocol)
 	 */
 	@Override
-	public Boolean isUserAssigned(String loginName) {
+	public boolean isUserAssigned(String loginName) {
 		SWORDClient swordClient = new SWORDClient();
 		AuthCredentials authCredentials = new AuthCredentials(saraUser, saraPassword, loginName); //"on-behalf-of: loginName"
 		ServiceDocument serviceDocument = this.getServiceDocument(swordClient, urlServiceDocument, authCredentials);
@@ -559,9 +559,9 @@ public class DSpace_v6 implements PublicationRepository{
 	 * Not implemented yet!
 	 */
 	@Override
-	public Boolean publishItem(Item item) {
+	public boolean publishItem(Item item) {
 		// TODO Auto-generated method stub
-		return null;
+		return false;
 	}
 
 	/**

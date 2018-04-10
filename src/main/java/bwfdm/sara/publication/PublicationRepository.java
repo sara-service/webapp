@@ -17,7 +17,7 @@ public interface PublicationRepository {
 	 * 
 	 * @return
 	 */
-	public Boolean isAccessible();
+	public boolean isAccessible();
 	
 	/**
 	 * Set login and password of the user.
@@ -39,7 +39,7 @@ public interface PublicationRepository {
 	 * @param loginName
 	 * @return
 	 */
-	public Boolean isUserRegistered(String loginName);
+	public boolean isUserRegistered(String loginName);
 	
 	/**
 	 * Check if user is assigned to publish something in the repository
@@ -48,7 +48,7 @@ public interface PublicationRepository {
 	 * @return {@code true} if count of user available collections is great than zero, 
 	 * 		   otherwise {@code false} 
  	 */
-	public Boolean isUserAssigned(String loginName);
+	public boolean isUserAssigned(String loginName);
 		
 	/**
 	 * Get collections, which are available for the user
@@ -153,7 +153,7 @@ public interface PublicationRepository {
 
 	public String getMetadataName(String uuid);
 
-	public Boolean publishItem(Item item);
+	public boolean publishItem(Item item);
 
 	public void dump();
 }
