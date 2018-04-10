@@ -1,9 +1,6 @@
 [submodule "src/main/resources/bwfdm/sara/extractor/licensee/ruby"]
 	path = src/main/resources/bwfdm/sara/extractor/licensee/ruby
 	url = https://github.com/benbalter/licensee.git
-[submodule "saradb"]
-	path = saradb
-	url = git@git.uni-konstanz.de:sara/SARA-DB.git
 [submodule "choosealicense"]
 	path = choosealicense
 	url = https://github.com/github/choosealicense.com.git
