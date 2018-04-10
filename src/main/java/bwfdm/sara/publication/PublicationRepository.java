@@ -20,20 +20,6 @@ public interface PublicationRepository {
 	public boolean isAccessible();
 	
 	/**
-	 * Set login and password of the user.
-	 * Password is needed for the communication with the publication repository via API (e.g. SWORD or REST)
-	 * <p>
-	 * If the publication repository is DSpace you should put login/password ONLY of the SARA-user.
-	 * Credentials of the SARA-user will be used for the REST/SWORD mechanism. 
-	 * This mechanism is needed because of limitations of DSpace-API, where password is always needed.   
-	 * <p>
-	 *   
-	 * @param user
-	 * @param password
-	 */
-	public void setCredentials(String user, String password);
-	
-	/**
 	 * Check if user is registered in the publication repository
 	 * 
 	 * @param loginName

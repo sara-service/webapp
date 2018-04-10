@@ -127,6 +127,7 @@ class IRTest {
 			}
 		}
 
+		/*
 		if (noCollection) {
 			System.out.println("Querying...");
 			Map<String, String> myColls = oparu.getAvailableCollectionTitles();
@@ -137,6 +138,7 @@ class IRTest {
 				System.out.println("Collection '" + map_to + "' (" + map_from + ")");
 			}
 		}
+		*/
 
 		myItem.foreign_collection_uuid = "0815";
 

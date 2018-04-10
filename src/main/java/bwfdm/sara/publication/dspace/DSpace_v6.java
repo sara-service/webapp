@@ -30,6 +30,9 @@ import org.swordapp.client.SWORDWorkspace;
 import org.swordapp.client.ServiceDocument;
 import org.swordapp.client.UriRegistry;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import bwfdm.sara.publication.Item;
 import bwfdm.sara.publication.PublicationRepository;
 import bwfdm.sara.publication.Repository;
@@ -40,56 +43,66 @@ import bwfdm.sara.utils.WebUtils;
 
 public class DSpace_v6 implements PublicationRepository{
 
-	protected static final Logger logger = LoggerFactory.getLogger(DSpace_v6.class);
+	//private final String rest_user, rest_pwd, rest_api_endpoint;
+	private final String sword_user, sword_pwd, sword_api_endpoint, sword_servicedocument;
+	private final Repository dao;
 	
-	// For SWORD
-	protected String saraUser;
-	protected String saraPassword;
-	protected final String urlServiceDocument;
+	private static final Logger logger = LoggerFactory.getLogger(DSpace_v6.class);
 		
 	// For REST
 	//TODO: remove, what we do not need
-	protected final String urlREST;
-	protected final WebTarget restWebTarget;
-	protected final WebTarget loginWebTarget;
-	protected final WebTarget logoutWebTarget;
-	protected final WebTarget testWebTarget;
-	protected final WebTarget statusWebTarget;
-	protected final WebTarget communitiesWebTarget;
-	protected final WebTarget collectionsWebTarget;
-	protected final WebTarget itemsWebTarget;
-	protected final WebTarget bitstreamsWebTarget;
-	protected final WebTarget handleWebTarget;
-	protected final WebTarget hierarchyWebTarget;
-	protected String token;
-	protected Cookie cookie;
-	protected Client client;
+	private final WebTarget restWebTarget;
+	//private final WebTarget loginWebTarget;
+	//private final WebTarget logoutWebTarget;
+	//private final WebTarget testWebTarget;
+	//private final WebTarget statusWebTarget;
+	//private final WebTarget communitiesWebTarget;
+	private final WebTarget collectionsWebTarget;
+	//private final WebTarget itemsWebTarget;
+	//private final WebTarget bitstreamsWebTarget;
+	//private final WebTarget handleWebTarget;
+	private final WebTarget hierarchyWebTarget;
+	//private String token;
+	//private Cookie cookie;
+	private Client client;
 	
-	
-	public DSpace_v6(String urlServiceDocument, String urlREST, String saraUser, String saraPassword) {
-		this.saraUser = saraUser;
-		this.saraPassword = saraPassword;
-		this.urlREST = urlREST;
-		this.urlServiceDocument = urlServiceDocument;
+	@JsonCreator
+	public DSpace_v6(@JsonProperty("rest_user") final String ru, @JsonProperty("rest_pwd") final String rp,
+			@JsonProperty("rest_api_endpoint") final String re, @JsonProperty("sword_user") final String su,
+			@JsonProperty("sword_pwd") final String sp, @JsonProperty("sword_api_endpoint") final String se,
+			@JsonProperty("dao") final Repository dao) {
+
+		this.dao = dao;
+
+		if (dao.url.endsWith("/"))
+			throw new IllegalArgumentException("url must not end with slash: " + dao.url);
+
+		//rest_user = ru;
+		//rest_pwd = rp;
+		//rest_api_endpoint = re;
+		sword_user = su;
+		sword_pwd = sp;
+		sword_api_endpoint = se;
+		
+		sword_servicedocument = sword_api_endpoint + "/servicedocument";
 		
 		//client = ClientBuilder.newClient();
 		client = WebUtils.getClientWithoutSSL(); // Ignore SSL-Verification
 		
 		// WebTargets
-		restWebTarget = client.target(this.urlREST);
-		loginWebTarget = restWebTarget.path("login");
-		logoutWebTarget = restWebTarget.path("logout");
-		testWebTarget = restWebTarget.path("test");
-		statusWebTarget = restWebTarget.path("status");
-		communitiesWebTarget = restWebTarget.path("communities");
+		restWebTarget = client.target(sword_api_endpoint);
+		//loginWebTarget = restWebTarget.path("login");
+		//logoutWebTarget = restWebTarget.path("logout");
+		//testWebTarget = restWebTarget.path("test");
+		//statusWebTarget = restWebTarget.path("status");
+		//communitiesWebTarget = restWebTarget.path("communities");
 		collectionsWebTarget = restWebTarget.path("collections");
-		itemsWebTarget = restWebTarget.path("items");
-		bitstreamsWebTarget = restWebTarget.path("bitstreams");
-		handleWebTarget = restWebTarget.path("handle");
+		//itemsWebTarget = restWebTarget.path("items");
+		//bitstreamsWebTarget = restWebTarget.path("bitstreams");
+		//handleWebTarget = restWebTarget.path("handle");
 		hierarchyWebTarget = restWebTarget.path("hierarchy");
-				
 	}
-	
+
 	//=== Private methods ===
 	
 	
@@ -104,7 +117,7 @@ public class DSpace_v6 implements PublicationRepository{
 	private ServiceDocument getServiceDocument(SWORDClient swordClient, String serviceDocumentURL, AuthCredentials authCredentials) {
 		ServiceDocument serviceDocument = null;
 		try {
-			serviceDocument = swordClient.getServiceDocument(this.urlServiceDocument, authCredentials);
+			serviceDocument = swordClient.getServiceDocument(sword_servicedocument, authCredentials);
 		} catch (SWORDClientException | ProtocolViolationException e) {
 			logger.error("Exception by accessing service document: " 
 						+ e.getClass().getSimpleName() + ": " + e.getMessage());
@@ -122,7 +135,7 @@ public class DSpace_v6 implements PublicationRepository{
 	private Map<String, String> getAvailableCollectionsViaSWORD(AuthCredentials authCredentials){
 		Map<String, String> collections = new HashMap<String, String>();
 		SWORDClient swordClient = new SWORDClient();
-		ServiceDocument serviceDocument = this.getServiceDocument(swordClient, urlServiceDocument, authCredentials);
+		ServiceDocument serviceDocument = this.getServiceDocument(swordClient, sword_servicedocument, authCredentials);
 		
 		for(SWORDWorkspace workspace : serviceDocument.getWorkspaces()) {
 			for (SWORDCollection collection : workspace.getCollections()) {
@@ -220,8 +233,8 @@ public class DSpace_v6 implements PublicationRepository{
 		
 		// Find a collectionURL inside of all avaialble collections. SWORD is used.
 		SWORDClient swordClient = new SWORDClient();
-		AuthCredentials authCredentials = new AuthCredentials(saraUser, saraPassword);
-		ServiceDocument serviceDocument = this.getServiceDocument(swordClient, urlServiceDocument, authCredentials);
+		AuthCredentials authCredentials = new AuthCredentials(sword_user, sword_pwd);
+		ServiceDocument serviceDocument = this.getServiceDocument(swordClient, sword_servicedocument, authCredentials);
 		
 		for(SWORDWorkspace workspace : serviceDocument.getWorkspaces()) {
 			for (SWORDCollection collection : workspace.getCollections()) {
@@ -270,7 +283,7 @@ public class DSpace_v6 implements PublicationRepository{
 		}
 		
 		SWORDClient swordClient = new SWORDClient();
-		AuthCredentials authCredentials = new AuthCredentials(saraUser, saraPassword, userLogin);
+		AuthCredentials authCredentials = new AuthCredentials(sword_user, sword_pwd, userLogin);
 		
 		Deposit deposit = new Deposit();
 		
@@ -451,8 +464,7 @@ public class DSpace_v6 implements PublicationRepository{
 	 */
 	@Override
 	public Repository getDAO() {
-		// TODO Auto-generated method stub
-		return null;
+		return dao;
 	}
 
 		
@@ -466,9 +478,9 @@ public class DSpace_v6 implements PublicationRepository{
 	@Override
 	public boolean isAccessible() {
 		SWORDClient swordClient = new SWORDClient();
-		AuthCredentials authCredentials = new AuthCredentials(saraUser, saraPassword);
+		AuthCredentials authCredentials = new AuthCredentials(sword_user, sword_pwd);
 		
-		if(this.getServiceDocument(swordClient, urlServiceDocument, authCredentials) != null) {
+		if(this.getServiceDocument(swordClient, sword_servicedocument, authCredentials) != null) {
 			return true;
 		} else {
 			return false;
@@ -484,9 +496,9 @@ public class DSpace_v6 implements PublicationRepository{
 	@Override
 	public boolean isUserRegistered(String loginName) {	
 		SWORDClient swordClient = new SWORDClient();
-		AuthCredentials authCredentials = new AuthCredentials(saraUser, saraPassword, loginName);// "on-behalf-of: loginName"
+		AuthCredentials authCredentials = new AuthCredentials(sword_user, sword_pwd, loginName);// "on-behalf-of: loginName"
 		
-		if(this.getServiceDocument(swordClient, urlServiceDocument, authCredentials) != null) {
+		if(this.getServiceDocument(swordClient, sword_servicedocument, authCredentials) != null) {
 			return true;
 		} else {
 			return false;
@@ -501,8 +513,8 @@ public class DSpace_v6 implements PublicationRepository{
 	@Override
 	public boolean isUserAssigned(String loginName) {
 		SWORDClient swordClient = new SWORDClient();
-		AuthCredentials authCredentials = new AuthCredentials(saraUser, saraPassword, loginName); //"on-behalf-of: loginName"
-		ServiceDocument serviceDocument = this.getServiceDocument(swordClient, urlServiceDocument, authCredentials);
+		AuthCredentials authCredentials = new AuthCredentials(sword_user, sword_pwd, loginName); //"on-behalf-of: loginName"
+		ServiceDocument serviceDocument = this.getServiceDocument(swordClient, sword_servicedocument, authCredentials);
 
 		int collectionCount = 0;
 		for(SWORDWorkspace workspace : serviceDocument.getWorkspaces()) {
@@ -518,7 +530,7 @@ public class DSpace_v6 implements PublicationRepository{
 	@Override
 	public Map<String, String> getUserAvailableCollectionsWithTitle(String loginName) {
 		
-		AuthCredentials authCredentials = new AuthCredentials(saraUser, saraPassword, loginName); // "on-behalf-of: loginName"		
+		AuthCredentials authCredentials = new AuthCredentials(sword_user, sword_pwd, loginName); // "on-behalf-of: loginName"		
 		return this.getAvailableCollectionsViaSWORD(authCredentials);
 	}
 
@@ -527,7 +539,7 @@ public class DSpace_v6 implements PublicationRepository{
 	 */
 	@Override
 	public Map<String, String> getSaraAvailableCollectionsWithTitle() {
-		AuthCredentials authCredentials = new AuthCredentials(saraUser, saraPassword); // login as "saraUser"		
+		AuthCredentials authCredentials = new AuthCredentials(sword_user, sword_pwd); // login as "saraUser"		
 		return this.getAvailableCollectionsViaSWORD(authCredentials);
 	}
 	
@@ -538,7 +550,7 @@ public class DSpace_v6 implements PublicationRepository{
 	 */
 	@Override
 	public String getCollectionName(String uuid) {
-		// TODO Auto-generated method stub
+		// TODO implementn it using REST
 		return null;
 	}
 
@@ -549,7 +561,7 @@ public class DSpace_v6 implements PublicationRepository{
 	 */
 	@Override
 	public String getMetadataName(String uuid) {
-		// TODO Auto-generated method stub
+		// TODO implement it using REST
 		return null;
 	}
 	
@@ -560,7 +572,7 @@ public class DSpace_v6 implements PublicationRepository{
 	 */
 	@Override
 	public boolean publishItem(Item item) {
-		// TODO Auto-generated method stub
+		// TODO implement it using SWORD
 		return false;
 	}
 
@@ -575,22 +587,11 @@ public class DSpace_v6 implements PublicationRepository{
 	}
 
 	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void setCredentials(String user, String password) {
-		// TODO Auto-generated method stub
-		this.saraUser = user;
-		this.saraPassword = password;
-	}
-
-
-	/**
 	 * {@inheritDoc}	  
 	 */
 	@Override
 	public Map<String, String> getUserAvailableCollectionsWithFullName(String loginName, String fullNameSeparator) {
-		AuthCredentials authCredentials = new AuthCredentials(saraUser, saraPassword, loginName); // "on-behalf-of: loginName"		
+		AuthCredentials authCredentials = new AuthCredentials(sword_user, sword_pwd, loginName); // "on-behalf-of: loginName"		
 		Map<String, String> collectionsMap = this.getAvailableCollectionsViaSWORD(authCredentials);
 		
 		for(String url: collectionsMap.keySet()) {
@@ -608,8 +609,7 @@ public class DSpace_v6 implements PublicationRepository{
 
 	@Override
 	public Map<String, String> getSaraAvailableCollectionsWithFullName(String fullNameSeparator) {
-		
-		return this.getUserAvailableCollectionsWithFullName(this.saraUser, fullNameSeparator);
+		return this.getUserAvailableCollectionsWithFullName(sword_user, fullNameSeparator);
 	}
 	
 }
