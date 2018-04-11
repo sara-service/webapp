@@ -1,6 +1,8 @@
 package bwfdm.sara.publication;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * General Interface for the publication repository.
@@ -35,7 +37,17 @@ public interface PublicationRepository {
 	 * 		   otherwise {@code false} 
  	 */
 	public boolean isUserAssigned(String loginName);
-		
+	
+	
+	/**
+	 * Get collections which are available for the user
+	 * 
+	 * @param loginName - login name of user, if 'null' service user is taken
+	 * @return hierarchy tree containing leafs (collections) and branches (communities)
+	 */
+	public Hierarchy getHierarchy(String loginName);
+	
+	
 	/**
 	 * Get collections, which are available for the user
 	 * Could be, that user has an access only for some specific collections.

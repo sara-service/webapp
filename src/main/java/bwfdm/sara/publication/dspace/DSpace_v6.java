@@ -11,7 +11,7 @@ import java.util.Map;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.Cookie;
+//import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -33,6 +33,7 @@ import org.swordapp.client.UriRegistry;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import bwfdm.sara.publication.Hierarchy;
 import bwfdm.sara.publication.Item;
 import bwfdm.sara.publication.PublicationRepository;
 import bwfdm.sara.publication.Repository;
@@ -43,11 +44,11 @@ import bwfdm.sara.utils.WebUtils;
 
 public class DSpace_v6 implements PublicationRepository{
 
-	//private final String rest_user, rest_pwd, rest_api_endpoint;
+	private final String /*rest_user, rest_pwd, */rest_api_endpoint;
 	private final String sword_user, sword_pwd, sword_api_endpoint, sword_servicedocument;
 	private final Repository dao;
 	
-	private static final Logger logger = LoggerFactory.getLogger(DSpace_v6.class);
+//	private static final Logger logger = LoggerFactory.getLogger(DSpace_v6.class);
 		
 	// For REST
 	//TODO: remove, what we do not need
@@ -79,18 +80,18 @@ public class DSpace_v6 implements PublicationRepository{
 
 		//rest_user = ru;
 		//rest_pwd = rp;
-		//rest_api_endpoint = re;
+		rest_api_endpoint = dao.url + "/" + re;
 		sword_user = su;
 		sword_pwd = sp;
-		sword_api_endpoint = dao.url + se;
-		
-		sword_servicedocument = dao.url + "/servicedocument";
+		sword_api_endpoint = dao.url + "/" + se;
+		sword_servicedocument = sword_api_endpoint + "/servicedocument";
+		//logger.info(sword_servicedocument);
 		
 		//client = ClientBuilder.newClient();
 		client = WebUtils.getClientWithoutSSL(); // Ignore SSL-Verification
 		
 		// WebTargets
-		restWebTarget = client.target(sword_api_endpoint);
+		restWebTarget = client.target(rest_api_endpoint);
 		//loginWebTarget = restWebTarget.path("login");
 		//logoutWebTarget = restWebTarget.path("logout");
 		//testWebTarget = restWebTarget.path("test");
@@ -119,8 +120,8 @@ public class DSpace_v6 implements PublicationRepository{
 		try {
 			serviceDocument = swordClient.getServiceDocument(sword_servicedocument, authCredentials);
 		} catch (SWORDClientException | ProtocolViolationException e) {
-			logger.error("Exception by accessing service document: " 
-						+ e.getClass().getSimpleName() + ": " + e.getMessage());
+			//logger.error("Exception by accessing service document: " 
+			//			+ e.getClass().getSimpleName() + ": " + e.getMessage());
 			return null;
 		}
 		return serviceDocument;
@@ -140,6 +141,7 @@ public class DSpace_v6 implements PublicationRepository{
 		for(SWORDWorkspace workspace : serviceDocument.getWorkspaces()) {
 			for (SWORDCollection collection : workspace.getCollections()) {
 				// key = full URL, value = Title
+
 				collections.put(collection.getHref().toString(), collection.getTitle());
 			}
 		}
@@ -218,7 +220,6 @@ public class DSpace_v6 implements PublicationRepository{
 		return communityList; // List of communities ( >= 0) or "null"
 	}
 	
-	
 	/**
 	 * Get a collection handle based on the collection URL.
 	 * <p> 
@@ -228,6 +229,7 @@ public class DSpace_v6 implements PublicationRepository{
 	 * @return String with a handle or {@code null} if collectionURL was not found 
 	 */
 	public String getCollectionHandle(String collectionURL) {
+		System.out.println(collectionsWebTarget);
 		
 		String swordCollectionPath = ""; //collectionURL without a hostname and port
 		
@@ -314,11 +316,11 @@ public class DSpace_v6 implements PublicationRepository{
 			return receipt.getLocation(); // "Location" parameter from the response
 			
 		} catch (FileNotFoundException e) {
-			logger.error("Exception by accessing a file: " + e.getClass().getSimpleName() + ": " + e.getMessage());
+			//logger.error("Exception by accessing a file: " + e.getClass().getSimpleName() + ": " + e.getMessage());
 			return null;	
 		
 		} catch (SWORDClientException | SWORDError | ProtocolViolationException e) {
-			logger.error("Exception by making deposit: " + e.getClass().getSimpleName() + ": " + e.getMessage());
+			//logger.error("Exception by making deposit: " + e.getClass().getSimpleName() + ": " + e.getMessage());
 			return null;
 		} 
 	}
@@ -612,4 +614,46 @@ public class DSpace_v6 implements PublicationRepository{
 		return this.getUserAvailableCollectionsWithFullName(sword_user, fullNameSeparator);
 	}
 	
+	@Override
+	public Hierarchy getHierarchy(String loginName) {
+		Hierarchy bib = new Hierarchy("bibliography");
+		
+		// Get all collections via REST to check, if swordCollectionPath contains a REST-handle
+		final Response response = getResponse(collectionsWebTarget, MediaType.APPLICATION_JSON, MediaType.APPLICATION_JSON);				
+		final CollectionObject[] allCollections = JsonUtils.jsonStringToObject(
+					WebUtils.readResponseEntity(String.class, response), CollectionObject[].class);
+		
+		AuthCredentials authCredentials;
+		if (loginName == null || loginName.equals(sword_user)) {
+			authCredentials = new AuthCredentials(sword_user, sword_pwd); // as service user 
+		} else {
+			authCredentials = new AuthCredentials(sword_user, sword_pwd, loginName); // on-behalf-of		
+		}
+		
+		Map<String, String> collections = new HashMap<String, String>();
+		SWORDClient swordClient = new SWORDClient();
+		ServiceDocument serviceDocument = this.getServiceDocument(swordClient, sword_servicedocument, authCredentials);
+		
+		for(SWORDWorkspace workspace : serviceDocument.getWorkspaces()) {
+			for (SWORDCollection collection : workspace.getCollections()) {
+				// key = full URL, value = Title
+
+				collections.put(collection.getHref().toString(), collection.getTitle());
+			}
+		}
+		
+		for(String url: collections.keySet()) {
+			//List<String> communityPath = this.getCommunitiesForCollection(url);
+			//for (String s: communityPath) {
+			System.out.print(url);
+			System.out.print("=>");
+			String handle = getCollectionHandle(url);
+			System.out.print(handle);
+			//}
+		}
+		
+		return bib;
+	}
+	
 }
+
