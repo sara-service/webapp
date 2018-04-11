@@ -2,14 +2,12 @@ package bwfdm.sara.publication.test;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 import javax.sql.DataSource;
 
 import org.springframework.jdbc.datasource.SimpleDriverDataSource;
 
 import bwfdm.sara.publication.Archive;
-import bwfdm.sara.publication.Collection;
 import bwfdm.sara.publication.EPerson;
 import bwfdm.sara.publication.Item;
 import bwfdm.sara.publication.MetadataMapping;
@@ -120,31 +118,6 @@ class IRTest {
 		System.out.println("Collections where the user has access to");
 		System.out.println(oparu.getUserAvailableCollectionsWithFullName(myEPerson.contact_email, ", "));
 		
-		/*
-		List<Collection> myCollections = pdb.getList(Collection.class);
-
-		boolean noCollection = true;
-		for (Collection c : myCollections) {
-			if (c.enabled && c.id == myRepository.uuid) {
-				System.out.println(
-						"Collection '" + oparu.getCollectionName(c.foreign_collection_uuid) + "' (" + c.foreign_collection_uuid + ")");
-				noCollection = false;
-			}
-		}
-
-		
-		if (noCollection) {
-			System.out.println("Querying...");
-			Map<String, String> myColls = oparu.getAvailableCollectionTitles();
-
-			for (Map.Entry<String, String> entry : myColls.entrySet()) {
-				final String map_from = entry.getKey();
-				final String map_to = entry.getValue();
-				System.out.println("Collection '" + map_to + "' (" + map_from + ")");
-			}
-		}
-		*/
-
 		myItem.foreign_collection_uuid = "0815";
 
 		System.out.println(
