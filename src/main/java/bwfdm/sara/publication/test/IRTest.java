@@ -9,6 +9,7 @@ import org.springframework.jdbc.datasource.SimpleDriverDataSource;
 
 import bwfdm.sara.publication.Archive;
 import bwfdm.sara.publication.EPerson;
+import bwfdm.sara.publication.Hierarchy;
 import bwfdm.sara.publication.Item;
 import bwfdm.sara.publication.MetadataMapping;
 import bwfdm.sara.publication.MetadataValue;
@@ -114,10 +115,12 @@ class IRTest {
 		System.out.println("User is allowed to publish: " + oparu.isUserAssigned(myEPerson.contact_email));
 		System.out.println("Repository " + oparu.getDAO().display_name + " offers the following collections: ");
 		System.out.println("All available collections");
-		System.out.println(oparu.getSaraAvailableCollectionsWithFullName(", "));
+		System.out.println(oparu.getSaraAvailableCollectionsWithTitle());
 		System.out.println("Collections where the user has access to");
-		System.out.println(oparu.getUserAvailableCollectionsWithFullName(myEPerson.contact_email, ", "));
+		System.out.println(oparu.getUserAvailableCollectionsWithTitle(myEPerson.contact_email));
 		
+		Hierarchy bib = oparu.getHierarchy(null);
+/*	
 		myItem.foreign_collection_uuid = "0815";
 
 		System.out.println(
@@ -127,5 +130,6 @@ class IRTest {
 		} else {
 			System.out.println("There has been an error publishing. Examining...");
 		}
+		*/
 	}
 }
