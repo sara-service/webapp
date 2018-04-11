@@ -82,9 +82,9 @@ public class DSpace_v6 implements PublicationRepository{
 		//rest_api_endpoint = re;
 		sword_user = su;
 		sword_pwd = sp;
-		sword_api_endpoint = se;
+		sword_api_endpoint = dao.url + se;
 		
-		sword_servicedocument = sword_api_endpoint + "/servicedocument";
+		sword_servicedocument = dao.url + "/servicedocument";
 		
 		//client = ClientBuilder.newClient();
 		client = WebUtils.getClientWithoutSSL(); // Ignore SSL-Verification
