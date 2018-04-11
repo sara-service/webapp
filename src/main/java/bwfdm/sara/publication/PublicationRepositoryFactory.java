@@ -21,7 +21,7 @@ public class PublicationRepositoryFactory {
 	private static final Map<String, Class<? extends PublicationRepository>> ADAPTERS = new HashMap<>();
 
 	static {
-		ADAPTERS.put("DSpace_RESTv6_SWORDv2", DSpace_v6.class);
+		ADAPTERS.put("DSpace_v6", DSpace_v6.class);
 	}
 
 	@JsonProperty

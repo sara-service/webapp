@@ -113,9 +113,14 @@ class IRTest {
 
 		System.out.println("Repository " + oparu.getDAO().display_name + " is accessible: " + oparu.isAccessible());
 		System.out.println("User is registered: " + oparu.isUserRegistered(myEPerson.contact_email));
-
+		System.out.println("User is allowed to publish: " + oparu.isUserAssigned(myEPerson.contact_email));
 		System.out.println("Repository " + oparu.getDAO().display_name + " offers the following collections: ");
-
+		System.out.println("All available collections");
+		System.out.println(oparu.getSaraAvailableCollectionsWithFullName(", "));
+		System.out.println("Collections where the user has access to");
+		System.out.println(oparu.getUserAvailableCollectionsWithFullName(myEPerson.contact_email, ", "));
+		
+		/*
 		List<Collection> myCollections = pdb.getList(Collection.class);
 
 		boolean noCollection = true;
@@ -127,7 +132,7 @@ class IRTest {
 			}
 		}
 
-		/*
+		
 		if (noCollection) {
 			System.out.println("Querying...");
 			Map<String, String> myColls = oparu.getAvailableCollectionTitles();
