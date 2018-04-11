@@ -1,0 +1,95 @@
+=== bwcloud instance setting: 
+ * select flavour 'nano' with ubuntu server 16.04
+ * add a security group saradb with 5432/5429 ports enabled
+
+=== installation
+git clone git@git.uni-konstanz.de:sara/SARA-DB.git ~/saradb_install
+
+sudo su
+apt-get update && apt-get install postgresql
+
+systemctl start postgresql.service
+systemctl status postgresql.service
+systemctl enable postgresql.service
+
+ps auxwww | grep postgres | grep -v grep
+# =/etc/postgresql/9.5/main/postgresql.conf
+# postgres  3554  0.0  0.8 293460  4048 ?        Ss   10:23   0:00 postgres: checkpointer process   
+# postgres  3555  0.0  1.1 293460  5556 ?        Ss   10:23   0:00 postgres: writer process   
+# postgres  3556  0.0  0.8 293460  4048 ?        Ss   10:23   0:00 postgres: wal writer process   
+# postgres  3557  0.0  1.0 293896  5216 ?        Ss   10:23   0:00 postgres: autovacuum launcher process   
+# postgres  3558  0.0  0.6 148444  3344 ?        Ss   10:23   0:00 postgres: stats collector process 
+
+vim /etc/postgresql/9.5/main/postgresql.conf
+# listen_addresses to '*'
+# port to 5429
+
+vim /etc/postgresql/9.5/main/pg_hba.conf 
+# Now add:
+#  for pgadmin on University PCs:
+# host    all             all             134.60.205.167/24       md5
+#  for dockerized pgadmin running on localhost: 
+# host    all             all             172.17.0.2/24           md5
+
+systemctl restart postgresql.service
+
+sudo su - postgres
+
+# create sara user
+/usr/bin/createuser -d -l -R -S sara
+# create sara db
+/usr/bin/createdb -E UTF8 -O sara sara
+
+psql -d sara --file=/home/ubuntu/saradb_install/crypto.sql
+psql
+# \password sara;
+# then set the password
+# \q
+
+psql -h localhost -p 5429 -U sara -d sara --file=/home/ubuntu/saradb_install/schema.sql
+psql -h localhost -p 5429 -U sara -d sara --file=/home/ubuntu/saradb_install/config.sql
+
+exit
+
+sudo su
+
+apt-get install docker.io
+docker pull dpage/pgadmin4
+docker run -p 8088:80 \
+ -e "PGADMIN_DEFAULT_EMAIL=alle@sarabw.org" \
+ -e "PGADMIN_DEFAULT_PASSWORD=SARA" \
+ -d dpage/pgadmin4
+
+
+# to start services automatically across reboots
+# place the following into /etc/rc.local
+
+/etc/init.d/postgresql start
+/usr/bin/docker run -p 8080:80  -e "PGADMIN_DEFAULT_EMAIL=alle@sarabw.org"  -e "PGADMIN_DEFAULT_PASSWORD=SARA"  -d dpage/pgadmin4
+
+exit
+
+# make the scheme available under http://IPADDRESS/index.html
+sudo apt-get install libpostgresql-jdbc-java graphviz openjdk-8-jre-headless
+mkdir -p /tmp/sarascheme
+sudo su
+
+# use schemaSpy to dump a schema report
+java -jar schemaSpy_5.0.0.jar -t pgsql -host localhost:5429 -dp /usr/share/java/postgresql-jdbc3.jar -db sara -s public -u sara -p PASSWORD -hq -o /tmp/sarascheme
+cd /tmp/sarascheme && sudo nohup python3 -m http.server 80 &  # now you can see the scheme under http://IPADDRESS/index.html 
+
+# update db each time the schema/config has been changed
+
+sudo docker ps | awk 'FNR>1{print $1}' | xargs sudo docker rm -f
+
+sudo su - postgres
+psql -c 'drop database sara;'
+createdb -p 5429 -O sara sara
+psql -d sara --file=/home/ubuntu/saradb_install/crypto.sql
+
+psql -h localhost -p 5429 -U sara -d sara --file=/home/ubuntu/saradb_install/schema.sql
+psql -h localhost -p 5429 -U sara -d sara --file=/home/ubuntu/saradb_install/config.sql
+exit
+
+sudo docker run -p 8080:80 -e "PGADMIN_DEFAULT_EMAIL=alle@sarabw.org" -e "PGADMIN_DEFAULT_PASSWORD=SARA" -d dpage/pgadmin4
+java -jar schemaSpy_5.0.0.jar -t pgsql -host localhost:5429 -dp /usr/share/java/postgresql-jdbc3.jar -db sara -s public -u sara -hq -o /tmp/sarascheme -norows -pfp
