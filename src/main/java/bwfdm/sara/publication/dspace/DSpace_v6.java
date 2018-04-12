@@ -107,6 +107,18 @@ public class DSpace_v6 implements PublicationRepository{
 	//=== Private methods ===
 	
 	
+	public DSpace_v6(String serviceDocumentURL, String restURL, String saraUser, String saraPassword) {
+		sword_servicedocument = serviceDocumentURL;
+		sword_user = saraUser;
+		sword_pwd = saraPassword;
+		sword_api_endpoint = "";
+		rest_api_endpoint = "";
+		dao = null;
+		restWebTarget = client.target(sword_api_endpoint);
+		collectionsWebTarget = restWebTarget.path("collections");
+		hierarchyWebTarget = restWebTarget.path("hierarchy");
+	}
+
 	/**
 	 * Get service document via SWORD v2
 	 * 

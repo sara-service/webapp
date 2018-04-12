@@ -126,7 +126,7 @@ class IRTest {
 		output += "\n";
 		output += "Collections where the user has access to";
 		output += "\n";
-		output += oparu.getAvailableCollectionPaths(">", myEPerson.contact_email);
+		output += oparu.getAvailableCollectionPaths("=> ", myEPerson.contact_email);
 		output += "\n";
 
 		Hierarchy bib = oparu.getHierarchy(null);
