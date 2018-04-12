@@ -2,6 +2,7 @@ package bwfdm.sara.publication.test;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import javax.sql.DataSource;
 
@@ -109,17 +110,29 @@ class IRTest {
 		}
 
 		pdb.insertInDB(m);
+		String output = "";
 
-		System.out.println("Repository " + oparu.getDAO().display_name + " is accessible: " + oparu.isAccessible());
-		System.out.println("User is registered: " + oparu.isUserRegistered(myEPerson.contact_email));
-		System.out.println("User is allowed to publish: " + oparu.isUserAssigned(myEPerson.contact_email));
-		System.out.println("Repository " + oparu.getDAO().display_name + " offers the following collections: ");
-		System.out.println("All available collections");
-		System.out.println(oparu.getSaraAvailableCollectionsWithTitle());
-		System.out.println("Collections where the user has access to");
-		System.out.println(oparu.getUserAvailableCollectionsWithTitle(myEPerson.contact_email));
-		
+		output += "Repository " + oparu.getDAO().display_name + " is accessible: " + oparu.isAccessible();
+		output += "\n";
+		output += "User is registered: " + oparu.isUserRegistered(myEPerson.contact_email);
+		output += "\n";
+		output += "User is allowed to publish: " + oparu.isUserAssigned(myEPerson.contact_email);
+		output += "\n";
+		output += "Repository " + oparu.getDAO().display_name + " offers the following collections: ";
+		output += "\n";
+		output += "All available collections";
+		output += "\n";
+		output += oparu.getAvailableCollectionPaths(">", null);
+		output += "\n";
+		output += "Collections where the user has access to";
+		output += "\n";
+		output += oparu.getAvailableCollectionPaths(">", myEPerson.contact_email);
+		output += "\n";
+
 		Hierarchy bib = oparu.getHierarchy(null);
+		
+		System.out.print("\n"+output);
+		
 /*	
 		myItem.foreign_collection_uuid = "0815";
 

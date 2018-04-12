@@ -85,6 +85,14 @@ public interface PublicationRepository {
 	 */
 	public Map<String, String> getSaraAvailableCollectionsWithFullName(String fullNameSeparator);
 	
+
+	/** blabla
+	 * @param bla
+	 * @return bla
+	 */
+	public Map<String, String> getAvailableCollectionPaths(String separator, String loginName);
+
+	
 	/**
 	 * Publish a file to some collections, which is available for the user.
 	 * 

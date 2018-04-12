@@ -189,7 +189,7 @@ public class DSpace_v6 implements PublicationRepository{
 	
 	
 	/**
-	 * Get a list of communities for the collection
+	 * Get a list of communities which determine the path to the collection
 	 * Specific only for DSpace-6.
 	 * <p>
 	 * REST and SWORD requests are used.
@@ -197,7 +197,7 @@ public class DSpace_v6 implements PublicationRepository{
 	 * @return a {@code List<String>} of communities (0 or more communities are possible) 
 	 * 		   or {@code null} if a collection was not found
 	 */
-	public List<String> getCommunitiesForCollection(String collectionURL){
+	public List<String> getCommunityListForCollection(String collectionURL){
 		
 		String collectionHandle = getCollectionHandle(collectionURL);
 		if(collectionHandle == null) {
@@ -589,6 +589,32 @@ public class DSpace_v6 implements PublicationRepository{
 	}
 
 	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public Map<String, String> getAvailableCollectionPaths(String separator, String loginName) {
+		AuthCredentials authCredentials;
+		if (loginName == null || loginName.equals(sword_user)) {
+			authCredentials = new AuthCredentials(sword_user, sword_pwd); // as service user 
+		} else {
+			authCredentials = new AuthCredentials(sword_user, sword_pwd, loginName); // on-behalf-of		
+		}
+		
+		Map<String, String> collectionsMap = getAvailableCollectionsViaSWORD(authCredentials);
+		
+		for(String url: collectionsMap.keySet()) {
+			List<String> communities = getCommunityListForCollection(url);
+			String fullName = "";
+			for(String community: communities) {
+				fullName += community + separator; // add community + separator
+			}
+			fullName += collectionsMap.get(url); // add title
+			collectionsMap.put(url, fullName);
+		}		
+		return collectionsMap;		
+	}
+	
+	/**
 	 * {@inheritDoc}	  
 	 */
 	@Override
@@ -597,7 +623,7 @@ public class DSpace_v6 implements PublicationRepository{
 		Map<String, String> collectionsMap = this.getAvailableCollectionsViaSWORD(authCredentials);
 		
 		for(String url: collectionsMap.keySet()) {
-			List<String> communities = this.getCommunitiesForCollection(url);
+			List<String> communities = getCommunityListForCollection(url);
 			String fullName = "";
 			for(String community: communities) {
 				fullName += community + fullNameSeparator; // add community + separator
