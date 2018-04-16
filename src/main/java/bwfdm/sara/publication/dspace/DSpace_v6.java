@@ -544,7 +544,7 @@ public class DSpace_v6 implements PublicationRepository{
 	/**
 	 * {@inheritDoc}
 	 */
-	@Override
+	
 	public Map<String, String> getUserAvailableCollectionsWithTitle(String loginName) {
 		
 		AuthCredentials authCredentials = new AuthCredentials(sword_user, sword_pwd, loginName); // "on-behalf-of: loginName"		
@@ -554,7 +554,7 @@ public class DSpace_v6 implements PublicationRepository{
 	/**
 	 * {@inheritDoc}
 	 */
-	@Override
+	
 	public Map<String, String> getSaraAvailableCollectionsWithTitle() {
 		AuthCredentials authCredentials = new AuthCredentials(sword_user, sword_pwd); // login as "saraUser"		
 		return this.getAvailableCollectionsViaSWORD(authCredentials);
@@ -632,7 +632,7 @@ public class DSpace_v6 implements PublicationRepository{
 	/**
 	 * {@inheritDoc}	  
 	 */
-	@Override
+	
 	public Map<String, String> getUserAvailableCollectionsWithFullName(String loginName, String fullNameSeparator) {
 		AuthCredentials authCredentials = new AuthCredentials(sword_user, sword_pwd, loginName); // "on-behalf-of: loginName"		
 		Map<String, String> collectionsMap = this.getAvailableCollectionsViaSWORD(authCredentials);
@@ -650,7 +650,7 @@ public class DSpace_v6 implements PublicationRepository{
 	}
 
 
-	@Override
+	
 	public Map<String, String> getSaraAvailableCollectionsWithFullName(String fullNameSeparator) {
 		return this.getUserAvailableCollectionsWithFullName(sword_user, fullNameSeparator);
 	}
