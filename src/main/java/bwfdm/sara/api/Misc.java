@@ -17,6 +17,8 @@ import bwfdm.sara.git.GitRepoFactory;
 import bwfdm.sara.git.ProjectInfo;
 import bwfdm.sara.project.Project;
 import bwfdm.sara.publication.Hierarchy;
+import bwfdm.sara.publication.PublicationRepository;
+import bwfdm.sara.publication.PublicationRepositoryFactory;
 import bwfdm.sara.publication.Repository;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
@@ -44,24 +46,52 @@ public class Misc {
 	public Hierarchy queryHierarchy(
 			@RequestParam("user_email")final String user_email,
 			@RequestParam("repo_uuid")final String repo_uuid) {
-		if (!user_email.equals("stefan.kombrink@uni-ulm.de")) {
-			return null;
-		} else {
-			Hierarchy root = new Hierarchy("Bibliography");
-			
-			Hierarchy inf = new Hierarchy("Informatik");
-			Hierarchy ele = new Hierarchy("Elektrotechnik");
-			Hierarchy psy = new Hierarchy("Psychopathie");
-			
-			inf.addChild("Forschungsdaten"); inf.addChild("Publikationen");
-			ele.addChild("Forschungsdaten"); ele.addChild("Publikationen");
-			psy.addChild("Amokläufe");
-			
-			root.addChildren(Arrays.asList(inf,ele,psy));
-			String path = "";
-			root.dump(path);
-			return root;
+		List<PublicationRepository> pubRepos = config.getPublicationDatabase().getPubRepos();
+		PublicationRepository repo = null;
+		for (PublicationRepository r: pubRepos) {
+			if (r.getDAO().uuid.toString().equals(repo_uuid)) {
+				repo = r;
+			}
 		}
+		
+		if (repo == null) {
+			System.out.println("Error! No Publication Repository with given 'repo_uuid' found!");
+			return null;
+		}
+		
+		if (repo.isUserRegistered(user_email)) {
+			System.out.println("OK! User is registered!");
+		} else {
+			System.out.println("ERROR! User is not registered!");
+			return null;
+		}
+		
+		if (repo.isUserAssigned(user_email)) {
+			System.out.println("OK! User is registered and has submit rights to some collection!");
+		} else {
+			System.out.println("ERROR! User is registered but has no submit rights to anywhere!");
+		}
+		
+		
+		Hierarchy root = repo.getHierarchy(user_email);
+		
+		/*
+		Hierarchy root = new Hierarchy("Bibliographie");
+		Hierarchy inf = new Hierarchy("Informatik");
+		Hierarchy ele = new Hierarchy("Elektrotechnik");
+		Hierarchy psy = new Hierarchy("Psychopathie");
+		
+		inf.addChild("Forschungsdaten"); inf.addChild("Publikationen");
+		ele.addChild("Forschungsdaten"); ele.addChild("Publikationen");
+		psy.addChild("Amokläufe");
+			
+		root.addChildren(Arrays.asList(inf,ele,psy));
+		*/
+		
+		String path = "";
+		root.dump(path);
+		return root;
+
 	}
 
 	@GetMapping("project-list")

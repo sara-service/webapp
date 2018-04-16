@@ -657,43 +657,34 @@ public class DSpace_v6 implements PublicationRepository{
 	
 	@Override
 	public Hierarchy getHierarchy(String loginName) {
-		Hierarchy bib = new Hierarchy("bibliography");
+		Hierarchy hierarchy;
 		
-		// Get all collections via REST to check, if swordCollectionPath contains a REST-handle
-		final Response response = getResponse(collectionsWebTarget, MediaType.APPLICATION_JSON, MediaType.APPLICATION_JSON);				
-		final CollectionObject[] allCollections = JsonUtils.jsonStringToObject(
-					WebUtils.readResponseEntity(String.class, response), CollectionObject[].class);
+		hierarchy = new Hierarchy("");
+		hierarchy.setName("Uni-Bibliographie");
 		
-		AuthCredentials authCredentials;
-		if (loginName == null || loginName.equals(sword_user)) {
-			authCredentials = new AuthCredentials(sword_user, sword_pwd); // as service user 
-		} else {
-			authCredentials = new AuthCredentials(sword_user, sword_pwd, loginName); // on-behalf-of		
-		}
+		AuthCredentials authCredentials = new AuthCredentials(sword_user, sword_pwd, loginName); // "on-behalf-of: loginName"		
+		Map<String, String> collectionsMap = this.getAvailableCollectionsViaSWORD(authCredentials);
 		
-		Map<String, String> collections = new HashMap<String, String>();
-		SWORDClient swordClient = new SWORDClient();
-		ServiceDocument serviceDocument = this.getServiceDocument(swordClient, sword_servicedocument, authCredentials);
-		
-		for(SWORDWorkspace workspace : serviceDocument.getWorkspaces()) {
-			for (SWORDCollection collection : workspace.getCollections()) {
-				// key = full URL, value = Title
-
-				collections.put(collection.getHref().toString(), collection.getTitle());
+		for(String url: collectionsMap.keySet()) {
+			List<String> communities = getCommunityListForCollection(url);
+			Hierarchy entry = hierarchy;
+			for(String community: communities) {
+				boolean found = false;
+				for (Hierarchy child: entry.getChildren()) {
+					if (child.getName().equals(community)) {
+						entry = child;
+						found = true;
+						break;
+					}
+				}
+				if (!found) entry = entry.addChild(community);
 			}
-		}
+			entry = entry.addChild(collectionsMap.get(url));
+			entry.setURL(url);
+			entry.setCollection(true);
+		}		
 		
-		for(String url: collections.keySet()) {
-			//List<String> communityPath = this.getCommunitiesForCollection(url);
-			//for (String s: communityPath) {
-			System.out.print(url);
-			System.out.print("=>");
-			String handle = getCollectionHandle(url);
-			System.out.print(handle);
-			//}
-		}
-		
-		return bib;
+		return hierarchy;
 	}
 	
 }

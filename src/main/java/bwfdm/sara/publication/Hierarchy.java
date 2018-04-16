@@ -30,10 +30,11 @@ public class Hierarchy{
         this.children.add(child);
     }
 
-    public void addChild(String name) {
+    public Hierarchy addChild(String name) {
         Hierarchy newChild = new Hierarchy(name);
         newChild.setParent(this);
         children.add(newChild);
+        return newChild;
     }
 
     public void addChildren(List<Hierarchy> children) {
