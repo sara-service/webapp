@@ -47,48 +47,12 @@ public interface PublicationRepository {
 	 */
 	public Hierarchy getHierarchy(String loginName);
 	
-	
-	/**
-	 * Get collections, which are available for the user
-	 * Could be, that user has an access only for some specific collections.
-	 *  
-	 * @param loginName
-	 * @return Map of Strings, where key="Collection full URL", value="Collection title"
-	 */
-	public Map<String, String> getUserAvailableCollectionsWithTitle(String loginName);
-	
-	/**
-	 * Get collections, which are available for the user, and show their full name
+	/** Get available collection paths in the form of community => community ... => collection
 	 * (e.g. for DSpace-repository it means "community/subcommunity/collection")
-	 * <p>
-	 * Could be, that user has an access only for some specific collections.
-	 *  
-	 * @param loginName, nameSeparator
-	 * @return Map of Strings, where key="Collection full URL", value="Collection full name"
-	 */
-	public Map<String, String> getUserAvailableCollectionsWithFullName(String loginName, String fullNameSeparator);
-	
-	/**
-	 * Get available for the SARA-Service collections for publication.
-	 * As credentials for the request are used login/password of the SARA-user
 	 * 
-	 * @return Map of Strings, where key="Collection full URL", value="Collection title" 
-	 */
-	public Map<String, String> getSaraAvailableCollectionsWithTitle();
-	
-	/**
-	 * Get available for the SARA-service collections with full name
-	 * (e.g. for DSpace-repository it means "community/subcommunity/collection")
-	 *  
-	 * @param fullNameSeparator 
-	 * @return Map of Strings, where key="Collection full URL", value="Collection full name" 
-	 */
-	public Map<String, String> getSaraAvailableCollectionsWithFullName(String fullNameSeparator);
-	
-
-	/** blabla
-	 * @param bla
-	 * @return bla
+	 * @param separator string between communities and collection
+	 * @param on-behalf-of user name, if null, use service user
+	 * @return Map of Strings, where key="Collection full URL", value="Collection full name"
 	 */
 	public Map<String, String> getAvailableCollectionPaths(String separator, String loginName);
 
