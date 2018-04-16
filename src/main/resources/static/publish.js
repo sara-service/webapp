@@ -28,7 +28,7 @@ function setCollectionList(collection_path, hierarchy) {
 		$.each(hierarchy.children, function(_, child) {
 			var cp = collection_path;
 			cp += " -> ";
-			cp += child.data;
+			cp += child.name;
 			setCollectionList(cp, child);
 		});
 	} else {

@@ -13,6 +13,8 @@ public class Hierarchy{
 	@JsonProperty
 	private String handle = null;
 	@JsonProperty
+	private String URL = null;
+	@JsonProperty
 	private boolean is_collection = false;
 	@JsonManagedReference
     private List<Hierarchy> children = new ArrayList<>();
@@ -64,6 +66,10 @@ public class Hierarchy{
     public String getHandle() {
     	return handle;
     }
+    
+    public String getURL() {
+    	return URL;
+    }
 
     public void setName(String name) {
         this.name = name;
@@ -72,6 +78,10 @@ public class Hierarchy{
     public void setHandle(String handle) {
     	this.handle = handle;
     }
+    
+    public void setURL(String URL) {
+    	this.URL = URL;
+    }
 
     private void setParent(Hierarchy parent) {
         this.parent = parent;
@@ -79,5 +89,15 @@ public class Hierarchy{
 
     public Hierarchy getParent() {
         return parent;
+    }
+    
+    public void dump(String path) {
+		for (Hierarchy c: getChildren()) {
+			c.dump(path + ">" + c.name);
+		}
+
+		if (getChildrenCount() == 0) {
+			System.out.print(path + " ");
+		}
     }
 }

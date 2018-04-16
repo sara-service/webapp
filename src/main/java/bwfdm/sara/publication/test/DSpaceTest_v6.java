@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
+import bwfdm.sara.publication.Hierarchy;
 import bwfdm.sara.publication.dspace.DSpace_v6;
 
 public class DSpaceTest_v6 {
@@ -143,6 +143,18 @@ public class DSpaceTest_v6 {
 		output += "\n" + dspaceRepository.publishFileAndMetadata(userLogin, publicationCollectionURL, otherFile, otherFile); 			//false
 		output += "\n" + dspaceRepository.publishFileAndMetadata(userLogin, publicationCollectionURL, complicatedFile, complicatedFile);//false
 		output += "\n" + dspaceRepository.publishFileAndMetadata(userLogin, publicationCollectionURL, zipFile, xmlFile); 				//true
+		
+		// Test Hierarchy Tree
+		String path;
+		path = "";
+		output += "\n";
+		output += "\n" + "== PUBLICATION test: Hierarchy Tree SARA ==\n";
+		dspaceRepository.getHierarchy(null).dump(path);
+
+		path = "";
+		output += "\n";
+		output += "\n" + "== PUBLICATION test: Hierarchy Tree USER ==\n";
+		dspaceRepository.getHierarchy(userLogin).dump(path);
 
 		
 		System.out.println(output);

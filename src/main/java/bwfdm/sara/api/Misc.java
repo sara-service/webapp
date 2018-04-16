@@ -16,7 +16,7 @@ import bwfdm.sara.Config;
 import bwfdm.sara.git.GitRepoFactory;
 import bwfdm.sara.git.ProjectInfo;
 import bwfdm.sara.project.Project;
-
+import bwfdm.sara.publication.Hierarchy;
 import bwfdm.sara.publication.Repository;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
@@ -54,62 +54,14 @@ public class Misc {
 			Hierarchy psy = new Hierarchy("Psychopathie");
 			
 			inf.addChild("Forschungsdaten"); inf.addChild("Publikationen");
-			ele.addChild("Forschungsdaten"); inf.addChild("Publikationen");
+			ele.addChild("Forschungsdaten"); ele.addChild("Publikationen");
 			psy.addChild("Amokläufe");
 			
 			root.addChildren(Arrays.asList(inf,ele,psy));
+			String path = "";
+			root.dump(path);
 			return root;
 		}
-	}
-	
-	public class Hierarchy{
-		@JsonProperty
-	    private String data = null;
-		@JsonManagedReference
-	    private List<Hierarchy> children = new ArrayList<Hierarchy>();
-		@JsonBackReference
-		private Hierarchy parent = null;
-		
-	    public Hierarchy(String data) {
-	        this.data = data;
-	    }
-
-	    public void addChild(Hierarchy child) {
-	        child.setParent(this);
-	        this.children.add(child);
-	    }
-
-	    public void addChild(String data) {
-	        Hierarchy newChild = new Hierarchy(data);
-	        newChild.setParent(this);
-	        children.add(newChild);
-	    }
-	    
-	    public void addChildren(List<Hierarchy> children) {
-	        for(Hierarchy t : children) {
-	            t.setParent(this);
-	        }
-	        this.children.addAll(children);
-	    }
-	    public String getData() {
-	        return data;
-	    }
-	    
-	    public List<Hierarchy> getChildren() {
-	        return children;
-	    }
-	    
-	    public void setData(String data) {
-	        this.data = data;
-	    }
-
-	    private void setParent(Hierarchy parent) {
-	        this.parent = parent;
-	    }
-
-	    public Hierarchy getParent() {
-	        return parent;
-	    }
 	}
 
 	@GetMapping("project-list")
