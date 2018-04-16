@@ -111,10 +111,13 @@ public class DSpace_v6 implements PublicationRepository{
 		sword_servicedocument = serviceDocumentURL;
 		sword_user = saraUser;
 		sword_pwd = saraPassword;
-		sword_api_endpoint = "";
-		rest_api_endpoint = "";
+		sword_api_endpoint = null;
+		rest_api_endpoint = restURL;
 		dao = null;
-		restWebTarget = client.target(sword_api_endpoint);
+		
+		client = WebUtils.getClientWithoutSSL(); // Ignore SSL-Verification
+		
+		restWebTarget = client.target(rest_api_endpoint);
 		collectionsWebTarget = restWebTarget.path("collections");
 		hierarchyWebTarget = restWebTarget.path("hierarchy");
 	}

@@ -68,14 +68,14 @@ public class DSpaceTest_v6 {
 		// Get communities for every SARA-available collection
 		for(Map.Entry<String, String> collection: dspaceRepository.getSaraAvailableCollectionsWithTitle().entrySet()) {
 			output +=  "\n" + "== Communities of the collection \"" + collection.getValue() + "\"\n" ;
-			communities = dspaceRepository.getCommunitiesForCollection(collection.getKey());
+			communities = dspaceRepository.getCommunityListForCollection(collection.getKey());
 			for(String community: communities) {
 				output += "-- " + community + "\n";
 			}
 		}
 				
 		
-		// Get user available collectons with full names
+		// Get user available collections with full names
 		output += "\n" + "== User available colections with full name \n\n";
 		for(Map.Entry<String, String> collection: dspaceRepository.getUserAvailableCollectionsWithFullName(userLogin, "//").entrySet()) {
 			output += collection.getValue() + "\n";
@@ -84,7 +84,7 @@ public class DSpaceTest_v6 {
 		}
 		
 		
-		// Get SARA available collectons with full names
+		// Get SARA available collections with full names
 		output += "\n" + "== SARA available colections with full name \n\n";
 		for(Map.Entry<String, String> collection: dspaceRepository.getSaraAvailableCollectionsWithFullName("//").entrySet()) {
 			output += collection.getValue() + "\n";
