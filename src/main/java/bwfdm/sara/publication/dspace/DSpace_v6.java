@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
 //import javax.ws.rs.core.Cookie;
@@ -87,8 +88,8 @@ public class DSpace_v6 implements PublicationRepository{
 		sword_servicedocument = sword_api_endpoint + "/servicedocument";
 		//logger.info(sword_servicedocument);
 		
-		//client = ClientBuilder.newClient();
-		client = WebUtils.getClientWithoutSSL(); // Ignore SSL-Verification
+		client = ClientBuilder.newClient();
+		//client = WebUtils.getClientWithoutSSL(); // Ignore SSL-Verification
 		
 		// WebTargets
 		restWebTarget = client.target(rest_api_endpoint);
