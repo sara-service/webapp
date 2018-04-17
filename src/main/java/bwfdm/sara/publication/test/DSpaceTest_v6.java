@@ -17,8 +17,8 @@ public class DSpaceTest_v6 {
 		String output = "";
 		
 		//URL 
-		String serviceDocumentURL = "http://134.60.51.65:8080/swordv2/servicedocument";
-		String restURL = "http://134.60.51.65:8080/rest";
+		String serviceDocumentURL = "https://bwcloud-vm65.rz.uni-ulm.de:8080/swordv2/servicedocument";
+		String restURL = "https://bwcloud-vm65.rz.uni-ulm.de:8080/rest";
 		
 		//SARA credentials
 		String saraUser = "project-sara@uni-konstanz.de";
