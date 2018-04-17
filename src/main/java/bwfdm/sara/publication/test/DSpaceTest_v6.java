@@ -3,17 +3,13 @@ package bwfdm.sara.publication.test;
 
 import java.io.File;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import bwfdm.sara.publication.Hierarchy;
 import bwfdm.sara.publication.dspace.DSpace_v6;
 
 public class DSpaceTest_v6 {
 
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-		
 		String output = "";
 		
 		//URL 
@@ -27,13 +23,6 @@ public class DSpaceTest_v6 {
 		//Test user
 		String userLogin = "volodymyr.kushnarenko@uni-ulm.de";
 
-		//Collections
-		Map<String, String> saraCollections = new HashMap<String, String>();				
-		Map<String, String> userCollections = new HashMap<String, String>();				
-		
-		//Communities
-		List<String> communities;
-		
 		System.out.println("=== DSpace_v6 testing ===");
 				
 		// Create DSpace_v6 repository
@@ -48,7 +37,9 @@ public class DSpaceTest_v6 {
 		// Check if the user is allowed to publish in the repository -- OK
 		output += "Is \"" + userLogin + "\" assigned:" + dspaceRepository.isUserAssigned(userLogin) + "\n\n";
 			
-		
+		/*
+		 * probably not needed
+		 * 
 		// Get all available collection titles for the user
 		userCollections = dspaceRepository.getUserAvailableCollectionsWithTitle(userLogin);
 		output += "\n" + "== User (" + userLogin + ") available collections: " + userCollections + "\n";
@@ -63,7 +54,6 @@ public class DSpaceTest_v6 {
 		for(String key: saraCollections.keySet()) {
 			output += "-- " + key + " : " + saraCollections.get(key) + "\n";
 		}
-				
 		
 		// Get communities for every SARA-available collection
 		for(Map.Entry<String, String> collection: dspaceRepository.getSaraAvailableCollectionsWithTitle().entrySet()) {
@@ -73,11 +63,13 @@ public class DSpaceTest_v6 {
 				output += "-- " + community + "\n";
 			}
 		}
+		
+		*/
 				
 		
 		// Get user available collections with full names
-		output += "\n" + "== User available colections with full name \n\n";
-		for(Map.Entry<String, String> collection: dspaceRepository.getUserAvailableCollectionsWithFullName(userLogin, "//").entrySet()) {
+		output += "\n" + "== User available collections with full name \n\n";
+		for(Map.Entry<String, String> collection: dspaceRepository.getAvailableCollectionPaths("//", userLogin).entrySet()) {
 			output += collection.getValue() + "\n";
 			output += "-- URL:  " + collection.getKey() + 
 							   " -> Handle: " + dspaceRepository.getCollectionHandle(collection.getKey()) + "\n";
@@ -85,20 +77,15 @@ public class DSpaceTest_v6 {
 		
 		
 		// Get SARA available collections with full names
-		output += "\n" + "== SARA available colections with full name \n\n";
-		for(Map.Entry<String, String> collection: dspaceRepository.getSaraAvailableCollectionsWithFullName("//").entrySet()) {
+		output += "\n" + "== SARA available collections with full name \n\n";
+		for(Map.Entry<String, String> collection: dspaceRepository.getAvailableCollectionPaths("//", null).entrySet()) {
 			output += collection.getValue() + "\n";
 			output += "-- URL:  " + collection.getKey() + 
 							   " -> Handle: " + dspaceRepository.getCollectionHandle(collection.getKey()) + "\n";
 		}
 		
-//		System.out.println(output);
-//		if(true)
-//			return;
-		
-		
 		// Publication collection
-		String publicationCollectionURL = "http://134.60.51.65:8080/swordv2/collection/123456789/36";
+		String publicationCollectionURL = "https://bwcloud-vm65.rz.uni-ulm.de:8080/swordv2/collection/123456789/36";
 		
 		// File, ZIP-Archive, XML-file
 		File zipFile = new File("D:/tmp_dspace_publication/package_with_metadata.zip");

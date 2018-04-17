@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 
 import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
 //import javax.ws.rs.core.Cookie;
@@ -44,28 +43,16 @@ import bwfdm.sara.utils.JsonUtils;
 import bwfdm.sara.utils.WebUtils;
 
 public class DSpace_v6 implements PublicationRepository{
+	protected static final Logger logger = LoggerFactory.getLogger(DSpace_v6.class);
 
 	private final String /*rest_user, rest_pwd, */rest_api_endpoint;
 	private final String sword_user, sword_pwd, sword_api_endpoint, sword_servicedocument;
 	private final Repository dao;
-	
-//	private static final Logger logger = LoggerFactory.getLogger(DSpace_v6.class);
 		
 	// For REST
-	//TODO: remove, what we do not need
 	private final WebTarget restWebTarget;
-	//private final WebTarget loginWebTarget;
-	//private final WebTarget logoutWebTarget;
-	//private final WebTarget testWebTarget;
-	//private final WebTarget statusWebTarget;
-	//private final WebTarget communitiesWebTarget;
 	private final WebTarget collectionsWebTarget;
-	//private final WebTarget itemsWebTarget;
-	//private final WebTarget bitstreamsWebTarget;
-	//private final WebTarget handleWebTarget;
 	private final WebTarget hierarchyWebTarget;
-	//private String token;
-	//private Cookie cookie;
 	private Client client;
 	
 	@JsonCreator
@@ -79,35 +66,20 @@ public class DSpace_v6 implements PublicationRepository{
 		if (dao.url.endsWith("/"))
 			throw new IllegalArgumentException("url must not end with slash: " + dao.url);
 
-		//rest_user = ru;
-		//rest_pwd = rp;
 		rest_api_endpoint = dao.url + "/" + re;
 		sword_user = su;
 		sword_pwd = sp;
 		sword_api_endpoint = dao.url + "/" + se;
 		sword_servicedocument = sword_api_endpoint + "/servicedocument";
-		//logger.info(sword_servicedocument);
 		
-		client = ClientBuilder.newClient();
-		//client = WebUtils.getClientWithoutSSL(); // Ignore SSL-Verification
+		client = WebUtils.getClientWithoutSSL(); // Ignore SSL-Verification
 		
 		// WebTargets
 		restWebTarget = client.target(rest_api_endpoint);
-		//loginWebTarget = restWebTarget.path("login");
-		//logoutWebTarget = restWebTarget.path("logout");
-		//testWebTarget = restWebTarget.path("test");
-		//statusWebTarget = restWebTarget.path("status");
-		//communitiesWebTarget = restWebTarget.path("communities");
 		collectionsWebTarget = restWebTarget.path("collections");
-		//itemsWebTarget = restWebTarget.path("items");
-		//bitstreamsWebTarget = restWebTarget.path("bitstreams");
-		//handleWebTarget = restWebTarget.path("handle");
 		hierarchyWebTarget = restWebTarget.path("hierarchy");
 	}
 
-	//=== Private methods ===
-	
-	
 	public DSpace_v6(String serviceDocumentURL, String restURL, String saraUser, String saraPassword) {
 		sword_servicedocument = serviceDocumentURL;
 		sword_user = saraUser;
@@ -136,8 +108,8 @@ public class DSpace_v6 implements PublicationRepository{
 		try {
 			serviceDocument = swordClient.getServiceDocument(sword_servicedocument, authCredentials);
 		} catch (SWORDClientException | ProtocolViolationException e) {
-			//logger.error("Exception by accessing service document: " 
-			//			+ e.getClass().getSimpleName() + ": " + e.getMessage());
+			logger.error("Exception by accessing service document: " 
+						+ e.getClass().getSimpleName() + ": " + e.getMessage());
 			return null;
 		}
 		return serviceDocument;
@@ -157,7 +129,6 @@ public class DSpace_v6 implements PublicationRepository{
 		for(SWORDWorkspace workspace : serviceDocument.getWorkspaces()) {
 			for (SWORDCollection collection : workspace.getCollections()) {
 				// key = full URL, value = Title
-
 				collections.put(collection.getHref().toString(), collection.getTitle());
 			}
 		}
@@ -184,7 +155,6 @@ public class DSpace_v6 implements PublicationRepository{
 		}
 		return UriRegistry.PACKAGE_BINARY;
 	}
-	
 	
 	/**
 	 * Get response to the REST-request
@@ -249,7 +219,7 @@ public class DSpace_v6 implements PublicationRepository{
 		
 		String swordCollectionPath = ""; //collectionURL without a hostname and port
 		
-		// Find a collectionURL inside of all avaialble collections. SWORD is used.
+		// Find a collectionURL inside of all available collections. SWORD is used.
 		SWORDClient swordClient = new SWORDClient();
 		AuthCredentials authCredentials = new AuthCredentials(sword_user, sword_pwd);
 		ServiceDocument serviceDocument = this.getServiceDocument(swordClient, sword_servicedocument, authCredentials);
@@ -332,11 +302,11 @@ public class DSpace_v6 implements PublicationRepository{
 			return receipt.getLocation(); // "Location" parameter from the response
 			
 		} catch (FileNotFoundException e) {
-			//logger.error("Exception by accessing a file: " + e.getClass().getSimpleName() + ": " + e.getMessage());
+			logger.error("Exception by accessing a file: " + e.getClass().getSimpleName() + ": " + e.getMessage());
 			return null;	
 		
 		} catch (SWORDClientException | SWORDError | ProtocolViolationException e) {
-			//logger.error("Exception by making deposit: " + e.getClass().getSimpleName() + ": " + e.getMessage());
+			logger.error("Exception by making deposit: " + e.getClass().getSimpleName() + ": " + e.getMessage());
 			return null;
 		} 
 	}
@@ -413,11 +383,7 @@ public class DSpace_v6 implements PublicationRepository{
 		String mimeFormat = "application/atom+xml";
 		String packageFormat = getPackageFormat(metadataFileXML.getName());
 		
-		if(publishElement(userLogin, collectionURL, mimeFormat, packageFormat, metadataFileXML, null) != null) {
-			return true;
-		} else {
-			return false;
-		}		
+		return (publishElement(userLogin, collectionURL, mimeFormat, packageFormat, metadataFileXML, null) != null);
 	}
 	
 	
@@ -539,7 +505,7 @@ public class DSpace_v6 implements PublicationRepository{
 			collectionCount += workspace.getCollections().size(); //increment collection count
 		}
 		
-		return ((collectionCount > 0) ? true : false);
+		return (collectionCount > 0);
 	}
 	
 	/**
@@ -568,7 +534,7 @@ public class DSpace_v6 implements PublicationRepository{
 	 */
 	@Override
 	public String getCollectionName(String uuid) {
-		// TODO implementn it using REST
+		// TODO implement it using REST
 		return null;
 	}
 
@@ -628,32 +594,6 @@ public class DSpace_v6 implements PublicationRepository{
 			collectionsMap.put(url, fullName);
 		}		
 		return collectionsMap;		
-	}
-	
-	/**
-	 * {@inheritDoc}	  
-	 */
-	
-	public Map<String, String> getUserAvailableCollectionsWithFullName(String loginName, String fullNameSeparator) {
-		AuthCredentials authCredentials = new AuthCredentials(sword_user, sword_pwd, loginName); // "on-behalf-of: loginName"		
-		Map<String, String> collectionsMap = this.getAvailableCollectionsViaSWORD(authCredentials);
-		
-		for(String url: collectionsMap.keySet()) {
-			List<String> communities = getCommunityListForCollection(url);
-			String fullName = "";
-			for(String community: communities) {
-				fullName += community + fullNameSeparator; // add community + separator
-			}
-			fullName += collectionsMap.get(url); // add title
-			collectionsMap.put(url, fullName);
-		}		
-		return collectionsMap;
-	}
-
-
-	
-	public Map<String, String> getSaraAvailableCollectionsWithFullName(String fullNameSeparator) {
-		return this.getUserAvailableCollectionsWithFullName(sword_user, fullNameSeparator);
 	}
 	
 	@Override
