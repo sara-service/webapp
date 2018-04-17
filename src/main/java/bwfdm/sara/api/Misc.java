@@ -70,6 +70,7 @@ public class Misc {
 			System.out.println("OK! User is registered and has submit rights to some collection!");
 		} else {
 			System.out.println("ERROR! User is registered but has no submit rights to anywhere!");
+			return new Hierarchy("");
 		}
 		
 		
