@@ -5,7 +5,7 @@ do $$
 declare default_archive text          := 'Archive Gitlab Konstanz';
 declare default_gitlab  text          := 'Work Gitlab Konstanz';
 declare default_repository text       := 'OPARU Ulm';
-declare default_repository_home text  := 'http://134.60.51.65:8080';
+declare default_repository_home text  := 'https://bwcloud-vm65.rz.uni-ulm.de:8080';
 declare default_repository_sword text := 'swordv2';
 declare default_repository_rest text  := 'rest';
 
