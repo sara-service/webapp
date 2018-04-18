@@ -8,6 +8,7 @@ ALTER USER test WITH PASSWORD 'test';
 
 grant select, insert, update, delete on fe_temp_metadata to test;
 grant select, insert, update, delete on fe_temp_actions to test;
+grant select, insert, update, delete on fe_temp_publish to test;
 grant select, insert, update, delete on fe_temp_licenses to test;
 grant select, insert, update, delete on fe_supported_licenses to test;
 

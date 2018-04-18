@@ -26,6 +26,7 @@ import bwfdm.sara.project.RefAction.PublicationMethod;
  */
 public class FrontendDatabase {
 	private static final String ACTION_TABLE = "fe_temp_actions";
+	private static final String PUBLISH_TABLE = "fe_temp_publish";
 	private static final String METADATA_TABLE = "fe_temp_metadata";
 	private static final String LICENSES_TABLE = "fe_temp_licenses";
 
@@ -57,6 +58,17 @@ public class FrontendDatabase {
 				new DataSourceTransactionManager(db));
 	}
 
+	public void setPubRepo(final String field, final String value) {
+		if (value != null)
+			db.update("update "+ PUBLISH_TABLE+" set "+field+" = "+value);
+	}
+	
+	public String getPubRepo(final String field) {
+       String query = "select "+field+" from "+PUBLISH_TABLE+" where locked='X'"; 
+       Object[] inputs = new Object[] {};
+       return db.queryForObject(query, inputs, String.class);
+	}
+	
 	/**
 	 * Get metadata. The returned map is a snapshot; it doesn't reflect later
 	 * changes made by {@link #setMetadata(MetadataField, String)}! Also, some

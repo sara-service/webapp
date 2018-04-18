@@ -28,6 +28,18 @@ create table fe_temp_actions(
 	primary key (repo, project, ref)
 );
 
+create table fe_temp_publish(
+	locked char(1) not null,
+	pubrepo_uuid text,
+	pubrepo_displayname text,
+	login text not null,
+	collection_url text,
+	primary key (locked),
+	check (locked='X')
+);
+
+insert into fe_temp_publish (locked, pubrepo_uuid, pubrepo_displayname, login, collection_url) values ('X', null, null, null, null);
+
 create table fe_supported_licenses(
 	id text not null,
 	display_name text not null,
