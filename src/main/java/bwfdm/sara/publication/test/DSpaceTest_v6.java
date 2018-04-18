@@ -88,12 +88,20 @@ public class DSpaceTest_v6 {
 		String publicationCollectionURL = "https://bwcloud-vm65.rz.uni-ulm.de:8080/swordv2/collection/123456789/36";
 		
 		// File, ZIP-Archive, XML-file
+		/*
 		File zipFile = new File("D:/tmp_dspace_publication/package_with_metadata.zip");
 		File xmlFile = new File("D:/tmp_dspace_publication/entry_copy.xml");
 		File txtFile = new File("D:/tmp_dspace_publication/test-file.TXT");
 		File otherFile = new File("D:/tmp_dspace_publication/test-file.with.dots.txt.T");
 		File complicatedFile = new File("D:/tmp_dspace_publication/test-file.with.dots.txt-copy.zip");
+		*/
 		
+		File zipFile = new File(DSpaceTest_v6.class.getClassLoader().getResource("bwfdm/sara/testfiles/package_with_metadata.zip").getFile());
+		File xmlFile = new File(DSpaceTest_v6.class.getClassLoader().getResource("bwfdm/sara/testfiles/entry_copy.xml").getFile());
+		File txtFile = new File(DSpaceTest_v6.class.getClassLoader().getResource("bwfdm/sara/testfiles/test-file.TxT").getFile());
+		File otherFile = new File(DSpaceTest_v6.class.getClassLoader().getResource("bwfdm/sara/testfiles/test-file.with.dots.txt.t").getFile());
+		File complicatedFile = new File(DSpaceTest_v6.class.getClassLoader().getResource("bwfdm/sara/testfiles/test-file.with.dots.txt-copy.zip").getFile());
+	
 		// Metadata
 		Map<String, String> metadataMap = new HashMap<String, String>();
 		metadataMap.put("title", "My title !!!"); 			//OK, accepted
