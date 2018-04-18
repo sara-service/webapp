@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<entry xmlns="http://www.w3.org/2005/Atom"
+        xmlns:dcterms="http://purl.org/dc/terms/">
+        <!-- some embedded metadata -->
+    <dcterms:abstract>The custom abstract COPY</dcterms:abstract>
+    <dcterms:creator>Daniel Düsentrieb</dcterms:creator>
+    <dcterms:accessRights>Access Rights</dcterms:accessRights>
+    <dcterms:alternative>Alternative Title</dcterms:alternative>
+    <dcterms:available>Date Available</dcterms:available>
+    <dcterms:bibliographicCitation>Bibliographic Citation</dcterms:bibliographicCitation>
+    <dcterms:description>Description</dcterms:description>
+    <dcterms:hasPart>Has Part</dcterms:hasPart>
+    <dcterms:hasVersion>Has Version</dcterms:hasVersion>
+    <dcterms:identifier>Identifier</dcterms:identifier>
+    <dcterms:isPartOf>Is Part Of</dcterms:isPartOf>
+    <dcterms:publisher>Publisher</dcterms:publisher>
+    <dcterms:rightsHolder>Rights Holder</dcterms:rightsHolder>
+    <dcterms:source>Source</dcterms:source>
+    <dcterms:title>New publication (FF, VK) COPY</dcterms:title>
+    <dcterms:type>Type</dcterms:type>
+
+</entry>
