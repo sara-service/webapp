@@ -90,7 +90,8 @@ public class DSpace_v6 implements PublicationRepository{
 		rest_api_endpoint = restURL;
 		dao = null;
 		
-		client = WebUtils.getClientWithoutSSL(); // Ignore SSL-Verification
+		//client = WebUtils.getClientWithoutSSL(); // Ignore SSL-Verification
+		client = ClientBuilder.newBuilder().build();
 		
 		restWebTarget = client.target(rest_api_endpoint);
 		collectionsWebTarget = restWebTarget.path("collections");
