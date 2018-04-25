@@ -41,6 +41,18 @@ public class Misc {
 	public List<Repository> getPubRepoList() {
 		return config.getPublicationDatabase().getList(Repository.class);
 	}
+
+	@GetMapping("get-pubrepo-cfg")
+	public String getPubRepoCfg(@RequestParam("field")final String field, final HttpSession session) {
+		Project project = Project.getInstance(session);
+		return project.getFrontendDatabase().getPubRepoCfg(field);
+	}
+
+	@GetMapping("set-pubrepo-cfg")
+	public void setPubRepoCfg(@RequestParam("field")final String field, @RequestParam("value")final String value, final HttpSession session) {
+        final Project project = Project.getInstance(session);
+		project.getFrontendDatabase().setPubRepoCfg(field,value);
+	}
 	
 	@GetMapping("query-hierarchy")
 	public Hierarchy queryHierarchy(
