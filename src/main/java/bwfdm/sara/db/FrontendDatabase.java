@@ -58,12 +58,12 @@ public class FrontendDatabase {
 				new DataSourceTransactionManager(db));
 	}
 
-	public void setPubRepo(final String field, final String value) {
+	public void setPubRepoCfg(final String field, final String value) {
 		if (value != null)
 			db.update("update "+ PUBLISH_TABLE+" set "+field+" = "+value);
 	}
 	
-	public String getPubRepo(final String field) {
+	public String getPubRepoCfg(final String field) {
        String query = "select "+field+" from "+PUBLISH_TABLE+" where locked='X'"; 
        Object[] inputs = new Object[] {};
        return db.queryForObject(query, inputs, String.class);
