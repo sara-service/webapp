@@ -32,7 +32,7 @@ create table fe_temp_publish(
 	locked char(1) not null,
 	pubrepo_uuid text,
 	pubrepo_displayname text,
-	login text not null,
+	login text,
 	collection_url text,
 	primary key (locked),
 	check (locked='X')
