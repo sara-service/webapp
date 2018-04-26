@@ -60,11 +60,11 @@ public class FrontendDatabase {
 
 	public void setPubRepoCfg(final String field, final String value) {
 		if (value != null)
-			db.update("update "+ PUBLISH_TABLE+" set "+field+" = "+value);
+			db.update("update "+ PUBLISH_TABLE+" set "+field+" = '"+value + "' where locked='X'");
 	}
 	
 	public String getPubRepoCfg(final String field) {
-       String query = "select "+field+" from "+PUBLISH_TABLE+" where locked='X'"; 
+       String query = "select "+field+" from " + PUBLISH_TABLE + " where locked='X'"; 
        Object[] inputs = new Object[] {};
        return db.queryForObject(query, inputs, String.class);
 	}

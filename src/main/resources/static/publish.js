@@ -23,6 +23,7 @@ function initPubRepos(list) {
 }
 
 function setCollectionList(collection_path, hierarchy) {
+	// FIXME TODO .... 
 	if (hierarchy.children.length != 0) {
 		var child;
 		$.each(hierarchy.children, function(_, child) {
@@ -33,9 +34,14 @@ function setCollectionList(collection_path, hierarchy) {
 		});
 	} else {
 		var select = $("#collections");
-		var option = $("<option>").attr("value", collection_path).text(collection_path);
+		var option = $("<option>").attr("value", collection_path).text(collection_path).data("url", "https://bla/blubb...");
 		select.append(option);
 	}
+	$("#collections").on('change', function () {
+		var user_email = $("#login_email").val();
+		var collection = $("#collections").children(':selected').data("url");
+		API.get("update selected IR", "/api/set-pubrepo-cfg", { field: 'collection_url', value: collection }, {});
+	});
 }
 
 function validateEmail(email) {
@@ -49,6 +55,14 @@ function setNextButtonEnabled(enabled) {
 	} else {
 		$("#next_button").addClass("disabled");
 	}
+	
+	var repoid = $("#irs").children(':selected').data("id");
+	var reponame = $("#irs").children(':selected').val();
+	var email = $("#login_email").val();
+	
+	API.get("update selected IR", "/api/set-pubrepo-cfg", { field: 'pubrepo_uuid', value: repoid }, {});
+	API.get("update selected IR", "/api/set-pubrepo-cfg", { field: 'pubrepo_displayname', value: reponame }, {});
+	API.get("update selected IR", "/api/set-pubrepo-cfg", { field: 'login', value: email }, {});
 }
 
 function processHierarchy(hierarchy) {
@@ -72,7 +86,7 @@ function processHierarchy(hierarchy) {
 var timerId="";
 
 function initPage(session) {
-	API.get("loading list of confgured publication repositories",
+	API.get("loading list of configured publication repositories",
 			"/api/pubrepo-list", {}, initPubRepos);
 
 	$('body').on('input', '#login_email', function() {
@@ -97,6 +111,5 @@ function initPage(session) {
 		}
 	});
 	
-	// TODO move elsewhere
 	$("#next_button").attr("href", "/meta.html");
 }

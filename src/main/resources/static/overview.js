@@ -89,4 +89,8 @@ function initPage(session) {
 	API.get("load license choice", "/api/licenses", {}, initLicenses);
 	API.get("load branch list", "/api/repo/actions", {},
 			initBranches);
+	
+	API.get("get selected IR", "/api/get-pubrepo-cfg", {field:'pubrepo_displayname'}, function (v){ $("#ir_name").text(v); });
+	API.get("get selected IR", "/api/get-pubrepo-cfg", {field:'collection_url'}, function (v){ $("#coll").text(v); });
+	API.get("get selected IR", "/api/get-pubrepo-cfg", {field:'login'}, function (v){ $("#login").text(v); });
 }
