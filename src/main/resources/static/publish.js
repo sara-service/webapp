@@ -34,14 +34,9 @@ function setCollectionList(collection_path, hierarchy) {
 		});
 	} else {
 		var select = $("#collections");
-		var option = $("<option>").attr("value", collection_path).text(collection_path).data("url", "https://bla/blubb...");
+		var option = $("<option>").attr("value", collection_path).text(collection_path).data("url", hierarchy.url);
 		select.append(option);
 	}
-	$("#collections").on('change', function () {
-		var user_email = $("#login_email").val();
-		var collection = $("#collections").children(':selected').data("url");
-		API.get("update selected IR", "/api/set-pubrepo-cfg", { field: 'collection_url', value: collection }, {});
-	});
 }
 
 function validateEmail(email) {
@@ -80,6 +75,13 @@ function processHierarchy(hierarchy) {
 		$("#user_status").css("color","green");
 		setNextButtonEnabled(true);
 		setCollectionList("", hierarchy);
+		$("#collections").on('change', function () {
+			var user_email = $("#login_email").val();
+			var collection = $("#collections").children(':selected').data("url");
+			var collection_name = $("#collections").children(':selected').val();
+			API.get("update selected IR", "/api/set-pubrepo-cfg", { field: 'collection_url', value: collection }, {});
+			API.get("update selected IR", "/api/set-pubrepo-cfg", { field: 'collection_displayname', value: collection_name }, {});
+		});
 	}
 }
 

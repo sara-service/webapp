@@ -34,11 +34,12 @@ create table fe_temp_publish(
 	pubrepo_displayname text,
 	login text,
 	collection_url text,
+        collection_displayname text,
 	primary key (locked),
 	check (locked='X')
 );
 
-insert into fe_temp_publish (locked, pubrepo_uuid, pubrepo_displayname, login, collection_url) values ('X', null, null, null, null);
+insert into fe_temp_publish (locked, pubrepo_uuid, pubrepo_displayname, login, collection_displayname, collection_url) values ('X', null, null, null, null, null);
 
 create table fe_supported_licenses(
 	id text not null,
