@@ -16,6 +16,13 @@ function initPubRepos(list) {
 		var user_email = $("#login_email").val();
 		var repo_uuid = $("#irs").children(':selected').data("id");
 
+		API.get("initialize page", "/api/session-info", {}, function(info) {
+			alert(info.ir.url);
+			$("#ir_link").attr("href", info.ir.url);
+			$("#ir_link img").attr("src", "data:image/svg+xml;base64," + info.ir.logo);
+			
+		});
+
 		API.get("check whether user exists on pub-repo",
 			"/api/query-hierarchy", {repo_uuid, user_email}, processHierarchy);
 	});
@@ -23,7 +30,6 @@ function initPubRepos(list) {
 }
 
 function setCollectionList(collection_path, hierarchy) {
-	// FIXME TODO .... 
 	if (hierarchy.children.length != 0) {
 		var child;
 		$.each(hierarchy.children, function(_, child) {
