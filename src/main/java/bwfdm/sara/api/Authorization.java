@@ -33,24 +33,24 @@ public class Authorization {
 		// once. if so, make sure he knows it won't work.
 		if (Project.hasInstance(session)) {
 			final Project project = Project.getInstance(session);
-			if (!project.getRepoID().equals(gitRepo))
-				return warnPushy(redir, gitRepo, projectPath);
-			final String prevProjectPath = project.getProjectPath();
-			if (prevProjectPath != null && projectPath != null
-					&& !prevProjectPath.equals(projectPath))
-				return warnPushy(redir, gitRepo, projectPath);
+			final String prevProject = project.getProjectPath();
+			if (prevProject != null)
+				// user is in the middle of the publication workflow for some
+				// project and is about to start a new one. bad user; show
+				// warning.
+				if (!project.getRepoID().equals(gitRepo) // different repo
+						|| projectPath == null // any selection on index.html
+						|| !prevProject.equals(projectPath)) { // diff. project
+					redir.addAttribute("repo", gitRepo);
+					redir.addAttribute("project", projectPath);
+					return new RedirectView("/pushy.html");
+			}
 		}
+
 
 		// everything else is just the same whether the user is returning from
 		// the "pushy" warning or not
 		return forceAuth(gitRepo, projectPath, redir, session);
-	}
-
-	private RedirectView warnPushy(final RedirectAttributes redir,
-			final String gitRepo, final String project) {
-		redir.addAttribute("repo", gitRepo);
-		redir.addAttribute("project", project);
-		return new RedirectView("/pushy.html");
 	}
 
 	@GetMapping("new")
