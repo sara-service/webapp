@@ -46,6 +46,7 @@ function setCollectionList(collection_path, hierarchy) {
 }
 
 function validateEmail(email) {
+	// FIXME this is actually a pretty good regex, but type="email" is even better: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/email
     var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     return re.test(String(email).toLowerCase());
 }
@@ -96,6 +97,7 @@ var timerId="";
 function initPage(session) {
 	API.get("loading list of configured publication repositories",
 			"/api/pubrepo-list", {}, initPubRepos);
+	// TODO should pre-fill all fields here, for best usability
 
 	$('body').on('input', '#login_email', function() {
 		var user_email = $("#login_email").val();
