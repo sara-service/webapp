@@ -1,7 +1,5 @@
 package bwfdm.sara.api;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import javax.servlet.http.HttpSession;
@@ -18,13 +16,9 @@ import bwfdm.sara.git.ProjectInfo;
 import bwfdm.sara.project.Project;
 import bwfdm.sara.publication.Hierarchy;
 import bwfdm.sara.publication.PublicationRepository;
-import bwfdm.sara.publication.PublicationRepositoryFactory;
 import bwfdm.sara.publication.Repository;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.JsonSerializer;
 
 @RestController
 @RequestMapping("/api")
@@ -87,19 +81,6 @@ public class Misc {
 		
 		
 		Hierarchy root = repo.getHierarchy(user_email);
-		
-		/*
-		Hierarchy root = new Hierarchy("Bibliographie");
-		Hierarchy inf = new Hierarchy("Informatik");
-		Hierarchy ele = new Hierarchy("Elektrotechnik");
-		Hierarchy psy = new Hierarchy("Psychopathie");
-		
-		inf.addChild("Forschungsdaten"); inf.addChild("Publikationen");
-		ele.addChild("Forschungsdaten"); ele.addChild("Publikationen");
-		psy.addChild("Amokläufe");
-			
-		root.addChildren(Arrays.asList(inf,ele,psy));
-		*/
 		
 		String path = "";
 		root.dump(path);
