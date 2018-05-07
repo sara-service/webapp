@@ -116,21 +116,21 @@ probably much more than you wanted it to.
 
 - in `/etc/gitlab/gitlab.rb`, set variables as follows (unless you need other things, that's actually the entire config!)
 ```ruby
-external_url 'http://saradomain' # note http://; no SSL yet!
+external_url 'http://gitlabdomain' # note http://; no SSL yet!
 nginx['custom_gitlab_server_config'] = "location ^~ /.well-known { root /var/www/letsencrypt; }"
 ```
 - reconfigure and restart gitlab (`sudo gitlab-ctl reconfigure`)
-- get SSL certificate: `sudo letsencrypt certonly --webroot -w /var/www/letsencrypt -d saradomain`
+- get SSL certificate: `sudo letsencrypt certonly --webroot -w /var/www/letsencrypt -d gitlabdomain`
 - again in `/etc/gitlab/gitlab.rb`, set (again, that's usually the entire config)
 ```ruby
-external_url 'https://saradomain' # note https:// now!
+external_url 'https://gitlabdomain' # note https:// now!
 nginx['redirect_http_to_https'] = true
-nginx['ssl_certificate'] = "/etc/letsencrypt/live/saradomain/fullchain.pem"
-nginx['ssl_certificate_key'] = "/etc/letsencrypt/live/saradomain/privkey.pem"
+nginx['ssl_certificate'] = "/etc/letsencrypt/live/gitlabdomain/fullchain.pem"
+nginx['ssl_certificate_key'] = "/etc/letsencrypt/live/gitlabdomain/privkey.pem"
 nginx['custom_gitlab_server_config'] = "location ^~ /.well-known { root /var/www/letsencrypt; }"
 ```
 - reconfigure and restart gitlab again (`sudo gitlab-ctl reconfigure`)
-- visit `https://www.ssllabs.com/ssltest/analyze.html?d=saradomain` (replacing `saradomain` in URL!). if you don't get at least a "B", apply config from https://mozilla.github.io/server-side-tls/ssl-config-generator/
+- visit `https://www.ssllabs.com/ssltest/analyze.html?d=gitlabdomain` (replacing `gitlabdomain` in URL!). if you don't get at least a "B", apply config from https://mozilla.github.io/server-side-tls/ssl-config-generator/
 - set up periodic renewal: create `/etc/cron.d/letsencrypt` containing
 ```cron
 15 3 * * * root /usr/bin/letsencrypt renew && gitlab-ctl restart nginx
@@ -144,11 +144,11 @@ follow "Setting up a Git Repository using GitLab"
 
 ## Register OAuth Application
 
-log in as admin and go to `https://saradomain/admin/applications/new`.
+log in as admin and go to `https://gitlabdomain/admin/applications/new`.
 
 - Name: "SARA-Server" (configurable, but will be shown to users)
 - Callback url: `https://saradomain/api/auth/redirect` (for local development, add `http://localhost:8080/api/auth/redirect`)
-- Trusted: NO (except for development)
+- Trusted: NO (YES means "don't ask user for authorization on login". useful for development; probably illegal under GDPR in production)
 - Scopes: `api`, `read_user` (?)
 
 note "Application Id" and "Secret"
@@ -158,7 +158,7 @@ note "Application Id" and "Secret"
 create a repo with parameters:
 
 - Type: `GitLabRESTv4`
-- `url`: `https://saradomain` (no trailing slash!)
+- `url`: `https://gitlabdomain` (no trailing slash!)
 - `oauthID`: "Application Id" from GitLab
 - `oauthSecret`: "Secret" from GitLab
 
@@ -201,14 +201,14 @@ log in as `sara-user`:
 	- `rsa` works but is huge
 	- `dsa` and `rsa1` are *insecure*; never use these!
 - on the server, run `sed 's/^/saradomain /' /etc/ssh/*.pub >known_hosts`
-- in `https://saradomain/profile/personal_access_tokens`, create a token with `api` rights. note "Your New Personal Access Token"
-- in `https://saradomain/profile/keys`, add the public key from `temp.pub`
+- in `https://gitlabdomain/profile/personal_access_tokens`, create a token with `api` rights. note "Your New Personal Access Token"
+- in `https://gitlabdomain/profile/keys`, add the public key from `temp.pub`
 - remember to `shred -u temp` after you've installed the key!
 
 ## Create Archive in Database
 
 - Type: `GitLabArchiveRESTv4`
-- `url`: `https://saradomain` (no trailing slash!)
+- `url`: `https://gitlabdomain` (no trailing slash!)
 - `temp-namespace`: `temp` (or whatever you called the group)
 - `main-namespace`: `archive` (or whatever you called the group)
 - `dark-namespace`: currently unused; set to `dark-archive` for now
