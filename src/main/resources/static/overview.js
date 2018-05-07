@@ -57,7 +57,7 @@ function initLicenses(info) {
 			if (branch.effective == "keep")
 				line.license.text("keep " + branch.detected.id);
 			else if (branch.detected != null)
-				line.license.text("replace with " + branch.effective);
+				line.license.text("replace LICENSE file with " + branch.effective);
 			else
 				line.license.text("choose " + branch.effective);
 			$("#licenses").append(line.root);
@@ -87,10 +87,11 @@ function initPage(session) {
 	$("#project").text(session.project);
 	API.get("load metadata fields", "/api/meta", {}, initMeta);
 	API.get("load license choice", "/api/licenses", {}, initLicenses);
-	API.get("load branch list", "/api/repo/actions", {},
-			initBranches);
-	
+	API.get("load branch list", "/api/repo/actions", {}, initBranches);
+
+	// FIXME this should be requested in a single query for performance reasons
 	API.get("get selected IR", "/api/get-pubrepo-cfg", {field:'pubrepo_displayname'}, function (v){ $("#ir_name").text(v); });
 	API.get("get selected IR", "/api/get-pubrepo-cfg", {field:'collection_displayname'}, function (v){ $("#coll").text(v); });
 	API.get("get selected IR", "/api/get-pubrepo-cfg", {field:'login'}, function (v){ $("#login").text(v); });
+	blockLoaded("publish");
 }
