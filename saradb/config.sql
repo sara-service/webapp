@@ -29,10 +29,10 @@ insert into source (display_name, contact_email, adapter, url, enabled) values(d
 insert into source_params (id, param, value) values (sRef, 'url', 'https://arbeits-gitlab.unikn.netfuture.ch' );
 insert into source_params (id, param, value) values (sRef, 'oauthID', 'd6f80baadb28e3d9d20b79f6a27c0747f6692a67321375e40be1a1b0fd8bb430');
 insert into source_params (id, param, value) values (sRef, 'oauthSecret', '6df3596f15aaa0b4e1ecd4297c697e42632b2cab4c4224bbdd6a34b9ed0674f1');
-insert into source (display_name, contact_email, adapter, url, enabled) values('IOMI GitLabs', 'devnull@unikn.netfuture.ch', 'GitLabRESTv4', 'https://omi-gitlab.e-technik.uni-ulm.de/', true) returning uuid into sRef;
-insert into source_params (id, param, value) values (sRef, 'url', 'https://arbeits-gitlab.unikn.netfuture.ch' );
-insert into source_params (id, param, value) values (sRef, 'oauthID', 'd6f80baadb28e3d9d20b79f6a27c0747f6692a67321375e40be1a1b0fd8bb430');
-insert into source_params (id, param, value) values (sRef, 'oauthSecret', '6df3596f15aaa0b4e1ecd4297c697e42632b2cab4c4224bbdd6a34b9ed0674f1');
+insert into source (display_name, contact_email, adapter, url, enabled) values('Ulmer GitLab', 'stefan.kombrink@uni-ulm.de', 'GitLabRESTv4', 'https://bwcloud-vm92.rz.uni-ulm.de', true) returning uuid into sRef;
+insert into source_params (id, param, value) values (sRef, 'url', 'https://bwcloud-vm92.rz.uni-ulm.de' );
+insert into source_params (id, param, value) values (sRef, 'oauthID', '2ab7716f633dc3147272e2ac95b630caaadab2f08b4761d2a2f1cc20756717bc');
+insert into source_params (id, param, value) values (sRef, 'oauthSecret', '7326d31de2a072aa558c14d4e57fe4d09ff4120548052b6b4f024250fa35e9da');
 
 -- add github "development" app as source
 insert into source (display_name, contact_email, adapter, url, enabled) values('GitHub, Inc. (return to localhost:8080)', 'devnull@unikn.netfuture.ch', 'GitHubRESTv3', 'https://github.com', true) returning uuid into sRef;
