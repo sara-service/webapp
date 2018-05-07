@@ -2,15 +2,14 @@ package bwfdm.sara.publication.test;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 import javax.sql.DataSource;
 
 import org.springframework.jdbc.datasource.SimpleDriverDataSource;
 
 import bwfdm.sara.publication.Archive;
-import bwfdm.sara.publication.Collection;
 import bwfdm.sara.publication.EPerson;
+import bwfdm.sara.publication.Hierarchy;
 import bwfdm.sara.publication.Item;
 import bwfdm.sara.publication.MetadataMapping;
 import bwfdm.sara.publication.MetadataValue;
@@ -110,34 +109,30 @@ class IRTest {
 		}
 
 		pdb.insertInDB(m);
+		String output = "";
 
-		System.out.println("Repository " + oparu.getDAO().display_name + " is accessible: " + oparu.isAccessible());
-		System.out.println("User is registered: " + oparu.isUserRegistered(myEPerson.contact_email));
+		output += "Repository " + oparu.getDAO().display_name + " is accessible: " + oparu.isAccessible();
+		output += "\n";
+		output += "User is registered: " + oparu.isUserRegistered(myEPerson.contact_email);
+		output += "\n";
+		output += "User is allowed to publish: " + oparu.isUserAssigned(myEPerson.contact_email);
+		output += "\n";
+		output += "Repository " + oparu.getDAO().display_name + " offers the following collections: ";
+		output += "\n";
+		output += "All available collections";
+		output += "\n";
+		output += oparu.getAvailableCollectionPaths(">", null);
+		output += "\n";
+		output += "Collections where the user has access to";
+		output += "\n";
+		output += oparu.getAvailableCollectionPaths("=> ", myEPerson.contact_email);
+		output += "\n";
 
-		System.out.println("Repository " + oparu.getDAO().display_name + " offers the following collections: ");
-
-		List<Collection> myCollections = pdb.getList(Collection.class);
-
-		boolean noCollection = true;
-		for (Collection c : myCollections) {
-			if (c.enabled && c.id == myRepository.uuid) {
-				System.out.println(
-						"Collection '" + oparu.getCollectionName(c.foreign_collection_uuid) + "' (" + c.foreign_collection_uuid + ")");
-				noCollection = false;
-			}
-		}
-
-		if (noCollection) {
-			System.out.println("Querying...");
-			Map<String, String> myColls = oparu.getAvailableCollections();
-
-			for (Map.Entry<String, String> entry : myColls.entrySet()) {
-				final String map_from = entry.getKey();
-				final String map_to = entry.getValue();
-				System.out.println("Collection '" + map_to + "' (" + map_from + ")");
-			}
-		}
-
+		Hierarchy bib = oparu.getHierarchy(null);
+		
+		System.out.print("\n"+output);
+		
+/*	
 		myItem.foreign_collection_uuid = "0815";
 
 		System.out.println(
@@ -147,5 +142,6 @@ class IRTest {
 		} else {
 			System.out.println("There has been an error publishing. Examining...");
 		}
+		*/
 	}
 }

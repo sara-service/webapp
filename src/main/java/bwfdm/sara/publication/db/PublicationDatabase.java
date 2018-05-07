@@ -11,7 +11,6 @@ import java.util.TreeSet;
 import javax.sql.DataSource;
 
 import org.springframework.dao.DataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -19,23 +18,24 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import bwfdm.sara.publication.PublicationRepository;
 import bwfdm.sara.publication.PublicationRepositoryFactory;
 import bwfdm.sara.publication.Repository;
+import bwfdm.sara.db.JacksonTemplate;
 
 public class PublicationDatabase {
 	private static final ObjectMapper MAPPER = new ObjectMapper();
 	private static final String GENERATED_PRIMARY_KEY = "uuid";
 	private static final String LAST_MODIFIED_COLUMN = "date_last_modified";
-	private final JdbcTemplate db;
+	private final JacksonTemplate db;
 	private final DataSource ds;
 
 	/**
 	 * Creates a DAO for reading config values.
 	 * 
-	 * @param db
+	 * @ db
 	 *            the {@link DataSource} to use for all queries
 	 */
 	public PublicationDatabase(final DataSource db) {
 		this.ds = db;
-		this.db = new JdbcTemplate(db);
+		this.db = new JacksonTemplate(db);
 	}
 
 	public final DataSource getDataSource() {
@@ -67,7 +67,7 @@ public class PublicationDatabase {
 			elems.add(createDAO(cls, entryMap));
 		return elems;
 	}
-
+	
 	private <D extends DAO> D createDAO(Class<? extends D> cls,
 			Map<String, Object> fields) {
 		// create empty object from just the primary key columns
@@ -195,11 +195,22 @@ public class PublicationDatabase {
 
 	public PublicationRepository newPublicationRepository(Repository r) {
 		PublicationRepositoryFactory factory = new PublicationRepositoryFactory(r);
-		Map<String, Object> args = new HashMap<>();
+		Map<String, Object> args = readArguments(getTableName(r)+ "_params", r.uuid.toString());
 		args.put("dao", r);
 		return factory.newPublicationRepository(args);
 	}
-
+	
+	/** @return a list of all supported publication repositories */
+	
+	public List<PublicationRepository> getPubRepos() {
+	 
+		List<PublicationRepository> repos = new ArrayList<PublicationRepository>();
+		for (final Repository r: getList(Repository.class)) {
+			repos.add(newPublicationRepository(r));
+		}
+		return repos;
+	}
+    
 	public static SortedSet<String> getPrimaryKey(Class<? extends DAO> cls) {
 		final SortedSet<String> fields = new TreeSet<>();
 		for (final Field f : cls.getFields())
@@ -235,5 +246,12 @@ public class PublicationDatabase {
 			e.printStackTrace();
 			return null;
 		}
+	}
+	
+	private Map<String, Object> readArguments(final String table,
+			final String id) {
+		return db.querySingleToMap(
+				"select param, value from " + table + " where id = UUID(?)",
+				"param", String.class, "value", Object.class, id);
 	}
 }

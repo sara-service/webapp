@@ -256,7 +256,7 @@ $(function() {
 			title = info.project + " – " + title;
 		$("title").text(title);
 		$("#ir_link").attr("href", info.ir.url);
-		$("#ir_link img").attr("src", "/logos/" + info.ir.logo);
+		$("#ir_link img").attr("src", "data:image/svg+xml;base64," + info.ir.logo);
 		pageInfo = info;
 		initPage(info);
 	});

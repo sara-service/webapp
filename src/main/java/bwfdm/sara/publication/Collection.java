@@ -15,8 +15,8 @@ public class Collection implements DAO {
 	public final UUID id;
 	@PrimaryKey
 	public final String foreign_collection_uuid;
-	@PrimaryKey // FIXME why is this part of the primary key???
-	public final String display_name;
+	@DatabaseField
+	public String display_name;
 	@DatabaseField
 	public boolean enabled;
 
