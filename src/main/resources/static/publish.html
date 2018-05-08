@@ -9,7 +9,6 @@
 	<link rel="stylesheet" href="lib/bootstrap.min.css" />
 	<link rel="stylesheet" href="lib/sara.css" />
 	<script src="lib/jquery.min.js"></script>
-	<script src="lib/uri.min.js"></script>
 	<script src="lib/common.js"></script>
 	<script src="publish.js"></script>
 	<title>SARA software publishing</title>
@@ -34,49 +33,39 @@
 	</div>
 	
 	<form class="form-horizontal">
-		<div class="form-group" id="template">
-			<label class="col-sm-2 control-label">institutional repository</label>
-			<div class="col-sm-6 nopad">
-				<label for="template_commit" class="control-label sr-only">institutional repository</label>
-				<select class="form-control" name="commit" id="irs">
+		<div class="form-group">
+			<label for="irs" class="col-sm-2 control-label">institutional repository</label>
+			<div class="col-sm-10 nopad">
+				<select class="form-control" id="irs">
 					<option disabled>… loading list of institutional repositories …</option>
 				</select>
 			</div>
 		</div>
-		<div class="form-group" id="template">
-			<label class="col-sm-2 control-label">your login there</label>
-			<div class="col-sm-6 nopad">
-				<label for="template_commit" class="control-label sr-only">Your IR login</label>
-				<input type="text" class="form-control" id="login_email" placeholder="email.address@institution.de" aria-describedby="title_status_text">
+		<div class="form-group">
+			<label for="login_email" class="col-sm-2 control-label">your login there</label>
+			<div class="col-sm-10 nopad">
+				<input type="email" class="form-control" id="login_email" placeholder="email.address@institution.de" aria-describedby="user_status">
+			</div>
+			<div class="col-sm-10 col-sm-offset-2">
+				<span class="control-label" id="user_status">please type an email address...</span>
 			</div>
 		</div>
-		<div class="form-group" id="template">
-			<label class="col-sm-2 control-label">target collection</label>
-			<div class="col-sm-6 nopad">
-				<label for="template_commit" class="control-label sr-only">target collection</label>
-				<select class="form-control" name="commit" id="collections">
+		<div class="form-group">
+			<label for="collections" class="col-sm-2 control-label">target collection</label>
+			<div class="col-sm-10 nopad">
+				<select class="form-control" id="collections">
 					<option disabled>… loading list of target collections …</option>
 				</select>
 			</div>
 		</div>
-		<div class="form-group" id="template">
-			<label class="col-sm-2 control-label">Status</label>
-			<div class="col-sm-6 nopad">
-				<label class="control-label" id="user_status"></label>
-			</div>
-		</div>
 	</form>
 
-	<div id="buttons"></div>
-	<div id="broken" class="hidden"><h2>Error loading list!</h2>
-		<p>If reloading doesn't fix things,
-		you may want to contact the service administrator.</p></div>
 	<div id="loading" class="loading"><span class="sr-only">loading list, please wait...</span></div>
 
 	<p style="height:3ex"></p>
 	<div class="row">
 		<a class="btn btn-default col-sm-3" href="/branches.html">← previous</a>
-		<a class="btn btn-primary col-sm-2 col-sm-offset-7 disabled" id="next_button" href="/none">next →</a>
+		<a class="btn btn-primary col-sm-2 col-sm-offset-7 disabled" id="next_button">next →</a>
 	</div>
 	<p style="height:3ex"></p>
 </div></body>
