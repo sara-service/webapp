@@ -6,26 +6,24 @@ function initPubRepos(list) {
 	select.empty();
 	$.each(list, function(_, repo) {
 		var option = $("<option>").attr("value", repo.display_name)
-		.text(repo.display_name).data("id", repo.uuid);
+		.text(repo.display_name).data("id", repo.uuid)
+		.data("url", repo.url).data("logo_base64", repo.logo_base64);
 		select.append(option);
 	});
 
-	$("#irs").on('change', function () {
-		$("#login_email").setVal("");
-		$("#irs").empty();
+	$('body').on('change', '#irs', function() {
 		var user_email = $("#login_email").val();
 		var repo_uuid = $("#irs").children(':selected').data("id");
+		var url = $("#irs").children(':selected').data("url");
+		var logo_base64 = $("#irs").children(':selected').data("logo_base64");
 
-		API.get("initialize page", "/api/session-info", {}, function(info) {
-			alert(info.ir.url);
-			$("#ir_link").attr("href", info.ir.url);
-			$("#ir_link img").attr("src", "data:image/svg+xml;base64," + info.ir.logo);
-			
-		});
+		$("#ir_link").attr("href", url);
+		$("#ir_link img").attr("src", "data:image/svg+xml;base64," + logo_base64);
 
 		API.get("check whether user exists on pub-repo",
 			"/api/query-hierarchy", {repo_uuid, user_email}, processHierarchy);
 	});
+
 	$("#loading").remove();
 }
 
