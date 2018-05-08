@@ -7,6 +7,7 @@ import java.util.Map.Entry;
 import javax.sql.DataSource;
 
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -26,7 +27,6 @@ import bwfdm.sara.project.RefAction.PublicationMethod;
  */
 public class FrontendDatabase {
 	private static final String ACTION_TABLE = "fe_temp_actions";
-	private static final String PUBLISH_TABLE = "fe_temp_publish";
 	private static final String METADATA_TABLE = "fe_temp_metadata";
 	private static final String LICENSES_TABLE = "fe_temp_licenses";
 
@@ -56,21 +56,13 @@ public class FrontendDatabase {
 		this.db = new JacksonTemplate(db);
 		transaction = new TransactionTemplate(
 				new DataSourceTransactionManager(db));
+		// this doesn't really help with concurrent requests causing conflicts,
+		// but it does lead to much less mysterious error messages ("could not
+		// serialize" instead of a public key violation)
+		transaction.setIsolationLevel(
+				TransactionDefinition.ISOLATION_SERIALIZABLE);
 	}
 
-	public void setPubRepoCfg(final String field, final String value) {
-		if (value != null)
-			// FIXME fix the SQL injection
-			db.update("update "+ PUBLISH_TABLE+" set "+field+" = '"+value + "' where locked='X'");
-	}
-	
-	public String getPubRepoCfg(final String field) {
-		// FIXME fix the SQL injection
-       String query = "select "+field+" from " + PUBLISH_TABLE + " where locked='X'"; 
-       Object[] inputs = new Object[] {};
-       return db.queryForObject(query, inputs, String.class);
-	}
-	
 	/**
 	 * Get metadata. The returned map is a snapshot; it doesn't reflect later
 	 * changes made by {@link #setMetadata(MetadataField, String)}! Also, some

@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import bwfdm.sara.Config;
 import bwfdm.sara.git.GitRepoFactory;
 import bwfdm.sara.git.ProjectInfo;
@@ -17,8 +19,6 @@ import bwfdm.sara.project.Project;
 import bwfdm.sara.publication.Hierarchy;
 import bwfdm.sara.publication.PublicationRepository;
 import bwfdm.sara.publication.Repository;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 @RestController
 @RequestMapping("/api")
@@ -34,18 +34,6 @@ public class Misc {
 	@GetMapping("pubrepo-list")
 	public List<Repository> getPubRepoList() {
 		return config.getPublicationDatabase().getList(Repository.class);
-	}
-
-	@GetMapping("get-pubrepo-cfg")
-	public String getPubRepoCfg(@RequestParam("field")final String field, final HttpSession session) {
-		Project project = Project.getInstance(session);
-		return project.getFrontendDatabase().getPubRepoCfg(field);
-	}
-
-	@GetMapping("set-pubrepo-cfg")
-	public void setPubRepoCfg(@RequestParam("field")final String field, @RequestParam("value")final String value, final HttpSession session) {
-        final Project project = Project.getInstance(session);
-		project.getFrontendDatabase().setPubRepoCfg(field,value);
 	}
 	
 	@GetMapping("query-hierarchy")

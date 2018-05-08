@@ -60,9 +60,9 @@ function setNextButtonEnabled(enabled) {
 	var reponame = $("#irs").children(':selected').val();
 	var email = $("#login_email").val();
 	
-	API.get("update selected IR", "/api/set-pubrepo-cfg", { field: 'pubrepo_uuid', value: repoid }, {});
-	API.get("update selected IR", "/api/set-pubrepo-cfg", { field: 'pubrepo_displayname', value: reponame }, {});
-	API.get("update selected IR", "/api/set-pubrepo-cfg", { field: 'login', value: email }, {});
+	API.put("update selected institutional repository", "/api/meta/pubrepo", { value: repoid });
+	//API.get("update selected IR", "/api/set-pubrepo-cfg", { field: 'pubrepo_displayname', value: reponame }, {});
+	API.put("update login email", "/api/meta/email", { value: email });
 }
 
 function processHierarchy(hierarchy) {
@@ -84,8 +84,8 @@ function processHierarchy(hierarchy) {
 			var user_email = $("#login_email").val();
 			var collection = $("#collections").children(':selected').data("url");
 			var collection_name = $("#collections").children(':selected').val();
-			API.get("update selected IR", "/api/set-pubrepo-cfg", { field: 'collection_url', value: collection }, {});
-			API.get("update selected IR", "/api/set-pubrepo-cfg", { field: 'collection_displayname', value: collection_name }, {});
+			API.put("update selected collection", "/api/meta/collection", { value: collection });
+			//API.put("update selected IR", "/api/set-pubrepo-cfg", { field: 'collection_displayname', value: collection_name });
 		});
 	}
 }

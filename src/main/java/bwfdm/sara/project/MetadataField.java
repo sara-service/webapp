@@ -16,7 +16,16 @@ public enum MetadataField {
 	 * branch the version number was read from. this isn't really a metadatum,
 	 * but it should be remembered for the user's next visit anyway.
 	 */
-	VERSION_BRANCH("versionbranch");
+	VERSION_BRANCH("versionbranch"),
+	/** ID of the institutional repository to publish the item in */
+	PUBLICATION_REPOSITORY("pubrepo"),
+	/**
+	 * unique identifier of the selected collection in the institutional
+	 * repository
+	 */
+	PUBREPO_COLLECTION("collection"),
+	/** user's login email in the institutional repository */
+	PUBREPO_LOGIN_EMAIL("email");
 
 	private final String displayName;
 

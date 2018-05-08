@@ -81,6 +81,7 @@ function initMeta(info) {
 			$("#" + name).text(info[name].value);
 		});
 	blockLoaded("meta");
+
 }
 
 function initPage(session) {
@@ -89,9 +90,11 @@ function initPage(session) {
 	API.get("load license choice", "/api/licenses", {}, initLicenses);
 	API.get("load branch list", "/api/repo/actions", {}, initBranches);
 
-	// FIXME this should be requested in a single query for performance reasons
-	API.get("get selected IR", "/api/get-pubrepo-cfg", {field:'pubrepo_displayname'}, function (v){ $("#ir_name").text(v); });
-	API.get("get selected IR", "/api/get-pubrepo-cfg", {field:'collection_displayname'}, function (v){ $("#coll").text(v); });
-	API.get("get selected IR", "/api/get-pubrepo-cfg", {field:'login'}, function (v){ $("#login").text(v); });
-	blockLoaded("publish");
+	API.get("get selected IR", "/api/meta", {}, function (meta){
+		// FIXME replace IR + collection with the more user-friendly names here
+		$("#ir_name").text(meta.pubrepo.value);
+		$("#collection_displayname").text(meta.collection.value);
+		$("#login").text(meta.email.value);
+		blockLoaded("publish");
+	});
 }

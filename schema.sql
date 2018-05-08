@@ -5,7 +5,8 @@ create table fe_temp_metadata(
 	project text not null,
 	field text not null,
 	value text not null,
-	check (field in ('title', 'description', 'version', 'versionbranch')),
+	check (field in ('title', 'description', 'version', 'versionbranch',
+		'pubrepo', 'collection', 'email')),
 	primary key (repo, project, field)
 );
 
@@ -27,19 +28,6 @@ create table fe_temp_actions(
 			'ARCHIVE_PUBLIC', 'ARCHIVE_HIDDEN')),
 	primary key (repo, project, ref)
 );
-
-create table fe_temp_publish(
-	locked char(1) not null,
-	pubrepo_uuid text,
-	pubrepo_displayname text,
-	login text,
-	collection_url text,
-        collection_displayname text,
-	primary key (locked),
-	check (locked='X')
-);
-
-insert into fe_temp_publish (locked, pubrepo_uuid, pubrepo_displayname, login, collection_displayname, collection_url) values ('X', null, null, null, null, null);
 
 create table fe_supported_licenses(
 	id text not null,
