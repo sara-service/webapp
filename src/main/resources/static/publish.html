@@ -32,7 +32,7 @@
 		</div>
 	</div>
 	
-	<form class="form-horizontal">
+	<form class="form-horizontal hidden" id="content">
 		<div class="form-group">
 			<label for="irs" class="col-sm-2 control-label">institutional repository</label>
 			<div class="col-sm-10 nopad">
@@ -41,21 +41,22 @@
 				</select>
 			</div>
 		</div>
-		<div class="form-group">
-			<label for="login_email" class="col-sm-2 control-label">your login there</label>
+		<div class="form-group" id="email_group">
+			<label for="login_email" class="col-sm-2 control-label">your login email there</label>
 			<div class="col-sm-10 nopad">
-				<input type="email" class="form-control" id="login_email" placeholder="email.address@institution.de" aria-describedby="user_status">
-			</div>
-			<div class="col-sm-10 col-sm-offset-2">
-				<span class="control-label" id="user_status">please type an email address...</span>
+				<input type="email" class="form-control" id="email" placeholder="email.address@institution.de" aria-describedby="email_status_text">
+				<span id="email_status" class="glyphicon form-control-feedback" aria-hidden="true"></span>
+				<span id="email_status_text" class="sr-only"></span>
 			</div>
 		</div>
-		<div class="form-group">
+		<div class="form-group" id="collections_group">
 			<label for="collections" class="col-sm-2 control-label">target collection</label>
-			<div class="col-sm-10 nopad">
-				<select class="form-control" id="collections">
-					<option disabled>… loading list of target collections …</option>
-				</select>
+			<div class="col-sm-10 nopad hidden" id="collections_list">
+				<select class="form-control" id="collections"></select>
+			</div>
+			<div class="col-sm-10 nopad" id="collections_text">
+				<div id="collections_loading" class="loading-inline hidden"><span class="sr-only">loading collections...</span></div>
+				<label class="control-label has-error" id="user_status">please type an email address first!</label>
 			</div>
 		</div>
 	</form>
@@ -65,7 +66,7 @@
 	<p style="height:3ex"></p>
 	<div class="row">
 		<a class="btn btn-default col-sm-3" href="/branches.html">← previous</a>
-		<a class="btn btn-primary col-sm-2 col-sm-offset-7 disabled" id="next_button">next →</a>
+		<a class="btn btn-primary col-sm-2 col-sm-offset-7" id="next_button">next →</a>
 	</div>
 	<p style="height:3ex"></p>
 </div></body>

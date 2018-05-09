@@ -7,7 +7,6 @@ import javax.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -16,8 +15,6 @@ import bwfdm.sara.Config;
 import bwfdm.sara.git.GitRepoFactory;
 import bwfdm.sara.git.ProjectInfo;
 import bwfdm.sara.project.Project;
-import bwfdm.sara.publication.Hierarchy;
-import bwfdm.sara.publication.PublicationRepository;
 import bwfdm.sara.publication.Repository;
 
 @RestController
@@ -34,46 +31,6 @@ public class Misc {
 	@GetMapping("pubrepo-list")
 	public List<Repository> getPubRepoList() {
 		return config.getPublicationDatabase().getList(Repository.class);
-	}
-	
-	@GetMapping("query-hierarchy")
-	public Hierarchy queryHierarchy(
-			@RequestParam("user_email")final String user_email,
-			@RequestParam("repo_uuid")final String repo_uuid) {
-		List<PublicationRepository> pubRepos = config.getPublicationDatabase().getPubRepos();
-		PublicationRepository repo = null;
-		for (PublicationRepository r: pubRepos) {
-			if (r.getDAO().uuid.toString().equals(repo_uuid)) {
-				repo = r;
-			}
-		}
-		
-		if (repo == null) {
-			System.out.println("Error! No Publication Repository with given 'repo_uuid' found!");
-			return null;
-		}
-		
-		if (repo.isUserRegistered(user_email)) {
-			System.out.println("OK! User is registered!");
-		} else {
-			System.out.println("ERROR! User is not registered!");
-			return null;
-		}
-		
-		if (repo.isUserAssigned(user_email)) {
-			System.out.println("OK! User is registered and has submit rights to some collection!");
-		} else {
-			System.out.println("ERROR! User is registered but has no submit rights to anywhere!");
-			return new Hierarchy("");
-		}
-		
-		
-		Hierarchy root = repo.getHierarchy(user_email);
-		
-		String path = "";
-		root.dump(path);
-		return root;
-
 	}
 
 	@GetMapping("project-list")

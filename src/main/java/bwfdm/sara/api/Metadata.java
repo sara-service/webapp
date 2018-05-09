@@ -15,14 +15,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import bwfdm.sara.db.FrontendDatabase;
 import bwfdm.sara.extractor.MetadataExtractor;
 import bwfdm.sara.project.MetadataField;
 import bwfdm.sara.project.Project;
 import bwfdm.sara.project.Ref;
 import bwfdm.sara.project.Ref.RefType;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 @RestController
 @RequestMapping("/api/meta")
@@ -32,7 +32,11 @@ public class Metadata {
 	@GetMapping("")
 	public Map<MetadataField, MetadataValue> getAllFields(
 			final HttpSession session) {
-		final Project project = Project.getInstance(session);
+		return getAllFields(Project.getInstance(session));
+	}
+
+	public static Map<MetadataField, MetadataValue> getAllFields(
+			final Project project) {
 		final Map<MetadataField, String> detectedValues = project
 				.getMetadataExtractor().get(MetadataField.values());
 		final Map<MetadataField, String> userValues = project
@@ -166,7 +170,7 @@ public class Metadata {
 		return getAllFields(session);
 	}
 
-	public class MetadataValue {
+	public static class MetadataValue {
 		/**
 		 * the "effective" value: the one the {@link #user} entered if present,
 		 * else the {@link #autodetected} value.

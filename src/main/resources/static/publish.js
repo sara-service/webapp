@@ -1,123 +1,135 @@
 "use strict";
 
-function initPubRepos(list) {
-	console.log(list);
-	var select = $("#irs");
-	select.empty();
-	$.each(list, function(_, repo) {
-		var option = $("<option>").attr("value", repo.display_name)
-		.text(repo.display_name).data("id", repo.uuid)
-		.data("url", repo.url).data("logo_base64", repo.logo_base64);
-		select.append(option);
-	});
-
-	$('body').on('change', '#irs', function() {
-		var user_email = $("#login_email").val();
-		var repo_uuid = $("#irs").children(':selected').data("id");
-		var url = $("#irs").children(':selected').data("url");
-		var logo_base64 = $("#irs").children(':selected').data("logo_base64");
-
-		$("#ir_link").attr("href", url);
-		$("#ir_link img").attr("src", "data:image/svg+xml;base64," + logo_base64);
-
-		API.get("check whether user exists on pub-repo",
-			"/api/query-hierarchy", {repo_uuid, user_email}, processHierarchy);
-	});
-
-	$("#loading").remove();
-}
-
-function setCollectionList(collection_path, hierarchy) {
-	if (hierarchy.children.length != 0) {
-		var child;
-		$.each(hierarchy.children, function(_, child) {
-			var cp = collection_path;
-			cp += " -> ";
-			cp += child.name;
-			setCollectionList(cp, child);
-		});
-	} else {
-		var select = $("#collections");
-		var option = $("<option>").attr("value", collection_path).text(collection_path).data("url", hierarchy.url);
-		select.append(option);
-	}
+function save(value, id, success) {
+	API.put("update " + id, "/api/meta/" + id, { value: value }, success);
 }
 
 function validateEmail(email) {
-	// FIXME this is actually a pretty good regex, but type="email" is even better: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/email
-    var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-    return re.test(String(email).toLowerCase());
+	if (email == "")
+		return false;
+	// validating emails is HARD. just delegate it to the browser.
+	// if the browser doesn't support type=email, everything will be valid.
+	// (which isn't too bad an approximation.)
+	return !$("#email").is(":invalid");
 }
 
-function setNextButtonEnabled(enabled) {
-	if (enabled) {
-		$("#next_button").removeClass("disabled");
-	} else {
-		$("#next_button").addClass("disabled");
-	}
-	
-	var repoid = $("#irs").children(':selected').data("id");
-	var reponame = $("#irs").children(':selected').val();
-	var email = $("#login_email").val();
-	
-	API.put("update selected institutional repository", "/api/meta/pubrepo", { value: repoid });
-	//API.get("update selected IR", "/api/set-pubrepo-cfg", { field: 'pubrepo_displayname', value: reponame }, {});
-	API.put("update login email", "/api/meta/email", { value: email });
-}
-
-function processHierarchy(hierarchy) {
-	$("#collections").empty();
-	setNextButtonEnabled(false);
-	
-	if (hierarchy=="") {
-		$("#user_status").css("color","red");
-		$("#user_status").text("Bad - this email does not correspond to any registered user!");		
-	} else if (hierarchy.children.length == 0) {
-		$("#user_status").css("color","red");
-		$("#user_status").text("Bad - user is registered, but cannot submit to any collection!");
-	} else {
-		$("#user_status").text("Good - this email corresponds to a registered user!");
-		$("#user_status").css("color","green");
-		setNextButtonEnabled(true);
-		setCollectionList("", hierarchy);
-		$("#collections").on('change', function () {
-			var user_email = $("#login_email").val();
-			var collection = $("#collections").children(':selected').data("url");
-			var collection_name = $("#collections").children(':selected').val();
-			API.put("update selected collection", "/api/meta/collection", { value: collection });
-			//API.put("update selected IR", "/api/set-pubrepo-cfg", { field: 'collection_displayname', value: collection_name });
+function setCollectionList(select, collection_path, hierarchy) {
+	if (hierarchy.children.length != 0) {
+		$.each(hierarchy.children, function(_, child) {
+			var cp = collection_path + " \u2192 " + child.name;
+			setCollectionList(select, cp, child);
 		});
+	} else {
+		// TODO shouldn't we add this even if there are sub-colelctions?
+		var option = $("<option>").attr("value", hierarchy.url)
+				.text(collection_path);
+		select.append(option);
 	}
 }
 
-var timerId="";
+var selectedCollection = null;
+
+function processHierarchy(info) {
+	$("#collections_loading").addClass("hidden");
+
+	if (info.hierarchy == null) {
+		$("#collections_group").addClass("has-error");
+		$("#collections_list").addClass("hidden");
+		$("#collections_text").removeClass("hidden");
+
+		if (!info["user-valid"])
+			$("#user_status").text("you aren't registered there!");
+		else
+			$("#user_status").text("you don't have submit rights anywhere!");
+		// FIXME add some instructions for the user what to do about that...
+		// (in publish.html, though)
+	} else {
+		$("#collections_text").addClass("hidden");
+		$("#collections_list").removeClass("hidden");
+		setCollectionList($("#collections"), "", info.hierarchy);
+		// re-select the previousoly selected collection
+		// TODO check whether this is harmless when not in the list
+		$("#collections").val(selectedCollection);
+	}
+}
+
+function updateCollections() {
+	$("#collections").empty(); // this is what blocks the next button!
+	$("#collections_group").removeClass("has-error");
+	$("#user_status").text("checking user...");
+	$("#collections_loading").removeClass("hidden");
+
+	API.post("update list of collections", "/api/publish/query-hierarchy",
+			{ repo_uuid: $("#irs").val(), user_email: $("#email").val() },
+			processHierarchy);
+}
+
+function initPubRepos(info) {
+	var select = $("#irs");
+	select.empty();
+	$.each(info.repos, function(_, repo) {
+		var option = $("<option>").attr("value", repo.uuid)
+				.text(repo.display_name).data("repo", repo);
+		select.append(option);
+	});
+	// select the previously selected IR, if any
+	if (info.meta.pubrepo.value != null)
+		select.val(info.meta.pubrepo.value);
+
+	// event listeners to save on change
+	$("#irs").on("select change", function() {
+		save($(this).val(), "pubrepo");
+		updateCollections();
+	});
+	var collections = $("#collections");
+	collections.on('select change', function () {
+		selectedCollection = $(this).val();
+		save(selectedCollection, "collection");
+	});
+
+	// pre-fill email address and collection
+	selectedCollection = info.meta.collection.value;
+	if (info.meta.email.value != null) {
+		autosave.value("email", info.meta.email.value);
+		updateCollections();
+	}
+
+	$("#loading").remove();
+	$("#content").removeClass("hidden");
+}
 
 function initPage(session) {
-	API.get("loading list of configured publication repositories",
-			"/api/pubrepo-list", {}, initPubRepos);
-	// TODO should pre-fill all fields here, for best usability
+	autosave.init("email", function(value) {
+			save(value, "email", function() {
+					autosave.success("email");
+				});
+			updateCollections();
+		}, validateEmail);
+	API.get("load list of institutional repositories", "/api/publish", {},
+			initPubRepos);
 
-	$('body').on('input', '#login_email', function() {
-		var user_email = $("#login_email").val();
-		var repo_uuid = $("#irs").children(':selected').data("id");
-		clearTimeout(timerId);
-		if (!validateEmail(user_email)) {
-			$("#user_status").css("color","red");
-			$("#user_status").text("Bad - this is not even a valid email address!");
-		} else {
-			$("#user_status").css("color","brown");
-			$("#user_status").text("Checking ... wait a moment, please!");
-			
-			timerId = setTimeout(
-					function() {
-						var user_email = $("#login_email").val();
-						var repo_uuid = $("#irs").children(':selected').data("id");
-
-						API.get("check whether user exists on pub-repo",
-							"/api/query-hierarchy", {repo_uuid, user_email}, processHierarchy);
-						}, 1000 );
+	$("#next_button").click(function() {
+		if ($("#irs").val() == null) {
+			$("#irs").focus();
+			return;
 		}
+
+		if (!autosave.validate("email")) {
+			console.log("invalid email");
+			$("#email").focus(); // let's hope the user notices
+			return;
+		}
+
+		if ($("#collections").val() == null) {
+			if ($("#collections option").length > 0)
+				// there are options, but user didn't select any
+				$("#collections").focus();
+			else
+				// not registered or no rights. user must change email to fix.
+				$("#email").focus();
+			return;
+		}
+
+		location.href = "/meta.html";
 	});
-	
-	$("#next_button").attr("href", "/meta.html");
 }
