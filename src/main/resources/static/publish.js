@@ -56,12 +56,16 @@ function processHierarchy(info) {
 function updateCollections() {
 	$("#collections").empty(); // this is what blocks the next button!
 	$("#collections_group").removeClass("has-error");
-	$("#user_status").text("checking user...");
-	$("#collections_loading").removeClass("hidden");
 
-	API.post("update list of collections", "/api/publish/query-hierarchy",
-			{ repo_uuid: $("#irs").val(), user_email: $("#email").val() },
-			processHierarchy);
+	var repo = $("#irs").val();
+	var email = $("#email").val();
+	if (repo != null && email != "") {
+		$("#user_status").text("checking user...");
+		$("#collections_loading").removeClass("hidden");
+		API.post("update list of collections", "/api/publish/query-hierarchy",
+				{ repo_uuid: repo, user_email: email }, processHierarchy);
+	} else
+		$("#user_status").text("");
 }
 
 function initPubRepos(info) {
