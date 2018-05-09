@@ -73,8 +73,8 @@ public class DSpace_v6 implements PublicationRepository{
 		sword_api_endpoint = dao.url + "/" + se;
 		sword_servicedocument = sword_api_endpoint + "/servicedocument";
 		
-		//client = WebUtils.getClientWithoutSSL(); // Ignore SSL-Verification
-		client = ClientBuilder.newClient();
+		client = WebUtils.getClientWithoutSSL(); // Ignore SSL-Verification
+		//client = ClientBuilder.newClient();
 		
 		// WebTargets
 		restWebTarget = client.target(rest_api_endpoint);
@@ -90,8 +90,8 @@ public class DSpace_v6 implements PublicationRepository{
 		rest_api_endpoint = restURL;
 		dao = null;
 		
-		//client = WebUtils.getClientWithoutSSL(); // Ignore SSL-Verification
-		client = ClientBuilder.newBuilder().build();
+		client = WebUtils.getClientWithoutSSL(); // Ignore SSL-Verification
+		//client = ClientBuilder.newClient();
 		
 		restWebTarget = client.target(rest_api_endpoint);
 		collectionsWebTarget = restWebTarget.path("collections");
