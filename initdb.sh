@@ -30,8 +30,8 @@ else
   echo "NOPE"
 fi
 
-cat saradb/crypto.sql saradb/schema.sql saradb/config.sql \
-	schema.sql licenses.sql permissions.sql >temp.sql
+cat saradb/crypto.sql saradb/schema.sql schema.sql permissions.sql \
+	saradb/config.sql licenses.sql >temp.sql
 
 echo "starting database..."
 # TODO mv all sql files into saradb git repo!

@@ -1,57 +1,56 @@
 -- database schema. needs to be manually imported into PostgeSQL.
 
-create table fe_temp_metadata(
-	repo text not null,
-	project text not null,
-	field text not null,
-	value text not null,
-	check (field in ('title', 'description', 'version', 'versionbranch',
+CREATE TABLE fe_temp_metadata(
+	repo text NOT NULL,
+	project text NOT NULL,
+	field text NOT NULL,
+	value text NOT NULL,
+	CHECK (field in ('title', 'description', 'version', 'versionbranch',
 		'pubrepo', 'collection', 'email')),
-	primary key (repo, project, field)
+	PRIMARY KEY (repo, project, field)
 );
 
-create table fe_temp_licenses(
-	repo text not null,
-	project text not null,
-	ref text not null,
-	license text not null,
-	primary key (repo, project, ref)
+CREATE TABLE fe_temp_licenses(
+	repo text NOT NULL,
+	project text NOT NULL,
+	ref text NOT NULL,
+	license text NOT NULL,
+	PRIMARY KEY (repo, project, ref)
 );
 
-create table fe_temp_actions(
-	repo text not null,
-	project text not null,
-	ref text not null,
-	action text not null,
-	start text not null,
-	check (action in ('PUBLISH_FULL', 'PUBLISH_ABBREV', 'PUBLISH_LATEST',
+CREATE TABLE fe_temp_actions(
+	repo text NOT NULL,
+	project text NOT NULL,
+	ref text NOT NULL,
+	action text NOT NULL,
+	start text NOT NULL,
+	CHECK (action IN ('PUBLISH_FULL', 'PUBLISH_ABBREV', 'PUBLISH_LATEST',
 			'ARCHIVE_PUBLIC', 'ARCHIVE_HIDDEN')),
-	primary key (repo, project, ref)
+	PRIMARY KEY (repo, project, ref)
 );
 
-create table fe_supported_licenses(
-	id text not null,
-	display_name text not null,
+CREATE TABLE supported_licenses(
+	id text PRIMARY KEY,
+	display_name text NOT NULL,
 	info_url text,
-	preference integer not null default 2147483647, -- lower is earlier in list
-	hidden boolean default false,
-	full_text text not null,
+	preference integer NOT NULL DEFAULT 2147483647, -- lower is earlier in list
+	hidden boolean NOT NULL DEFAULT FALSE,
+	full_text text NOT NULL,
 	-- disallow reserved names used by frontend
-	check (id not in ('keep', 'other', 'multi', '')),
-	primary key (id)
+	CHECK (id NOT IN ('keep', 'other', 'multi', ''))
 );
 -- if the database is smart, it will store the (large) full_text column
 -- out of the primary table. if it isn't, this index should speed up
 -- FrontendDatabase.getLicenses():
-create index on fe_supported_licenses(hidden asc, preference asc, id asc);
+CREATE INDEX ON supported_licenses(hidden ASC, preference ASC, id ASC);
 -- only allow the frontend to set known licenses. the fe_temp_licenses
 -- table is only used during the publication workflow, so this cannot
 -- cause any long-term consistency problems.
--- "on delete no action" is required to allow fe_supported_licenses to be
--- updated with delete + insert without wiping the fe_temp_licenses. it also
--- means that "delete from fe_supported_licenses where ..." will fail unless
--- the license is unused – but licenses should never be deleted anyway, only
--- set as hidden.
-alter table fe_temp_licenses add constraint fe_temp_valid_license
-	foreign key (license) references fe_supported_licenses(id)
-	on delete no action on update cascade deferrable;
+-- "ON DELETE NO ACTION" and "DEFERRABLE" are required to allow this table to
+-- be updated with delete + insert without wiping the fe_temp_licenses. it
+-- also means that "DELETE FROM fe_supported_licenses WHERE ..." will fail
+-- unless the license is unused – but licenses should never be deleted anyway,
+-- only set as hidden.
+ALTER TABLE fe_temp_licenses ADD CONSTRAINT fe_temp_valid_license
+	FOREIGN KEY (license) REFERENCES supported_licenses(id)
+	ON DELETE NO ACTION ON UPDATE CASCADE DEFERRABLE;
