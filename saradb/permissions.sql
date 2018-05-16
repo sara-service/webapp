@@ -7,8 +7,8 @@
 GRANT SELECT, INSERT, UPDATE, DELETE ON fe_temp_metadata TO test;
 GRANT SELECT, INSERT, UPDATE, DELETE ON fe_temp_actions TO test;
 GRANT SELECT, INSERT, UPDATE, DELETE ON fe_temp_licenses TO test;
-GRANT SELECT ON supported_licenses TO test;
 
+GRANT SELECT ON supported_licenses TO test;
 GRANT SELECT ON source TO test;
 GRANT SELECT ON source_params TO test;
 GRANT SELECT ON repository TO test;

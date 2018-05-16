@@ -93,4 +93,4 @@ INSERT INTO metadatamapping(repository_uuid, display_name, map_from, map_to, ena
 INSERT INTO item(source_uuid, archive_uuid, repository_uuid, contact_email, item_type, item_state, item_state_sent, date_created, date_last_modified)
   VALUES(sRef, aRef, rRef, 'stefan.kombrink@uni-ulm.de', 'PUBLISH', 'CREATED', 'CREATED', now(), now()) RETURNING uuid INTO iRef;
 
-END $$; 
+END $$;

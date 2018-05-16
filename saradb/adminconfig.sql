@@ -1,2 +1,2 @@
--- For really unique uuids
+-- pgcrypto for gen_random_uuid()
 CREATE EXTENSION IF NOT EXISTS pgcrypto;

@@ -7,9 +7,17 @@ fi
 trap "service postgresql stop" ERR HUP INT QUIT TERM
 
 service postgresql start
-createuser -d -l -R -S test
+createuser -l -D -R -S test
 createdb -E UTF8 -O test test
 psql -d test -c "ALTER USER test WITH PASSWORD 'test'"
-psql -d test -f /init.sql
+echo 'localhost:*:test:test:test' >~/.pgpass
+chmod 600 ~/.pgpass
+
+psql -d test -f /saradb/adminconfig.sql
+psql -d test -f /saradb/schema.sql
+psql -d test -f /saradb/permissions.sql
+psql -d test -f /saradb/config.sql
+psql -d test -f /saradb/licenses.sql
+
 psql -d test
 service postgresql stop
