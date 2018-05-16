@@ -1,30 +1,22 @@
-package bwfdm.sara.publication.test;
+package bwfdm.sara.publication;
 
 import java.util.Date;
 import java.util.List;
 
 import javax.sql.DataSource;
 
+import org.junit.Test;
 import org.springframework.jdbc.datasource.SimpleDriverDataSource;
 
-import bwfdm.sara.publication.Archive;
-import bwfdm.sara.publication.EPerson;
-import bwfdm.sara.publication.Hierarchy;
-import bwfdm.sara.publication.Item;
-import bwfdm.sara.publication.MetadataMapping;
-import bwfdm.sara.publication.MetadataValue;
-import bwfdm.sara.publication.PublicationRepository;
-import bwfdm.sara.publication.Repository;
-import bwfdm.sara.publication.Source;
 import bwfdm.sara.publication.db.PublicationDatabase;
 
 /**
  * @author sk
  */
 
-class IRTest {
-
-	public static void main(String[] args) {
+public class IRTest {
+	@Test
+	public void main() {
 		System.out.println("SARA-IR Test Program!");
 
 		final DataSource ds = new SimpleDriverDataSource(new org.postgresql.Driver(),

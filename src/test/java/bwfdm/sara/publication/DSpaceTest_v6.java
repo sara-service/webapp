@@ -1,15 +1,17 @@
-package bwfdm.sara.publication.test;
+package bwfdm.sara.publication;
 
 
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.junit.Test;
+
 import bwfdm.sara.publication.dspace.DSpace_v6;
 
 public class DSpaceTest_v6 {
-
-	public static void main(String[] args) {
+	@Test
+	public void main() {
 		String output = "";
 		
 		//URL 

@@ -1,4 +1,4 @@
-package bwfdm.sara.publication.test;
+package bwfdm.sara.publication;
 
 /**
  * @author sk
@@ -9,31 +9,28 @@ import java.util.UUID;
 
 import javax.sql.DataSource;
 
+import org.junit.BeforeClass;
+import org.junit.Test;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.datasource.SimpleDriverDataSource;
 
-import bwfdm.sara.publication.Archive;
-import bwfdm.sara.publication.Collection;
-import bwfdm.sara.publication.EPerson;
-import bwfdm.sara.publication.Item;
-import bwfdm.sara.publication.MetadataMapping;
-import bwfdm.sara.publication.PublicationRepository;
-import bwfdm.sara.publication.Repository;
-import bwfdm.sara.publication.Source;
 import bwfdm.sara.publication.db.DAO;
 import bwfdm.sara.publication.db.PublicationDatabase;
 
-class DBTest {
+public class DBTest {
+	private static PublicationDatabase pdb;
 
-	static PublicationDatabase pdb;
+	@BeforeClass
+	public static void init() {
+		final DataSource ds = new SimpleDriverDataSource(
+				new org.postgresql.Driver(),
+				"jdbc:postgresql://localhost:5432/test", "test", "test");
+		pdb = new PublicationDatabase(ds);
+	}
 
-	static List<EPerson> myPersons;
-	static List<Source> mySources;
-	static List<Archive> myArchives;
-	static List<Repository> myRepositories;
-	static List<Item> myItems;
-
-	public static void testPersons() {
+	@Test
+	public void testPersons() {
+		List<EPerson> myPersons = pdb.getList(EPerson.class);
 		System.out.println("===PERSONS===");
 		System.out.println("#Sources:" + myPersons.size());
 		for (EPerson p : myPersons) {
@@ -44,7 +41,9 @@ class DBTest {
 		}
 	}
 
-	public static void testSources() {
+	@Test
+	public void testSources() {
+		List<Source> mySources = pdb.getList(Source.class);
 		// git sources
 		System.out.println("===SOURCES===");
 		System.out.println("#Sources:" + mySources.size());
@@ -62,7 +61,9 @@ class DBTest {
 		}
 	}
 
-	public static void testArchives() {
+	@Test
+	public void testArchives() {
+		List<Archive> myArchives = pdb.getList(Archive.class);
 		// git archives
 		System.out.println("===ARCHIVES===");
 		System.out.println("#Archives:" + myArchives.size());
@@ -80,7 +81,9 @@ class DBTest {
 		}
 	};
 
-	public static void testRepositories() {
+	@Test
+	public void testRepositories() {
+		List<Repository> myRepositories = pdb.getList(Repository.class);
 		// institutional repositories
 		System.out.println("===REPOSITORIES===");
 		System.out.println("#IRs: " + myRepositories.size());
@@ -132,7 +135,9 @@ class DBTest {
 		}
 	}
 
-	public static void testItems() {
+	@Test
+	public void testItems() {
+		List<Item> myItems = pdb.getList(Item.class);
 		// publication items
 		System.out.println("===ITEMS===");
 		System.out.println("#Items:" + myItems.size());
@@ -166,7 +171,7 @@ class DBTest {
 		}
 	};
 
-	public static void dump(DAO d) {
+	private void dump(DAO d) {
 		System.out.println(d.getClass().getName());
 		System.out.println("=========================");
 		List<String> fields = PublicationDatabase
@@ -176,27 +181,5 @@ class DBTest {
 			System.out
 					.println(s + "==" + PublicationDatabase.getField(d, s));
 		}
-
-	}
-
-	public static void main(String[] args) {
-		System.out.println("SARA-DB Test Program!"); // Display the string.
-
-		final DataSource ds = new SimpleDriverDataSource(new org.postgresql.Driver(),
-				"jdbc:postgresql://localhost:5432/test", "test", "test");
-
-		pdb = new PublicationDatabase(ds);
-
-		myPersons = pdb.getList(EPerson.class);
-		myRepositories = pdb.getList(Repository.class);
-		myArchives = pdb.getList(Archive.class);
-		mySources = pdb.getList(Source.class);
-		myItems = pdb.getList(Item.class);
-
-		testPersons();
-		testSources();
-		testArchives();
-		testRepositories();
-		testItems();
 	}
 }
