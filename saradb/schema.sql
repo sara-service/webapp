@@ -168,11 +168,9 @@ CREATE INDEX ON supported_licenses(hidden ASC, preference ASC, id ASC);
 -- only allow the frontend to set known licenses. the fe_temp_licenses
 -- table is only used during the publication workflow, so this cannot
 -- cause any long-term consistency problems.
--- "ON DELETE NO ACTION" and "DEFERRABLE" are required to allow this table to
--- be updated with delete + insert without wiping the fe_temp_licenses. it
--- also means that "DELETE FROM fe_supported_licenses WHERE ..." will fail
--- unless the license is unused – but licenses should never be deleted anyway,
--- only set as hidden.
+-- "ON DELETE/UPDATE RESTRICT" effectively forbid removing or renaming licenses
+-- that are references from fe_temp_licenses – but licenses should never be
+-- deleted anyway, only set as hidden.
 ALTER TABLE fe_temp_licenses ADD CONSTRAINT fe_temp_valid_license
 	FOREIGN KEY (license) REFERENCES supported_licenses(id)
-	ON DELETE NO ACTION ON UPDATE CASCADE DEFERRABLE;
+	ON DELETE RESTRICT ON UPDATE RESTRICT DEFERRABLE;

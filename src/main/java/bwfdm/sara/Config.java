@@ -1,7 +1,6 @@
 package bwfdm.sara;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
@@ -47,10 +46,6 @@ public class Config implements ServletContextAware {
 	private ConfigDatabase configDB;
 	private PublicationDatabase pubDB;
 
-	private Config(final Properties props) {
-		this.props = props;
-	}
-
 	/**
 	 * Constructor used by Spring, along with
 	 * {@link #setServletContext(ServletContext)} and injection for the database
@@ -58,42 +53,28 @@ public class Config implements ServletContextAware {
 	 */
 	@SuppressWarnings("unused")
 	private Config() {
-		this((Properties) null);
+		this.props = null;
 	}
 
 	/**
 	 * Constructor used <b>for testing only</>, when context parameters are
-	 * simply loaded from a properties file. Use
+	 * simply loaded from a {@link Properties} object. Use
 	 * {@code @Autowired private Config config;} everywhere else!
 	 * 
-	 * @param filename
-	 *            name of the properties file to read
+	 * @param props
+	 *            {@link Properties} that has been
+	 *            {@link Properties#load(InputStream) loaded} from a file
 	 */
-	public Config(final String filename) throws IOException {
-		this(new FileInputStream(filename));
-	}
-
-	/**
-	 * Constructor used <b>for testing only</>, when context parameters are
-	 * simply loaded from a properties file (or resource). Use
-	 * {@code @Autowired private Config config;} everywhere else!
-	 * 
-	 * @param contextParams
-	 *            either a {@link FileInputStream} for a properties file, or the
-	 *            one returned by {@link Class#getResourceAsStream(String)} when
-	 *            reading from a resource
-	 */
-	public Config(final InputStream contextParams) throws IOException {
-		this(new Properties());
-		props.load(contextParams);
+	public Config(final Properties props) throws IOException {
+		this.props = props;
 		setServletContext(null);
 		setDataSource(createDataSource(props));
 	}
 
-	private static DataSource createDataSource(final Properties props)
+	public static DataSource createDataSource(final Properties props)
 			throws IOException {
-		final String klass = props.getProperty(DATASOURCE_PREFIX
-				+ "driver-class-name");
+		final String klass = props
+				.getProperty(DATASOURCE_PREFIX + "driver-class-name");
 		Driver driver;
 		try {
 			driver = (Driver) Class.forName(klass).newInstance();

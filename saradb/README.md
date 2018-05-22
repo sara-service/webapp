@@ -1,4 +1,4 @@
-# SARA DB Setup (for production)
+# SARA DB Setup (for production – untested!)
 
 - create a user for SARA-server: `createuser -l -D -R -S test`
 - create a database for SARA-server: `createdb -E UTF8 -O test test`
