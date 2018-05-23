@@ -47,6 +47,20 @@
 	100% { transform: rotate(360deg); }
 }
 
+.panel-heading a {
+	color: black;
+}
+
+.panel-heading .accordion-toggle:after {
+	content: "\2212";
+	color: #555555;
+	margin-right: .2em;
+}
+
+.panel-heading .collapsed .accordion-toggle:after {
+	content: "\002b";
+}
+
 .logo-header {
 	height: 10ex;
 	margin: 0ex 0ex 0ex 0ex;

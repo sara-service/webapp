@@ -32,62 +32,57 @@
 		</div>
 	</div>
 	<div class="row panel-group" id="accordion" role="tablist" aria-multiselectable="true"><div class="panel panel-default">
-		<div class="panel-heading" role="tab" id="headingOne"><h4 class="panel-title">
-			<span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
-  			<a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne">What will the options do?</a>
-		</h4></div>
-		<div id="collapseOne" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne"><div class="panel-body"><div class="row">
+		<div class="panel-heading" role="tab" id="headingOne">
+			<a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseOptions" aria-expanded="true" aria-controls="collapseOptions" class="collapsed">
+				<h4 class="panel-title">
+					<span class="glyphicon accordion-toggle" aria-hidden="true"></span>
+					What will the options do?
+				</h4>
+			</a>
+		</div>
+		<div id="collapseOptions" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne"><div class="panel-body"><div class="row">
 			<div class="pull-left"><img src="graph.svg" style="height:55ex" /></div>
 			<div>
 				<!--<div style="display:inline-block;height:0px;width:10em"></div>-->
 				<ul>
 				<li>"<strong class="sara-green">Publish full history</strong>"
-					will publish the <strong>entire history</strong> of a branch as-is.
-					This is the <strong>most useful format</strong> for others
-					to continue working with your project,
-					and thus the <strong>recommended option</strong>.
-					Note that this will publish the entire project history
-					of the selected branch, including anything
-					you might have excluded on previous publications.
-					This is the only option that <strong>retains the commit IDs</strong>,
-					keeping your work fully replicable.
+					publishes <strong>all commits in the version history</strong>,
+					even those excluded in previous publications (if any).
+					It does not change commit IDs,
+					and is the <strong>recommended</strong> option because
+					it allows replicating your research process.
 				</li>
 				<li>"<strong class="sara-blue">Publish abbreviated history</strong>"
-					will publish only the <strong>significant points (tags &amp; merges)</strong>
-					of a branch's history. Only merge commits and
-					commits that have been tagged with <kbd>git tag</kbd>
-					will be retained in the abbreviated history,
-					as well as the HEAD revision of the branch.
-					This option will <strong>change the commit IDs,
-					reducing the replicability</strong> of your work,
-					but mention the original commit ID in the commit message.
+					publishes only <strong>significant points</strong>
+					of the version history and thus
+					<strong>changes commit IDs.</strong>
+					Significant points are defined to be merge commits
+					and commits that have been tagged with <kbd>git tag</kbd>.
+<!--
 					The full history will be archived non-publicly.
-					This is the recommended option
-					<!-- if your development process is so shoddy
-					that you are ashamed of it -->
-					if you need to hide parts of your development process.
+-->
+					This is useful <!-- if your development process
+					is so shoddy that you are ashamed of it -->
+					if you need to omit parts of your development process.
 				</li>
 				<li>"<strong class="sara-red">Publish latest version only</strong>"
-					will publish only the HEAD revision of the branch.
-					If you have previously archived this project,
-					the previously published version(s) will be listed
-					as previous commit(s).
-					This option will change the commit ID,
-					but mention the original commit ID in the commit message.
+					publishes only the <strong>HEAD revision</strong>,
+					omitting the version history
+					except for previously published versions.
+<!--
 					The full history will be archived non-publicly.
+-->
 					This option is <strong>not recommended</strong>
-					unless you don't have any other options.
+					if you have other options.
 				</li>
 				<li>"<strong class="sara-orange">Private access, public record</strong>"
-					will non-publicly archive the full history of a branch.
-					A public bibliographical record will be created for the archival record.
+					privately archives the full history of a branch
+					and publishes a bibliographical record only.
 					This is suitable for data that you want to (or have to) keep private.
 				</li>
 				<li>"<strong class="sara-cyan">Private access, no record</strong>"
-					will not publish anything (obviously),
-					but will non-publicly archive the full history of a branch.
-					The existence of the archived data will not be publicly disclosed.
-					This is suitable for data that you want to (or have to) keep private.
+					privately archives the full history of a branch.
+					The existence of the archived data will not be published.
 				</li>
 			</ul><p>Please note that none of these options
 				are suitable for highly sensitive data.
@@ -122,13 +117,7 @@
 		</div>
 	</form>
 	<div id="loading" class="loading"><span class="sr-only">loading, please wait...</span></div>
-	<p>
-		<span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
-		Adding tags is not usually necessary
-		when publishing full or abbreviated history.
-		Tags along the history will be included automatically;
-		you do not have to add them here to have them included.
-	</p>
+	<h3>Anything else you would like to publish?</h3>
 	<form class="form-horizontal"><div class="form-group">
 		<div class="col-sm-2 nopad">
 			<select class="form-control" id="add_branch">
@@ -139,6 +128,12 @@
 			<button type="button" class="btn btn-success form-control" id="add_button">add</button>
 		</div>
 	</div></form>
+	<p>
+		<span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
+		Merged branches and tags on selected branches
+		are always included when publishing full or abbreviated history.
+		You do not have to add them explicitly.
+	</p>
 
 	<p style="height:3ex"></p>
 	<div class="row">
