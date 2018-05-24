@@ -8,14 +8,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import bwfdm.sara.db.ConfigDatabase;
 import bwfdm.sara.db.FrontendDatabase;
 import bwfdm.sara.db.License;
 import bwfdm.sara.extractor.LicenseFile;
 import bwfdm.sara.extractor.MetadataExtractor;
 import bwfdm.sara.project.Ref;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * primary the data class for
@@ -31,7 +31,7 @@ public class LicensesInfo {
 	public static final String MULTIPLE_LICENSES = "multi";
 	public static final String UNRECOGNIZED_LICENSE = "other";
 	private static final License UNRECOGNIZED_LICENSE_INFO = new License(
-			UNRECOGNIZED_LICENSE, "Unrecognized License", null);
+			UNRECOGNIZED_LICENSE, "Some Other License", null);
 
 	/** list of all licenses supported by the server, in order of preference */
 	@JsonProperty("supported")

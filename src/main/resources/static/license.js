@@ -22,11 +22,14 @@ function initSingleLicense(info) {
 	$("#declare_group").removeClass("hidden");
 
 	if (detected != null) {
-		// show label naming the detected license
-		$("#single_existing").removeClass("hidden");
-		$("#single_detected").text(detected.name);
-		if (detected.url != null)
-			$("#single_detected").attr("href", detected.url);
+		if (detected.id != "other") {
+			// show label naming the detected license
+			$("#single_existing").removeClass("hidden");
+			$("#single_detected").text(detected.name);
+			if (detected.url != null)
+				$("#single_detected").attr("href", detected.url);
+		} else
+			$("#other_existing").removeClass("hidden");
 	} else
 		// show "missing license" label
 		$("#none_existing").removeClass("hidden");

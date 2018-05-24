@@ -41,12 +41,15 @@ function initBranch(form, ref, file) {
 function initDetected(form, detected) {
 	var text;
 	if (detected != null) {
-		if (detected.url != null) {
-			text = form.detected;
-			text.attr("href", detected.url);
+		if (detected.id != "other") {
+			if (detected.url != null) {
+				text = form.detected;
+				text.attr("href", detected.url);
+			} else
+				text = form.noinfo;
+			text.text(detected.name);
 		} else
-			text = form.noinfo;
-		text.text(detected.name);
+			text = form.other;
 		text.removeClass("hidden");
 	} else
 		text = form.missing;

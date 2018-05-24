@@ -12,8 +12,11 @@ function initLicenseList(form, supported, detected, user) {
 	// the situation where it isn't in the list (ie. "other" or a hidden
 	// license).
 	if (detected != null) {
-		form.declare_keep.text("keep " + detected.name);
-		form.declare_keep.data("infourl", detected.url);
+		if (detected.id != "other") {
+			form.declare_keep.text("keep " + detected.name);
+			form.declare_keep.data("infourl", detected.url);
+		} else
+			form.declare_keep.text("keep existing LICENSE file");
 		// if the user selected that license last time, then updated the
 		// git repo to match, its entry will now be called "keep" in the
 		// selection field.
