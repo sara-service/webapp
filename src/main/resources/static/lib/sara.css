@@ -105,6 +105,8 @@ body {
 
 .inline-icon {
 	margin: 0px 0.5em;
+	font-size: 150%;
+	line-height: 50%;
 }
 
 .inline-heading {

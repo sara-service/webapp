@@ -2,15 +2,15 @@
 
 var clone_status = {
 	pending: {
-		glyphicon: "glyphicon-hourglass",
+		icon: "\u231A",
 		status_text: "pending",
 		text: "text-muted" },
 	working: {
-		glyphicon: "glyphicon-transfer",
+		icon: "\u21C4",
 		status_text: "working",
 		text: "text-primary" },
 	done: {
-		glyphicon: "glyphicon-ok",
+		icon: "\u2714",
 		status_text: "done",
 		text: "text-success" },
 };
@@ -30,7 +30,7 @@ function updateStatusItem(id, step) {
 		$("#steps").append(line.root);
 	}
 	setStatus(line.root, "text");
-	setStatus(line.icon, "glyphicon");
+	line.icon.text(clone_status[step.status].icon);
 	line.status.text("(" + clone_status[step.status].status_text + ")");
 	line.text.text(step.text);
 
@@ -71,7 +71,7 @@ function updateStatus(timeout) {
 function update() {
 	// long timeout for later updates because the user is already
 	// waiting anyway
-	updateStatus(5000);
+	updateStatus(2000);
 }
 
 function initStatus(endpoint, success, error) {
@@ -81,5 +81,5 @@ function initStatus(endpoint, success, error) {
 
 	// short timeout for first update so the user doesn't have to wait
 	// excessively if the operations finish quickly
-	updateStatus(2000);
+	updateStatus(1000);
 }
