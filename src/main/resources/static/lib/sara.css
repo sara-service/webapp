@@ -55,14 +55,20 @@ li {
 	color: black;
 }
 
-.panel-heading .accordion-toggle:after {
-	content: "\2212";
-	color: #555555;
+.panel-heading .accordion-toggle {
+	height: 1em;
+	width: 1em;
+	vertical-align: bottom;
 	margin-right: .2em;
+	fill: #555555;
 }
 
-.panel-heading .collapsed .accordion-toggle:after {
-	content: "\002b";
+.panel-heading .accordion-toggle .collapse-expand {
+	display: none;
+}
+
+.panel-heading .collapsed .accordion-toggle .collapse-expand {
+	display: block;
 }
 
 .logo-header {
