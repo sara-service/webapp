@@ -47,6 +47,10 @@
 	100% { transform: rotate(360deg); }
 }
 
+li {
+	margin-bottom: 1ex;
+}
+
 .panel-heading a {
 	color: black;
 }
