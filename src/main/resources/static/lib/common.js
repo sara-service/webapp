@@ -124,19 +124,19 @@ function setStatusClass(elem, status_list, name, status) {
 var autosave = {};
 autosave.msg = {
 	saving: {
-		glyphicon: "glyphicon-transfer",
+		icon: "\u21C4",
 		feedback: null,
 		text: null },
 	success: {
-		glyphicon: "glyphicon-ok",
+		icon: "\u2714",
 		feedback: "has-success",
 		text: "saved" },
 	invalid: {
-		glyphicon: "glyphicon-remove",
+		icon: "\u2716",
 		feedback: "has-error",
 		text: "field contents are invalid" },
 	none: {
-		glyphicon: null,
+		icon: null,
 		feedback: null,
 		text: null },
 };
@@ -148,7 +148,7 @@ autosave.feedback = function(id, st) {
 	}
 
 	setClass(id, "group", "feedback", st);
-	setClass(id, "status", "glyphicon", st);
+	$("#" + id + "_status").text(st.icon);
 	if (st.text)
 		$("#" + id + "_status_text").text("(" + st.text + ")");
 	else
