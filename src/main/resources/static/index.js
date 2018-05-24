@@ -3,7 +3,7 @@
 function initRepos(list) {
 	console.log(list);
 	$.each(list, function(_, repo) {
-		var link = $("<a>").addClass("btn btn-default");
+		var link = $("<a>").addClass("btn btn-default btn-array");
 		link.text(repo.display_name);
 		link.attr("href", new URI("/api/auth/login")
 			.addSearch("repo", repo.id));

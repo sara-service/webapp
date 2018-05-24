@@ -47,6 +47,10 @@
 	100% { transform: rotate(360deg); }
 }
 
+.btn-array {
+	margin: .3ex .3em;
+}
+
 li {
 	margin-bottom: 1ex;
 }
