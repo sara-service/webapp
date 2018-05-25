@@ -1,6 +1,6 @@
 "use strict";
 
-function initPage(session) {
+$(function() {
 	API.post("initiate repository push", "/api/push/trigger", {},
 		function() {
 			initStatus("/api/push/status", function() {
@@ -12,4 +12,4 @@ function initPage(session) {
 					location.href = "/overview.html";
 				});
 		});
-}
+});

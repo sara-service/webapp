@@ -105,7 +105,7 @@ function addBranches(branches) {
 	$("#loading").remove();	
 }
 
-function initPage() {
+$(function() {
 	API.get("load list of tags and branches", "/api/repo/refs", {},
 		addBranches);
-}
+});

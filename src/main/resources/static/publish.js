@@ -102,7 +102,7 @@ function initPubRepos(info) {
 	$("#content").removeClass("hidden");
 }
 
-function initPage(session) {
+$(function() {
 	autosave.init("email", function(value) {
 			save(value, "email", function() {
 					autosave.success("email");
@@ -136,4 +136,4 @@ function initPage(session) {
 
 		location.href = "/meta.html";
 	});
-}
+});

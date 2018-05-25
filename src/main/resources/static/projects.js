@@ -11,15 +11,17 @@ function addProjectButton(repo, project) {
 	$("#projects").append(form.root);
 }
 
-function initPage(info) {
-	API.get("load list of projects", "/api/project-list", {},
-		function(list) {
-			if (list.length === 0)
-				$("#noprojects").removeAttr("style")
-			else
-				$.each(list, function(_, project) {
-					addProjectButton(info.repo, project);
-				});
-			$("#loading").remove();	
+$(function() {
+	API.get("initialize page", "/api/session-info", {}, function(info) {
+		API.get("load list of projects", "/api/project-list", {},
+			function(list) {
+				if (list.length === 0)
+					$("#noprojects").removeAttr("style")
+				else
+					$.each(list, function(_, project) {
+						addProjectButton(info.repo, project);
+					});
+				$("#loading").remove();	
+			});
 		});
-}
+});

@@ -84,8 +84,10 @@ function initMeta(info) {
 
 }
 
-function initPage(session) {
-	$("#project").text(session.project);
+$(function() {
+	API.get("initialize page", "/api/session-info", {}, function(info) {
+		$("#project").text(info.project);
+	});
 	API.get("load metadata fields", "/api/meta", {}, initMeta);
 	API.get("load license choice", "/api/licenses", {}, initLicenses);
 	API.get("load branch list", "/api/repo/actions", {}, initBranches);
@@ -97,4 +99,4 @@ function initPage(session) {
 		$("#login").text(meta.email.value);
 		blockLoaded("publish");
 	});
-}
+});

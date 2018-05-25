@@ -91,7 +91,7 @@ function validateNotEmpty(value) {
 	return value.trim() != "";
 }
 
-function initPage(session) {
+$(function() {
 	autosave.init("title", save, validateNotEmpty);
 	autosave.configureUpdateButton("title", updateMeta);
 	autosave.init("description", save);
@@ -126,4 +126,4 @@ function initPage(session) {
 			// FIXME will become contributors-then-overview
 			location.href = "/overview.html";
 	});
-}
+});

@@ -246,18 +246,3 @@ autosave.configureUpdateButton = function(id, updater) {
 	} else
 		save.update.prop("disabled", true);
 }
-
-var pageInfo;
-
-$(function() {
-	API.get("initialize page", "/api/session-info", {}, function(info) {
-		var title = "SARA software publishing";
-		if (info.project !== null)
-			title = info.project + " – " + title;
-		$("title").text(title);
-		$("#ir_link").attr("href", info.ir.url);
-		$("#ir_link img").attr("src", "data:image/svg+xml;base64," + info.ir.logo);
-		pageInfo = info;
-		initPage(info);
-	});
-});

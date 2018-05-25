@@ -1,24 +1,32 @@
 "use strict";
 
-function initRepos(list) {
-	console.log(list);
-	$.each(list, function(_, repo) {
-		var link = $("<a>").addClass("btn btn-default btn-array");
-		link.text(repo.display_name);
-		link.attr("href", new URI("/api/auth/login")
-			.addSearch("repo", repo.id));
-		$("#buttons").append(link);
-	});
-	$("#loading").remove();
+function addRepoButton(repo) {
+	var form = template("template");
+	form.display.text(repo.display_name);
+	form.select.attr("href", URI("/api/auth/login").search({
+		repo: repo.id
+	}));
+	$("#repos").append(form.root);
 }
 
-function fail(xhr, status, http) {
-	console.log("load failure", status, http, xhr.responseText);
-	$("#broken").removeClass("hidden");
-	$("#loading").remove();
+function initRepos(list) {
+	if (list.length === 0)
+		$("#broken").removeClass("hidden")
+	else
+		$.each(list, function(_, repo) {
+			addRepoButton(repo);
+		});
+	$("#loading").remove();	
 }
 
 $(function() {
-	$.ajax("/api/repo-list",
-		{ method: "GET", success: initRepos, error: fail });
+	// custom error handling: there really isn't a lot that can go here. if
+	// anything does fail, we probably want the user to report that
+	// immediately. showing the "retry" dialog in a loop is definitely not
+	// something we want to do as the very first step!
+	APIERR.handle = function() {
+		$("#broken").removeClass("hidden");
+		$("#loading").remove();	
+	};
+	API.get("load list of git repos", "/api/repo-list", {}, initRepos);
 });

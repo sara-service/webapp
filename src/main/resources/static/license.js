@@ -75,6 +75,6 @@ function initLicense(info) {
 		initSingleLicense(info);
 }
 
-function initPage(info) {
+$(function() {
 	API.get("autodetect licenses", "/api/licenses", {}, initLicense);
-}
+});

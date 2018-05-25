@@ -1,6 +1,6 @@
 "use strict";
 
-function initPage(session) {
+$(function() {
 	API.post("initiate repository clone", "/api/clone/trigger", {},
 		function() {
 			initStatus("/api/clone/status", function() {
@@ -9,4 +9,4 @@ function initPage(session) {
 					location.href = "/branches.html";
 				});
 		});
-}
+});
