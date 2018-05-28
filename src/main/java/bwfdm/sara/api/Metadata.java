@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -33,6 +34,16 @@ public class Metadata {
 	public Map<MetadataField, MetadataValue> getAllFields(
 			final HttpSession session) {
 		return getAllFields(Project.getInstance(session));
+	}
+
+	@PutMapping("")
+	public void setAllFields(@RequestBody final Map<String, String> values,
+			final HttpSession session) {
+		final Project project = Project.getInstance(session);
+		for (String name : values.keySet())
+			project.getFrontendDatabase().setMetadata(
+					MetadataField.forDisplayName(name), values.get(name));
+		project.invalidateMetadata();
 	}
 
 	public static Map<MetadataField, MetadataValue> getAllFields(
@@ -71,16 +82,8 @@ public class Metadata {
 	private Map<MetadataField, MetadataValue> resetProjectInfo(
 			final HttpSession session, final MetadataField... fields) {
 		final Project project = Project.getInstance(session);
-		// re-run detection. it's fast, and matches the real-time nature of the
-		// update button: that one changes data in GitLab immediately, so the
-		// user probably expects the reset button to pick up new values from
-		// GitLab, too.
-		final MetadataExtractor extractor = project.getMetadataExtractor();
-		extractor.detectProjectInfo();
-
-		// note the order: try to detect new value first, then delete what the
-		// user entered. this way the field doesn't end up empty if detection
-		// fails.
+		// not re-runnig detection here, to match the non-realtime behavior of
+		// the "update" checkbox
 		final FrontendDatabase db = project.getFrontendDatabase();
 		for (final MetadataField field : fields)
 			db.setMetadata(field, null);

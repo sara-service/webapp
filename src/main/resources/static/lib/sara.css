@@ -75,6 +75,10 @@ li {
 	display: block;
 }
 
+.form-control-feedback-text {
+	padding: 0em 1em;
+}
+
 .logo-header {
 	height: 10ex;
 	margin: 0ex 0ex 0ex 0ex;

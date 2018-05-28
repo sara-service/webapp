@@ -106,7 +106,13 @@ API.post = function(step, path, data, callback) {
 	API.ajax(step, "POST", path, data, callback);
 }
 API.put = function(step, path, data, callback) {
-	API.ajax(step, "PUT", path, data, callback);
+	$.ajax(path, {
+		method: "PUT", data: JSON.stringify(data), success: callback,
+		error: function(xhr, status, http) {
+			APIERR.handle(step, status, http, xhr.responseText);
+		},
+		contentType: "application/json; charset=UTF-8"
+	});
 }
 API.delete = function(step, path, callback) {
 	API.ajax(step, "DELETE", path, null, callback);
@@ -119,6 +125,74 @@ function setStatusClass(elem, status_list, name, status) {
 	});
 	if (status[name])
 		elem.addClass(status[name]);
+}
+
+var validate = {};
+
+validate.init = function(id, value, validator, updateHook) {
+	var elem = $("#" + id);
+	elem.data("validator", validator);
+	elem.data("updateHook", updateHook);
+	elem.on("select change keyup paste focusout", function() {
+		validate.check(id);
+	});
+	if (value !== null)
+		elem.val(value);
+
+	// no feedback on initial validation so the user doesn't start with a red
+	// page. but call it anyway so the update hook gets called.
+	validate.check(id, true);
+}
+
+validate.check = function(id, disableFeedback) {
+	var elem = $("#" + id);
+	var validator = elem.data("validator");
+	var res = validator(elem.val());
+	if (!disableFeedback)
+		validate.feedback(id, res);
+
+	var valid = res === true || res === null;
+	var updateHook = elem.data("updateHook");
+	if (updateHook)
+		updateHook(elem.val(), valid, id);
+	return valid;
+}
+
+validate.feedback = function(id, status) {
+	var elem = $("#" + id);
+	var group = elem.parents(".form-group");
+	var text = $("#" + id + "_text");
+	var icon = $("#" + id + "_status");
+
+	group.removeClass("has-error");
+	icon.removeClass("text-success");
+	text.addClass("hidden");
+	icon.text("");
+	if (status === true) {
+		icon.addClass("text-success");
+		icon.text("\u2714");
+	} else if (status !== null) {
+		group.addClass("has-error");
+		icon.text("\u2716");
+		text.removeClass("hidden");
+		text.addClass("text-danger");
+		if (status === false)
+			text.text("please fill in this field");
+		else
+			text.text(status);
+	}
+}
+
+validate.all = function() {
+	var valid = true;
+	$.each(arguments, function(_, id) {
+		if (!validate.check(id)) {
+			valid = false;
+			$("#" + id).focus(); // let's hope the user notices
+			return false;
+		}
+	});
+	return valid;
 }
 
 var autosave = {};

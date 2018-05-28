@@ -1,49 +1,108 @@
 "use strict";
 
-function setField(id, info) {
-	autosave.value(id, info[id].value);
+function resetField(id, info) {
+	$("#" + id + "_loading").addClass("hidden");
+	var elem = $("#" + id);
+	elem.val(info[id].value);
+	elem.data("auto", info[id].autodetected);
 }
 
-function resetTitle(info) {
-	setField("title", info);
-	setField("description", info);
-	$("#reset_title_loading").css("display", "none");
+function updateAuxButtons(value, valid, id) {
+	var update = $("#update_" + id);
+	var label = $("#update_" + id).parent("label");
+	var changed = value.trim() != $("#" + id).data("auto").trim();
+	var canWriteBack = fields[id].canWriteBack ?
+		fields[id].canWriteBack(value) : true;
+
+	if (valid && changed && canWriteBack) {
+		update.prop("disabled", false);
+		label.removeClass("text-muted");
+	} else {
+		update.prop("disabled", true);
+		label.addClass("text-muted");
+	}
+
+	var reset = $("#reset_" + id);
+	reset.prop("disabled", false);
 }
 
-function resetVersion(info) {
-	setField("version", info);
-	branchChanged();
+function initField(id, info) {
+	$("#reset_" + id).click(function() {
+		$("#" + id + "_loading").removeClass("hidden");
+		var resetInfo = fields[id].getResetInfo ? fields[id].getResetInfo() :
+			{};
+		API.post("reset " + id, "/api/meta/" + id + "/reset", resetInfo,
+			function(info) {
+				resetField(id, info);
+				validate.check(id);
+			});
+	});
+	resetField(id, info);
 
-	$("#version_loading").css("display", "none");
+	validate.init(id, info[id].value, fields[id].validator, updateAuxButtons);
 }
 
-function branchChanged() {
-	var branch = $("#version_branch :selected");
-	// update button label
-	$("[data-branch]").text(branch.text());
+var fields = { title: {}, description: {}, version: {} };
 
-	var action = branch.data("ref");
+fields.title.validator = function(value) {
+	if (value.trim() == "")
+		return "What title do you want to use for your publication?";
+	return true;
+};
+fields.title.canWriteBack = function(value) {
+	// FIXME "Name can contain only letters, digits, emojis, '_', '.', dash, space. It must start with letter, digit, emoji or '_'."
+	return true;
+};
+
+fields.description.validator = function(value) {
+	if (value.trim() != "")
+		return true;
+	return null;
+};
+
+fields.version.validator = function(value) {
+	if (value.trim() == "")
+		return "What version of your software artefact are you publishing?";
+	return true;
+};
+fields.version.canWriteBack = function(value) {
+	// no branch selected yet, no updating
+	if ($("#version_branch").val() === null)
+		return false;
+
+	var action = $("#version_branch :selected").data("refAction");
 	// only allow updating branches that haven't been pushed back. tags
 	// cannot be written to, and trying to update branches a few commits
 	// back is impossible to do consistently.
-	if (autosave.isValid("version") && action.ref.type == "branch"
-			&& action.firstCommit == "HEAD")
-		autosave.configureUpdateButton("version", function(value, id) {
-			API.post("update VERSION file", "/api/meta/version",
-				{ value: value, branch: action.ref.name },
-				function(info) {
-					setField(id, info);
-				});
-			});
-	else
-		autosave.configureUpdateButton("version", null);
+	return action.ref.type == "branch" && action.firstCommit == "HEAD";
+};
+fields.version.getResetInfo = function() {
+	// no branch selected yet, no resetting
+	if ($("#version_branch").val() === null)
+		return false;
+
+	var action = $("#version_branch :selected").data("refAction");
+	return { ref: action.ref.path };
+};
+
+function initFields(info) {
+	initField("title", info);
+	initField("description", info);
+	initField("version", info);
+
+	API.get("load branches and tags marked for publication",
+		"/api/repo/actions", {}, function(refs) {
+			loadLazyBranches(refs, info);
+		});
+
+	$("#main").removeClass("hidden");
+	$("#main_loading").css("display", "none");
 }
 
-function save(value, id) {
-	API.put("save field " + id, "/api/meta/" + id, { value: value },
-		function() {
-			autosave.success(id);
-		});
+function branchChanged() {
+	var action = $("#version_branch :selected").data("refAction");
+	$("[data-branch]").text(action.ref.type + " " + action.ref.name);
+	validate.check("version", true);
 }
 
 function loadLazyBranches(refs, info) {
@@ -53,7 +112,7 @@ function loadLazyBranches(refs, info) {
 	$.each(refs, function(_, action) {
 		var name = action.ref.type + " " + action.ref.name;
 		var option = $("<option>").attr("value", action.ref.path)
-			.text(name).data("ref", action);
+			.text(name).data("refAction", action);
 		select.append(option);
 		// select that item if it's the one last used for version
 		// detection. this will be the one the user picked last time if
@@ -63,67 +122,25 @@ function loadLazyBranches(refs, info) {
 	});
 	$("#version_branch").on("select change", branchChanged);
 	branchChanged();
-
-	$("#reset_version").prop("disabled", false);
-}
-
-function initFields(info) {
-	setField("title", info);
-	setField("description", info);
-	setField("version", info);
-	$("#main").removeClass("hidden");
-	$("#main_loading").css("display", "none");
-
-	API.get("load branches and tags marked for publication",
-		"/api/repo/actions", {}, function(refs) {
-			loadLazyBranches(refs, info);
-		});
-}
-
-function updateMeta(value, id) {
-	API.post("update project " + id, "/api/meta/" + id,
-		{ value: value }, function(info) {
-			setField(id, info);
-		});
-}
-
-function validateNotEmpty(value) {
-	return value.trim() != "";
 }
 
 $(function() {
-	autosave.init("title", save, validateNotEmpty);
-	autosave.configureUpdateButton("title", updateMeta);
-	autosave.init("description", save);
-	autosave.configureUpdateButton("description", updateMeta);
-	$("#reset_title").click(function() {
-		$("#reset_title_loading").removeClass("hidden");
-		API.post("reset to project name and description",
-			"/api/meta/project-info/reset", {}, resetTitle);
-	});
-
-	autosave.init("version", save, validateNotEmpty);
-	$("#reset_version").click(function() {
-		$("#reset_version_loading").removeClass("hidden");
-		var action = $("#version_branch :selected").data("ref");
-		API.post("reset version number", "/api/meta/version/reset",
-			{ ref: action.ref.path }, resetVersion);
-	});
+	//$("#reset_title").click(function() {
+		//$("#title_loading").removeClass("hidden");
+		//API.post("reset to project name",
+			//"/api/meta/title/reset", {}, resetTitle);
+	//});
+	//$("#reset_version").click(function() {
+		//$("#version_loading").removeClass("hidden");
+		//var action = $("#version_branch :selected").data("ref");
+		//API.post("reset version number", "/api/meta/version/reset",
+			//{ ref: action.ref.path }, resetVersion);
+	//});
 
 	API.get("load field values", "/api/meta", {}, initFields);
 
 	$("#next_button").click(function() {
-		var valid = true;
-		// check required fields. note description isn't required!
-		$.each(["title", "version"], function(_, id) {
-			if (!autosave.validate(id)) {
-				valid = false;
-				$("#" + id).focus(); // let's hope the user notices
-				return false;
-			}
-		});
-		if (valid)
-			// FIXME will become contributors-then-overview
-			location.href = "/overview.html";
+		if (validate.all("title", "description", "version"))
+			save();
 	});
 });

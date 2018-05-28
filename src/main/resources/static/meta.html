@@ -31,54 +31,56 @@
 			<div class="form-group has-feedback" id="title_group">
 				<label class="col-sm-2 control-label" for="title">publication title</label>
 				<div class="col-sm-7 nopad">
-					<input type="text" class="form-control" id="title" placeholder="name of your software artefact" aria-describedby="title_status_text">
+					<input type="text" class="form-control" id="title" placeholder="name of your software artefact" aria-describedby="title_text">
 					<span id="title_status" class="form-control-feedback" aria-hidden="true"></span>
-					<span id="title_status_text" class="sr-only"></span>
+					<span id="title_text" class="form-control-feedback-text text-danger hidden"></span>
 				</div>
 				<div class="col-sm-3 nopad">
-					<button type="button" class="btn btn-default form-control" id="update_title">update project name in git repo</button>
+					<button type="button" class="btn btn-sm btn-warning" id="reset_title">use project name from git repo</button>
+					<div id="title_loading" class="loading-inline hidden"><span class="sr-only">loading title...</span></div>
 				</div>
+				<div class="col-sm-10 col-sm-offset-2"><label class="form-check-label control-label">
+					<input class="form-check-input" type="checkbox" id="update_title">
+					update project name in git repo
+				</label></div>
 			</div>
 			<div class="form-group has-feedback" id="description_group">
 				<label class="col-sm-2 control-label" for="description">short description (optional)</label>
 				<div class="col-sm-7 nopad">
-					<textarea class="form-control" id="description" placeholder="short description of what your software does" aria-describedby="description_status_text" rows="10"></textarea>
+					<textarea class="form-control" id="description" placeholder="short description of what your software does" aria-describedby="description_text" rows="10"></textarea>
 					<span id="description_status" class="form-control-feedback" aria-hidden="true"></span>
-					<span id="description_status_text" class="sr-only"></span>
+					<span id="description_text" class="form-control-feedback-text text-danger hidden"></span>
 				</div>
 				<div class="col-sm-3 nopad">
-					<button type="button" class="btn btn-default form-control" id="update_description">update project description in git repo</button>
+					<button type="button" class="btn btn-sm btn-warning" id="reset_description">use project description from git repo</button>
+					<div id="description_loading" class="loading-inline hidden"><span class="sr-only">loading title and description...</span></div>
 				</div>
-			</div>
-			<div class="form-group form-group-sm">
-				<div class="col-sm-7 col-sm-offset-2 nopad">
-					<button type="button" class="btn btn-sm btn-warning" id="reset_title">reset title and description to project name and description from git repo</button>
-					<div id="reset_title_loading" class="loading-inline hidden"><span class="sr-only">loading title and description...</span></div>
-				</div>
+				<div class="col-sm-10 col-sm-offset-2"><label class="form-check-label control-label">
+					<input class="form-check-input" type="checkbox" id="update_description">
+					update project description in git repo
+				</label></div>
 			</div>
 
 			<div class="form-group has-feedback" id="version_group">
 				<label class="col-sm-2 control-label" for="version">software version</label>
 				<div class="col-sm-7 nopad">
-					<input type="text" class="form-control" id="version" placeholder="version number" aria-describedby="version_status_text">
+					<input type="text" class="form-control" id="version" placeholder="version number" aria-describedby="version_text">
 					<span id="version_status" class="form-control-feedback" aria-hidden="true"></span>
-					<span id="version_status_text" class="sr-only"></span>
+					<span id="version_text" class="form-control-feedback-text text-danger hidden"></span>
 				</div>
-				<div class="col-sm-3 nopad">
-					<button type="button" class="btn btn-default form-control" id="update_version" data-can-update="true" disabled>update file <tt data-versionfile>VERSION</tt> in <span data-branch>branch master</span></button>
-				</div>
-			</div>
-			<div class="form-group form-group-sm">
-				<label class="col-sm-2 col-sm-offset-1 control-label" for="version_branch">autodetect from</label>
-				<div class="col-sm-2 nopad">
+				<div class=" col-sm-7 col-sm-offset-2"><label class="form-check-label control-label">
+					<input class="form-check-input" type="checkbox" id="update_version">
+					update file <code data-versionfile>VERSION</code> in <span data-branch>branch master</span>
+				</label></div>
+			</div><div class="form-group form-group-sm">
+				<label class="col-sm-2 col-sm-offset-2 control-label" for="version_branch">autodetect from</label>
+				<div class="col-sm-5 nopad">
 					<select class="form-control" id="version_branch">
 						<option value="DONT-BE-SO-IMPATIENT" disabled selected>… loading …</option>
 					</select>
 				</div>
 				<div class="col-sm-2 nopad">
-					<button type="button" class="btn btn-sm btn-warning" id="reset_version" disabled>I'm Feeling Lazy</button>
-				</div>
-				<div class="col-sm-6 nopad">
+					<button type="button" class="btn btn-sm btn-warning" id="reset_version" disabled>I'm Feeling Lazy<!--detect--></button>
 					<div id="version_loading" class="loading-inline hidden"><span class="sr-only">detecting version...</span></div>
 				</div>
 			</div>
