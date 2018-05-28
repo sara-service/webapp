@@ -37,7 +37,6 @@
 				</div>
 				<div class="col-sm-3 nopad">
 					<button type="button" class="btn btn-sm btn-warning" id="reset_title">use project name from git repo</button>
-					<div id="title_loading" class="loading-inline hidden"><span class="sr-only">loading title...</span></div>
 				</div>
 				<div class="col-sm-10 col-sm-offset-2"><label class="form-check-label control-label">
 					<input class="form-check-input" type="checkbox" id="update_title">
@@ -53,12 +52,28 @@
 				</div>
 				<div class="col-sm-3 nopad">
 					<button type="button" class="btn btn-sm btn-warning" id="reset_description">use project description from git repo</button>
-					<div id="description_loading" class="loading-inline hidden"><span class="sr-only">loading title and description...</span></div>
 				</div>
 				<div class="col-sm-10 col-sm-offset-2"><label class="form-check-label control-label">
 					<input class="form-check-input" type="checkbox" id="update_description">
 					update project description in git repo
 				</label></div>
+			</div>
+
+			<!-- per-branch options -->
+			<p style="height:3ex"></p>
+			<div class="form-group has-feedback" id="master_group">
+				<label class="col-sm-2 control-label" for="master">main branch</label>
+				<div class="col-sm-7 nopad">
+					<select class="form-control" id="master">
+						<option value="DONT-BE-SO-IMPATIENT" disabled selected>… loading list …</option>
+					</select>
+					<span id="master_status" class="form-control-feedback" aria-hidden="true"></span>
+					<span id="master_text" class="form-control-feedback-text text-danger hidden"></span>
+				</div>
+				<div class="col-sm-3 nopad">
+					<button type="button" class="btn btn-sm btn-warning" id="reset_master" disabled>autodetect from version history</button>
+					<div id="master_loading" class="loading-inline hidden"><span class="sr-only">detecting metadata for this branch...</span></div>
+				</div>
 			</div>
 
 			<div class="form-group has-feedback" id="version_group">
@@ -68,21 +83,13 @@
 					<span id="version_status" class="form-control-feedback" aria-hidden="true"></span>
 					<span id="version_text" class="form-control-feedback-text text-danger hidden"></span>
 				</div>
-				<div class=" col-sm-7 col-sm-offset-2"><label class="form-check-label control-label">
+				<div class="col-sm-3 nopad">
+					<button type="button" class="btn btn-sm btn-warning" id="reset_version" disabled>autodetect from main branch</button>
+				</div>
+				<div class="col-sm-7 col-sm-offset-2"><label class="form-check-label control-label">
 					<input class="form-check-input" type="checkbox" id="update_version">
-					update file <code data-versionfile>VERSION</code> in <span data-branch>branch master</span>
+					update file <code data-versionfile>VERSION</code> in <span data-master>branch master</span> (in git repo)
 				</label></div>
-			</div><div class="form-group form-group-sm">
-				<label class="col-sm-2 col-sm-offset-2 control-label" for="version_branch">autodetect from</label>
-				<div class="col-sm-5 nopad">
-					<select class="form-control" id="version_branch">
-						<option value="DONT-BE-SO-IMPATIENT" disabled selected>… loading …</option>
-					</select>
-				</div>
-				<div class="col-sm-2 nopad">
-					<button type="button" class="btn btn-sm btn-warning" id="reset_version" disabled>I'm Feeling Lazy<!--detect--></button>
-					<div id="version_loading" class="loading-inline hidden"><span class="sr-only">detecting version...</span></div>
-				</div>
 			</div>
 		</form>
 	</div>

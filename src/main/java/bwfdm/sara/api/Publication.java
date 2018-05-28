@@ -38,7 +38,7 @@ public class Publication {
 		final Project project = Project.getInstance(session);
 
 		final Map<MetadataField, MetadataValue> meta = Metadata
-				.getAllFields(project);
+				.getAllFields(null, project);
 		final List<Repository> repos = config.getPublicationDatabase()
 				.getList(Repository.class);
 

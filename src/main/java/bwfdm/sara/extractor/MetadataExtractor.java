@@ -2,6 +2,7 @@ package bwfdm.sara.extractor;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -64,12 +65,22 @@ public class MetadataExtractor {
 	 * Get autodetected values for a defined set of {@link MetadataField}s. Pass
 	 * {@link MetadataField#values()} to get all fields.
 	 */
-	public Map<MetadataField, String> get(final MetadataField... fields) {
-		final Map<MetadataField, String> res = new EnumMap<>(
-				MetadataField.class);
-		for (final MetadataField f : fields)
-			if (meta.containsKey(f))
-				res.put(f, meta.get(f));
+	public Map<MetadataField, String> get( 			final MetadataField... fields) {
+		return get(null, fields);
+	}
+
+	/**
+	 * Get autodetected values for a defined set of {@link MetadataField}s. Pass
+	 * {@link MetadataField#values()} to get all fields.
+	 */
+	public Map<MetadataField, String> get(final Ref ref,
+			final MetadataField... fields) {
+		final Map<MetadataField, String> res = new EnumMap<>(meta);
+		if (ref != null) { // need to add version-specific metadata
+			res.put(MetadataField.VERSION, versions.get(ref.path));
+		}
+
+		res.keySet().retainAll(Arrays.asList(fields));
 		return res;
 	}
 
@@ -146,7 +157,7 @@ public class MetadataExtractor {
 	public Ref detectMasterBranch(final Collection<Ref> refs)
 			throws IOException {
 		final Ref master = detectMaster(refs);
-		meta.put(MetadataField.VERSION_BRANCH, master.path);
+		meta.put(MetadataField.MAIN_BRANCH, master.path);
 		return master;
 	}
 
@@ -184,16 +195,7 @@ public class MetadataExtractor {
 		}
 	}
 
-	public String setVersionFromBranch(final Ref ref) {
-		final String version = versions.get(ref.path);
-		meta.put(MetadataField.VERSION, version);
-		return version;
-	}
-
-	public void updateVersion(final Ref ref, final String version) {
-		// this will be overwritten if detectVersion() is called again, but
-		// detectVersion() is only called after cloning and in that case we want
-		// to update it anyway.
-		versions.put(ref.path, version);
+	public void setVersionFromBranch(final Ref ref) {
+		meta.put(MetadataField.VERSION, versions.get(ref.path));
 	}
 }

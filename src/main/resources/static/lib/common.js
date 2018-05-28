@@ -147,7 +147,7 @@ validate.init = function(id, value, validator, updateHook) {
 validate.check = function(id, disableFeedback) {
 	var elem = $("#" + id);
 	var validator = elem.data("validator");
-	var res = validator(elem.val());
+	var res = validator ? validator(elem.val()) : null;
 	if (!disableFeedback)
 		validate.feedback(id, res);
 
@@ -183,16 +183,20 @@ validate.feedback = function(id, status) {
 	}
 }
 
-validate.all = function() {
+validate.all = function(fields) {
 	var valid = true;
+	var data = {};
 	$.each(arguments, function(_, id) {
 		if (!validate.check(id)) {
 			valid = false;
 			$("#" + id).focus(); // let's hope the user notices
 			return false;
 		}
+		data[id] = $("#" + id).val();
 	});
-	return valid;
+	if (!valid)
+		return null;
+	return data;
 }
 
 var autosave = {};
