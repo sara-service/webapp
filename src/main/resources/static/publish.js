@@ -1,7 +1,7 @@
 "use strict";
 
 function save(value, id, success) {
-	API.put("update " + id, "/api/meta/" + id, { value: value }, success);
+	API.putEmpty("update " + id, "/api/meta/" + id, { value: value }, success);
 }
 
 function validateEmail(email) {

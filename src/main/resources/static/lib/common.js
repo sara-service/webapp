@@ -105,6 +105,9 @@ API.get = function(step, path, data, callback) {
 API.post = function(step, path, data, callback) {
 	API.ajax(step, "POST", path, data, callback);
 }
+API.putEmpty = function(step, path, data, callback) {
+	API.ajax(step, "PUT", path, data, callback);
+}
 API.put = function(step, path, data, callback) {
 	$.ajax(path, {
 		method: "PUT", data: JSON.stringify(data), success: callback,
