@@ -1,6 +1,8 @@
 package bwfdm.sara.db.util;
 
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Properties;
 
 import javax.sql.DataSource;
 
@@ -12,18 +14,22 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import bwfdm.sara.Config;
 
-abstract class TransacionHelper {
+abstract class TransactionHelper {
 	protected final JdbcTemplate db;
 	protected final TransactionTemplate tx;
 
-	protected TransacionHelper() {
-		final DataSource ds;
-		try {
-			ds = new Config(Config.SPRING_APPLICATION_CONFIG_FILE)
-					.getDatabase();
-		} catch (final IOException e) {
-			throw new RuntimeException(e);
+	protected TransactionHelper(final String... args) throws IOException {
+		if (args.length != 1) {
+			System.err.println("usage: " + getClass().getSimpleName()
+					+ " database-config.properties");
+			System.exit(1);
 		}
+
+		Properties props = new Properties();
+		try (FileInputStream in = new FileInputStream(args[0])) {
+			props.load(in);
+		}
+		final DataSource ds = Config.createDataSource(props);
 		db = new JdbcTemplate(ds);
 		tx = new TransactionTemplate(new DataSourceTransactionManager(ds));
 	}

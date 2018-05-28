@@ -24,7 +24,7 @@ public class Source implements DAO {
 	@DatabaseField
 	public String logo_base64;
 	@DatabaseField
-	public Boolean enabled;
+	public boolean enabled;
 
 	public Source(@JsonProperty("uuid") UUID uuid) {
 		this.uuid = uuid;

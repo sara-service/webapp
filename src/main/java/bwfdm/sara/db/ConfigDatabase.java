@@ -18,11 +18,11 @@ import bwfdm.sara.git.GitRepoFactory;
  * but without U) queries.
  */
 public class ConfigDatabase {
-	public static final String LICENSES_TABLE = "public.fe_supported_licenses";
-	private static final String GITREPOS_TABLE = "public.source";
-	private static final String GITREPO_PARAM_TABLE = "public.source_params";
-	private static final String ARCHIVES_TABLE = "public.archive";
-	private static final String ARCHIVE_PARAM_TABLE = "public.archive_params";
+	public static final String LICENSES_TABLE = "supported_licenses";
+	private static final String GITREPOS_TABLE = "source";
+	private static final String GITREPO_PARAM_TABLE = "source_params";
+	private static final String ARCHIVES_TABLE = "archive";
+	private static final String ARCHIVE_PARAM_TABLE = "archive_params";
 
 	private final JacksonTemplate db;
 

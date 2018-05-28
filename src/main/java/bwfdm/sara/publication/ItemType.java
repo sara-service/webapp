@@ -5,5 +5,5 @@ package bwfdm.sara.publication;
  */
 
 public enum ItemType {
-	archive, record, publication;
+	ARCHIVE_HIDDEN, ARCHIVE_PUBLIC, PUBLISH;
 }

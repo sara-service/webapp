@@ -15,10 +15,10 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import bwfdm.sara.db.JacksonTemplate;
 import bwfdm.sara.publication.PublicationRepository;
 import bwfdm.sara.publication.PublicationRepositoryFactory;
 import bwfdm.sara.publication.Repository;
-import bwfdm.sara.db.JacksonTemplate;
 
 public class PublicationDatabase {
 	private static final ObjectMapper MAPPER = new ObjectMapper();
@@ -30,7 +30,7 @@ public class PublicationDatabase {
 	/**
 	 * Creates a DAO for reading config values.
 	 * 
-	 * @ db
+	 * @param db
 	 *            the {@link DataSource} to use for all queries
 	 */
 	public PublicationDatabase(final DataSource db) {

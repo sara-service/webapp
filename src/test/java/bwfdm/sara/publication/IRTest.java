@@ -30,13 +30,7 @@ public class IRTest {
 		Archive myArchive = pdb.getList(Archive.class).get(0);
 		Repository myRepository = pdb.getList(Repository.class).get(0);
 
-		System.out.println("Create an eperson");
-
-		EPerson myEPerson = new EPerson();
-		myEPerson.contact_email = "stefan.kombrink@uni-ulm.de";
-		myEPerson.password = null;
-		myEPerson.last_active = new Date(); // set current time
-		myEPerson = pdb.insertInDB(myEPerson);
+		String contact_email = "stefan.kombrink@uni-ulm.de";
 
 		System.out.println("Create an item");
 
@@ -44,10 +38,9 @@ public class IRTest {
 		myItem.source_uuid = mySource.uuid;
 		myItem.archive_uuid = myArchive.uuid;
 		myItem.repository_uuid = myRepository.uuid;
-		myItem.eperson_uuid = myEPerson.uuid;
-		myItem.in_archive = false;
+		myItem.contact_email = contact_email;
 		myItem.item_state = "created";
-		myItem.email_verified = true;
+		myItem.item_state = ItemState.VERIFIED.name();
 		myItem.date_created = new Date();
 		myItem.date_last_modified = myItem.date_created;
 		myItem.item_type = "publication";
@@ -105,9 +98,11 @@ public class IRTest {
 
 		output += "Repository " + oparu.getDAO().display_name + " is accessible: " + oparu.isAccessible();
 		output += "\n";
-		output += "User is registered: " + oparu.isUserRegistered(myEPerson.contact_email);
+		output += "User is registered: "
+				+ oparu.isUserRegistered(contact_email);
 		output += "\n";
-		output += "User is allowed to publish: " + oparu.isUserAssigned(myEPerson.contact_email);
+		output += "User is allowed to publish: "
+				+ oparu.isUserAssigned(contact_email);
 		output += "\n";
 		output += "Repository " + oparu.getDAO().display_name + " offers the following collections: ";
 		output += "\n";
@@ -117,7 +112,7 @@ public class IRTest {
 		output += "\n";
 		output += "Collections where the user has access to";
 		output += "\n";
-		output += oparu.getAvailableCollectionPaths("=> ", myEPerson.contact_email);
+		output += oparu.getAvailableCollectionPaths("=> ", contact_email);
 		output += "\n";
 
 		Hierarchy bib = oparu.getHierarchy(null);
