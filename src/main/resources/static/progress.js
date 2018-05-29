@@ -74,7 +74,7 @@ function update() {
 	updateStatus(2000);
 }
 
-function initStatus(endpoint, success, error) {
+function initStatus(endpoint, cancel, success, error) {
 	_endpoint = endpoint;
 	_success = success;
 	_error = error;
@@ -82,4 +82,8 @@ function initStatus(endpoint, success, error) {
 	// short timeout for first update so the user doesn't have to wait
 	// excessively if the operations finish quickly
 	updateStatus(1000);
+
+	$("#cancel").click(function() {
+		location.replace(cancel);
+	});
 }

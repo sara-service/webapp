@@ -1,9 +1,9 @@
 "use strict";
 
 $(function() {
-	initStatus("/api/clone/status", function() {
-		location.href = "/license.html";
+	initStatus("/api/clone/status", "/api/clone/cancel", function() {
+		location.replace("/license.html");
 	}, function() {
-		location.reload();
+		location.replace("/branches.html");
 	});
 });

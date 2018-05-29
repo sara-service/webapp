@@ -99,7 +99,7 @@ function addBranches(branches) {
 		} else
 			API.put("save branch selection", "/api/repo/actions", data,
 				function() {
-					replaceDocument("start clone", "/api/clone/trigger");
+					location.href = "/api/clone/trigger";
 				});
 	});
 	$("#loading").remove();	
