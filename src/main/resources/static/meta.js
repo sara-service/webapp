@@ -91,6 +91,7 @@ function initFields(info) {
 				location.href = "/overview.html";
 			});
 	});
+	$("#next_button").removeClass("disabled");
 
 	$("#main").removeClass("hidden");
 	$("#main_loading").css("display", "none");

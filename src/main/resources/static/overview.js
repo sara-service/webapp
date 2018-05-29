@@ -28,7 +28,8 @@ function blockLoaded(name) {
 	$("#loading").remove();
 	$("#content").removeClass("hidden");
 	$("#next_button").click(function() {
-		location.href = "/push.html";
+		// FIXME ?id=deadbeef
+		location.href = "/api/push/trigger";
 	});
 	$("#next_button").removeClass("disabled");
 }
@@ -81,7 +82,6 @@ function initMeta(info) {
 			$("#" + name).text(info[name].value);
 		});
 	blockLoaded("meta");
-
 }
 
 $(function() {

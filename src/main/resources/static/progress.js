@@ -57,9 +57,9 @@ function updateStatus(timeout) {
 						status.error.exception + ": " +
 						status.error.message);
 				}
-				_error(status);
+				location.replace(_error);
 			} else if (status.status == "success")
-				_success(status);
+				location.replace(_success);
 			else
 				// schedule next status update. uses setTimeout instead
 				// of setInterval so two requests can never be active at
