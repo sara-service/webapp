@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import bwfdm.sara.db.FrontendDatabase;
 import bwfdm.sara.extractor.MetadataExtractor;
 import bwfdm.sara.project.MetadataField;
 import bwfdm.sara.project.Project;
@@ -119,11 +118,6 @@ public class Metadata {
 		project.getGitProject().putBlob(ref.name,
 				MetadataExtractor.VERSION_FILE, "update version to " + version,
 				version.getBytes(UTF8));
-
-		final FrontendDatabase db = project.getFrontendDatabase();
-		db.setMetadata(MetadataField.MAIN_BRANCH, ref.path);
-		db.setMetadata(MetadataField.VERSION, null);
-		project.invalidateMetadata(); // due to versionbranch field
 	}
 
 	public static class MetadataValue {

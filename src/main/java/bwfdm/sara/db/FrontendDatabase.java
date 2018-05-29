@@ -1,5 +1,6 @@
 package bwfdm.sara.db;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -194,7 +195,7 @@ public class FrontendDatabase {
 	 * Get the list of branches selected for archival / publication. More
 	 * precisely, it provides a list of {@link Ref Refs}, which can be a branch
 	 * or a tag. The returned list is a snapshot; it doesn't reflect later
-	 * changes made by {@link #setRefAction(Ref, PublicationMethod, String)}!
+	 * changes made by {@link #setRefActions(Collection)}!
 	 *
 	 * @return a {@link List} of {@link Ref Refs}
 	 */
@@ -206,44 +207,29 @@ public class FrontendDatabase {
 	}
 
 	/**
-	 * Update the publication action for a single ref.
+	 * Update the publication action for a project.
 	 *
-	 * @param ref
-	 *            the ref to update
-	 * @param method
-	 *            any valid {@link PublicationMethod}, or <code>null</code> to
-	 *            delete the branch from the list (semantically: set it to
-	 *            "don't publish")
-	 * @param firstCommit
-	 *            ID of first commit to archive. either the SHA-1 or
-	 *            {@link RefAction#HEAD_COMMIT}
+	 * @param actions
+	 *            a list of {@link RefAction RefActions} listing actions for all
+	 *            relevant refs. branches not in the list are marked as ignored.
 	 */
-	public void setRefAction(final Ref ref, final PublicationMethod method,
-			final String firstCommit) {
+	public void setRefActions(final Collection<RefAction> actions) {
 		transaction.execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(
 					final TransactionStatus status) {
-				updateRefAction(ref.path, method != null ? method.name() : null,
-						firstCommit);
+				updateRefActions(actions);
 			}
 		});
 	}
 
-	private void updateRefAction(final String refPath, final String method,
-			final String firstCommit) {
-		db.update(
-				"delete from " + ACTION_TABLE
-						+ " where repo = ? and project = ? and ref = ?",
-				gitRepo, project, refPath);
-		if (method == null)
-			// setting method to null is the frontend's way of saying "branch
-			// removed from list".
-			// the only advantage of having to do upserts as delete / insert is
-			// that this uncommon use case actually works out nicely...
-			return;
-		db.update("insert into " + ACTION_TABLE
+	private void updateRefActions(final Collection<RefAction> actions) {
+		db.update("delete from " + ACTION_TABLE
+				+ " where repo = ? and project = ?", gitRepo, project);
+		for (RefAction action : actions)
+			db.update("insert into " + ACTION_TABLE
 				+ "(repo, project, ref, action, start) values(?, ?, ?, ?, ?)",
-				gitRepo, project, refPath, method, firstCommit);
+					gitRepo, project, action.ref.path,
+					action.publicationMethod.name(), action.firstCommit);
 	}
 }

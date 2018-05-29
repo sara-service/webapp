@@ -121,6 +121,12 @@ API.delete = function(step, path, callback) {
 	API.ajax(step, "DELETE", path, null, callback);
 }
 
+function replaceDocument(step, path) {
+	API.ajax(step, "GET", path, {}, function(data) {
+		$("#root").replaceWith($.parseHTML(data, document, true));
+	});
+}
+
 function setStatusClass(elem, status_list, name, status) {
 	$.each(status_list, function(_, st) {
 		if (st[name])

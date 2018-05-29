@@ -10,7 +10,8 @@ import java.util.Map;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -63,33 +64,28 @@ public class Repository {
 			// branches). other branches are ignored by default to avoid
 			// overloading the user when there are many branches.
 			for (final RefInfo r : refs)
-				if (r.isProtected || r.isDefault) {
-					db.setRefAction(r.ref, PublicationMethod.PUBLISH_FULL,
-							RefAction.HEAD_COMMIT);
-				}
-			// fetch the list again to get one with the modifications we just
-			// did. (the list is immutable once obtained.)
-			actionList = db.getRefActions();
-			// the user changed the list of branches, so we will obviously have
-			// to clone this again
+				if (r.isProtected || r.isDefault)
+					actionList.add(
+							new RefAction(r.ref, PublicationMethod.PUBLISH_FULL,
+									RefAction.HEAD_COMMIT));
+			db.setRefActions(actionList);
+			// the user didn't change the list of branches, but we did. he will
+			// still have to clone this again
 			project.invalidateTransferRepo();
 		}
 
 		final Map<Ref, RefAction> actions = new HashMap<Ref, RefAction>();
-		for (final RefAction a : db.getRefActions())
+		for (final RefAction a : actionList)
 			actions.put(a.ref, a);
 		for (final RefInfo r : refs)
 			r.action = actions.get(r.ref);
 	}
 
-	@PostMapping("actions")
-	public void setActions(@RequestParam("ref") final String refPath,
-			@RequestParam("publish") final PublicationMethod action,
-			@RequestParam("firstCommit") final String start,
+	@PutMapping("actions")
+	public void setActions(@RequestBody final List<RefAction> actions,
 			final HttpSession session) {
 		final Project project = Project.getInstance(session);
-		project.getFrontendDatabase().setRefAction(new Ref(refPath),
-				action, start);
+		project.getFrontendDatabase().setRefActions(actions);
 		project.invalidateTransferRepo();
 	}
 

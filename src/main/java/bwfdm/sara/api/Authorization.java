@@ -47,7 +47,6 @@ public class Authorization {
 			}
 		}
 
-
 		// everything else is just the same whether the user is returning from
 		// the "pushy" warning or not
 		return forceAuth(gitRepo, projectPath, redir, session);

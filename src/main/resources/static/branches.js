@@ -1,15 +1,6 @@
 "use strict";
 
-var forms = [];
-
-function save(branch) {
-	API.post("save " + branch.ref.type + " " + branch.ref.name,
-		"/api/repo/actions", {
-			ref: branch.ref.path,
-			publish: branch.action.publish,
-			firstCommit: branch.action.firstCommit,
-		});
-}
+var forms = {};
 
 function addCommits(branch, select, commits) {
 	$.each(commits, function(_, commit) {
@@ -50,15 +41,6 @@ function addBranch(branch) {
 		branch.action.publish = null;
 		delete forms[branch.ref.path];
 		form.root.remove();
-		save(branch);
-	});
-	form.action.on("select change", function() {
-		branch.action.publish = $(this).val();
-		save(branch);
-	});
-	form.commit.on("select change", function() {
-		branch.action.firstCommit = $(this).val();
-		save(branch);
 	});
 	forms[branch.ref.path] = form;
 	$("#branches").append(form.root);
@@ -93,15 +75,33 @@ function addBranches(branches) {
 	$("#add_button").click(function() {
 		var branch = $("#add_branch :selected").data("branch");
 		addBranch(branch);
-		// save immediately because the user might not change the
-		// selection before clicking next
-		save(branch);
 	});
+
 	// enable the "next" button only after branches have been loaded.
 	// this prevents the user from clicking it before we have a valid
 	// branch selection.
-	$("#next_button").attr("href", "/clone.html");
-	$("#next_button").removeClass("disabled");
+	$("#next_button").click(function() {
+		var data = [];
+		$.each(forms, function(ref, form) {
+			data.push({
+				ref: ref,
+				publish: form.action.val(),
+				firstCommit: form.commit.val()
+			});
+		});
+		if (data.length == 0) {
+			// this is actually quite hard: the default is only empty if there
+			// are no branches in the repo (empty repo? maybe not even there).
+			// ie. the user really has to remove everything and then expect
+			// "next" to do something...
+			console.log("StupidUserException: no refs in the list");
+			$("#add_branch").focus(); // highlighting the button is too subtle
+		} else
+			API.put("save branch selection", "/api/repo/actions", data,
+				function() {
+					replaceDocument("start clone", "/api/clone/trigger");
+				});
+	});
 	$("#loading").remove();	
 }
 
