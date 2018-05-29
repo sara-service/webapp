@@ -102,6 +102,7 @@ function addBranches(branches) {
 					location.href = "/api/clone/trigger";
 				});
 	});
+	$("#next_button").removeClass("disabled");
 	$("#loading").remove();	
 }
 
