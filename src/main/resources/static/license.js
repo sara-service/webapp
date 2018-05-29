@@ -4,7 +4,7 @@ function saveAndContinue() {
 	var lic = $("#declare :selected");
 	API.post("save license selection", "/api/licenses/all",
 		{ license: lic.val() }, function() {
-			location.href = "/publish.html";
+			location.href = "/overview.html";
 		});
 }
 

@@ -134,6 +134,7 @@ $(function() {
 			return;
 		}
 
-		location.href = "/meta.html";
+		location.href = "/pubmeta.html";
 	});
+	$("#next_button").removeClass("disabled");
 });

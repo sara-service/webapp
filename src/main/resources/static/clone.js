@@ -1,6 +1,6 @@
 "use strict";
 
 $(function() {
-	initStatus("/api/clone/status", "/api/clone/cancel", "/license.html",
+	initStatus("/api/clone/status", "/api/clone/cancel", "/meta.html",
 		"/branches.html");
 });

@@ -88,7 +88,7 @@ function initFields(info) {
 		var data = validate.all("title", "description", "master", "version");
 		if (data)
 			API.put("save fields", "/api/meta", data, function() {
-				location.href = "/overview.html";
+				location.href = "/license.html";
 			});
 	});
 	$("#next_button").removeClass("disabled");
