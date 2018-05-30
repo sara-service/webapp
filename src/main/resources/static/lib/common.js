@@ -132,40 +132,40 @@ function setStatusClass(elem, status_list, name, status) {
 
 var validate = {};
 
-validate.init = function(id, value, validator, updateHook) {
-	var elem = $("#" + id);
+validate.init = function(field, value, validator, updateHook) {
+	var elem = typeof field == "string" ? $("#" + field) : field;
 	elem.data("validator", validator);
 	elem.data("updateHook", updateHook);
 	elem.on("select change keyup paste focusout", function() {
-		validate.check(id);
+		validate.check(elem);
 	});
 	if (value !== null)
 		elem.val(value);
 
 	// no feedback on initial validation so the user doesn't start with a red
 	// page. but call it anyway so the update hook gets called.
-	validate.check(id, true);
+	validate.check(elem, true);
 }
 
-validate.check = function(id, disableFeedback) {
-	var elem = $("#" + id);
+validate.check = function(field, disableFeedback) {
+	var elem = typeof field == "string" ? $("#" + field) : field;
 	var validator = elem.data("validator");
 	var res = validator ? validator(elem.val()) : null;
 	if (!disableFeedback)
-		validate.feedback(id, res);
+		validate.feedback(elem, res);
 
 	var valid = res === true || res === null;
 	var updateHook = elem.data("updateHook");
 	if (updateHook)
-		updateHook(elem.val(), valid, id);
+		updateHook(elem.val(), valid, elem);
 	return valid;
 }
 
-validate.feedback = function(id, status) {
-	var elem = $("#" + id);
+validate.feedback = function(field, status) {
+	var elem = typeof field == "string" ? $("#" + field) : field;
 	var group = elem.parents(".form-group");
-	var text = $("#" + id + "_text");
-	var icon = $("#" + id + "_status");
+	var text = elem.siblings(".form-control-feedback-text");
+	var icon = elem.siblings(".form-control-feedback");;
 
 	group.removeClass("has-error");
 	icon.removeClass("text-success");
@@ -189,13 +189,14 @@ validate.feedback = function(id, status) {
 validate.all = function(fields) {
 	var valid = true;
 	var data = {};
-	$.each(arguments, function(_, id) {
-		if (!validate.check(id)) {
+	$.each(fields, function(_, field) {
+		var elem = typeof field == "string" ? $("#" + field) : field;
+		if (!validate.check(elem)) {
 			valid = false;
-			$("#" + id).focus(); // let's hope the user notices
+			elem.focus(); // let's hope the user notices
 			return false;
 		}
-		data[id] = $("#" + id).val();
+		data[elem.attr("id")] = elem.val();
 	});
 	if (!valid)
 		return null;

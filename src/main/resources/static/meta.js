@@ -1,6 +1,6 @@
 "use strict";
 
-var meta, cache = {};
+var meta, cache = {}, branches = [];
 
 function canWriteBack() {
 	var action = $("#master :selected").data("refAction");
@@ -66,8 +66,14 @@ function initFields(info) {
 		return true;
 	});
 
+	// special case: the saved user selection isn't in the list.
+	// → just replace with autodetected best guess...
+	if (!branches.includes(meta.master.value))
+		meta.master.value = meta.master.autodetected;
 	initField("master", false, function() { return true; }, function() {
 			var action = $("#master :selected").data("refAction");
+			if (!action)
+				return;
 			$("[data-master]").text(action.ref.type + " " + action.ref.name);
 
 			var ref = action.ref.path;
@@ -86,7 +92,8 @@ function initFields(info) {
 		});
 
 	$("#next_button").click(function() {
-		var values = validate.all("title", "description", "master", "version");
+		var values = validate.all(["title", "description", "master",
+			"version"]);
 		if (!values)
 			return;
 		var data = {};
@@ -115,6 +122,7 @@ function loadLazyBranches(refs) {
 		var option = $("<option>").attr("value", action.ref.path)
 			.text(name).data("refAction", action);
 		select.append(option);
+		branches.push(action.ref.path);
 	});
 
 	API.get("load field values", "/api/meta", {}, initFields);
