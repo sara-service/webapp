@@ -20,8 +20,8 @@ function initField(id, branchDependent, validator, speshul) {
 	});
 	elem.val(meta[id].value);
 
+	var update = $("#update_" + id);
 	validate.init(id, meta[id].value, validator, function(value, valid) {
-		var update = $("#update_" + id);
 		var label = $("#update_" + id).parent("label");
 		var changed = value != meta[id].autodetected;
 		var allowWriteBack = branchDependent ? canWriteBack() : true;
@@ -40,6 +40,7 @@ function initField(id, branchDependent, validator, speshul) {
 		var reset = $("#reset_" + id);
 		reset.prop("disabled", !changed);
 	});
+	update.prop("checked", meta[id].update);
 }
 
 function updateBranchSpecific() {
@@ -85,11 +86,19 @@ function initFields(info) {
 		});
 
 	$("#next_button").click(function() {
-		var data = validate.all("title", "description", "master", "version");
-		if (data)
-			API.put("save fields", "/api/meta", data, function() {
-				location.href = "/license.html";
-			});
+		var values = validate.all("title", "description", "master", "version");
+		if (!values)
+			return;
+		var data = {};
+		$.each(values, function(field, value) {
+			data[field] = {
+				user: value,
+				update: $("#update_" + field).prop("checked") 
+			};
+		});
+		API.put("save fields", "/api/meta", data, function() {
+			location.href = "/license.html";
+		});
 	});
 	$("#next_button").removeClass("disabled");
 

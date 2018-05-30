@@ -1,9 +1,12 @@
 package bwfdm.sara.db;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import javax.sql.DataSource;
 
@@ -35,6 +38,7 @@ public class FrontendDatabase {
 	private final String project;
 	private final JacksonTemplate db;
 	private final TransactionTemplate transaction;
+	private Set<MetadataField> update;
 
 	/*
 	 * TODO if settings are to be per-user instead of per-project, must add a
@@ -72,11 +76,10 @@ public class FrontendDatabase {
 	 * @return all metadata fields in a {@link Map}
 	 */
 	public Map<MetadataField, String> getMetadata() {
-		return db.querySingleToMap(
+		return db.queryRowToMap(
 				"select field, value from " + METADATA_TABLE
 						+ " where repo = ? and project = ?",
-				"field", MetadataField.class, "value", String.class, gitRepo,
-				project);
+				"field", MetadataField.class, String.class, gitRepo, project);
 	}
 
 	/**
@@ -87,26 +90,64 @@ public class FrontendDatabase {
 	 * @param value
 	 *            the new value, or {@code null} to revert to the autodetected
 	 *            value
+	 * @deprecated use {@link #setMetadata(Map)} if possible!
 	 */
+	@Deprecated
 	public void setMetadata(final MetadataField field, final String value) {
+		final Map<MetadataField, String> map = new HashMap<MetadataField, String>(
+				1);
+		map.put(field, value);
 		transaction.execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(
 					final TransactionStatus status) {
-				updateMetadata(field.getDisplayName(), value);
+				updateMetadata(map);
 			}
 		});
 	}
 
-	private void updateMetadata(final String field, final String value) {
-		db.update(
-				"delete from " + METADATA_TABLE
-						+ " where repo = ? and project = ? and field = ?",
-				gitRepo, project, field);
-		if (value != null)
+	/**
+	 * Set all metadata fields. Any fields missing in the map are left alone.
+	 *
+	 * @param values
+	 *            a map of field name to field value
+	 */
+	public void setMetadata(final Map<MetadataField, String> values) {
+			transaction.execute(new TransactionCallbackWithoutResult() {
+				@Override
+				protected void doInTransactionWithoutResult(
+						final TransactionStatus status) {
+					updateMetadata(values);
+				}
+		});
+	}
+
+	private void updateMetadata(final Map<MetadataField, String> values) {
+		for (MetadataField field : values.keySet()) {
+			final String fieldName = field.getDisplayName();
+			db.update(
+					"delete from " + METADATA_TABLE
+							+ " where repo = ? and project = ? and field = ?",
+					gitRepo, project, fieldName);
 			db.update("insert into " + METADATA_TABLE
 					+ "(repo, project, field, value) values(?, ?, ?, ?)",
-					gitRepo, project, field, value);
+					gitRepo, project, fieldName, values.get(field));
+		}
+	}
+
+	/** Set list of metadata fields that should be writen back to git repo. */
+	public void setUpdateMetadata(final Set<MetadataField> update) {
+		// deliberately NOT stored in the database. this way the checkbox never
+		// defaults to enabled. → user always has to give explicit consent to
+		// have stuff updated in his live repo.
+		this.update = update;
+	}
+
+	/** Get list of metadata fields that should be writen back to git repo. */
+	public Set<MetadataField> getUpdateMetadata() {
+		if (update == null)
+			return Collections.emptySet();
+		return update;
 	}
 
 	/**
@@ -119,10 +160,10 @@ public class FrontendDatabase {
 	 *         tag
 	 */
 	public Map<Ref, String> getLicenses() {
-		return db.querySingleToMap(
+		return db.queryRowToMap(
 				"select ref, license from " + LICENSES_TABLE
 						+ " where repo = ? and project = ?",
-				"ref", Ref.class, "license", String.class, gitRepo, project);
+				"ref", Ref.class, String.class, gitRepo, project);
 	}
 
 	/**
@@ -200,7 +241,7 @@ public class FrontendDatabase {
 	 * @return a {@link List} of {@link Ref Refs}
 	 */
 	public List<Ref> getSelectedRefs() {
-		return db.querySingleToList(
+		return db.queryRowToList(
 				"select ref from " + ACTION_TABLE
 						+ " where repo = ? and project = ?",
 				Ref.class, gitRepo, project);
