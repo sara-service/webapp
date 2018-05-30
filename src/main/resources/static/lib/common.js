@@ -163,7 +163,7 @@ validate.check = function(field, disableFeedback) {
 
 validate.feedback = function(field, status) {
 	var elem = typeof field == "string" ? $("#" + field) : field;
-	var group = elem.parents(".form-group");
+	var group = elem.parents(".form-group,.form-group-horizontal");
 	var text = elem.siblings(".form-control-feedback-text");
 	var icon = elem.siblings(".form-control-feedback");;
 
@@ -196,7 +196,10 @@ validate.all = function(fields) {
 			elem.focus(); // let's hope the user notices
 			return false;
 		}
-		data[elem.attr("id")] = elem.val();
+		var id = elem.attr("name");
+		if (!id)
+			id = elem.attr("id");
+		data[id] = elem.val();
 	});
 	if (!valid)
 		return null;

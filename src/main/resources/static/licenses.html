@@ -37,25 +37,29 @@
 		<table class="table" id="branch_table">
 			<tr><th>branch</th><th>file</th><th>detected license</th><th colspan="2">license to declare in publication</th></tr>
 			<tr id="template" class="hidden">
-				<td style="vertical-align:middle"><span name="type">branch</span> <b name="name">master</b></td>
-				<td style="vertical-align:middle">
+				<td style="vertical-align:middle"><div class="form-group-horizontal">
+					<span name="type">branch</span> <b name="name">master</b>
+				</div></td><td style="vertical-align:middle"><div class="form-group-horizontal">
 					<tt name="file">LICENSE</tt>
-					<a class="btn btn-warning btn-sm hidden" name="edit_branch">edit in git repo</a>
-					<a class="btn btn-warning btn-sm hidden" name="create_branch">create one in git repo</a>
+					<!-- FIXME remove these, they're hard to support without auto-writeback! -->
+					<a class="btn btn-warning btn-sm hidden" name="edit_branch" target="_blank">edit in git repo</a>
+					<a class="btn btn-warning btn-sm hidden" name="create_branch" target="_blank">create one in git repo</a>
 					<small name="edit_tag" class="hidden">cannot edit a tag</small>
-				</td><td style="vertical-align:middle">
+				</div></td><td style="vertical-align:middle"><div class="form-group-horizontal">
 					<a name="detected" target="_blank" class="hidden">GNU GPL 3.0</a>
 					<span name="noinfo" class="hidden">GNU LGPL 2.1</span>
 					<i name="other" class="hidden">license present but not recognized</i>
 					<b name="missing" class="hidden">license missing</b>
-				</td><td style="vertical-align:middle">
+				</div></td><td style="vertical-align:middle"><div class="form-group-horizontal has-feedback">
 					<select class="form-control" name="declare">
 						<option name="declare_choose" disabled selected>choose a license...</option>
 						<option value="keep" name="declare_keep">keep GNU GPL 3.0</option>
 					</select>
-				</td><td style="vertical-align:middle">
+					<span class="form-control-feedback" aria-hidden="true"></span>
+					<span class="form-control-feedback-text text-danger hidden"></span>
+				</div></td><td style="vertical-align:middle"><div class="form-group-horizontal">
 					<a class="btn btn-default form-control" name="info" target="_blank">more info</a>
-				</td>
+				</div></td>
 			</tr>
 		</table>
 

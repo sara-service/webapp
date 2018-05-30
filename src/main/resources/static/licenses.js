@@ -1,18 +1,9 @@
 "use strict";
 
-function saveAndContinue(forms) {
-	var lic = $("#declare :selected");
-	API.get("check licenses", "/api/licenses", {}, function(info) {
-			if (!info.undefined)
-				location.href = "/overview.html";
-		});
-}
-
-function save(ref, license) {
-	API.post("save " + ref.type + " " + ref.name, "/api/licenses", {
-			ref: ref.path,
-			license: license,
-		});
+function saveAndContinue(data) {
+	API.put("set licenses", "/api/licenses", data, function(info) {
+		location.href = "/overview.html";
+	});
 }
 
 function initBranch(form, ref, file) {
@@ -60,15 +51,15 @@ function initLicense(info) {
 	var forms = [];
 	$.each(info.branches, function(_, branch) {
 		var form = template("template");
-		initLicenseList(form, info.supported, branch.detected,
-			branch.user);
+		initLicenseList(branch.ref.path, form, info.supported,
+			branch.detected, branch.user);
 		initBranch(form, branch.ref, branch.file);
 		initDetected(form, branch.detected);
 		$("#branch_table").append(form.root);
 		form.declare.on("select change", function() {
 			save(branch.ref, $(this).val());
 		});
-		forms.push(form);
+		forms.push(form.declare);
 	});
 
 	loadingFinished("confirm", forms);

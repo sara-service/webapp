@@ -7,7 +7,7 @@ function addLicense(form, license) {
 	form.declare.append(option);
 }
 
-function initLicenseList(form, supported, detected, user) {
+function initLicenseList(ref, form, supported, detected, user) {
 	// create the "keep" entry separately. this automatically deals with
 	// the situation where it isn't in the list (ie. "other" or a hidden
 	// license).
@@ -40,18 +40,17 @@ function initLicenseList(form, supported, detected, user) {
 			addLicense(form, info);
 	});
 
-	// select whatever value the user selected last time. if there is no
-	// "last time", or if the user has selected different licenses per
-	// branch, keep the "choose a license" text selected.
-	if (user != null)
-		form.declare.val(user);
-	else
-		form.declare_choose.prop("selected", true);
-
-	form.declare.on("select change", function() {
-			updateInfoButton(form);
-		});
-	updateInfoButton(form);
+	form.declare.attr("name", ref);
+	validate.init(form.declare, user, function(value) {
+		// we don't care what the user actually selected as long as
+		// we have a useful license, ie. anything but the "choose a
+		// license" placeholder is valid.
+		if (value == null)
+			return "Please pick a license!";
+		return true;
+	}, function() {
+		updateInfoButton(form);
+	});
 }
 
 function updateInfoButton(form) {
@@ -66,27 +65,18 @@ function updateInfoButton(form) {
 	}
 }
 
-function checkLicenses(forms) {
-	var valid = true;
-	$.each(forms, function(_, form) {
-		// we don't care what the user actually selected as long as
-		// we have a useful license, ie. anything but the "choose a
-		// license" placeholder is valid.
-		if (form.declare.val() == null) {
-			valid = false;
-			form.declare.focus(); // will the user notice?
-		}
-	});
-
-	if (valid)
-		saveAndContinue(forms);
+function checkLicenses(fields) {
+	console.log(fields);
+	var data = validate.all(fields);
+	if (data)
+		saveAndContinue(data);
 }
 
-function loadingFinished(nextButton, forms) {
+function loadingFinished(nextButton, fields) {
 	var next = $("#" + nextButton);
 	next.removeClass("hidden");
 	if (typeof next.attr("href") == "undefined")
-		next.click(function() { checkLicenses(forms); });
+		next.click(function() { checkLicenses(fields); });
 	$("#license").removeClass("hidden");
 	$("#loading").remove();
 }

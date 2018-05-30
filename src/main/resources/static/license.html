@@ -30,19 +30,21 @@
 		<p class="col-xs-12">Blah blah blah if you need help, <a href="https://choosealicense.com/" target="_blank">choosealicense.com</a>.</p>
 	</div>
 	<p style="height:3ex"></p>
-	<form class="form hidden" id="license">
+	<form class="form-horizontal hidden" id="license">
 		<div class="form-group">
 			<label class="form-label hidden" id="none_existing">No license detected!</label>
 			<label class="form-label hidden" id="single_existing">Detected license: <a id="single_detected" target="_blank">GNU GPL 3.0</a></label>
 			<label class="form-label hidden" id="other_existing">License present but not recognized as a well-known license</label>
 			<label class="form-label hidden" id="multi_existing">Multiple licenses detected: <span id="multi_detected"></span></label>
 		</div>
-		<div class="form-group hidden" id="declare_group">
+		<div class="form-group has-feedback hidden" id="declare_group">
 			<label for="declare" class="form-label">License to declare in publication / archive</label>
 			<select class="form-control" id="declare">
 				<option id="declare_choose" disabled selected>choose a license...</option>
 				<option id="declare_keep" value="keep">keep autodetected license</option>
 			</select>
+			<span class="form-control-feedback" aria-hidden="true"></span>
+			<span class="form-control-feedback-text text-danger hidden"></span>
 			<p style="height:0ex"></p>
 			<div class="text-right"><a class="btn btn-default disabled" id="info" target="_blank">more info</a></div>
 		</div>
