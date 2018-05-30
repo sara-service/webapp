@@ -41,11 +41,13 @@ public class GitLabProject implements GitProject {
 		return guiRoot;
 	}
 
+	@Deprecated
 	@Override
 	public String getEditURL(final String branch, final String path) {
 		return guiRoot + "/edit/" + branch + "/" + path;
 	}
 
+	@Deprecated
 	@Override
 	public String getCreateURL(final String branch, final String path) {
 		return guiRoot + "/new/" + branch + "/?commit_message=Add+"

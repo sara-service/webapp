@@ -105,6 +105,7 @@ public class Repository {
 		return new RedirectView(project.getGitProject().getProjectViewURL());
 	}
 
+	@Deprecated
 	@GetMapping("edit-file")
 	public RedirectView getEditURL(@RequestParam("branch") final String branch,
 			@RequestParam("path") final String path, final HttpSession session) {

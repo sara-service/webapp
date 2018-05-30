@@ -7,26 +7,13 @@ function saveAndContinue(data) {
 }
 
 function initBranch(form, ref, file) {
-	var edit;
-	if (file != null) {
+	if (file != null)
 		form.file.text(file);
-		edit = form.edit_branch;
-	} else {
+	else
 		form.file.replaceWith("&#8213;");
-		edit = form.create_branch;
-		file = "LICENSE";
-	}
 
 	form.type.text(ref.type);
 	form.name.text(ref.name);
-	if (ref.type == 'branch') {
-		edit.attr("href", new URI("/api/repo/edit-file")
-			.addSearch("branch", ref.name)
-			.addSearch("path", file));
-		edit.removeClass("hidden");
-	} else
-		form.edit_tag.removeClass("hidden");
-
 }
 
 function initDetected(form, detected) {
