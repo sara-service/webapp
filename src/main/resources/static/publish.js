@@ -22,9 +22,10 @@ function doQueryHierarchy(pubrepo, email) {
 function queryHierarchy(force) {
 	var email = $("#email").val();
 	var pubrepo = $("#pubrepo").val();
+	if (pubrepo == null)
+		return null;
 	if (!cache[pubrepo])
 		cache[pubrepo] = {};
-	console.log(email, "@", pubrepo, cache[pubrepo]);
 
 	if (cache[pubrepo][email] === "busy") // download already in progress?
 		return null;
