@@ -1,4 +1,6 @@
 package bwfdm.sara.publication;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.fail;
 
 /**
  * @author sk
@@ -26,19 +28,6 @@ public class DBTest {
 				new org.postgresql.Driver(),
 				"jdbc:postgresql://localhost:5432/test", "test", "test");
 		pdb = new PublicationDatabase(ds);
-	}
-
-	@Test
-	public void testPersons() {
-		List<EPerson> myPersons = pdb.getList(EPerson.class);
-		System.out.println("===PERSONS===");
-		System.out.println("#Sources:" + myPersons.size());
-		for (EPerson p : myPersons) {
-			dump(p);
-			p = pdb.updateFromDB(p);
-			p.contact_email = "Tri Tra Trullalala der Kasper der ist wieder da";
-			pdb.updateInDB(p);
-		}
 	}
 
 	@Test
@@ -143,27 +132,29 @@ public class DBTest {
 		System.out.println("#Items:" + myItems.size());
 		for (Item i : myItems) {
 			dump(i);
-			i.email_verified = true;
+			i.item_state = ItemState.VERIFIED.name();
 			pdb.updateInDB(i);
 			dump(i);
 			i = pdb.updateFromDB(i);
 
 			// this should raise an exception
-			i.archive_uuid = i.eperson_uuid;
+			i.archive_uuid = i.repository_uuid;
 			try {
 				pdb.updateInDB(i);
-				System.out.println("WARNING! The schema lacks foreign key constraints!");
+				fail("WARNING! The schema lacks foreign key constraints!");
 			} catch (DataAccessException ex) {
-				System.out.println("GOOD! Exception when FK constraint is violated!");
+				System.out.println(
+						"GOOD! Exception when FK constraint is violated!");
 				System.out.println(ex.getMessage());
 			}
 			i = pdb.updateFromDB(i);
 			System.out.println("ItemDAO exists in DB : " + pdb.exists(i));
 			i = new Item(
 					UUID.fromString("ff2a1271-b84b-4ac9-a07e-5f2419909e97"));
-			System.out.println("ItemDAO exists in DB : " + pdb.exists(i));
+			assertFalse("nonexistent ItemDAO exists in DB", pdb.exists(i));
 			try {
 				pdb.deleteFromDB(i);
+				fail("we have DELETE rights on items table!");
 			} catch (DataAccessException ex) {
 				System.out.println("GOOD! The item table grants no DELETE rights!");
 				System.out.println(ex.getMessage());

@@ -30,13 +30,9 @@ else
   echo "NOPE"
 fi
 
-cat saradb/crypto.sql saradb/schema.sql saradb/config.sql \
-	schema.sql licenses.sql permissions.sql >temp.sql
-
 echo "starting database..."
-# TODO mv all sql files into saradb git repo!
 exec ./udocker.py --repo=$RD run \
-  -v $PWD/temp.sql:/init.sql \
+  -v $PWD:/saradb \
   -v $PWD/postgresql.sh:/init.sh \
   -i -t --rm --user postgres \
   c1t4r/sara-server-vre \

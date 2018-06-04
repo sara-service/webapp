@@ -7,7 +7,11 @@ import java.net.URL;
 
 import bwfdm.sara.db.ConfigDatabase;
 
-public class SetLicensePreference extends TransacionHelper {
+public class SetLicensePreference extends TransactionHelper {
+	protected SetLicensePreference(String... args) throws IOException {
+		super(args);
+	}
+
 	@Override
 	public void run() throws IOException {
 		// move some preferred licenses to the top of the displayed list. reset
@@ -31,7 +35,7 @@ public class SetLicensePreference extends TransacionHelper {
 		}
 	}
 
-	public static void main(final String... args) {
-		new SetLicensePreference().executeInTransaction();
+	public static void main(final String... args) throws IOException {
+		new SetLicensePreference(args).executeInTransaction();
 	}
 }
