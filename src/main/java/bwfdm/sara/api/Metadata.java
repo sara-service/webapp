@@ -1,9 +1,11 @@
 package bwfdm.sara.api;
 
-import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.http.HttpSession;
 
@@ -11,10 +13,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import bwfdm.sara.db.FrontendDatabase;
@@ -31,16 +35,45 @@ public class Metadata {
 
 	@GetMapping("")
 	public Map<MetadataField, MetadataValue> getAllFields(
+			@RequestParam(name = "ref", required = false) final String refPath,
 			final HttpSession session) {
-		return getAllFields(Project.getInstance(session));
+		final Ref ref = refPath != null ? new Ref(refPath) : null;
+		return getAllFields(ref, Project.getInstance(session));
 	}
 
-	public static Map<MetadataField, MetadataValue> getAllFields(
+	@PutMapping("")
+	public void setAllFields( // FIXME setMultipleFields
+			@RequestBody final Map<MetadataField, MetadataValue> values,
+			final HttpSession session) {
+		final Project project = Project.getInstance(session);
+		final Map<MetadataField, String> userValues = new HashMap<MetadataField, String>();
+		final Set<MetadataField> update = new HashSet<MetadataField>();
+		for (MetadataField field : values.keySet()) {
+			MetadataValue value = values.get(field);
+			userValues.put(field, value.user);
+			if (value.update)
+				update.add(field);
+		}
+
+		FrontendDatabase db = project.getFrontendDatabase();
+		db.setMetadata(userValues);
+		db.setUpdateMetadata(update);
+		project.invalidateMetadata();
+	}
+
+	public static Map<MetadataField, MetadataValue> getAllFields(Ref ref,
 			final Project project) {
+		FrontendDatabase db = project.getFrontendDatabase();
+		final Map<MetadataField, String> userValues = db.getMetadata();
+		final Set<MetadataField> update = db.getUpdateMetadata();
+		// if the user has selected a different main branch than the
+		// autodetected one, make sure we request the branch-specific metadata
+		// for that branch.
+		final String master = userValues.get(MetadataField.MAIN_BRANCH);
+		if (master != null && ref == null)
+			ref = new Ref(master);
 		final Map<MetadataField, String> detectedValues = project
-				.getMetadataExtractor().get(MetadataField.values());
-		final Map<MetadataField, String> userValues = project
-				.getFrontendDatabase().getMetadata();
+				.getMetadataExtractor().get(ref, MetadataField.values());
 		// make sure all fields are always present; JavaScript needs this. unset
 		// values map to a {@code (null, null)} {@link MetadataValue}.
 		final EnumMap<MetadataField, MetadataValue> res = new EnumMap<>(
@@ -48,103 +81,48 @@ public class Metadata {
 		for (final MetadataField f : MetadataField.values()) {
 			final String user = userValues.get(f);
 			final String auto = detectedValues.get(f);
-			res.put(f, new MetadataValue(user, auto));
+			res.put(f, new MetadataValue(auto, user, update.contains(f)));
 		}
 		return res;
 	}
-
 	@GetMapping("{field}")
 	public MetadataValue getSingleField(
-			@PathVariable("field") final String name, final HttpSession session) {
-		return getAllFields(session).get(MetadataField.forDisplayName(name));
+			@PathVariable("field") final String name,
+			final HttpSession session) {
+		return getAllFields(null, session)
+				.get(MetadataField.forDisplayName(name));
 	}
 
 	@PutMapping("{field}")
 	public void setSingleField(@PathVariable("field") final String name,
-			@RequestParam("value") final String value, final HttpSession session) {
-		final Project project = Project.getInstance(session);
-		project.getFrontendDatabase().setMetadata(
-				MetadataField.forDisplayName(name), value);
-		project.invalidateMetadata();
-	}
-
-	private Map<MetadataField, MetadataValue> resetProjectInfo(
-			final HttpSession session, final MetadataField... fields) {
-		final Project project = Project.getInstance(session);
-		// re-run detection. it's fast, and matches the real-time nature of the
-		// update button: that one changes data in GitLab immediately, so the
-		// user probably expects the reset button to pick up new values from
-		// GitLab, too.
-		final MetadataExtractor extractor = project.getMetadataExtractor();
-		extractor.detectProjectInfo();
-
-		// note the order: try to detect new value first, then delete what the
-		// user entered. this way the field doesn't end up empty if detection
-		// fails.
-		final FrontendDatabase db = project.getFrontendDatabase();
-		for (final MetadataField field : fields)
-			db.setMetadata(field, null);
-		project.invalidateMetadata();
-
-		return getAllFields(session);
-	}
-
-	@PostMapping("title/reset")
-	public Map<MetadataField, MetadataValue> resetTitle(
+			@RequestParam("value") final String value,
 			final HttpSession session) {
-		return resetProjectInfo(session, MetadataField.TITLE);
+		final Project project = Project.getInstance(session);
+		project.getFrontendDatabase()
+				.setMetadata(MetadataField.forDisplayName(name), value);
+		project.invalidateMetadata();
 	}
 
+	/** @deprecated move to PushTask */
 	@PostMapping("title")
-	public Map<MetadataField, MetadataValue> updateTitle(
-			@RequestParam("value") final String title, final HttpSession session) {
+	public void updateTitle(@RequestParam("value") final String title,
+			final HttpSession session) {
 		final Project project = Project.getInstance(session);
 		project.getGitProject().updateProjectInfo(title, null);
-		return resetTitle(session);
 	}
 
-	@PostMapping("description/reset")
-	public Map<MetadataField, MetadataValue> resetDescription(
-			final HttpSession session) {
-		return resetProjectInfo(session, MetadataField.DESCRIPTION);
-	}
-
+	/** @deprecated move to PushTask */
 	@PostMapping("description")
-	public Map<MetadataField, MetadataValue> updateDescription(
+	public void updateDescription(
 			@RequestParam("value") final String description,
 			final HttpSession session) {
 		final Project project = Project.getInstance(session);
 		project.getGitProject().updateProjectInfo(null, description);
-		return resetDescription(session);
 	}
 
-	@PostMapping("project-info/reset")
-	public Map<MetadataField, MetadataValue> resetProjectInfo(
-			final HttpSession session) {
-		return resetProjectInfo(session, MetadataField.TITLE,
-				MetadataField.DESCRIPTION);
-	}
-
-	@PostMapping("version/reset")
-	public Map<MetadataField, MetadataValue> resetVersion(
-			@RequestParam("ref") final String ref, final HttpSession session)
-			throws IOException {
-		final Project project = Project.getInstance(session);
-		// need to re-run detection because it depends on the ref. this has the
-		// side effect that it crashes if ref is invalid, so it's harder to get
-		// garbage into the versionbranch field...
-		project.getMetadataExtractor().setVersionFromBranch(new Ref(ref));
-
-		final FrontendDatabase db = project.getFrontendDatabase();
-		db.setMetadata(MetadataField.VERSION_BRANCH, ref);
-		db.setMetadata(MetadataField.VERSION, null);
-		project.invalidateMetadata();
-
-		return getAllFields(session);
-	}
-
+	/** @deprecated move to PushTask */
 	@PostMapping("version")
-	public Map<MetadataField, MetadataValue> updateVersion(
+	public void updateVersion(
 			@RequestParam("branch") final String branch,
 			@RequestParam("value") final String version,
 			final HttpSession session) {
@@ -155,19 +133,6 @@ public class Metadata {
 		project.getGitProject().putBlob(ref.name,
 				MetadataExtractor.VERSION_FILE, "update version to " + version,
 				version.getBytes(UTF8));
-		// update MetadataExtractor's cached copy. the underlying repo won't
-		// change, so re-running version detection would restore the old value,
-		// which isn't desirable.
-		// note: this only works if detectVersion() is NOT called again here!
-		// detectVersion() would overwrite this value!
-		project.getMetadataExtractor().updateVersion(ref, version);
-
-		final FrontendDatabase db = project.getFrontendDatabase();
-		db.setMetadata(MetadataField.VERSION_BRANCH, ref.path);
-		db.setMetadata(MetadataField.VERSION, null);
-		project.invalidateMetadata(); // due to versionbranch field
-
-		return getAllFields(session);
 	}
 
 	public static class MetadataValue {
@@ -188,16 +153,36 @@ public class Metadata {
 		 */
 		@JsonProperty("autodetected")
 		public final String autodetected;
+		/**
+		 * <code>true</code> if the user selected the "update in git repo"
+		 * checkbox
+		 */
+		@JsonProperty("update")
+		public final boolean update;
 
-		private MetadataValue(final String user, final String autodetected) {
-			this.user = user;
+		@JsonCreator
+		public MetadataValue(@JsonProperty("value") final String value,
+				@JsonProperty("update") final boolean update) {
+			this.user = this.value = value;
+			this.autodetected = null;
+			this.update = update;
+		}
+
+		public MetadataValue(final String autodetected, final String user,
+				final boolean update) {
 			this.autodetected = autodetected;
-			if (user != null)
+			if (user != null) {
+				this.user = user;
+				this.update = update;
 				value = user;
-			else if (autodetected != null)
-				value = autodetected;
-			else
-				value = "";
+			} else {
+				this.user = null;
+				this.update = false;
+				if (autodetected != null)
+					value = autodetected;
+				else
+					value = "";
+			}
 		}
 	}
 }

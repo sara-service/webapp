@@ -19,6 +19,7 @@ public interface GitProject {
 	 *            full, absolute path to file in repo
 	 * @return the url of a page where the user can edit the file
 	 */
+	@Deprecated
 	public String getEditURL(final String branch, String path);
 
 	/**
@@ -28,6 +29,7 @@ public interface GitProject {
 	 *            full, absolute path to file in repo
 	 * @return the url of a page where the user can create such a file
 	 */
+	@Deprecated
 	public String getCreateURL(String branch, String path);
 
 	/** @return a list of all branches in the given project */

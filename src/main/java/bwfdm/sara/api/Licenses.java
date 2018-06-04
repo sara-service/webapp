@@ -3,12 +3,15 @@ package bwfdm.sara.api;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -33,7 +36,7 @@ public class Licenses {
 				project.getMetadataExtractor().getLicenses(), db.getLicenses());
 	}
 
-	@PostMapping("all")
+	@PostMapping("")
 	public void setAllLicenses(@RequestParam("license") final String license,
 			final HttpSession session) {
 		final Project project = Project.getInstance(session);
@@ -46,13 +49,14 @@ public class Licenses {
 		project.invalidateMetadata();
 	}
 
-	@PostMapping("")
-	public void setLicense(@RequestParam("ref") final String refPath,
-			@RequestParam("license") final String license,
+	@PutMapping("")
+	public void setLicense(@RequestBody final Map<Ref, String> licenses,
 			final HttpSession session) {
 		final Project project = Project.getInstance(session);
-		final FrontendDatabase db = project.getFrontendDatabase();
-		db.setLicense(new Ref(refPath), LicensesInfo.unmapKeep(license));
+		for (final Entry<Ref, String> e : licenses.entrySet())
+			e.setValue(LicensesInfo.unmapKeep(e.getValue()));
+		project.getFrontendDatabase().setLicenses(licenses);
+		// db.setLicense(new Ref(refPath), LicensesInfo.unmapKeep(license));
 		project.invalidateMetadata();
 	}
 

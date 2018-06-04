@@ -33,6 +33,8 @@ public class JacksonTemplate extends JdbcTemplate {
 	}
 
 	/**
+	 * Returns a single database row as an object.
+	 * 
 	 * @param query
 	 *            SQL query returning exactly one row
 	 * @param type
@@ -43,29 +45,15 @@ public class JacksonTemplate extends JdbcTemplate {
 	 */
 	public <T> T queryRowToObject(final String query, final Class<T> type,
 			final Object... args) {
-		return MAPPER.convertValue(queryForMap(query, args), type);
+		return convertRow(queryForMap(query, args), type);
 	}
 
 	/**
-	 * @param query
-	 *            SQL query returning exactly one row consisting of a single
-	 *            column
-	 * @param type
-	 *            {@link Class} of return type, for type conversion
-	 * @param args
-	 *            substituted for the parameters in {@code query}
-	 * @return an object constructed from the single column
-	 */
-	public <T> T querySingleToObject(final String query, final Class<T> type,
-			final Object... args) {
-		return MAPPER.convertValue(queryForObject(query, Object.class, args),
-				type);
-	}
-
-	/**
+	 * Returns a set of database rows as a list of objects.
+	 * 
 	 * @param query
 	 *            SQL query
-	 * @param type
+	 * @param typecreateObjectFromRow
 	 *            {@link Class} of return type, for type conversion
 	 * @param args
 	 *            substituted for the parameters in {@code query}
@@ -75,28 +63,14 @@ public class JacksonTemplate extends JdbcTemplate {
 			final Object... args) {
 		final List<T> list = new ArrayList<>();
 		for (final Map<String, Object> row : queryForList(query, args))
-			list.add(MAPPER.<T> convertValue(row, type));
+			list.add(convertRow(row, type));
 		return list;
 	}
 
 	/**
-	 * @param query
-	 *            SQL query returning a single column
-	 * @param type
-	 *            {@link Class} of return type, for type conversion
-	 * @param args
-	 *            substituted for the parameters in {@code query}
-	 * @return a list of objects constructed from the single column
-	 */
-	public <T> List<T> querySingleToList(final String query,
-			final Class<T> type, final Object... args) {
-		final List<T> list = new ArrayList<>();
-		for (final Object col : queryForList(query, Object.class, args))
-			list.add(MAPPER.<T> convertValue(col, type));
-		return list;
-	}
-
-	/**
+	 * Returns a set of database rows as a (key → value) mapping with a
+	 * specified column as the key.
+	 * 
 	 * @param query
 	 *            SQL query
 	 * @param keyField
@@ -116,38 +90,23 @@ public class JacksonTemplate extends JdbcTemplate {
 		final Map<K, V> map = new HashMap<>();
 		for (final Map<String, Object> row : queryForList(query, args)) {
 			final K key = MAPPER.convertValue(row.remove(keyField), keyType);
-			final V value = MAPPER.convertValue(row, valueType);
+			final V value = convertRow(row, valueType);
 			map.put(key, value);
 		}
 		return map;
 	}
 
-	/**
-	 * @param query
-	 *            SQL query returning exactly two columns
-	 * @param keyField
-	 *            name of the field containing the <i>key</i> of the mapping
-	 *            (this field will not be passed to the object's constructor)
-	 * @param keyType
-	 *            {@link Class} of <i>key</i> type, for type conversion
-	 * @param valueField
-	 *            name of the field containing the <i>value</i> of the mapping
-	 * @param valueType
-	 *            {@link Class} of <i>value</i> type, for type conversion
-	 * @param args
-	 *            substituted for the parameters in {@code query}
-	 * @return a map of objects constructed from the single column
-	 */
-	public <K, V> Map<K, V> querySingleToMap(final String query,
-			final String keyField, final Class<K> keyType,
-			final String valueField, final Class<V> valueType,
-			final Object... args) {
-		final Map<K, V> map = new HashMap<>();
-		for (final Map<String, Object> row : queryForList(query, args)) {
-			final K key = MAPPER.convertValue(row.get(keyField), keyType);
-			final V value = MAPPER.convertValue(row.get(valueField), valueType);
-			map.put(key, value);
-		}
-		return map;
+	private static <V> V convertRow(final Map<String, Object> row,
+			final Class<V> valueType) {
+		final Object object;
+		if (row.size() == 1)
+			// if just a single column, pass that to Jackson as a string.
+			// Jackson will then pass it to a single-string-argument
+			// constructor. (it doesn't voluntarily do that when passed a
+			// single-element map.)
+			object = row.values().iterator().next();
+		else
+			object = row;
+		return MAPPER.convertValue(object, valueType);
 	}
 }

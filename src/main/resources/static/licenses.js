@@ -1,41 +1,19 @@
 "use strict";
 
-function saveAndContinue(forms) {
-	var lic = $("#declare :selected");
-	API.get("check licenses", "/api/licenses", {}, function(info) {
-			if (!info.undefined)
-				location.href = "/publish.html";
-		});
-}
-
-function save(ref, license) {
-	API.post("save " + ref.type + " " + ref.name, "/api/licenses", {
-			ref: ref.path,
-			license: license,
-		});
+function saveAndContinue(data) {
+	API.put("set licenses", "/api/licenses", data, function(info) {
+		location.href = "/overview.html";
+	});
 }
 
 function initBranch(form, ref, file) {
-	var edit;
-	if (file != null) {
+	if (file != null)
 		form.file.text(file);
-		edit = form.edit_branch;
-	} else {
+	else
 		form.file.replaceWith("&#8213;");
-		edit = form.create_branch;
-		file = "LICENSE";
-	}
 
 	form.type.text(ref.type);
 	form.name.text(ref.name);
-	if (ref.type == 'branch') {
-		edit.attr("href", new URI("/api/repo/edit-file")
-			.addSearch("branch", ref.name)
-			.addSearch("path", file));
-		edit.removeClass("hidden");
-	} else
-		form.edit_tag.removeClass("hidden");
-
 }
 
 function initDetected(form, detected) {
@@ -60,15 +38,15 @@ function initLicense(info) {
 	var forms = [];
 	$.each(info.branches, function(_, branch) {
 		var form = template("template");
-		initLicenseList(form, info.supported, branch.detected,
-			branch.user);
+		initLicenseList(branch.ref.path, form, info.supported,
+			branch.detected, branch.user);
 		initBranch(form, branch.ref, branch.file);
 		initDetected(form, branch.detected);
 		$("#branch_table").append(form.root);
 		form.declare.on("select change", function() {
 			save(branch.ref, $(this).val());
 		});
-		forms.push(form);
+		forms.push(form.declare);
 	});
 
 	loadingFinished("confirm", forms);

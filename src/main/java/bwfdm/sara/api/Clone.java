@@ -32,4 +32,10 @@ public class Clone {
 				.createTransferRepo();
 		return clone.getStatus();
 	}
+
+	@GetMapping("trigger")
+	public RedirectView triggerCloneAndRedirect(final HttpSession session) {
+		triggerClone(session);
+		return new RedirectView("/clone.html");
+	}
 }

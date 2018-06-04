@@ -43,14 +43,14 @@
 			<div style="padding:.5ex 1.5em">
 				<!--<div style="display:inline-block;height:0px;width:10em"></div>-->
 				<ul>
-				<li>"<strong class="sara-green">Publish full history</strong>"
+				<li><strong class="sara-green">Publish full history</strong>
 					publishes <strong>all commits in the version history</strong>,
 					even those excluded in previous publications (if any).
 					It does not change commit IDs,
 					and is the <strong>recommended</strong> option because
 					it allows replicating your research process.
 				</li>
-				<li>"<strong class="sara-blue">Publish abbreviated history</strong>"
+				<li><strong class="sara-blue">Publish abbreviated history</strong>
 					publishes only <strong>significant points</strong>
 					of the version history and thus
 					<strong>changes commit IDs.</strong>
@@ -63,7 +63,7 @@
 					is so shoddy that you are ashamed of it -->
 					if you need to omit parts of your development process.
 				</li>
-				<li>"<strong class="sara-red">Publish latest version only</strong>"
+				<li><strong class="sara-red">Publish latest version only</strong>
 					publishes only the <strong>HEAD revision</strong>,
 					omitting the version history
 					except for previously published versions.
@@ -73,12 +73,12 @@
 					This option is <strong>not recommended</strong>
 					if you have other options.
 				</li>
-				<li>"<strong class="sara-orange">Private access, public record</strong>"
+				<li><strong class="sara-orange">Private access, public record</strong>
 					privately archives the full history of a branch
 					and publishes a bibliographical record only.
 					This is suitable for data that you want to (or have to) keep private.
 				</li>
-				<li>"<strong class="sara-cyan">Private access, no record</strong>"
+				<li><strong class="sara-cyan">Private access, no record</strong>
 					privately archives the full history of a branch.
 					The existence of the archived data will not be published.
 				</li>
@@ -115,7 +115,7 @@
 		</div>
 	</form>
 	<div id="loading" class="loading"><span class="sr-only">loading, please wait...</span></div>
-	<h3>Anything else you would like to publish?</h3>
+	<h3>Any other branches you would like to include?</h3>
 	<form class="form-horizontal"><div class="form-group">
 		<div class="col-sm-2 nopad">
 			<select class="form-control" id="add_branch">
@@ -139,7 +139,7 @@
 	<p style="height:3ex"></p>
 	<div class="row">
 		<a class="btn btn-default col-sm-3" href="/api/repo/return">← save and return to git repo</a>
-		<a class="btn btn-primary disabled col-sm-2 col-sm-offset-7" id="next_button">next →</a>
+		<a class="btn btn-primary col-sm-2 col-sm-offset-7 disabled" id="next_button">next →</a>
 	</div>
 	<p style="height:3ex"></p>
 </div></body>

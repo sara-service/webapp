@@ -45,6 +45,7 @@ public class GitHubProject implements GitProject {
 		return info.webURL;
 	}
 
+	@Deprecated
 	@Override
 	public String getEditURL(final String branch, final String path) {
 		// FIXME check whether to encode paths with slashes
@@ -53,6 +54,7 @@ public class GitHubProject implements GitProject {
 		return getProjectViewURL() + "/edit/" + branch + "/" + path;
 	}
 
+	@Deprecated
 	@Override
 	public String getCreateURL(final String branch, final String path) {
 		// FIXME allow this to be disabled, or find a way to implement it

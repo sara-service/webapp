@@ -250,8 +250,8 @@ public class PublicationDatabase {
 	
 	private Map<String, Object> readArguments(final String table,
 			final String id) {
-		return db.querySingleToMap(
+		return db.queryRowToMap(
 				"select param, value from " + table + " where id = UUID(?)",
-				"param", String.class, "value", Object.class, id);
+				"param", String.class, Object.class, id);
 	}
 }

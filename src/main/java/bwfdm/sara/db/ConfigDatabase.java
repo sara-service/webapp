@@ -47,7 +47,7 @@ public class ConfigDatabase {
 	}
 
 	public String getLicenseText(final String id) {
-		return db.querySingleToObject(
+		return db.queryRowToObject(
 				"select full_text from " + LICENSES_TABLE + " where id = ?",
 				String.class, id);
 	}
@@ -81,7 +81,7 @@ public class ConfigDatabase {
 	 */
 	@Deprecated
 	public String getGitArchive() {
-		return db.querySingleToObject("select uuid from " + ARCHIVES_TABLE,
+		return db.queryRowToObject("select uuid from " + ARCHIVES_TABLE,
 				String.class);
 	}
 
@@ -103,8 +103,8 @@ public class ConfigDatabase {
 
 	private Map<String, String> readArguments(final String table,
 			final String id) {
-		return db.querySingleToMap(
+		return db.queryRowToMap(
 				"select param, value from " + table + " where id = UUID(?)",
-				"param", String.class, "value", String.class, id);
+				"param", String.class, String.class, id);
 	}
 }

@@ -24,7 +24,6 @@
 			</a>
 		</div>
 	</div>
-	
 		
 	<div class="row">
 		<div class="col-xs-12 action-header">
@@ -33,30 +32,34 @@
 	</div>
 	
 	<form class="form-horizontal hidden" id="content">
-		<div class="form-group">
+		<div class="form-group has-feedback">
 			<label for="irs" class="col-sm-2 control-label">institutional repository</label>
 			<div class="col-sm-10 nopad">
-				<select class="form-control" id="irs">
+				<select class="form-control" id="pubrepo">
 					<option disabled>… loading list of institutional repositories …</option>
 				</select>
+				<span class="form-control-feedback" aria-hidden="true"></span>
+				<span class="form-control-feedback-text text-danger hidden"></span>
 			</div>
 		</div>
-		<div class="form-group" id="email_group">
+		<div class="form-group has-feedback">
 			<label for="login_email" class="col-sm-2 control-label">your login email there</label>
 			<div class="col-sm-10 nopad">
-				<input type="email" class="form-control" id="email" placeholder="email.address@institution.de" aria-describedby="email_status_text">
-				<span id="email_status" class="form-control-feedback" aria-hidden="true"></span>
-				<span id="email_status_text" class="sr-only"></span>
+				<input type="email" class="form-control" id="email" placeholder="email.address@institution.de">
+				<span class="form-control-feedback" aria-hidden="true"></span>
+				<span class="form-control-feedback-text text-danger hidden"></span>
 			</div>
 		</div>
-		<div class="form-group" id="collections_group">
+		<div class="form-group has-feedback" id="collections_group">
 			<label for="collections" class="col-sm-2 control-label">target collection</label>
 			<div class="col-sm-10 nopad hidden" id="collections_list">
-				<select class="form-control" id="collections"></select>
+				<select class="form-control" id="collection"></select>
+				<span class="form-control-feedback" aria-hidden="true"></span>
+				<span class="form-control-feedback-text text-danger hidden"></span>
 			</div>
-			<div class="col-sm-10 nopad" id="collections_text">
-				<div id="collections_loading" class="loading-inline hidden"><span class="sr-only">loading collections...</span></div>
-				<label class="control-label has-error" id="user_status">please type an email address first!</label>
+			<div class="col-sm-10 nopad" id="collections_loading">
+				<div class="loading-inline"></div>
+				<label class="control-label">checking user...</label>
 			</div>
 		</div>
 	</form>
@@ -66,8 +69,10 @@
 	<p style="height:3ex"></p>
 	<div class="row">
 		<!-- FIXME where does this go after archiving has finished? -->
+<!--
 		<a class="btn btn-default col-sm-3" href="/license.html">← previous</a>
-		<a class="btn btn-primary col-sm-2 col-sm-offset-7" id="next_button">next →</a>
+-->
+		<a class="btn btn-primary disabled col-sm-2 col-sm-offset-10" id="next_button">next →</a>
 	</div>
 	<p style="height:3ex"></p>
 </div></body>

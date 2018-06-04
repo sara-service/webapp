@@ -5,11 +5,12 @@ import javax.servlet.http.HttpSession;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.view.RedirectView;
 
 import bwfdm.sara.project.Project;
+import bwfdm.sara.project.RefAction;
+import bwfdm.sara.project.RefAction.PublicationMethod;
 import bwfdm.sara.transfer.Task.TaskStatus;
 
 @RestController
@@ -33,14 +34,26 @@ public class Push {
 		return tx.getPushStatus();
 	}
 
-	@GetMapping("web-url")
-	@ResponseBody
-	public String getWebUrl(final HttpSession session) {
+	@GetMapping("trigger")
+	public RedirectView triggerCloneAndRedirect(final HttpSession session) {
+		triggerClone(session);
+		return new RedirectView("/push.html");
+	}
+
+	@GetMapping("redirect")
+	public RedirectView getWebUrl(final HttpSession session) {
 		// TODO should kill the TransferRepo at around this point
 		// (but definitely not HERE!)
+		Project project = Project.getInstance(session);
+		if (isArchiveOnly(project))
+			return new RedirectView("/done.html");
+		return new RedirectView("/publish.html");
+	}
 
-		// we're done now; there is no point for the user to go back
-		// FIXME replace with some info page
-		return Project.getInstance(session).getWebURL();
+	private boolean isArchiveOnly(final Project project) {
+		for (RefAction action : project.getFrontendDatabase().getRefActions())
+			if (action.publicationMethod != PublicationMethod.ARCHIVE_HIDDEN)
+				return false;
+		return true;
 	}
 }

@@ -1,10 +1,9 @@
 "use strict";
 
-function saveAndContinue() {
-	var lic = $("#declare :selected");
-	API.post("save license selection", "/api/licenses/all",
-		{ license: lic.val() }, function() {
-			location.href = "/publish.html";
+function saveAndContinue(data) {
+	API.post("save license selection", "/api/licenses",
+		{ license: data.all }, function() {
+			location.href = "/overview.html";
 		});
 }
 
@@ -18,7 +17,7 @@ function initSingleLicense(info) {
 		});
 
 	var detected = info.detected.length > 0 ? info.detected[0] : null;
-	initLicenseList(form, info.supported, detected, info.user);
+	initLicenseList("all", form, info.supported, detected, info.user);
 	$("#declare_group").removeClass("hidden");
 
 	if (detected != null) {
@@ -36,9 +35,9 @@ function initSingleLicense(info) {
 
 	// enable the right button
 	if (info.missing)
-		loadingFinished("confirm_missing", [form]);
+		loadingFinished("confirm_missing", [form.declare]);
 	else
-		loadingFinished("confirm_single", [form]);
+		loadingFinished("confirm_single", [form.declare]);
 }
 
 function initMultiLicense(licenses, missing) {

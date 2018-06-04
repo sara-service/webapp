@@ -12,11 +12,8 @@ public enum MetadataField {
 	DESCRIPTION("description"),
 	/** software version number */
 	VERSION("version"),
-	/**
-	 * branch the version number was read from. this isn't really a metadatum,
-	 * but it should be remembered for the user's next visit anyway.
-	 */
-	VERSION_BRANCH("versionbranch"),
+	/** primary (default) branch in repo. */
+	MAIN_BRANCH("master"),
 	/** ID of the institutional repository to publish the item in */
 	PUBLICATION_REPOSITORY("pubrepo"),
 	/**
