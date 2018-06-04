@@ -4,8 +4,14 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.PushCommand;
 import org.eclipse.jgit.api.RemoteAddCommand;
@@ -22,6 +28,11 @@ import bwfdm.sara.git.ArchiveRepo;
 import bwfdm.sara.git.ArchiveRepo.ProjectExistsException;
 import bwfdm.sara.project.MetadataField;
 import bwfdm.sara.project.Ref;
+import bwfdm.sara.publication.Archive;
+import bwfdm.sara.publication.Item;
+import bwfdm.sara.publication.PublicationRepository;
+import bwfdm.sara.publication.Source;
+import bwfdm.sara.publication.db.PublicationDatabase;
 
 public class PushTask extends Task {
 	private static final String TARGET_REMOTE = "target";
@@ -31,11 +42,13 @@ public class PushTask extends Task {
 	private final ArchiveRepo archive;
 	private final Map<MetadataField, String> meta;
 	private final boolean visible;
+	private final PublicationDatabase pubDB;
 	private ArchiveProject project;
 
-	public PushTask(final TransferRepo repo, final Collection<Ref> refs,
-			final ArchiveRepo archive, final Map<MetadataField, String> meta,
-			final boolean visible) {
+	public PushTask(final TransferRepo repo, final Collection<Ref> refs, final ArchiveRepo archive,
+			final Map<MetadataField, String> meta, final boolean visible,
+			final PublicationDatabase pubDB) {
+		this.pubDB = pubDB;
 		this.repo = repo.getRepo();
 		this.refs = refs;
 		this.archive = archive;
@@ -91,6 +104,75 @@ public class PushTask extends Task {
 
 		project.setCredentials(push);
 		push.setProgressMonitor(this).call();
+
+		beginTask("write dspace item into database", 1);
+		createItemInDB(project.getWebURL(), meta);
+		endTask();
+	}
+
+	private String createItemInDB(final String webURL, Map<MetadataField, String> meta) {
+		final String sourceName = "Generisches Arbeits-GitLab (bwCloud Konstanz)";
+		final String archiveName = "Testarchiv";
+		final String contactEMail = "s.k@gmail.com";
+
+		List<Source> sources = pubDB.getList(Source.class);
+		Source source = null;
+
+		for (final Source s : sources) {
+			if (s.display_name.equals(sourceName)) {
+				source = s;
+				break;
+			}
+		}
+
+		List<Archive> archives = pubDB.getList(Archive.class);
+		Archive archive = null;
+
+		for (final Archive a : archives) {
+			if (a.display_name.equals(archiveName)) {
+				archive = a;
+				break;
+			}
+		}
+
+		if ( (source == null) || (archive == null) ) {
+			logger.error("Error creating item with source=" + sourceName + "//archive=" + archiveName);
+			return null;
+		} else {
+			logger.info("Creating item with source=" + sourceName + "//archive=" + archiveName);
+		}
+		
+		
+		Item i = new Item();
+		i.archive_uuid = archive.uuid;
+		i.source_uuid = source.uuid;
+		i.item_state = "CREATED";
+		i.item_state_sent = "CREATED";
+		i.item_type = "ARCHIVE_HIDDEN";
+		i.contact_email = contactEMail;
+		
+		i.date_created = new Date();
+		i.date_last_modified = i.date_created;
+		
+		i = pubDB.insertInDB(i);
+		
+
+		/*
+		Map<String, String> metadataMap = new HashMap<String, String>();
+
+		metadataMap.put("abstract", meta.get(MetadataField.DESCRIPTION));
+		metadataMap.put("contributor", meta.get(MetadataField.PUBREPO_LOGIN_EMAIL));
+		metadataMap.put("title", meta.get(MetadataField.TITLE));
+		metadataMap.put("identifier", meta.get(MetadataField.VERSION)); 
+		metadataMap.put("type", "Software Sources");
+		metadataMap.put("publisher", "SARA Service");
+		metadataMap.put("source", webURL);
+		metadataMap.put("dateSubmitted", new Date().toString());
+		*/
+
+		logger.info("Item submission succeeded with item uuid " + i.uuid.toString());
+
+		return "HAPPY WORKFLOW COMPLETED :)";
 	}
 
 	public String getWebURL() {

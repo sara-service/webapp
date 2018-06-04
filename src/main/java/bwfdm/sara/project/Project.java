@@ -10,6 +10,7 @@ import bwfdm.sara.Config;
 import bwfdm.sara.api.Authorization;
 import bwfdm.sara.db.ConfigDatabase;
 import bwfdm.sara.db.FrontendDatabase;
+import bwfdm.sara.publication.db.PublicationDatabase;
 import bwfdm.sara.extractor.MetadataExtractor;
 import bwfdm.sara.git.GitProject;
 import bwfdm.sara.git.GitRepo;
@@ -185,7 +186,7 @@ public class Project {
 			push = new PushTask(getTransferRepo(),
 					getFrontendDatabase().getSelectedRefs(),
 					config.getConfigDatabase().newGitArchive(archiveID), meta,
-					true);
+					true, config.getPublicationDatabase());
 		}
 		push.start();
 	}

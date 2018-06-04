@@ -18,7 +18,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public abstract class Task implements ProgressMonitor, Runnable {
-	private static final Log logger = LogFactory.getLog(Task.class);
+	protected static final Log logger = LogFactory.getLog(Task.class);
 
 	private final List<Step> steps = new ArrayList<>();
 	private Map<String, Step> declaredSteps;
