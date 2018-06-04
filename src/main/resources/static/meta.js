@@ -100,7 +100,7 @@ function initFields(info) {
 		$.each(values, function(field, value) {
 			data[field] = {
 				user: value,
-				update: $("#update_" + field).prop("checked") 
+				update: $("#update_" + field).prop("checked")
 			};
 		});
 		API.put("save fields", "/api/meta", data, function() {

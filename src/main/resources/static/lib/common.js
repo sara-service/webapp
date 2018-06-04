@@ -136,7 +136,7 @@ validate.init = function(field, value, validator, updateHook) {
 	var elem = typeof field == "string" ? $("#" + field) : field;
 	elem.data("validator", validator);
 	elem.data("updateHook", updateHook);
-	elem.on("select change keyup paste focusout", function() {
+	elem.on("select change keyup paste input focusout", function() {
 		validate.check(elem);
 	});
 	if (value !== null)

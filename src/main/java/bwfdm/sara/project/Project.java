@@ -210,7 +210,8 @@ public class Project {
 	 * for multiple changes.
 	 */
 	public void invalidateMetadata() {
-		cancelPush();
+		// FIXME change to PushTaskConfig to this is safe to do
+		// cancelPush();
 		// FIXME is there anything else we need to do here?
 	}
 
