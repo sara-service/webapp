@@ -157,7 +157,7 @@ validate.check = function(field, disableFeedback) {
 	var valid = res === true || res === null;
 	var updateHook = elem.data("updateHook");
 	if (updateHook)
-		updateHook(elem.val(), valid, elem);
+		updateHook(elem.val(), valid, elem, disableFeedback);
 	return valid;
 }
 

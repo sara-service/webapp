@@ -126,11 +126,11 @@ function initPubRepos(info) {
 		if (value == null)
 			return "Please select your institutional repository!";
 		return true;
-	}, function() {
+	}, function(valud, valid, elem, disableFeedback) {
 		// delegate to email validation. the two fields have basically the
 		// same role (influencing the collection list), but we want the UI
 		// messages below the email to which they refer.
-		validate.check("email");
+		validate.check("email", disableFeedback);
 	});
 
 	validate.init("collection", null, function(value) {
@@ -164,4 +164,7 @@ function initPubRepos(info) {
 $(function() {
 	API.get("load list of institutional repositories", "/api/publish", {},
 			initPubRepos);
+	$("form").submit(function() {
+		return false;
+	});
 });
