@@ -1,23 +1,5 @@
 "use strict";
 
-var publish = {
-	PUBLISH_FULL: {
-		sara: "sara-green",
-		text: "publish full history of" },
-	PUBLISH_ABBREV: {
-		sara: "sara-blue",
-		text: "publish abbreviated history of" },
-	PUBLISH_LATEST: {
-		sara: "sara-red",
-		text: "publish latest version of" },
-	ARCHIVE_PUBLIC: {
-		sara: "sara-orange",
-		text: "archive with public record" },
-	ARCHIVE_HIDDEN: {
-		sara: "sara-cyan",
-		text: "archive without record" }
-};
-
 var has_block = { meta: false, publish: false };
 
 function blockLoaded(name) {
