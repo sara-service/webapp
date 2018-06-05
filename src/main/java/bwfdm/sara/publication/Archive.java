@@ -22,7 +22,7 @@ public class Archive implements DAO {
 	@DatabaseField
 	public String adapter;
 	@DatabaseField
-	public String logo_base64;
+	public String logo_url;
 	@DatabaseField
 	public boolean enabled;
 
