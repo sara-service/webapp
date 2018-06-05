@@ -127,6 +127,16 @@ function initPubRepos(info) {
 			return "Please select your institutional repository!";
 		return true;
 	}, function(valud, valid, elem, disableFeedback) {
+		var repo = $("#pubrepo :selected").data("repo");
+		var logo = repo ? repo.logo_url : null;
+		if (logo && !logo.match(/^(https:\/\/|data:)/))
+			// insecure URL will cause a mixed content warning. give the IR
+			// operator a very good reason to fix that:
+			logo = "/insecure.svg";
+		if (logo)
+			$("#ir_logo").attr("src", logo);
+		else
+			$("#ir_logo").removeAttr("src");
 		// delegate to email validation. the two fields have basically the
 		// same role (influencing the collection list), but we want the UI
 		// messages below the email to which they refer.

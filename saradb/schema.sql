@@ -18,7 +18,7 @@ CREATE TABLE archive(
 	url text NOT NULL, -- user-visible URL of repository
 	contact_email text NOT NULL, -- an email address to contact the archive
 	adapter text NOT NULL,
-	logo_base64 text, -- base64-encoded "data:" url for logo (optional)
+	logo_url text, -- URL of logo, either https:// or data: (optional)
 	enabled boolean NOT NULL
 );
 
@@ -38,7 +38,7 @@ CREATE TABLE source(
 	url text NOT NULL, -- user-visible URL of repository
 	contact_email text NOT NULL, -- an email address to contact the source
 	adapter text NOT NULL,
-	logo_base64 text, -- base64-encoded "data:" url for logo (optional)
+	logo_url text, -- URL of logo, either https:// or data: (optional)
 	enabled boolean NOT NULL
 );
 
@@ -58,7 +58,7 @@ CREATE TABLE repository(
 	url text NOT NULL, -- user-visible URL of repository
 	contact_email text NOT NULL, -- an email address to contact the repository
 	adapter text NOT NULL,
-	logo_base64 text, -- logo in base64 encoding for direct usage in <img> element
+	logo_url text, -- URL of logo, either https:// or data: (optional)
 	enabled boolean NOT NULL
 );
 
