@@ -152,7 +152,7 @@ function initPubRepos(info) {
 			};
 		});
 		API.put("save fields", "/api/meta", data, function() {
-			location.href = "/pubmeta.html";
+			location.href = "/summary.html";
 		});
 	});
 	$("#next_button").removeClass("disabled");

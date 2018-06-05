@@ -18,7 +18,7 @@ var publish = {
 		text: "archive without record" }
 };
 
-var has_block = { meta: false, branches: false };
+var has_block = { meta: false, branches: false, licenses: false };
 
 function blockLoaded(name) {
 	has_block[name] = true;
@@ -91,12 +91,4 @@ $(function() {
 	API.get("load metadata fields", "/api/meta", {}, initMeta);
 	API.get("load license choice", "/api/licenses", {}, initLicenses);
 	API.get("load branch list", "/api/repo/actions", {}, initBranches);
-
-	API.get("get selected IR", "/api/meta", {}, function (meta){
-		// FIXME replace IR + collection with the more user-friendly names here
-		$("#ir_name").text(meta.pubrepo.value);
-		$("#collection_displayname").text(meta.collection.value);
-		$("#login").text(meta.email.value);
-		blockLoaded("publish");
-	});
 });
