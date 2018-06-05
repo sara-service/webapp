@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.view.RedirectView;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -56,6 +57,15 @@ public class Publication {
 			this.metadata = meta;
 			this.repos = repos;
 		}
+	}
+
+	@GetMapping("trigger")
+	public RedirectView triggerPublication() {
+		if (true)
+			// TODO
+			throw new UnsupportedOperationException(
+					"here be code to publish stuff");
+		return new RedirectView("/get-lost.html");
 	}
 
 	@PostMapping("query-hierarchy")
