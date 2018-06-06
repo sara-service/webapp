@@ -91,6 +91,10 @@ public class Project {
 		checkHaveProject();
 		return db;
 	}
+	
+	public PublicationDatabase getPublicationDatabase() {
+		return config.getPublicationDatabase();
+	}
 
 	private void checkHaveTransferRepo() {
 		if (!transferRepo.isUpToDate())
@@ -182,11 +186,9 @@ public class Project {
 			final String archiveID = config.getConfigDatabase().getGitArchive();
 			final Map<MetadataField, String> meta = metadataExtractor
 					.get(MetadataField.values());
+			
 			meta.putAll(getFrontendDatabase().getMetadata());
-			push = new PushTask(getTransferRepo(),
-					getFrontendDatabase().getSelectedRefs(),
-					config.getConfigDatabase().newGitArchive(archiveID), meta,
-					true, config.getPublicationDatabase());
+			push = new PushTask(new ArchiveJob(this, archiveID), getPublicationDatabase());
 		}
 		push.start();
 	}
