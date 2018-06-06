@@ -3,8 +3,6 @@ package bwfdm.sara.transfer;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Map;
 
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.PushCommand;
@@ -12,35 +10,23 @@ import org.eclipse.jgit.api.RemoteAddCommand;
 import org.eclipse.jgit.api.RemoteRemoveCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Constants;
-import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.transport.RefSpec;
 import org.eclipse.jgit.transport.URIish;
 
 import bwfdm.sara.Config;
 import bwfdm.sara.git.ArchiveProject;
-import bwfdm.sara.git.ArchiveRepo;
 import bwfdm.sara.git.ArchiveRepo.ProjectExistsException;
-import bwfdm.sara.project.MetadataField;
+import bwfdm.sara.project.ArchiveJob;
 import bwfdm.sara.project.Ref;
 
 public class PushTask extends Task {
 	private static final String TARGET_REMOTE = "target";
 
-	private final Repository repo;
-	private final Collection<Ref> refs;
-	private final ArchiveRepo archive;
-	private final Map<MetadataField, String> meta;
-	private final boolean visible;
+	private final ArchiveJob job;
 	private ArchiveProject project;
 
-	public PushTask(final TransferRepo repo, final Collection<Ref> refs,
-			final ArchiveRepo archive, final Map<MetadataField, String> meta,
-			final boolean visible) {
-		this.repo = repo.getRepo();
-		this.refs = refs;
-		this.archive = archive;
-		this.meta = meta;
-		this.visible = visible;
+	public PushTask(final ArchiveJob job) {
+		this.job = job;
 	}
 
 	@Override
@@ -61,10 +47,10 @@ public class PushTask extends Task {
 
 		final String id = Config.getRandomID();
 		beginTask("Creating project " + id, 1);
-		project = archive.createProject(id, visible, meta);
+		project = job.archive.createProject(id, false, job.meta);
 
 		beginTask("Preparing repository for upload", 1);
-		final Git git = Git.wrap(repo);
+		final Git git = Git.wrap(job.clone.getRepo());
 		// remove remote before recreating it. it may otherwise still contain
 		// stale information from a previous execution.
 		final RemoteRemoveCommand rm = git.remoteRemove();
@@ -79,8 +65,9 @@ public class PushTask extends Task {
 		update(1);
 
 		final PushCommand push = git.push();
-		final ArrayList<RefSpec> spec = new ArrayList<RefSpec>(refs.size());
-		for (final Ref r : refs) {
+		final ArrayList<RefSpec> spec = new ArrayList<RefSpec>(
+				job.selectedRefs.size());
+		for (final Ref r : job.selectedRefs) {
 			final String path = Constants.R_REFS + r.path;
 			// TODO send locally-created refs unchanged
 			spec.add(new RefSpec().setSourceDestination(path, path)

@@ -1,7 +1,5 @@
 package bwfdm.sara.project;
 
-import java.util.Map;
-
 import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -179,13 +177,7 @@ public class Project {
 			// api.Push is a much better place...
 			// FIXME archiveID should be dynamic
 			final String archiveID = config.getConfigDatabase().getGitArchive();
-			final Map<MetadataField, String> meta = metadataExtractor
-					.get(MetadataField.values());
-			meta.putAll(getFrontendDatabase().getMetadata());
-			push = new PushTask(getTransferRepo(),
-					getFrontendDatabase().getSelectedRefs(),
-					config.getConfigDatabase().newGitArchive(archiveID), meta,
-					true);
+			push = new PushTask(new ArchiveJob(this, archiveID));
 		}
 		push.start();
 	}
