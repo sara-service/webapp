@@ -82,6 +82,8 @@ function updateCollections(_, valid) {
 	// if either field is invalid, don't even bother checking
 	var pubrepoValid = $("#pubrepo").val() != null;
 	if (!valid || !pubrepoValid) {
+		$("#collections_list").removeClass("hidden");
+		$("#collections_loading").addClass("hidden");
 		collection.prop("disabled", true);
 		return;
 	}
@@ -120,9 +122,9 @@ function initPubRepos(info) {
 		select.append(option);
 	});
 
-	validate.init("email", info.meta.email.value, validateEmail,
+	validate.init("email", info.meta.email, validateEmail,
 		updateCollections);
-	validate.init("pubrepo", info.meta.pubrepo.value, function(value) {
+	validate.init("pubrepo", info.meta.pubrepo, function(value) {
 		if (value == null)
 			return "Please select your institutional repository!";
 		return true;
@@ -148,7 +150,7 @@ function initPubRepos(info) {
 			return "Please select a collection (usually, your department)!";
 		return true;
 	});
-	initialCollection = info.meta.collection.value;
+	initialCollection = info.meta.collection;
 
 	$("#next_button").click(function() {
 		var values = validate.all(["pubrepo", "email", "collection"]);
