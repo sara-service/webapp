@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.UUID;
 
 import javax.sql.DataSource;
 
@@ -16,6 +17,7 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import bwfdm.sara.db.JacksonTemplate;
+import bwfdm.sara.publication.PublicationMetadatum;
 import bwfdm.sara.publication.PublicationRepository;
 import bwfdm.sara.publication.PublicationRepositoryFactory;
 import bwfdm.sara.publication.Repository;
@@ -54,20 +56,40 @@ public class PublicationDatabase {
 	}
 
 	/**
-	 * Retrieves a list of DAO entries for given table
+	 * Retrieves a list of all DAO entries for given table
 	 * 
-	 * @param tableName
-	 *            the name of the table in the database
+	 * @param cls
+	 *            Class of the DAO, which must be annotated with
+	 *            {@link TableName} to give the name of the database table
 	 * @return list of entries of the given table contained in the database
 	 */
 	public <D extends DAO> List<D> getList(Class<D> cls) {
-		List<Map<String, Object>> mapList = db.queryForList("select * from " + getTableName(cls));
+		return getList(cls, "");
+	}
+	
+	/**
+	 * Retrieves a list of all DAO entries matching a given where clause
+	 * 
+	 * @param cls
+	 *            Class of the DAO, which must be annotated with
+	 *            {@link TableName} to give the name of the database table
+	 * @param where
+	 *            the full WHERE clause, including the {@code WHERE} keyword (so
+	 *            it can be empty if there is no WHERE clause)
+	 * @param args
+	 *            parameters substituted for ? in the where clause
+	 * @return list of entries of the given table contained in the database
+	 */
+	public <D extends DAO> List<D> getList(Class<D> cls, String where,
+			Object... args) {
+		List<Map<String, Object>> mapList = db.queryForList(
+				"select * from " + getTableName(cls) + " " + where, args);
 		List<D> elems = new ArrayList<>();
 		for (Map<String, Object> entryMap : mapList)
 			elems.add(createDAO(cls, entryMap));
 		return elems;
 	}
-	
+
 	private <D extends DAO> D createDAO(Class<? extends D> cls,
 			Map<String, Object> fields) {
 		// create empty object from just the primary key columns
@@ -159,6 +181,19 @@ public class PublicationDatabase {
 				+ where.getClause(), where.appendParams(values, d));
 	}
 
+	/**
+	 * "Upserts" the DAO into the database, ie. inserts it replacing any
+	 * previous rows with the same key.
+	 * 
+	 * @param d
+	 *            The DAO and all its values to be updated.
+	 */
+	public void upsertInDB(DAO d) throws DataAccessException {
+		// FIXME should probably perform a proper upsert, with atomicity etc.
+		deleteFromDB(d);
+		insertInDB(d);
+	}
+
 	private String getTableName(Class<?> cls) {
 		return cls.getAnnotation(TableName.class).value();
 	}
@@ -203,7 +238,7 @@ public class PublicationDatabase {
 	/** @return a list of all supported publication repositories */
 	
 	public List<PublicationRepository> getPubRepos() {
-	 
+		// FIXME why does this convert a list into a... list??
 		List<PublicationRepository> repos = new ArrayList<PublicationRepository>();
 		for (final Repository r: getList(Repository.class)) {
 			repos.add(newPublicationRepository(r));
@@ -211,6 +246,26 @@ public class PublicationDatabase {
 		return repos;
 	}
     
+	public Map<PublicationField, String> getMetadata(final UUID item) {
+		List<PublicationMetadatum> data = getList(PublicationMetadatum.class,
+				"where item_uuid = ?", item);
+		Map<PublicationField, String> map = new HashMap<PublicationField, String>(
+				data.size());
+		for (PublicationMetadatum datum : data)
+			map.put(PublicationField.forDisplayName(datum.field), datum.value);
+		return map;
+	}
+
+	public void setMetadata(final UUID item,
+			final Map<PublicationField, String> values) {
+		for (PublicationField field : values.keySet()) {
+			final PublicationMetadatum row = new PublicationMetadatum(
+					item, field.getDisplayName());
+			row.value = values.get(field);
+			upsertInDB(row);
+		}
+	}
+
 	public static SortedSet<String> getPrimaryKey(Class<? extends DAO> cls) {
 		final SortedSet<String> fields = new TreeSet<>();
 		for (final Field f : cls.getFields())

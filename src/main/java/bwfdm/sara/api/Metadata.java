@@ -42,7 +42,7 @@ public class Metadata {
 	}
 
 	@PutMapping("")
-	public void setAllFields( // FIXME setMultipleFields
+	public void setMultipleFields(
 			@RequestBody final Map<MetadataField, MetadataValue> values,
 			final HttpSession session) {
 		final Project project = Project.getInstance(session);

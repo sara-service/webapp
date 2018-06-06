@@ -25,7 +25,7 @@ CREATE TABLE archive(
 -- Table: archive_params
 -- e.g. oauth_id, oauth_secret ...
 CREATE TABLE archive_params(
-	id UUID REFERENCES archive(uuid) on delete cascade,
+	id UUID REFERENCES archive(uuid) ON DELETE CASCADE,
 	param text NOT NULL,
 	value text NOT NULL,
 	PRIMARY KEY (id, param)
@@ -45,7 +45,7 @@ CREATE TABLE source(
 -- Table: source_params
 -- e.g. api_endpoint, oauth_id, oauth_secret ...
 CREATE TABLE source_params(
-	id UUID REFERENCES source(uuid) on delete cascade,
+	id UUID REFERENCES source(uuid) ON DELETE CASCADE,
 	param text NOT NULL,
 	value text NOT NULL,
 	PRIMARY KEY (id, param)
@@ -65,7 +65,7 @@ CREATE TABLE repository(
 -- Table: repository_params
 -- e.g. version {query,submit}_{api_endpoint,user,pwd}, default_collection ...
 CREATE TABLE repository_params(
-	id UUID REFERENCES repository(uuid) ON DELETE cascade,
+	id UUID REFERENCES repository(uuid) ON DELETE CASCADE,
 	param text NOT NULL,
 	value text NOT NULL,
 	PRIMARY KEY (id, param)
@@ -75,9 +75,9 @@ CREATE TABLE repository_params(
 CREATE TABLE item(
 	uuid UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 
-	source_uuid UUID NOT NULL REFERENCES source(uuid) ON DELETE restrict,
-	archive_uuid UUID NOT NULL REFERENCES archive(uuid) ON DELETE restrict,
-	repository_uuid UUID REFERENCES repository(uuid) ON DELETE restrict,
+	source_uuid UUID NOT NULL REFERENCES source(uuid) ON DELETE RESTRICT,
+	archive_uuid UUID NOT NULL REFERENCES archive(uuid) ON DELETE RESTRICT,
+	repository_uuid UUID REFERENCES repository(uuid) ON DELETE RESTRICT,
 
 	contact_email text NOT NULL,
 
@@ -101,7 +101,7 @@ CREATE TABLE item(
 -- Table: metadatamapping (WIP)
 CREATE TABLE metadatamapping(
 	uuid UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-	repository_uuid UUID REFERENCES repository(uuid) ON DELETE cascade,
+	repository_uuid UUID REFERENCES repository(uuid) ON DELETE CASCADE,
 	display_name text NOT NULL,
 	map_from text NOT NULL,
 	map_to text NOT NULL, -- foreign uuid
@@ -112,10 +112,20 @@ CREATE TABLE metadatamapping(
 
 -- Table: metadatavalue (WIP)
 CREATE TABLE metadatavalue(
-	item_uuid UUID REFERENCES item ON DELETE cascade,
+	item_uuid UUID REFERENCES item(uuid) ON DELETE CASCADE,
 	metadatamapping_uuid UUID REFERENCES metadatamapping(uuid) ON DELETE SET NULL,
 	map_from text NOT NULL,
 	data text NOT NULL
+);
+
+-- temp storage of publication metadata fields for publication frontend
+CREATE TABLE fe_temp_pubmeta(
+	item_uuid UUID REFERENCES item(uuid) ON DELETE CASCADE,
+	field text NOT NULL,
+	value text NOT NULL,
+	CHECK (field in ('title', 'description', 'version', 'pubrepo', 'collection',
+		'email')),
+	PRIMARY KEY (item_uuid, field)
 );
 
 -- branch selection
@@ -139,14 +149,13 @@ CREATE TABLE fe_temp_licenses(
 	PRIMARY KEY (repo, project, ref)
 );
 
--- metadata fields
+-- archiving metadata fields (ie. basic metadata only)
 CREATE TABLE fe_temp_metadata(
 	repo text NOT NULL,
 	project text NOT NULL,
 	field text NOT NULL,
 	value text NOT NULL,
-	CHECK (field in ('title', 'description', 'version', 'master',
-		'pubrepo', 'collection', 'email')),
+	CHECK (field in ('title', 'description', 'version', 'master')),
 	PRIMARY KEY (repo, project, field)
 );
 

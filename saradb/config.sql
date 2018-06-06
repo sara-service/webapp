@@ -130,6 +130,9 @@ INSERT INTO item(source_uuid, archive_uuid, repository_uuid, contact_email, item
 		now(), now())
 	RETURNING uuid INTO iRef;
 
+-- FIXME temporary fix to fulfil constraints until items are created for real!
+UPDATE item SET uuid = 'deadbeef-dead-dead-dead-beeeeeeeeeef';
+
 -- erase the temporary large objects
 PERFORM lo_unlink(kops_logo), lo_unlink(oparu_logo), lo_unlink(testarchiv_privkey),
 	lo_unlink(testarchiv_pubkey), lo_unlink(testarchiv_known);

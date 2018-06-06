@@ -16,6 +16,7 @@ import bwfdm.sara.transfer.PushTask;
 import bwfdm.sara.transfer.Task.TaskStatus;
 import bwfdm.sara.transfer.TransferRepo;
 
+// FIXME rename to ArchiveSession for consistency with PublicationSession
 public class Project {
 	private static final String PROJECT_ATTR = Project.class.getCanonicalName();
 
@@ -188,10 +189,8 @@ public class Project {
 		push = null;
 	}
 
-	public TaskStatus getPushStatus() {
-		if (push != null)
-			return push.getStatus();
-		return null;
+	public PushTask getPushTask() {
+		return push;
 	}
 
 	/**
@@ -207,8 +206,8 @@ public class Project {
 		// FIXME is there anything else we need to do here?
 	}
 
-	public String getWebURL() {
-		return push.getWebURL();
+	Config getConfig() {
+		return config;
 	}
 
 	public static Project getInstance(final HttpSession session) {

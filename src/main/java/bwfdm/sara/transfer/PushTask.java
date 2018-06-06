@@ -3,6 +3,7 @@ package bwfdm.sara.transfer;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.UUID;
 
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.PushCommand;
@@ -80,10 +81,15 @@ public class PushTask extends Task {
 		push.setProgressMonitor(this).call();
 	}
 
-	public String getWebURL() {
+	public ArchiveJob getArchiveJob() {
+		return job;
+	}
+
+	public UUID getItemUUID() {
 		if (!isDone())
 			throw new IllegalStateException(
-					"getWebURL() on in-progress PushTask");
-		return project.getWebURL();
+					"getItemUUID() on in-progress PushTask");
+		// FIXME return the actual item UUID here
+		return UUID.fromString("deadbeef-dead-dead-dead-beeeeeeeeeef");
 	}
 }

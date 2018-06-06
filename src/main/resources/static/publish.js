@@ -156,14 +156,7 @@ function initPubRepos(info) {
 		var values = validate.all(["pubrepo", "email", "collection"]);
 		if (values == null)
 			return;
-		var data = {};
-		$.each(values, function(field, value) {
-			data[field] = {
-				user: value,
-				update: false
-			};
-		});
-		API.put("save fields", "/api/meta", data, function() {
+		API.put("save fields", "/api/publish/meta", values, function() {
 			location.href = "/summary.html";
 		});
 	});
