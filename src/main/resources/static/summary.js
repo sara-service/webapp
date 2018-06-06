@@ -26,8 +26,5 @@ function initMeta(info) {
 }
 
 $(function() {
-	API.get("initialize page", "/api/session-info", {}, function(info) {
-		$("#project").text(info.project);
-	});
 	API.get("load metadata fields", "/api/publish/meta", {}, initMeta);
 });

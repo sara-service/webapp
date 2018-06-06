@@ -8,38 +8,68 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import bwfdm.sara.Config;
 import bwfdm.sara.api.Authorization;
+import bwfdm.sara.git.AuthProvider;
+import bwfdm.sara.publication.Item;
 import bwfdm.sara.publication.db.PublicationDatabase;
 
 public class PublicationSession {
 	private static final String PROJECT_ATTR = PublicationSession.class.getCanonicalName();
 
 	private final Config config;
-	private final String email;
-	private final String gitRepo;
-	private final UUID item;
+	private final UUID sourceUUID;
+	private final UUID itemUUID;
+	private final AuthProvider auth;
+	private String email;
+	private Item item;
 
-	private PublicationSession(final String gitRepo, final String email,
-			final UUID item,
-			final Config config) {
-		this.gitRepo = gitRepo;
-		this.email = email;
-		this.item = item;
+	private PublicationSession(final UUID sourceUUID, final AuthProvider auth,
+			final UUID itemUUID, final Config config) {
+		this.sourceUUID = sourceUUID;
+		this.auth = auth;
+		this.itemUUID = itemUUID;
 		this.config = config;
 	}
 
-	public String getRepoID() {
-		return gitRepo;
+	public UUID getSourceUUID() {
+		return sourceUUID;
 	}
 
-	public String getGitRepoEmail() {
+	public UUID getItemUUID() {
+		return itemUUID;
+	}
+
+	public String getSourceEmail() {
 		return email;
 	}
 
-	public UUID getArchiveItem() {
+	public void initialize() {
+		this.email = "stefan.kombrink@uni-ulm.de";
+		// FIXME implement getUserInfo()
+		// this.email = auth.getUserInfo().email;
+
+		// check that the user actually owns the item, and show a nasty error
+		// message if not
+		final Item item = config.getPublicationDatabase()
+				.updateFromDB(new Item(itemUUID));
+		// FIXME shouldn't check contact_email but source_login_email!
+		if (!item.source_uuid.equals(sourceUUID)
+				|| !item.contact_email.equals(email))
+			throw new InvalidItemException(email);
+		this.item = item;
+	}
+
+	private void checkHaveItem() {
+		if (item == null)
+			throw new NoSessionException();
+	}
+
+	public Item getItem() {
+		checkHaveItem();
 		return item;
 	}
 
 	public PublicationDatabase getPublicationDatabase() {
+		checkHaveItem();
 		return config.getPublicationDatabase();
 	}
 
@@ -61,11 +91,11 @@ public class PublicationSession {
 	 *
 	 * @param session
 	 *            the user's {@link HttpSession}
-	 * @param gitRepo
-	 *            ID of the git repo, to qualify the email addressname
-	 * @param email
-	 *            the user's email address in that git repo
-	 * @param item
+	 * @param sourceUUID
+	 *            UUID of the data source
+	 * @param auth
+	 *            {@link AuthProvider} that authenticated the user
+	 * @param itemUUID
 	 *            UUID of the archival item which is about to be published (must
 	 *            not be <code>null</code>)
 	 * @param config
@@ -73,20 +103,16 @@ public class PublicationSession {
 	 *            have Spring inject it)
 	 */
 	public static PublicationSession createInstance(final HttpSession session,
-			final String repoID, final String email, final UUID item,
+			final UUID sourceUUID, final AuthProvider auth, final UUID itemUUID,
 			final Config config) {
-		final PublicationSession project = new PublicationSession(repoID, email,
-				item, config);
-		session.setAttribute(PROJECT_ATTR, project);
-		return project;
+		final PublicationSession publish = new PublicationSession(sourceUUID,
+				auth, itemUUID, config);
+		session.setAttribute(PROJECT_ATTR, publish);
+		return publish;
 	}
 
-	public static PublicationSession createInstance(final HttpSession session,
-			final Project project, final UUID item) {
-		// FIXME use project.getGitRepo().getUserInfo() instead
-		final String email = "root@local.host";
-		return createInstance(session, project.getRepoID(), email, item,
-				project.getConfig());
+	public AuthProvider getAuth() {
+		return auth;
 	}
 
 	@SuppressWarnings("serial")
@@ -97,9 +123,10 @@ public class PublicationSession {
 	}
 
 	@SuppressWarnings("serial")
-	public static class NoItemException extends RuntimeException {
-		private NoItemException() {
-			super("no project selected");
+	public class InvalidItemException extends RuntimeException {
+		private InvalidItemException(final String email) {
+			super("user (" + sourceUUID + ", " + email + ") not owner of "
+					+ itemUUID);
 		}
 	}
 }

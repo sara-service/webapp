@@ -206,7 +206,7 @@ public class Project {
 		// FIXME is there anything else we need to do here?
 	}
 
-	Config getConfig() {
+	public Config getConfig() {
 		return config;
 	}
 

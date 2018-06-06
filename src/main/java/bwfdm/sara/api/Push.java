@@ -62,18 +62,24 @@ public class Push {
 			return new RedirectView("/done.html");
 		}
 
+		final PublicationSession publish;
 		if (PublicationSession.hasInstance(session)) {
 			// no need to panic if we already have a publication session. but do
 			// panic if it's for a different item; that should never happen.
-			UUID prevItem = PublicationSession.getInstance(session)
-					.getArchiveItem();
+			publish = PublicationSession.getInstance(session);
+			UUID prevItem = publish.getItemUUID();
 			if (prevItem != item)
 				throw new IllegalStateException(
 						"finishArchiving would override exiting session: "
 								+ prevItem + " → " + item);
 		} else
-			// directly create new session, without another authorization query
-			PublicationSession.createInstance(session, project, item);
+			// directly create new session, inheriting authorization from
+			// archiving part. this is the common case, obviously.
+			publish = PublicationSession.createInstance(session,
+					UUID.fromString(project.getRepoID()), project.getGitRepo(),
+					item, project.getConfig());
+		publish.initialize();
+
 		return new RedirectView("/publish.html");
 	}
 }

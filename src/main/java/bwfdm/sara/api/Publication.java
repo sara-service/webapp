@@ -12,6 +12,8 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -20,12 +22,11 @@ import org.springframework.web.servlet.view.RedirectView;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import bwfdm.sara.Config;
-import bwfdm.sara.api.Metadata.MetadataValue;
-import bwfdm.sara.project.MetadataField;
-import bwfdm.sara.project.Project;
+import bwfdm.sara.project.PublicationSession;
 import bwfdm.sara.publication.Hierarchy;
 import bwfdm.sara.publication.PublicationRepository;
 import bwfdm.sara.publication.Repository;
+import bwfdm.sara.publication.db.PublicationField;
 
 @RestController
 @RequestMapping("/api/publish")
@@ -36,27 +37,48 @@ public class Publication {
 
 	@GetMapping("")
 	public PubrepoConfig getPubRepoConfig(final HttpSession session) {
-		final Project project = Project.getInstance(session);
-
-		final Map<MetadataField, MetadataValue> meta = Metadata
-				.getAllFields(null, project);
-		final List<Repository> repos = config.getPublicationDatabase()
-				.getList(Repository.class);
-
-		return new PubrepoConfig(meta, repos);
+		return new PubrepoConfig(getMetadata(session), getPubRepos());
 	}
 
 	public class PubrepoConfig {
 		@JsonProperty("meta")
-		public final Map<MetadataField, MetadataValue> metadata;
+		public final Map<PublicationField, String> metadata;
 		@JsonProperty("repos")
 		public final List<Repository> repos;
 
-		public PubrepoConfig(Map<MetadataField, MetadataValue> meta,
+		public PubrepoConfig(Map<PublicationField, String> meta,
 				List<Repository> repos) {
 			this.metadata = meta;
 			this.repos = repos;
 		}
+	}
+
+	@GetMapping("repos")
+	public List<Repository> getPubRepos() {
+		return config.getPublicationDatabase().getList(Repository.class);
+	}
+
+	@GetMapping("meta")
+	public Map<PublicationField, String> getMetadata(
+			final HttpSession session) {
+		PublicationSession project = PublicationSession.getInstance(session);
+		final Map<PublicationField, String> data = project
+				.getPublicationDatabase().getMetadata(project.getItemUUID());
+		// make sure all keys exist (JavaScript needs this)
+		for (PublicationField field : PublicationField.values())
+			if (!data.containsKey(field))
+				data.put(field, null);
+		return data;
+	}
+
+	@PutMapping("meta")
+	public void setMetadata(
+			@RequestBody final Map<PublicationField, String> values,
+			final HttpSession session) {
+		final PublicationSession project = PublicationSession
+				.getInstance(session);
+		project.getPublicationDatabase().setMetadata(project.getItemUUID(),
+				values);
 	}
 
 	@GetMapping("trigger")
@@ -72,6 +94,7 @@ public class Publication {
 	public CollectionList queryHierarchy(
 			@RequestParam("user_email") final String user_email,
 			@RequestParam("repo_uuid") final String repo_uuid) {
+		// FIXME should use WHERE clause instead!
 		List<PublicationRepository> pubRepos = config.getPublicationDatabase()
 				.getPubRepos();
 		PublicationRepository repo = getPubRepo(pubRepos, repo_uuid);

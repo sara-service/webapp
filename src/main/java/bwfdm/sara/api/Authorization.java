@@ -1,6 +1,7 @@
 package bwfdm.sara.api;
 
 import java.util.Map;
+import java.util.UUID;
 
 import javax.servlet.http.HttpSession;
 
@@ -14,8 +15,10 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 
 import bwfdm.sara.Config;
+import bwfdm.sara.git.AuthProvider;
 import bwfdm.sara.git.GitRepo;
 import bwfdm.sara.project.Project;
+import bwfdm.sara.project.PublicationSession;
 
 @RestController
 @ControllerAdvice
@@ -78,22 +81,66 @@ public class Authorization {
 				redir, session);
 	}
 
+	@GetMapping("publish")
+	public RedirectView authForPublication(
+			@RequestParam("repo") final String gitRepo,
+			@RequestParam(name = "item", required = false) final String item,
+			final RedirectAttributes redir, final HttpSession session) {
+		// if the user does not have a session for this repo, create one
+		final UUID sourceUUID = UUID.fromString(gitRepo);
+		if (!PublicationSession.hasInstance(session) || !PublicationSession
+				.getInstance(session).getSourceUUID().equals(sourceUUID)) {
+			final GitRepo repo = config.getConfigDatabase().newGitRepo(gitRepo);
+			PublicationSession.createInstance(session, sourceUUID, repo,
+					UUID.fromString(item), config);
+		}
+
+		final PublicationSession publish = PublicationSession
+				.getInstance(session);
+		final AuthProvider auth = publish.getAuth();
+		// if the user already has a session and the token still works, we're
+		// done; no need to bother the user with authorization again.
+		if (auth.hasWorkingToken())
+			return authFinished(publish);
+
+		// user doesn't have a token or it has expired. trigger authorization
+		// again.
+		return auth.triggerAuth(config.getWebRoot() + "/api/auth/redirect",
+				redir, session);
+	}
+
 	@GetMapping("redirect")
 	public RedirectView getOAuthToken(
 			@RequestParam final Map<String, String> args,
 			final RedirectAttributes redir, final HttpSession session) {
-		if (!Project.hasInstance(session))
+		final AuthProvider auth;
+		if (PublicationSession.hasInstance(session))
+			auth = PublicationSession.getInstance(session).getAuth();
+		else if (Project.hasInstance(session))
+			auth = Project.getInstance(session).getGitRepo();
+		else
 			// session has timed out before user returned. this should never
-			// happen.
+			// happen (but it just did).
 			return new RedirectView("/autherror.html");
 
-		final Project project = Project.getInstance(session);
-		if (project.getGitRepo().parseAuthResponse(args, session))
-			return authFinished(project);
+		if (!auth.parseAuthResponse(args, session))
+			// authorization failed. there isn't much we can do here;
+			// retrying probably won't help.
+			return new RedirectView("/autherror.html");
 
-		// authorization failed. there isn't much we can do here; retrying
-		// probably won't help.
-		return new RedirectView("/autherror.html");
+		if (PublicationSession.hasInstance(session))
+			return authFinished(PublicationSession.getInstance(session));
+		else if (Project.hasInstance(session))
+			return authFinished(Project.getInstance(session));
+		else
+			// huh? we did have one of those beforehand!!
+			throw new IllegalStateException(
+					"session has suddenly disappeared?!");
+	}
+
+	private RedirectView authFinished(final PublicationSession publish) {
+		publish.initialize();
+		return new RedirectView("/publish.html");
 	}
 
 	private RedirectView authFinished(final Project project) {

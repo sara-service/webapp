@@ -10,6 +10,7 @@ DECLARE testarchiv_known oid := lo_import('/saradb/config/testarchiv.known');
 
 DECLARE aRef UUID;
 DECLARE sRef UUID;
+DECLARE sRef2 UUID;
 DECLARE rRef UUID;
 DECLARE rRef2 UUID;
 DECLARE rRef3 UUID;
@@ -31,28 +32,28 @@ INSERT INTO source_params(id, param, value) VALUES
 INSERT INTO source(display_name, contact_email, adapter, url, enabled) VALUES
 	('Ulmer GitLab', 'stefan.kombrink@uni-ulm.de', 'GitLabRESTv4',
 		'https://bwcloud-vm92.rz.uni-ulm.de', TRUE)
-	RETURNING uuid INTO sRef;
+	RETURNING uuid INTO sRef2;
 INSERT INTO source_params(id, param, value) VALUES
-	(sRef, 'url', 'https://bwcloud-vm92.rz.uni-ulm.de'),
-	(sRef, 'oauthID', '2ab7716f633dc3147272e2ac95b630caaadab2f08b4761d2a2f1cc20756717bc'),
-	(sRef, 'oauthSecret', '7326d31de2a072aa558c14d4e57fe4d09ff4120548052b6b4f024250fa35e9da');
+	(sRef2, 'url', 'https://bwcloud-vm92.rz.uni-ulm.de'),
+	(sRef2, 'oauthID', '2ab7716f633dc3147272e2ac95b630caaadab2f08b4761d2a2f1cc20756717bc'),
+	(sRef2, 'oauthSecret', '7326d31de2a072aa558c14d4e57fe4d09ff4120548052b6b4f024250fa35e9da');
 
 -- GitHub "development" app (return address: http://localhost:8080/)
 INSERT INTO source(display_name, contact_email, adapter, url, enabled) VALUES
 	('GitHub, Inc. (return to localhost:8080)', 'devnull@unikn.netfuture.ch',
 		'GitHubRESTv3', 'https://github.com', TRUE)
-	RETURNING uuid INTO sRef;
+	RETURNING uuid INTO sRef2;
 INSERT INTO source_params(id, param, value) VALUES
-	(sRef, 'oauthID', 'a71475f487dc3438b132'),
-	(sRef, 'oauthSecret', 'f84451f01d60ea507955e3454526ea396a77b479');
+	(sRef2, 'oauthID', 'a71475f487dc3438b132'),
+	(sRef2, 'oauthSecret', 'f84451f01d60ea507955e3454526ea396a77b479');
 -- GitHub "test" app (return address: https://sara.unikn.netfuture.ch/)
 INSERT INTO source(display_name, contact_email, adapter, url, enabled) VALUES
 	('GitHub, Inc.', 'devnull@unikn.netfuture.ch', 'GitHubRESTv3',
 		'https://github.com', TRUE)
-	RETURNING uuid INTO sRef;
+	RETURNING uuid INTO sRef2;
 INSERT INTO source_params(id, param, value) VALUES
-	(sRef, 'oauthID', '7a0fc631e187589a8d2a'),
-	(sRef, 'oauthSecret', 'a0acf7b6eb2848e0df2a2efb8a135a97f0e65eb7');
+	(sRef2, 'oauthID', '7a0fc631e187589a8d2a'),
+	(sRef2, 'oauthSecret', 'a0acf7b6eb2848e0df2a2efb8a135a97f0e65eb7');
 
 -- "Testarchiv" default git archive
 INSERT INTO archive(display_name, contact_email, adapter, url, enabled) VALUES
