@@ -70,9 +70,10 @@ INSERT INTO archive_params(id, param, value) VALUES
 	(aRef, 'known-hosts', convert_from(lo_get(testarchiv_known), 'UTF-8'));
 
 -- Stefan's OPARU Stand-In in bwCloud (https://bwcloud-vm65.rz.uni-ulm.de:8080/xmlui/)
-INSERT INTO repository(display_name, adapter, url, contact_email, enabled, logo_base64) VALUES
+INSERT INTO repository(display_name, adapter, url, contact_email, enabled, logo_url) VALUES
 	('OPARU Ulm', 'DSpace_v6', 'https://bwcloud-vm65.rz.uni-ulm.de:8080',
-		'help@oparu.uni-ulm.de', TRUE, encode(lo_get(oparu_logo), 'base64'))
+		'help@oparu.uni-ulm.de', TRUE,
+		'data:image/svg+xml;base64,' || encode(lo_get(oparu_logo), 'base64'))
 	RETURNING uuid INTO rRef;
 INSERT INTO repository_params(id, param, value) VALUES
 	(rRef, 'rest_user', 'project-sara@uni-konstanz.de'),
@@ -85,9 +86,10 @@ INSERT INTO repository_params(id, param, value) VALUES
 --	(rRef, 'workflow_type', 'login_required');
 
 -- Fake KOPS (only for show; this doesn't work)
-INSERT INTO repository(display_name, adapter, url, contact_email, enabled, logo_base64) VALUES
+INSERT INTO repository(display_name, adapter, url, contact_email, enabled, logo_url) VALUES
 	('KOPS Konstanz', 'DSpace_v6', 'https://kops.uni-konstanz.de',
-		'kops.kim@uni-konstanz.de', TRUE, encode(lo_get(kops_logo), 'base64'))
+		'kops.kim@uni-konstanz.de', TRUE,
+		'data:image/svg+xml;base64,' || encode(lo_get(kops_logo), 'base64'))
 	RETURNING uuid INTO rRef2;
 INSERT INTO repository_params(id, param, value) VALUES
 	(rRef2, 'rest_user', 'project-sara@uni-konstanz.de'),

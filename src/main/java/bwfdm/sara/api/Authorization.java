@@ -64,9 +64,9 @@ public class Authorization {
 
 		final Project project = Project.getInstance(session);
 		final GitRepo repo = project.getGitRepo();
-		// if project selected, remember for later
-		if (projectPath != null)
-			project.setProjectPath(projectPath);
+		// if project selected, remember for later. if no project selected,
+		// remember to show the selection screen instead.
+		project.setProjectPath(projectPath);
 		// if the user already has a session and the token still works, we're
 		// done; no need to bother the user with authorization again.
 		if (repo.hasWorkingToken())

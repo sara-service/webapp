@@ -26,7 +26,7 @@
 			<h1>One at a time, please!</h1>
 		</div>
 	</div>
-	<div class="row">
+	<div class="row hidden" id="warning">
 		<div class="col-xs-12">
 			<p>You are about to start a new publishing workflow,
 			but haven't finished
@@ -38,11 +38,12 @@
 			and click the "publish" button again.</p>
 		</div>
 	</div>
+	<div id="loading" class="loading"><span class="sr-only">loading warning message, please wait...</span></div>
 
 	<p style="height:3ex"></p>
 	<div class="row">
-		<a class="btn btn-default col-sm-4" href="/branches.html">resume publication workflow for <tt class="text-muted" data-old>bar</tt></a>
-		<a class="btn btn-primary col-sm-5 col-sm-offset-3" id="change_project">start new publication workflow</a>
+		<a class="btn btn-default col-sm-4 disabled" id="keep_project">resume publication workflow for <tt class="text-muted" data-old>bar</tt></a>
+		<a class="btn btn-primary col-sm-5 col-sm-offset-3 disabled" id="change_project">start new publication workflow</a>
 	</div>
 	<p style="height:3ex"></p>
 </div></body>

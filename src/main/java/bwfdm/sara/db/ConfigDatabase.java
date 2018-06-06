@@ -69,7 +69,7 @@ public class ConfigDatabase {
 	 */
 	public GitRepo newGitRepo(final String id) {
 		final GitRepoFactory factory = db.queryRowToObject(
-				"select uuid, display_name, logo_base64, adapter from "
+				"select uuid, display_name, logo_url, adapter from "
 						+ GITREPOS_TABLE + " where uuid = UUID(?)",
 				GitRepoFactory.class, id);
 		return factory.newGitRepo(readArguments(GITREPO_PARAM_TABLE, id));
@@ -95,7 +95,7 @@ public class ConfigDatabase {
 	 */
 	public ArchiveRepo newGitArchive(final String id) {
 		final ArchiveRepoFactory factory = db.queryRowToObject(
-				"select uuid, display_name, logo_base64, adapter from "
+				"select uuid, display_name, logo_url, adapter from "
 						+ ARCHIVES_TABLE + " where uuid = UUID(?)",
 				ArchiveRepoFactory.class, id);
 		return factory.newArchiveRepo(readArguments(ARCHIVE_PARAM_TABLE, id));

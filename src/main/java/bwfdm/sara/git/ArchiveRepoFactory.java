@@ -33,7 +33,7 @@ public class ArchiveRepoFactory {
 	@JsonCreator
 	public ArchiveRepoFactory(@JsonProperty("uuid") final String id,
 			@JsonProperty("display_name") final String displayName,
-			@JsonProperty("logo_base64") final String logoURL,
+			@JsonProperty("logo_url") final String logoURL,
 			@JsonProperty("adapter") final String adapter) {
 		this.id = id;
 		this.displayName = displayName;
