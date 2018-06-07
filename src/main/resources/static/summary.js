@@ -23,8 +23,8 @@ function initMeta(info) {
 			$("#" + name).text(info[name]);
 		});
 
-	$('#pubrepo').prop('title',info["pubrepo"]);
-	$('#collection').prop('title',info["collection"]);
+	$('#pubrepo_displayname').prop('title',info["pubrepo"]);
+	$('#collection_displayname').prop('title',info["collection"]);
 	blockLoaded("meta");
 }
 
