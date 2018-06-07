@@ -88,6 +88,7 @@ public class PushTask extends Task {
 		push.setProgressMonitor(this).call();
 
 		beginTask("write dspace item into database", 1);
+
 		createItemInDB(project.getWebURL(), job.meta);
 		endTask();
 	}
@@ -98,11 +99,18 @@ public class PushTask extends Task {
 		i.source_uuid = UUID.fromString(job.sourceUUID);
 		i.item_state = "CREATED";
 		i.item_state_sent = "CREATED";
-		i.item_type = "ARCHIVE_HIDDEN";
-		i.contact_email = job.gitrepoEmail;
+		if (job.isArchiveOnly) {
+			i.item_type = "ARCHIVE_HIDDEN";
+		} else {
+			i.item_type = "ARCHIVE_PUBLIC";
+			// TODO make configurable via saradb whether items will be archived externally or within the IRs
+		}
 		
+		i.contact_email = job.gitrepoEmail;
+
+		i.contact_email = job.gitrepoEmail;
 		if (i.contact_email == null ) {
-			i.contact_email = "NN@nowhere.org";
+			i.contact_email = "NN@nowhere.noob";
 		}
 		
 		i.date_created = new Date();
@@ -111,7 +119,7 @@ public class PushTask extends Task {
 		i = pubDB.insertInDB(i);
 		
 
-		/*
+		/* TODO write respective metadatamapping / metadatavalue
 		Map<String, String> metadataMap = new HashMap<String, String>();
 
 		metadataMap.put("abstract", meta.get(MetadataField.DESCRIPTION));
