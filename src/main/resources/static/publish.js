@@ -119,7 +119,7 @@ function updateCollections(_, valid) {
 		collection.empty();
 		setCollectionList(collection, "", userInfo.hierarchy);
 		collection.val(selectedCollection); // restore selection
-		collection_displayname = collection.val(selectedCollection).text();
+		collection_displayname = collection.find('option:selected').text();
 	} else
 		collection.prop("disabled", true);
 }
