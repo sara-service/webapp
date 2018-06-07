@@ -1,5 +1,6 @@
 package bwfdm.sara.api;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -22,8 +23,10 @@ import org.springframework.web.servlet.view.RedirectView;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import bwfdm.sara.Config;
+import bwfdm.sara.project.Project;
 import bwfdm.sara.project.PublicationSession;
 import bwfdm.sara.publication.Hierarchy;
+import bwfdm.sara.publication.Item;
 import bwfdm.sara.publication.PublicationRepository;
 import bwfdm.sara.publication.Repository;
 import bwfdm.sara.publication.db.PublicationField;
@@ -90,6 +93,32 @@ public class Publication {
 		return new RedirectView("/get-lost.html");
 	}
 
+	@GetMapping("list")
+	public List<PublicationItem> getArchivedItems(final HttpSession session) {
+		// special case: this can be called directly after login, before there
+		// is a PublicationSession. if so, get the relevant info from the
+		// Project instead.
+		final UUID sourceUUID;
+		final String email;
+		if (PublicationSession.hasInstance(session)) {
+		PublicationSession project = PublicationSession.getInstance(session);
+			sourceUUID = project.getSourceUUID();
+			email = project.getSourceEmail();
+		} else {
+			Project project = Project.getInstance(session);
+			sourceUUID = UUID.fromString(project.getRepoID());
+			email = project.getGitRepo().getUserInfo().email;
+		}
+
+		final List<Item> items = config.getPublicationDatabase()
+				.getPublishedItems(sourceUUID, email);
+		final List<PublicationItem> res = new ArrayList<PublicationItem>(
+				items.size());
+		for (Item item : items)
+			res.add(new PublicationItem(sourceUUID, item));
+		return res;
+	}
+
 	@PostMapping("query-hierarchy")
 	public CollectionList queryHierarchy(
 			@RequestParam("user_email") final String user_email,
@@ -144,6 +173,25 @@ public class Publication {
 		public CollectionList(Hierarchy accessibleCollections) {
 			this.isUserValid = true;
 			this.accessibleCollections = accessibleCollections;
+		}
+	}
+
+	public class PublicationItem {
+		@JsonProperty("source")
+		public final UUID source;
+		@JsonProperty("title")
+		public final String title;
+		@JsonProperty("version")
+		public final String version;
+		@JsonProperty("item")
+		public final UUID item;
+
+		public PublicationItem(final UUID source, final Item item) {
+			this.item = item.uuid;
+			this.source = source;
+			// FIXME how do we get the title and version here??
+			title = "$" + item.uuid.toString();
+			version = "1.0";
 		}
 	}
 }

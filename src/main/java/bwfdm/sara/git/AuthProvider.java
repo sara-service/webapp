@@ -16,6 +16,12 @@ public interface AuthProvider {
 	public boolean hasWorkingToken();
 
 	/**
+	 * @return a {@link UserInfo} object containing the user's display name and
+	 *         email
+	 */
+	public UserInfo getUserInfo();
+
+	/**
 	 * Trigger the authorization process.
 	 * 
 	 * @param redirURI
@@ -50,4 +56,22 @@ public interface AuthProvider {
 	 */
 	public boolean parseAuthResponse(final Map<String, String> params,
 			final HttpSession session);
+
+	public static class UserInfo {
+		/**
+		 * The user's primary email address, verified to belong to that user
+		 * (ie. the user clicked a link to confirm it).
+		 */
+		public final String email;
+		/**
+		 * The user's preferred way of representing his/her name in a Unicode
+		 * string.
+		 */
+		public final String displayName;
+
+		public UserInfo(final String email, final String displayName) {
+			this.email = email;
+			this.displayName = displayName;
+		}
+	}
 }
