@@ -18,12 +18,16 @@ function blockLoaded(name) {
 
 function initMeta(info) {
 	// FIXME replace IR + collection IDs with the more user-friendly names here
-	$.each(["title", "description", "version", "pubrepo", "collection",
+	$.each(["title", "description", "version", "pubrepo_displayname", "collection_displayname",
 		"email"], function(_, name) {
 			$("#" + name).text(info[name]);
 		});
+
+	$('#pubrepo').prop('title',info["pubrepo"]);
+	$('#collection').prop('title',info["collection"]);
 	blockLoaded("meta");
 }
+
 
 $(function() {
 	API.get("load metadata fields", "/api/publish/meta", {}, initMeta);

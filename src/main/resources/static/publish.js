@@ -2,6 +2,9 @@
 
 var cache = {}, timer;
 
+var pubrepo_displayname = null;
+var collection_displayname = null;
+
 // do not call directly, ever. call queryHierarchy() instead!
 function doQueryHierarchy(pubrepo, email) {
 	cache[pubrepo][email] = "busy"; // abuse of untyped language...
@@ -109,6 +112,7 @@ function updateCollections(_, valid) {
 		collection.empty();
 		setCollectionList(collection, "", userInfo.hierarchy);
 		collection.val(selectedCollection); // restore selection
+		collection_displayname = collection.val(selectedCollection).text();
 	} else
 		collection.prop("disabled", true);
 }
@@ -129,6 +133,7 @@ function initPubRepos(info) {
 			return "Please select your institutional repository!";
 		return true;
 	}, function(valud, valid, elem, disableFeedback) {
+		pubrepo_displayname = $("#pubrepo :selected").text();
 		var repo = $("#pubrepo :selected").data("repo");
 		var logo = repo ? repo.logo_url : null;
 		if (logo && !logo.match(/^(https:\/\/|data:)/))
@@ -156,6 +161,8 @@ function initPubRepos(info) {
 		var values = validate.all(["pubrepo", "email", "collection"]);
 		if (values == null)
 			return;
+		values["pubrepo_displayname"] = pubrepo_displayname;
+		values["collection_displayname"] = collection_displayname;
 		API.put("save fields", "/api/publish/meta", values, function() {
 			location.href = "/summary.html";
 		});
