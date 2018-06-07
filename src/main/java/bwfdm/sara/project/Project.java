@@ -10,10 +10,10 @@ import bwfdm.sara.Config;
 import bwfdm.sara.api.Authorization;
 import bwfdm.sara.db.ConfigDatabase;
 import bwfdm.sara.db.FrontendDatabase;
-import bwfdm.sara.publication.db.PublicationDatabase;
 import bwfdm.sara.extractor.MetadataExtractor;
 import bwfdm.sara.git.GitProject;
 import bwfdm.sara.git.GitRepo;
+import bwfdm.sara.publication.db.PublicationDatabase;
 import bwfdm.sara.transfer.CloneTask;
 import bwfdm.sara.transfer.PushTask;
 import bwfdm.sara.transfer.Task.TaskStatus;
@@ -190,7 +190,7 @@ public class Project {
 					.get(MetadataField.values());
 			
 			meta.putAll(getFrontendDatabase().getMetadata());
-			push = new PushTask(new ArchiveJob(this, archiveID), getPublicationDatabase());
+			push = new PushTask(new ArchiveJob(this, archiveID));
 		}
 		push.start();
 	}

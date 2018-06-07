@@ -23,18 +23,16 @@ import bwfdm.sara.project.ArchiveJob;
 import bwfdm.sara.project.MetadataField;
 import bwfdm.sara.project.Ref;
 import bwfdm.sara.publication.Item;
-import bwfdm.sara.publication.db.PublicationDatabase;
 
 public class PushTask extends Task {
 	private static final String TARGET_REMOTE = "target";
-	private final PublicationDatabase pubDB;
-	
+
 	private final ArchiveJob job;
 	private ArchiveProject project;
+	private UUID itemUUID;
 
-	public PushTask(final ArchiveJob job, final PublicationDatabase pubDB) {
+	public PushTask(final ArchiveJob job) {
 		this.job = job;
-		this.pubDB = pubDB;
 	}
 
 	@Override
@@ -89,11 +87,12 @@ public class PushTask extends Task {
 
 		beginTask("write dspace item into database", 1);
 
-		createItemInDB(project.getWebURL(), job.meta);
+		itemUUID = createItemInDB(project.getWebURL(), job.meta);
 		endTask();
 	}
 
-	private String createItemInDB(final String webURL, Map<MetadataField, String> meta) {
+	private UUID createItemInDB(final String webURL,
+			Map<MetadataField, String> meta) {
 		Item i = new Item();
 		i.archive_uuid = UUID.fromString(job.archiveUUID);
 		i.source_uuid = UUID.fromString(job.sourceUUID);
@@ -116,7 +115,7 @@ public class PushTask extends Task {
 		i.date_created = new Date();
 		i.date_last_modified = i.date_created;
 		
-		i = pubDB.insertInDB(i);
+		i = job.pubDB.insertInDB(i);
 		
 
 		/* TODO write respective metadatamapping / metadatavalue
@@ -134,7 +133,7 @@ public class PushTask extends Task {
 
 		logger.info("Item submission succeeded with item uuid " + i.uuid.toString());
 
-		return "HAPPY WORKFLOW COMPLETED :)";
+		return i.uuid;
 	}
 
 	public ArchiveJob getArchiveJob() {
@@ -146,6 +145,6 @@ public class PushTask extends Task {
 			throw new IllegalStateException(
 					"getItemUUID() on in-progress PushTask");
 		// FIXME return the actual item UUID here
-		return UUID.fromString("deadbeef-dead-dead-dead-beeeeeeeeeef");
+		return itemUUID;
 	}
 }
