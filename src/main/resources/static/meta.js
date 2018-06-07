@@ -50,6 +50,11 @@ function updateBranchSpecific() {
 function initFields(info) {
 	meta = cache[info.master.value] = info;
 
+	initField("submitter", false, function(value) {
+		if (value.trim() == "")
+			return "Who is submitting this software artefact? What's your name?";
+		return true;
+	});
 	initField("title", false, function(value) {
 		if (value.trim() == "")
 			return "What title do you want to use for your publication?";
@@ -93,7 +98,7 @@ function initFields(info) {
 
 	$("#next_button").click(function() {
 		var values = validate.all(["title", "description", "master",
-			"version"]);
+			"version", "submitter"]);
 		if (!values)
 			return;
 		var data = {};

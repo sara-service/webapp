@@ -13,7 +13,9 @@ public enum MetadataField {
 	/** software version number */
 	VERSION("version"),
 	/** primary (default) branch in repo. */
-	MAIN_BRANCH("master");
+	MAIN_BRANCH("master"),
+	/** full name of the submitting user */
+	SUBMITTER("submitter");
 
 	private final String displayName;
 

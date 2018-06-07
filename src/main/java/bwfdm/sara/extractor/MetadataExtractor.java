@@ -95,7 +95,7 @@ public class MetadataExtractor {
 		userInfo = repo.getUserInfo();
 		meta.put(MetadataField.TITLE, info.name);
 		meta.put(MetadataField.DESCRIPTION, info.description);
-		// TODO meta.put(MetadataField.SUBMITTER, userInfo.displayName);
+		meta.put(MetadataField.SUBMITTER, userInfo.displayName);
 	}
 
 	public Map<Ref, LicenseFile> detectLicenses(final Collection<Ref> refs)
