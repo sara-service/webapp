@@ -13,16 +13,7 @@ public enum MetadataField {
 	/** software version number */
 	VERSION("version"),
 	/** primary (default) branch in repo. */
-	MAIN_BRANCH("master"),
-	/** ID of the institutional repository to publish the item in */
-	PUBLICATION_REPOSITORY("pubrepo"),
-	/**
-	 * unique identifier of the selected collection in the institutional
-	 * repository
-	 */
-	PUBREPO_COLLECTION("collection"),
-	/** user's login email in the institutional repository */
-	PUBREPO_LOGIN_EMAIL("email");
+	MAIN_BRANCH("master");
 
 	private final String displayName;
 

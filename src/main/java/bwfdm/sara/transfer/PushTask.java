@@ -7,7 +7,6 @@ import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
 
-
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.PushCommand;
 import org.eclipse.jgit.api.RemoteAddCommand;
@@ -130,10 +129,15 @@ public class PushTask extends Task {
 		return "HAPPY WORKFLOW COMPLETED :)";
 	}
 
-	public String getWebURL() {
+	public ArchiveJob getArchiveJob() {
+		return job;
+	}
+
+	public UUID getItemUUID() {
 		if (!isDone())
 			throw new IllegalStateException(
-					"getWebURL() on in-progress PushTask");
-		return project.getWebURL();
+					"getItemUUID() on in-progress PushTask");
+		// FIXME return the actual item UUID here
+		return UUID.fromString("deadbeef-dead-dead-dead-beeeeeeeeeef");
 	}
 }
