@@ -12,7 +12,9 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 import bwfdm.sara.extractor.licensee.LicenseeExtractor;
+import bwfdm.sara.git.AuthProvider.UserInfo;
 import bwfdm.sara.git.GitProject;
+import bwfdm.sara.git.GitRepo;
 import bwfdm.sara.git.ProjectInfo;
 import bwfdm.sara.project.MetadataField;
 import bwfdm.sara.project.Ref;
@@ -52,11 +54,15 @@ public class MetadataExtractor {
 	private final Map<MetadataField, String> meta = new EnumMap<>(
 			MetadataField.class);
 	private final Map<String, String> versions = new HashMap<>();
-	private final TransferRepo repo;
+	private final TransferRepo clone;
 	private final GitProject project;
+	private final GitRepo repo;
 	private final Map<Ref, LicenseFile> licenses = new HashMap<>();
+	private UserInfo userInfo;
 
-	public MetadataExtractor(final TransferRepo repo, final GitProject project) {
+	public MetadataExtractor(final TransferRepo clone, final GitRepo repo,
+			final GitProject project) {
+		this.clone = clone;
 		this.repo = repo;
 		this.project = project;
 	}
@@ -65,7 +71,7 @@ public class MetadataExtractor {
 	 * Get autodetected values for a defined set of {@link MetadataField}s. Pass
 	 * {@link MetadataField#values()} to get all fields.
 	 */
-	public Map<MetadataField, String> get( 			final MetadataField... fields) {
+	public Map<MetadataField, String> get(final MetadataField... fields) {
 		return get(null, fields);
 	}
 
@@ -86,8 +92,10 @@ public class MetadataExtractor {
 
 	public void detectProjectInfo() {
 		final ProjectInfo info = project.getProjectInfo();
+		userInfo = repo.getUserInfo();
 		meta.put(MetadataField.TITLE, info.name);
 		meta.put(MetadataField.DESCRIPTION, info.description);
+		// TODO meta.put(MetadataField.SUBMITTER, userInfo.displayName);
 	}
 
 	public Map<Ref, LicenseFile> detectLicenses(final Collection<Ref> refs)
@@ -105,7 +113,7 @@ public class MetadataExtractor {
 		final List<RepoFile> obvious = new ArrayList<>();
 		final List<RepoFile> likely = new ArrayList<>();
 		// final List<RepoFile> possible = new ArrayList<>();
-		final List<RepoFile> files = repo.getFiles(ref, "");
+		final List<RepoFile> files = clone.getFiles(ref, "");
 		for (final Iterator<RepoFile> iter = files.iterator(); iter.hasNext();) {
 			final RepoFile file = iter.next();
 			if (file.getType() != FileType.FILE)
@@ -134,7 +142,7 @@ public class MetadataExtractor {
 	private LicenseFile detectLicenses(final LicenseeExtractor extractor,
 			final List<RepoFile> files) {
 		final List<LicenseFile> licenses = extractor
-				.detectLicenses(repo, files);
+				.detectLicenses(clone, files);
 		// trivial case: only one license file, or missing license
 		if (licenses.size() == 0)
 			return null;
@@ -176,7 +184,7 @@ public class MetadataExtractor {
 		Ref best = refs.iterator().next();
 		long bestDate = Long.MIN_VALUE;
 		for (final Ref ref : refs) {
-			final long date = repo.getHeadCommitDate(ref.path);
+			final long date = clone.getHeadCommitDate(ref.path);
 			if ((best.type == RefType.TAG && ref.type == RefType.BRANCH)
 					|| (date > bestDate)) {
 				best = ref;
@@ -188,7 +196,7 @@ public class MetadataExtractor {
 
 	public void detectVersion(final Collection<Ref> set) throws IOException {
 		for (final Ref ref : set) {
-			String data = repo.readString(ref, VERSION_FILE);
+			String data = clone.readString(ref, VERSION_FILE);
 			if (data == null)
 				data = ""; // force the user to enter something
 			versions.put(ref.path, data);
@@ -197,5 +205,9 @@ public class MetadataExtractor {
 
 	public void setVersionFromBranch(final Ref ref) {
 		meta.put(MetadataField.VERSION, versions.get(ref.path));
+	}
+
+	public String getEmail() {
+		return userInfo.email;
 	}
 }

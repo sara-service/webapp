@@ -17,6 +17,7 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import bwfdm.sara.db.JacksonTemplate;
+import bwfdm.sara.publication.Item;
 import bwfdm.sara.publication.PublicationMetadatum;
 import bwfdm.sara.publication.PublicationRepository;
 import bwfdm.sara.publication.PublicationRepositoryFactory;
@@ -264,6 +265,12 @@ public class PublicationDatabase {
 			row.value = values.get(field);
 			upsertInDB(row);
 		}
+	}
+
+	public List<Item> getPublishedItems(final UUID sourceUUID, final String email) {
+		return getList(Item.class,
+				"where source_uuid = ? and contact_email = ?", sourceUUID,
+				email);
 	}
 
 	public static SortedSet<String> getPrimaryKey(Class<? extends DAO> cls) {

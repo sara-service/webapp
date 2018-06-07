@@ -111,7 +111,8 @@ public class Project {
 			// TransferRepo is invalid or nonexistent and cannot be reused.
 			// create a new one.
 			transferRepo = new TransferRepo(config.getRandomTempDir());
-			metadataExtractor = new MetadataExtractor(transferRepo, project);
+			metadataExtractor = new MetadataExtractor(transferRepo, repo,
+					project);
 			clone = null;
 		}
 

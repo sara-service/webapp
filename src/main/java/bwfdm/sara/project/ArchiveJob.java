@@ -26,10 +26,10 @@ public class ArchiveJob {
 				.getMetadataExtractor();
 
 		sourceUUID = project.getRepoID();
-		gitrepoEmail = "devnull@example.org"; // metadataExtractor.getEmail()
 		this.archiveUUID = archiveUUID;
 		meta = metadataExtractor.get(MetadataField.values());
 		meta.putAll(frontend.getMetadata());
+		gitrepoEmail = metadataExtractor.getEmail();
 		archive = project.getConfigDatabase().newGitArchive(archiveUUID);
 		clone = project.getTransferRepo();
 

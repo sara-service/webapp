@@ -11,8 +11,8 @@
 	<script src="lib/jquery.min.js"></script>
 	<script src="lib/uri.min.js"></script>
 	<script src="lib/common.js"></script>
-	<script src="projects.js"></script>
-	<title>Project selection — SARA software publishing</title>
+	<script src="resume.js"></script>
+	<title>Archive artefact selection — SARA software publishing</title>
 </head>
 <body><div class="fluid-container">
 	<div class="row">
@@ -23,35 +23,23 @@
 
 	<div class="row">
 		<div class="col-xs-12 action-header">
-			<h1>Which project do you want to publish?</h1>
+			<h1>What do you want to publish from the archives?</h1>
 		</div>
 	</div>
 
 	<div id="projects">
 		<span class="hidden" id="template"><a class="btn btn-default btn-array" name="select">
-			<span name="display">SARA-server</span> (<tt name="internal">sara/SARA-server</tt>)
+			<span name="title">SARA-server</span> (<tt name="version">sara/SARA-server</tt>)
 		</a></span>
 		<div class="hidden" id="noprojects">
-			<p><b>No projects found!</b> Please <a class="btn btn-default" href="/api/repo/return">return to git repo</a> and create some!</p>
+			<p><b>Nothing archived yet!</b> <a class="btn btn-default" href="/projects.html">Pick a project</a> and start archiving something!</p>
 		</div>
 	</div>
 	<div id="loading" class="loading"><span class="sr-only">loading, please wait...</span></div>
 
 	<p style="height:3ex"></p>
-	<p>If you have projects that don't show up here, double-check project permissions.
-		In order to publish or archive a project, you have to be a <i>member of that project</i>
-		and you need to have the rights to <i>commit to the code repository</i>.
-		Nothing will be committed unless you explicitly select something to be written to your git repo,
-		but <i>only users who could contribute to a project are allowed to publish it</i>.</p>
-
-	<p style="height:3ex"></p>
 	<div class="row">
-		<a class="btn btn-default col-sm-3" href="/resume.html">publish something from the archives</a>
-	</div>
-
-	<p style="height:3ex"></p>
-	<div class="row">
-		<a class="btn btn-default col-sm-3" href="/api/repo/return">← return to git repo</a>
+		<a class="btn btn-default col-sm-3" href="/projects.html">← return to project selection</a>
 	</div>
 	<p style="height:3ex"></p>
 </div></body>

@@ -43,9 +43,7 @@ public class PublicationSession {
 	}
 
 	public void initialize() {
-		this.email = "stefan.kombrink@uni-ulm.de";
-		// FIXME implement getUserInfo()
-		// this.email = auth.getUserInfo().email;
+		this.email = auth.getUserInfo().email;
 
 		// check that the user actually owns the item, and show a nasty error
 		// message if not

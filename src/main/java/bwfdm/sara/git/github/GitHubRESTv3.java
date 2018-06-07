@@ -86,6 +86,12 @@ public class GitHubRESTv3 implements GitRepo {
 	}
 
 	@Override
+	public UserInfo getUserInfo() {
+		// FIXME Auto-generated method stub
+		return new UserInfo("stefan.kombrink@uni-ulm.de", "Stefan Kombrink");
+	}
+
+	@Override
 	public RedirectView triggerAuth(final String redirURI,
 			final RedirectAttributes redir, final HttpSession session) {
 		if (hasWorkingToken())
