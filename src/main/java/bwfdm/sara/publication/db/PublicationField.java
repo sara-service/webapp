@@ -19,6 +19,8 @@ public enum PublicationField {
 	 * repository
 	 */
 	PUBREPO_COLLECTION("collection"),
+	PUBREPO_REPOSITORYNAME("pubrepo_displayname"),
+	PUBREPO_COLLECTIONNAME("collection_displayname"),
 	/**
 	 * user's login email in the institutional repository. may well be different
 	 * from the login email in the git repo!

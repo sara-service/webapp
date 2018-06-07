@@ -123,8 +123,7 @@ CREATE TABLE fe_temp_pubmeta(
 	item_uuid UUID REFERENCES item(uuid) ON DELETE CASCADE,
 	field text NOT NULL,
 	value text NOT NULL,
-	CHECK (field in ('title', 'description', 'version', 'pubrepo', 'collection',
-		'email')),
+	CHECK (field in ('title', 'description', 'version', 'pubrepo', 'pubrepo_displayname', 'collection', 'collection_displayname', 'email')),
 	PRIMARY KEY (item_uuid, field)
 );
 
