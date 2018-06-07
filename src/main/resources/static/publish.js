@@ -8,16 +8,18 @@ var collection_displayname = null;
 // do not call directly, ever. call queryHierarchy() instead!
 function doQueryHierarchy(pubrepo, email) {
 	cache[pubrepo][email] = "busy"; // abuse of untyped language...
-	API.post("update list of collections", "/api/publish/query-hierarchy",
-		{ repo_uuid: pubrepo, user_email: email }, function(info) {
-			cache[pubrepo][email] = info;
-			validate.check("email"); // callback to validateEmail
-		});
+	API.post("update list of collections", "/api/publish/query-hierarchy", {
+		repo_uuid : pubrepo,
+		user_email : email
+	}, function(info) {
+		cache[pubrepo][email] = info;
+		validate.check("email"); // callback to validateEmail
+	});
 }
 
 // query-hierarchy is slow and expensive. this method thus does two things:
-//   1. it caches query results locally
-//   2. it delays all queries by 1.5s
+// 1. it caches query results locally
+// 2. it delays all queries by 1.5s
 // if the result isn't in cache, it returns null, starts the download in the
 // background and calls email validation once the query is finished. it is
 // expected that email validation then calls queryHierarchy() again, and this
@@ -63,13 +65,18 @@ function validateEmail(email) {
 function setCollectionList(select, collection_path, hierarchy) {
 	if (hierarchy.children.length != 0) {
 		$.each(hierarchy.children, function(_, child) {
-			var cp = collection_path + " \u2192 " + child.name;
+			var cp;
+			if (collection_path.trim().length == 0) {
+				cp = child.name;
+			} else {
+				cp = collection_path + " \u2192 " + child.name;
+			}
 			setCollectionList(select, cp, child);
 		});
 	} else {
 		// TODO shouldn't we add this even if there are sub-collections?
-		var option = $("<option>").attr("value", hierarchy.url)
-				.text(collection_path);
+		var option = $("<option>").attr("value", hierarchy.url).text(
+				collection_path);
 		select.append(option);
 	}
 }
@@ -121,13 +128,12 @@ function initPubRepos(info) {
 	var select = $("#pubrepo");
 	select.empty();
 	$.each(info.repos, function(_, repo) {
-		var option = $("<option>").attr("value", repo.uuid)
-				.text(repo.display_name).data("repo", repo);
+		var option = $("<option>").attr("value", repo.uuid).text(
+				repo.display_name).data("repo", repo);
 		select.append(option);
 	});
 
-	validate.init("email", info.meta.email, validateEmail,
-		updateCollections);
+	validate.init("email", info.meta.email, validateEmail, updateCollections);
 	validate.init("pubrepo", info.meta.pubrepo, function(value) {
 		if (value == null)
 			return "Please select your institutional repository!";
@@ -158,7 +164,7 @@ function initPubRepos(info) {
 	initialCollection = info.meta.collection;
 
 	$("#next_button").click(function() {
-		var values = validate.all(["pubrepo", "email", "collection"]);
+		var values = validate.all([ "pubrepo", "email", "collection" ]);
 		if (values == null)
 			return;
 		values["pubrepo_displayname"] = pubrepo_displayname;
