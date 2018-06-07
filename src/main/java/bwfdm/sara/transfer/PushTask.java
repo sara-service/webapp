@@ -12,6 +12,8 @@ import org.eclipse.jgit.api.PushCommand;
 import org.eclipse.jgit.api.RemoteAddCommand;
 import org.eclipse.jgit.api.RemoteRemoveCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.api.errors.InvalidRemoteException;
+import org.eclipse.jgit.api.errors.TransportException;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.transport.RefSpec;
 import org.eclipse.jgit.transport.URIish;
@@ -23,6 +25,8 @@ import bwfdm.sara.project.ArchiveJob;
 import bwfdm.sara.project.MetadataField;
 import bwfdm.sara.project.Ref;
 import bwfdm.sara.publication.Item;
+import bwfdm.sara.publication.ItemState;
+import bwfdm.sara.publication.ItemType;
 
 public class PushTask extends Task {
 	private static final String TARGET_REMOTE = "target";
@@ -56,6 +60,15 @@ public class PushTask extends Task {
 		project = job.archive.createProject(id, false, job.meta);
 
 		beginTask("Preparing repository for upload", 1);
+		pushRepoToArchive();
+
+		beginTask("write dspace item into database", 1);
+		itemUUID = createItemInDB(project.getWebURL(), job.meta);
+		endTask();
+	}
+
+	private void pushRepoToArchive() throws GitAPIException, URISyntaxException,
+			InvalidRemoteException, TransportException {
 		final Git git = Git.wrap(job.clone.getRepo());
 		// remove remote before recreating it. it may otherwise still contain
 		// stale information from a previous execution.
@@ -84,40 +97,28 @@ public class PushTask extends Task {
 
 		project.setCredentials(push);
 		push.setProgressMonitor(this).call();
-
-		beginTask("write dspace item into database", 1);
-
-		itemUUID = createItemInDB(project.getWebURL(), job.meta);
-		endTask();
 	}
 
 	private UUID createItemInDB(final String webURL,
 			Map<MetadataField, String> meta) {
 		Item i = new Item();
-		i.archive_uuid = UUID.fromString(job.archiveUUID);
-		i.source_uuid = UUID.fromString(job.sourceUUID);
-		i.item_state = "CREATED";
-		i.item_state_sent = "CREATED";
+		i.archive_uuid = job.archiveUUID;
+		i.source_uuid = job.sourceUUID;
+		i.item_state = ItemState.CREATED.name();
+		i.item_state_sent = i.item_state;
 		if (job.isArchiveOnly) {
-			i.item_type = "ARCHIVE_HIDDEN";
+			i.item_type = ItemType.ARCHIVE_HIDDEN.name();
 		} else {
-			i.item_type = "ARCHIVE_PUBLIC";
+			i.item_type = ItemType.ARCHIVE_PUBLIC.name();
 			// TODO make configurable via saradb whether items will be archived externally or within the IRs
 		}
 		
 		i.contact_email = job.gitrepoEmail;
-
-		i.contact_email = job.gitrepoEmail;
-		if (i.contact_email == null ) {
-			i.contact_email = "NN@nowhere.noob";
-		}
-		
 		i.date_created = new Date();
 		i.date_last_modified = i.date_created;
 		
 		i = job.pubDB.insertInDB(i);
 		
-
 		/* TODO write respective metadatamapping / metadatavalue
 		Map<String, String> metadataMap = new HashMap<String, String>();
 
@@ -132,7 +133,6 @@ public class PushTask extends Task {
 		*/
 
 		logger.info("Item submission succeeded with item uuid " + i.uuid.toString());
-
 		return i.uuid;
 	}
 
