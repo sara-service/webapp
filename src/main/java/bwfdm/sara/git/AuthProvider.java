@@ -59,6 +59,11 @@ public interface AuthProvider {
 
 	public static class UserInfo {
 		/**
+		 * The user's unique user ID. Unspecified format; can be the email
+		 * address if it's guaranteed to be unique.
+		 */
+		public final String userID;
+		/**
 		 * The user's primary email address, verified to belong to that user
 		 * (ie. the user clicked a link to confirm it).
 		 */
@@ -69,7 +74,9 @@ public interface AuthProvider {
 		 */
 		public final String displayName;
 
-		public UserInfo(final String email, final String displayName) {
+		public UserInfo(final String userID, final String email,
+				final String displayName) {
+			this.userID = userID;
 			this.email = email;
 			this.displayName = displayName;
 		}

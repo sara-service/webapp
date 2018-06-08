@@ -182,8 +182,6 @@ public class Project {
 
 	public void startPush() {
 		if (push == null) {
-			// FIXME this shouldn't have to be done HERE!
-			// api.Push is a much better place...
 			// FIXME archiveID should be dynamic
 			final String archiveID = config.getConfigDatabase().getGitArchive();
 			final Map<MetadataField, String> meta = metadataExtractor

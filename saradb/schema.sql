@@ -79,7 +79,8 @@ CREATE TABLE item(
 	archive_uuid UUID NOT NULL REFERENCES archive(uuid) ON DELETE RESTRICT,
 	repository_uuid UUID REFERENCES repository(uuid) ON DELETE RESTRICT,
 
-	contact_email text NOT NULL,
+	source_user_id text NOT NULL, -- unique user ID in source
+	contact_email text NOT NULL, -- email address to be used for contacting the user
 
 	collection_id text, -- ID of collection in institutional repository
 	item_id text, -- ID of submitted item in institutional repository
@@ -97,6 +98,8 @@ CREATE TABLE item(
 	CHECK (item_state IN ('CREATED', 'VERIFIED', 'SUBMITTED', 'ACCEPTED', 'DONE', 'REJECTED', 'DELETED')),
 	CHECK (item_state_sent IN ('CREATED', 'VERIFIED', 'SUBMITTED', 'ACCEPTED', 'DONE', 'REJECTED', 'DELETED'))
 );
+-- index to speed up the query for the artefacts archived by a particular user
+CREATE INDEX ON item(source_uuid, source_user_id);
 
 -- Table: metadatamapping (WIP)
 CREATE TABLE metadatamapping(

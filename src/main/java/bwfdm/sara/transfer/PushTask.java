@@ -113,6 +113,7 @@ public class PushTask extends Task {
 			// TODO make configurable via saradb whether items will be archived externally or within the IRs
 		}
 		
+		i.source_user_id = job.sourceUserID;
 		i.contact_email = job.gitrepoEmail;
 		i.date_created = new Date();
 		i.date_last_modified = i.date_created;
@@ -144,7 +145,6 @@ public class PushTask extends Task {
 		if (!isDone())
 			throw new IllegalStateException(
 					"getItemUUID() on in-progress PushTask");
-		// FIXME return the actual item UUID here
 		return itemUUID;
 	}
 }

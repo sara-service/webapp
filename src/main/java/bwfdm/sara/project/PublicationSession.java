@@ -19,7 +19,7 @@ public class PublicationSession {
 	private final UUID sourceUUID;
 	private final UUID itemUUID;
 	private final AuthProvider auth;
-	private String email;
+	private String userID;
 	private Item item;
 
 	private PublicationSession(final UUID sourceUUID, final AuthProvider auth,
@@ -38,21 +38,20 @@ public class PublicationSession {
 		return itemUUID;
 	}
 
-	public String getSourceEmail() {
-		return email;
+	public String getSourceUserID() {
+		return userID;
 	}
 
 	public void initialize() {
-		this.email = auth.getUserInfo().email;
+		this.userID = auth.getUserInfo().userID;
 
 		// check that the user actually owns the item, and show a nasty error
 		// message if not
 		final Item item = config.getPublicationDatabase()
 				.updateFromDB(new Item(itemUUID));
-		// FIXME shouldn't check contact_email but source_login_email!
 		if (!item.source_uuid.equals(sourceUUID)
-				|| !item.contact_email.equals(email))
-			throw new InvalidItemException(email);
+				|| !item.source_user_id.equals(userID))
+			throw new InvalidItemException(userID);
 		this.item = item;
 	}
 

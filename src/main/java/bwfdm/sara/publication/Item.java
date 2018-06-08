@@ -25,6 +25,8 @@ public class Item implements DAO {
 	@DatabaseField
 	public UUID repository_uuid;
 	@DatabaseField
+	public String source_user_id;
+	@DatabaseField
 	public String contact_email;
 	@DatabaseField
 	public String collection_id;

@@ -210,4 +210,8 @@ public class MetadataExtractor {
 	public String getEmail() {
 		return userInfo.email;
 	}
+
+	public String getUserID() {
+		return userInfo.userID;
+	}
 }

@@ -23,6 +23,7 @@ public class ArchiveJob {
 	public final TransferRepo clone;
 	public final boolean isArchiveOnly;
 	public final PublicationDatabase pubDB;
+	public final String sourceUserID;
 
 	public ArchiveJob(final Project project, final String archiveUUID) {
 		final FrontendDatabase frontend = project.getFrontendDatabase();
@@ -34,6 +35,7 @@ public class ArchiveJob {
 		meta = metadataExtractor.get(MetadataField.values());
 		meta.putAll(frontend.getMetadata());
 		gitrepoEmail = metadataExtractor.getEmail();
+		sourceUserID = metadataExtractor.getUserID();
 		archive = project.getConfigDatabase().newGitArchive(archiveUUID);
 		clone = project.getTransferRepo();
 		pubDB = project.getPublicationDatabase();

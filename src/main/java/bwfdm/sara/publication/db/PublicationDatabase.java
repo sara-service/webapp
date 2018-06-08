@@ -267,10 +267,11 @@ public class PublicationDatabase {
 		}
 	}
 
-	public List<Item> getPublishedItems(final UUID sourceUUID, final String email) {
+	public List<Item> getPublishedItems(final UUID sourceUUID,
+			final String userID) {
 		return getList(Item.class,
-				"where source_uuid = ? and contact_email = ?", sourceUUID,
-				email);
+				"where source_uuid = ? and source_user_id = ?", sourceUUID,
+				userID);
 	}
 
 	public static SortedSet<String> getPrimaryKey(Class<? extends DAO> cls) {

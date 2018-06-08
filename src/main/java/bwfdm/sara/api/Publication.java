@@ -99,19 +99,19 @@ public class Publication {
 		// is a PublicationSession. if so, get the relevant info from the
 		// Project instead.
 		final UUID sourceUUID;
-		final String email;
+		final String userID;
 		if (PublicationSession.hasInstance(session)) {
 		PublicationSession project = PublicationSession.getInstance(session);
 			sourceUUID = project.getSourceUUID();
-			email = project.getSourceEmail();
+			userID = project.getSourceUserID();
 		} else {
 			Project project = Project.getInstance(session);
 			sourceUUID = UUID.fromString(project.getRepoID());
-			email = project.getGitRepo().getUserInfo().email;
+			userID = project.getGitRepo().getUserInfo().userID;
 		}
 
 		final List<Item> items = config.getPublicationDatabase()
-				.getPublishedItems(sourceUUID, email);
+				.getPublishedItems(sourceUUID, userID);
 		final List<PublicationItem> res = new ArrayList<PublicationItem>(
 				items.size());
 		for (Item item : items)
@@ -189,7 +189,7 @@ public class Publication {
 		public PublicationItem(final UUID source, final Item item) {
 			this.item = item.uuid;
 			this.source = source;
-			// FIXME how do we get the title and version here??
+			// FIXME how do we get the title and version of the item??
 			title = "$" + item.uuid.toString();
 			version = "1.0";
 		}
