@@ -330,7 +330,6 @@ public class DSpace_v6 implements PublicationRepository {
 			return null;
 		}
 
-		SWORDClient swordClient = new SWORDClient();
 		AuthCredentials authCredentials = new AuthCredentials(sword_user, sword_pwd, userLogin);
 
 		Deposit deposit = new Deposit();
@@ -361,7 +360,8 @@ public class DSpace_v6 implements PublicationRepository {
 			// deposit.setMd5("fileMD5");
 			// deposit.setSuggestedIdentifier("abcdefg");
 
-			DepositReceipt receipt = swordClient.deposit(collectionURL, deposit, authCredentials);
+			DepositReceipt receipt = sword_client.deposit(collectionURL,
+					deposit, authCredentials);
 			return receipt.getLocation(); // "Location" parameter from the response
 
 		} catch (FileNotFoundException e) {
