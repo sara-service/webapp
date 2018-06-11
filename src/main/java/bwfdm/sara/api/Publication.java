@@ -219,15 +219,20 @@ public class Publication {
 		public final String title;
 		@JsonProperty("version")
 		public final String version;
+		@JsonProperty("description")
+		public final String description;
+		@JsonProperty("archive_url")
+		public final String archive_url;
 		@JsonProperty("item")
 		public final UUID item;
 
 		public PublicationItem(final UUID source, final Item item) {
 			this.item = item.uuid;
 			this.source = source;
-			// FIXME how do we get the title and version of the item??
-			title = "$" + item.uuid.toString();
-			version = "1.0";
+			title = item.meta_title;
+			version = item.meta_version;
+			description = item.meta_description;
+			archive_url = item.archive_url;
 		}
 	}
 }

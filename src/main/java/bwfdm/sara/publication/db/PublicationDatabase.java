@@ -239,13 +239,8 @@ public class PublicationDatabase {
 	/** @return a publication repository for the given repo UUID */
 
 	public PublicationRepository getPubRepo(final UUID repository_uuid) {
-		List<Repository> repos = getList(Repository.class);
-		for (final Repository r : repos) {
-			if (r.uuid.equals(repository_uuid)) {
-				return newPublicationRepository(r);
-			}
-		}
-		return null;
+		return newPublicationRepository(
+				updateFromDB(new Repository(repository_uuid)));
 	}
 
 	/** @return a list of all supported publication repositories */
@@ -266,6 +261,15 @@ public class PublicationDatabase {
 				data.size());
 		for (PublicationMetadatum datum : data)
 			map.put(PublicationField.forDisplayName(datum.field), datum.value);
+
+		// initialize publication meta data
+		Item i = new Item(item);
+		i = updateFromDB(i);
+
+		map.put(PublicationField.TITLE, i.meta_title);
+		map.put(PublicationField.VERSION, i.meta_version);
+		map.put(PublicationField.DESCRIPTION, i.meta_description);
+
 		return map;
 	}
 

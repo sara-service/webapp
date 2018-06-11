@@ -106,6 +106,7 @@ public class PushTask extends Task {
 		i.source_uuid = job.sourceUUID;
 		i.item_state = ItemState.CREATED.name();
 		i.item_state_sent = i.item_state;
+
 		if (job.isArchiveOnly) {
 			i.item_type = ItemType.ARCHIVE_HIDDEN.name();
 		} else {
@@ -117,7 +118,19 @@ public class PushTask extends Task {
 		i.contact_email = job.gitrepoEmail;
 		i.date_created = new Date();
 		i.date_last_modified = i.date_created;
-		
+
+		// initialization with reasonable defaults
+		// email from working gitlab
+		i.repository_login_id = job.gitrepoEmail;
+		// version of git project
+		i.meta_version = meta.get(MetadataField.VERSION);
+		// title of git project
+		i.meta_title = meta.get(MetadataField.TITLE);
+		// description of git project
+		i.meta_description = meta.get(MetadataField.DESCRIPTION);
+		// URL where the archive has been deposited
+		i.archive_url = webURL;
+
 		i = job.pubDB.insertInDB(i);
 
 		logger.info("Item submission succeeded with item uuid " + i.uuid.toString());
