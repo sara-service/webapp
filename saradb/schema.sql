@@ -80,6 +80,11 @@ CREATE TABLE item(
 	repository_uuid UUID REFERENCES repository(uuid) ON DELETE RESTRICT,
 
 	source_user_id text NOT NULL, -- unique user ID in source
+        repository_login_id text,
+        meta_title text,
+        meta_description text,
+        meta_version text,
+        archive_url text,
 	contact_email text NOT NULL, -- email address to be used for contacting the user
 
 	collection_id text, -- ID of collection in institutional repository
