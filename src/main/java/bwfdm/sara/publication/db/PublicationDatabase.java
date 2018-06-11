@@ -269,6 +269,7 @@ public class PublicationDatabase {
 		map.put(PublicationField.TITLE, i.meta_title);
 		map.put(PublicationField.VERSION, i.meta_version);
 		map.put(PublicationField.DESCRIPTION, i.meta_description);
+		map.put(PublicationField.ARCHIVE_URL, i.archive_url);
 
 		return map;
 	}

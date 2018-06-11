@@ -113,7 +113,7 @@ public class Publication {
 		metadataMap.put("identifier", meta.get(PublicationField.VERSION));
 		metadataMap.put("type", "Software Sources");
 		metadataMap.put("publisher", "SARA Service");
-		metadataMap.put("source", "http://WEBURL");
+		metadataMap.put("source", meta.get(PublicationField.ARCHIVE_URL));
 		metadataMap.put("dateSubmitted", new Date().toString());
 
 		repo.publishMetadata(userLogin, collectionURL, metadataMap);
