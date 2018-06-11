@@ -87,7 +87,6 @@ public class GitHubRESTv3 implements GitRepo {
 
 	@Override
 	public UserInfo getUserInfo() {
-		System.out.println(new String(rest.getBlob(rest.uri("/user"))));
 		return rest.get(rest.uri("/user"),
 				new ParameterizedTypeReference<GHUserInfo>() {
 				}).toDataObject();
