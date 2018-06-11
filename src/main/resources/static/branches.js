@@ -33,8 +33,22 @@ function addBranch(branch) {
 	// what we prefer.
 	if (!branch.action)
 		branch.action = { publish: "PUBLISH_FULL", firstCommit: "HEAD" };
-	form.action.val(branch.action.publish);
-	// firstCommit restored when list of commits has been loaded
+	// remove the name attributes, forcing validate.all to use the unique
+	// element ID as a key for the dropdown's value.
+	form.action.removeAttr("name");
+	form.commit.removeAttr("name");
+	validate.init(form.action, branch.action.publish, function(value) {
+			if (value == null)
+				return "What do you want to do with this branch?";
+			return true;
+		});
+	validate.init(form.commit, "HEAD", function(value) {
+			if (value == null)
+				return "Rewind this branch a few commits or archive HEAD?";
+			return true;
+		});
+	// real firstCommit restored when list of commits has been loaded. else
+	// it just stays at HEAD, which is a good default.
 
 	// event handler stuff
 	form.remove.click(function() {
@@ -48,7 +62,7 @@ function addBranch(branch) {
 	// in the background, load list of commits and update starting point
 	// selection box
 	API.get("load list of commits in " + branch.ref.type + " "
-		+ branch.ref.name, "/api/repo/commits", { 
+		+ branch.ref.name, "/api/repo/commits", {
 			ref: branch.ref.path,
 			limit: 20,
 		}, function(commits) {
@@ -81,14 +95,21 @@ function addBranches(branches) {
 	// this prevents the user from clicking it before we have a valid
 	// branch selection.
 	$("#next_button").click(function() {
+		var fields = [];
+		$.each(forms, function(ref, form) {
+			fields.push(form.action, form.commit);
+		});
+		var values = validate.all(fields);
+
 		var data = [];
 		$.each(forms, function(ref, form) {
 			data.push({
 				ref: ref,
-				publish: form.action.val(),
-				firstCommit: form.commit.val()
+				publish: values[form.action.attr("id")],
+				firstCommit: values[form.commit.attr("id")]
 			});
 		});
+
 		if (data.length == 0) {
 			// this is actually quite hard: the default is only empty if there
 			// are no branches in the repo (empty repo? maybe not even there).
@@ -103,7 +124,7 @@ function addBranches(branches) {
 				});
 	});
 	$("#next_button").removeClass("disabled");
-	$("#loading").remove();	
+	$("#loading").remove();
 }
 
 $(function() {
