@@ -1,6 +1,8 @@
 package bwfdm.sara.api;
 
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -27,6 +29,7 @@ import bwfdm.sara.project.Project;
 import bwfdm.sara.project.PublicationSession;
 import bwfdm.sara.publication.Hierarchy;
 import bwfdm.sara.publication.Item;
+import bwfdm.sara.publication.ItemState;
 import bwfdm.sara.publication.PublicationRepository;
 import bwfdm.sara.publication.Repository;
 import bwfdm.sara.publication.db.PublicationField;
@@ -85,12 +88,45 @@ public class Publication {
 	}
 
 	@GetMapping("trigger")
-	public RedirectView triggerPublication() {
-		if (true)
-			// TODO
-			throw new UnsupportedOperationException(
-					"here be code to publish stuff");
-		return new RedirectView("/get-lost.html");
+	public RedirectView triggerPublication(final HttpSession session) {
+		final PublicationSession project = PublicationSession
+				.getInstance(session);
+
+		// TODO Metadata Mapping
+		// TODO Error Handling
+		Map<PublicationField, String> meta = project.getPublicationDatabase()
+				.getMetadata(project.getItemUUID());
+
+		final UUID repository_uuid = UUID
+				.fromString(meta.get(PublicationField.PUBLICATION_REPOSITORY));
+		final PublicationRepository repo = project.getPublicationDatabase()
+				.getPubRepo(repository_uuid);
+
+		Map<String, String> metadataMap = new HashMap<String, String>();
+		final String collectionURL = meta
+				.get(PublicationField.PUBREPO_COLLECTION);
+		final String userLogin = meta.get(PublicationField.PUBREPO_LOGIN_EMAIL);
+
+		metadataMap.put("abstract", meta.get(PublicationField.DESCRIPTION));
+		metadataMap.put("contributor", project.getItem().contact_email);
+		metadataMap.put("title", meta.get(PublicationField.TITLE));
+		metadataMap.put("identifier", meta.get(PublicationField.VERSION));
+		metadataMap.put("type", "Software Sources");
+		metadataMap.put("publisher", "SARA Service");
+		metadataMap.put("source", "http://WEBURL");
+		metadataMap.put("dateSubmitted", new Date().toString());
+
+		repo.publishMetadata(userLogin, collectionURL, metadataMap);
+
+		Item i = project.getItem();
+		i.date_last_modified = new Date();
+		i.item_state = ItemState.SUBMITTED.name();
+		i.repository_uuid = repository_uuid;
+		i.collection_id = collectionURL;
+
+		project.getPublicationDatabase().updateInDB(i);
+
+		return new RedirectView("/final.html");
 	}
 
 	@GetMapping("list")

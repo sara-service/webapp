@@ -236,6 +236,18 @@ public class PublicationDatabase {
 		return factory.newPublicationRepository(args);
 	}
 	
+	/** @return a publication repository for the given repo UUID */
+
+	public PublicationRepository getPubRepo(final UUID repository_uuid) {
+		List<Repository> repos = getList(Repository.class);
+		for (final Repository r : repos) {
+			if (r.uuid.equals(repository_uuid)) {
+				return newPublicationRepository(r);
+			}
+		}
+		return null;
+	}
+
 	/** @return a list of all supported publication repositories */
 	
 	public List<PublicationRepository> getPubRepos() {
