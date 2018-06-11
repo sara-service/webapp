@@ -3,6 +3,7 @@ package bwfdm.sara.git.github;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import javax.servlet.http.HttpSession;
 
@@ -87,9 +88,22 @@ public class GitHubRESTv3 implements GitRepo {
 
 	@Override
 	public UserInfo getUserInfo() {
-		return rest.get(rest.uri("/user"),
+		GHUserInfo userInfo = rest.get(rest.uri("/user"),
 				new ParameterizedTypeReference<GHUserInfo>() {
-				}).toDataObject();
+				});
+		return new UserInfo(userInfo.userID, getUserEmail(),
+				userInfo.getEffectiveDisplayName());
+	}
+
+	private String getUserEmail() {
+		final List<GHEmail> emails = rest.get(rest.uri("/user/emails"),
+				new ParameterizedTypeReference<List<GHEmail>>() {
+				});
+		for (GHEmail email : emails)
+			if (email.isPrimary && email.isVerified)
+				return email.address;
+		throw new NoSuchElementException(
+				"user has no primary, verified email!");
 	}
 
 	@Override
@@ -99,7 +113,7 @@ public class GitHubRESTv3 implements GitRepo {
 			return null;
 
 		auth = new OAuthCode(appID, appSecret, OAUTH_AUTHORIZE, OAUTH_TOKEN);
-		auth.addAttribute("scope", "read:user repo");
+		auth.addAttribute("scope", "read:user user:email repo");
 		return auth.trigger(redirURI, redir);
 	}
 

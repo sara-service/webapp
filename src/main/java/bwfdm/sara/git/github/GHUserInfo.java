@@ -3,18 +3,12 @@ package bwfdm.sara.git.github;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import bwfdm.sara.git.AuthProvider.UserInfo;
-import bwfdm.sara.git.DataObject;
-
-/** data class for GitLab project info. */
+/** data class for GitHub user info. */
 @JsonIgnoreProperties(ignoreUnknown = true)
-class GHUserInfo implements DataObject<UserInfo> {
+class GHUserInfo {
 	/** internal user ID (unchangeable?) */
 	@JsonProperty("id")
 	String userID;
-	/** user's primary email address (verified and guranteed unique) */
-	@JsonProperty("email")
-	String email;
 	/**
 	 * user's display name (<code>null</code> unless the user entered that
 	 * somewhere)
@@ -37,10 +31,5 @@ class GHUserInfo implements DataObject<UserInfo> {
 		if (displayName != null && !displayName.isEmpty())
 			return displayName;
 		return loginName;
-	}
-
-	@Override
-	public UserInfo toDataObject() {
-		return new UserInfo(userID, email, getEffectiveDisplayName());
 	}
 }
