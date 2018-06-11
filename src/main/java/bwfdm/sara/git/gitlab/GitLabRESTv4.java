@@ -80,7 +80,7 @@ public class GitLabRESTv4 implements GitRepo {
 		// whether it's a WORKING token. downloads the user info because that
 		// should always be available and doesn't depend on the project.
 		try {
-			rest.getBlob(rest.uri("/user"));
+			getUserInfo();
 			return true;
 		} catch (final Exception e) {
 			// doesn't look like that token is working...
@@ -91,9 +91,9 @@ public class GitLabRESTv4 implements GitRepo {
 
 	@Override
 	public UserInfo getUserInfo() {
-		// FIXME Auto-generated method stub
-		return new UserInfo("stefan.kombrink@uni-ulm.de",
-				"stefan.kombrink@uni-ulm.de", "Stefan Kombrink");
+		return rest.get(rest.uri("/user"),
+				new ParameterizedTypeReference<GLUserInfo>() {
+				}).toDataObject();
 	}
 
 	@Override

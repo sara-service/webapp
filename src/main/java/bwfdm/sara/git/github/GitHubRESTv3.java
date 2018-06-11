@@ -77,7 +77,7 @@ public class GitHubRESTv3 implements GitRepo {
 		// test token by retrieving user info. this throws a 401 if executed
 		// without a token.
 		try {
-			rest.getBlob(rest.uri("/user"));
+			getUserInfo();
 			return true;
 		} catch (final Exception e) {
 			authRest.setToken(null);
@@ -87,9 +87,10 @@ public class GitHubRESTv3 implements GitRepo {
 
 	@Override
 	public UserInfo getUserInfo() {
-		// FIXME Auto-generated method stub
-		return new UserInfo("stefan.kombrink@uni-ulm.de",
-				"stefan.kombrink@uni-ulm.de", "Stefan Kombrink");
+		System.out.println(new String(rest.getBlob(rest.uri("/user"))));
+		return rest.get(rest.uri("/user"),
+				new ParameterizedTypeReference<GHUserInfo>() {
+				}).toDataObject();
 	}
 
 	@Override
