@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="icon" href="lib/icon.png" type="image/png"/>
+	<link rel="shortcut icon" href="lib/icon.png" type="image/png"/>
+	<link rel="stylesheet" href="lib/bootstrap.min.css" />
+	<link rel="stylesheet" href="lib/sara.css" />
+	<script src="lib/jquery.min.js"></script>
+	<script src="lib/common.js"></script>
+	<script src="final.js"></script>
+	<title>Final stage — SARA software publishing</title>
+</head>
+<body><div class="fluid-container">
+	<div class="row">
+		<div class="col-xs-12">
+			<img src="lib/header.svg" class="logo-header" />
+		</div>
+	</div>
+
+	<div class="row">
+		<div class="col-xs-12 action-header">
+			<h1>Your publication has been submitted</h1>
+		</div>
+	</div>
+
+	<div id="loading" class="loading"><span class="sr-only">loading, please wait...</span></div>
+	<div id="content" class="hidden">
+		<div class="row">
+			<div class="col-xs-12 col-sm-9"><h3 class="inline-heading">Publish it on:</h3></div>
+			<a class="col-xs-9 col-xs-offset-3 col-sm-3 col-sm-offset-0 btn btn-default" href="/publish.html">edit publishing options</a>
+		</div>
+		<dl class="dl-horizontal" id="publish">
+			<dt>repository</dt><dd id="pubrepo_displayname">Oparu</dd>
+			<dt>collection</dt><dd id="collection_displayname">Community-&gt;SubCommunity-&gt;Collection(0815)</dd>
+			<dt>login</dt><dd id="email">user@email.de</dd>
+		</dl>
+
+		<div class="row">
+			<div class="col-xs-12 col-sm-9"><h3 class="inline-heading">Describe it as:</h3></div>
+<!--
+			<a class="col-xs-9 col-xs-offset-3 col-sm-3 col-sm-offset-0 btn btn-default" href="/pubmeta.html">edit metadata</a>
+-->
+		</div>
+		<dl class="dl-horizontal">
+			<dt>publication title</dt><dd id="title">SARA-server</dd>
+			<dt>version</dt><dd id="version">3.1.4.1.5</dd>
+			<dt>description</dt><dd id="description">nothing</dd>
+		</dl>
+	</div>
+
+	<p style="height:3ex"></p>
+	<div class="row">
+		<a class="btn btn-primary disabled col-sm-2 col-sm-offset-10" id="next_button">publish something else</a>
+	</div>
+	<p style="height:3ex"></p>
+</div></body>
+</html>
