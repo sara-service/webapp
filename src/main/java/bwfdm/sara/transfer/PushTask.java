@@ -119,19 +119,6 @@ public class PushTask extends Task {
 		i.date_last_modified = i.date_created;
 		
 		i = job.pubDB.insertInDB(i);
-		
-		/* TODO write respective metadatamapping / metadatavalue
-		Map<String, String> metadataMap = new HashMap<String, String>();
-
-		metadataMap.put("abstract", meta.get(MetadataField.DESCRIPTION));
-		metadataMap.put("contributor", meta.get(MetadataField.PUBREPO_LOGIN_EMAIL));
-		metadataMap.put("title", meta.get(MetadataField.TITLE));
-		metadataMap.put("identifier", meta.get(MetadataField.VERSION)); 
-		metadataMap.put("type", "Software Sources");
-		metadataMap.put("publisher", "SARA Service");
-		metadataMap.put("source", webURL);
-		metadataMap.put("dateSubmitted", new Date().toString());
-		*/
 
 		logger.info("Item submission succeeded with item uuid " + i.uuid.toString());
 		return i.uuid;
