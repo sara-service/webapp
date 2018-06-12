@@ -1,0 +1,6 @@
+{ 
+	"version": "${project.version}"
+	"branch": "${scmBranch}",
+	"commit": "${buildNumber}",
+	"timestamp": ${timestamp}
+}
