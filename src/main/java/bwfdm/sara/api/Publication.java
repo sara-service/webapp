@@ -94,7 +94,8 @@ public class Publication {
 
 		// TODO Metadata Mapping
 		// TODO Error Handling
-		Map<PublicationField, String> meta = project.getPublicationDatabase()
+		final Map<PublicationField, String> meta = project
+				.getPublicationDatabase()
 				.getMetadata(project.getItemUUID());
 
 		final UUID repository_uuid = UUID
@@ -108,7 +109,7 @@ public class Publication {
 		final String userLogin = meta.get(PublicationField.PUBREPO_LOGIN_EMAIL);
 
 		metadataMap.put("abstract", meta.get(PublicationField.DESCRIPTION));
-		metadataMap.put("contributor", project.getItem().contact_email);
+		metadataMap.put("contributor", meta.get(PublicationField.SUBMITTER));
 		metadataMap.put("title", meta.get(PublicationField.TITLE));
 		metadataMap.put("identifier", meta.get(PublicationField.VERSION));
 		metadataMap.put("type", "Software Sources");
@@ -123,8 +124,13 @@ public class Publication {
 		i.item_state = ItemState.SUBMITTED.name();
 		i.repository_uuid = repository_uuid;
 		i.collection_id = collectionURL;
+		i.repository_url = repo.getDAO().url + "/xmlui/submissions";
 
 		project.getPublicationDatabase().updateInDB(i);
+
+		Map<PublicationField, String> m = new HashMap<PublicationField, String>();
+		m.put(PublicationField.REPOSITORY_URL, i.repository_url);
+		config.getPublicationDatabase().setMetadata(project.getItemUUID(), m);
 
 		return new RedirectView("/final.html");
 	}

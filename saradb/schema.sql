@@ -84,7 +84,9 @@ CREATE TABLE item(
         meta_title text,
         meta_description text,
         meta_version text,
+        meta_submitter text,
         archive_url text,
+        repository_url text,
 	contact_email text NOT NULL, -- email address to be used for contacting the user
 
 	collection_id text, -- ID of collection in institutional repository
@@ -131,7 +133,7 @@ CREATE TABLE fe_temp_pubmeta(
 	item_uuid UUID REFERENCES item(uuid) ON DELETE CASCADE,
 	field text NOT NULL,
 	value text NOT NULL,
-	CHECK (field in ('title', 'description', 'version', 'pubrepo', 'pubrepo_displayname', 'collection', 'collection_displayname', 'email')),
+	CHECK (field in ('title', 'description', 'version', 'pubrepo', 'pubrepo_displayname', 'collection', 'collection_displayname', 'email', 'submitter', 'repository_url', 'archive_url')),
 	PRIMARY KEY (item_uuid, field)
 );
 

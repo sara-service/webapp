@@ -53,7 +53,11 @@ public class Item implements DAO {
 	@DatabaseField
 	public String meta_description;
 	@DatabaseField
+	public String meta_submitter;
+	@DatabaseField
 	public String archive_url;
+	@DatabaseField
+	public String repository_url;
 
 	public Item(@JsonProperty("uuid") UUID uuid) {
 		this.uuid = uuid;
