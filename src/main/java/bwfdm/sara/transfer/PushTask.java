@@ -20,6 +20,7 @@ import org.eclipse.jgit.transport.URIish;
 
 import bwfdm.sara.Config;
 import bwfdm.sara.git.ArchiveProject;
+import bwfdm.sara.git.ArchiveRepo;
 import bwfdm.sara.git.ArchiveRepo.ProjectExistsException;
 import bwfdm.sara.project.ArchiveJob;
 import bwfdm.sara.project.MetadataField;
@@ -27,16 +28,34 @@ import bwfdm.sara.project.Ref;
 import bwfdm.sara.publication.Item;
 import bwfdm.sara.publication.ItemState;
 import bwfdm.sara.publication.ItemType;
+import bwfdm.sara.publication.db.PublicationDatabase;
 
+/** Pushes a repository to a git archive. */
 public class PushTask extends Task {
 	private static final String TARGET_REMOTE = "target";
 
 	private final ArchiveJob job;
+	private final ArchiveRepo archive;
+	private final PublicationDatabase pubDB;
+
 	private ArchiveProject project;
 	private UUID itemUUID;
 
-	public PushTask(final ArchiveJob job) {
+	/**
+	 * @param job
+	 *            all the information needed to archive this job (and probably
+	 *            some extra info that isn't relevant)
+	 * @param archive
+	 *            handle to the archive into which the item must be uploaded
+	 * @param pubDB
+	 *            handle to the publication database for storing the metadata of
+	 *            the archived item
+	 */
+	public PushTask(final ArchiveJob job, final ArchiveRepo archive,
+			final PublicationDatabase pubDB) {
 		this.job = job;
+		this.archive = archive;
+		this.pubDB = pubDB;
 	}
 
 	@Override
@@ -57,7 +76,7 @@ public class PushTask extends Task {
 
 		final String id = Config.getRandomID();
 		beginTask("Creating project " + id, 1);
-		project = job.archive.createProject(id, true, job.meta);
+		project = archive.createProject(id, true, job.meta);
 
 		beginTask("Preparing repository for upload", 1);
 		pushRepoToArchive();
@@ -118,7 +137,7 @@ public class PushTask extends Task {
 		i.date_created = new Date();
 		i.date_last_modified = i.date_created;
 		
-		i = job.pubDB.insertInDB(i);
+		i = pubDB.insertInDB(i);
 
 		logger.info("Item submission succeeded with item uuid " + i.uuid.toString());
 		return i.uuid;

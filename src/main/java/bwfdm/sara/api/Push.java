@@ -7,10 +7,12 @@ import javax.servlet.http.HttpSession;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 
+import bwfdm.sara.project.ArchiveJob;
 import bwfdm.sara.project.Project;
 import bwfdm.sara.project.PublicationSession;
 import bwfdm.sara.transfer.PushTask;
@@ -30,17 +32,30 @@ public class Push {
 		return Project.getInstance(session).getPushTask().getStatus();
 	}
 
-	@PostMapping("trigger")
-	public TaskStatus triggerClone(final HttpSession session) {
-		final Project tx = Project.getInstance(session);
-		tx.startPush();
-		return tx.getPushTask().getStatus();
+	@PostMapping("trigger") // FIXME triggerPush
+	public TaskStatus triggerPush(@RequestParam("token") final String hash,
+			final HttpSession session) {
+		final Project project = Project.getInstance(session);
+		final ArchiveJob job = project.getArchiveJob();
+		final String curHash = job.getHash();
+		if (!curHash.equals(hash))
+			throw new IllegalArgumentException("trying to trigger " + hash
+					+ " but session has data for " + curHash);
+		project.startPush(job);
+		return project.getPushTask().getStatus();
 	}
 
 	@GetMapping("trigger")
-	public RedirectView triggerCloneAndRedirect(final HttpSession session) {
-		triggerClone(session);
+	public RedirectView triggerPushAndRedirect(
+			@RequestParam("token") final String hash,
+			final HttpSession session) {
+		triggerPush(hash, session);
 		return new RedirectView("/push.html");
+	}
+
+	@GetMapping("overview")
+	public ArchiveJob getPushSummary(final HttpSession session) {
+		return Project.getInstance(session).getArchiveJob();
 	}
 
 	@GetMapping("redirect")

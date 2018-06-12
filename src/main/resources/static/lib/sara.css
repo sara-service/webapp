@@ -79,6 +79,18 @@ li {
 	padding: 0em 1em;
 }
 
+.multiline {
+	white-space: pre-wrap;
+}
+
+.multiline::before {
+	display: none !important;
+}
+
+.multiline::after {
+	display: none !important;
+}
+
 .logo-header {
 	height: 10ex;
 	margin: 0ex 0ex 0ex 0ex;

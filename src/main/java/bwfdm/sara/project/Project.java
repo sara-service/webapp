@@ -1,7 +1,5 @@
 package bwfdm.sara.project;
 
-import java.util.Map;
-
 import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +9,7 @@ import bwfdm.sara.api.Authorization;
 import bwfdm.sara.db.ConfigDatabase;
 import bwfdm.sara.db.FrontendDatabase;
 import bwfdm.sara.extractor.MetadataExtractor;
+import bwfdm.sara.git.ArchiveRepo;
 import bwfdm.sara.git.GitProject;
 import bwfdm.sara.git.GitRepo;
 import bwfdm.sara.publication.db.PublicationDatabase;
@@ -180,17 +179,26 @@ public class Project {
 		return clone.getStatus();
 	}
 
-	public void startPush() {
+	public void startPush(final ArchiveJob job) {
+		// if a different ArchiveJob is running, kill it
+		// FIXME shouldn't we just throw an exception?
+		// this should never happen!
+		if (push != null && !push.getArchiveJob().equals(job))
+			cancelPush();
+
 		if (push == null) {
-			// FIXME archiveID should be dynamic
-			final String archiveID = config.getConfigDatabase().getGitArchive();
-			final Map<MetadataField, String> meta = metadataExtractor
-					.get(MetadataField.values());
-			
-			meta.putAll(getFrontendDatabase().getMetadata());
-			push = new PushTask(new ArchiveJob(this, archiveID));
+			final ArchiveRepo archive = config.getConfigDatabase()
+					.newGitArchive(job.archiveUUID.toString());
+			final PublicationDatabase pubDB = config.getPublicationDatabase();
+			push = new PushTask(job, archive, pubDB);
 		}
 		push.start();
+	}
+
+	public ArchiveJob getArchiveJob() {
+		// FIXME archiveID should be dynamic
+		final String archiveID = config.getConfigDatabase().getGitArchive();
+		return new ArchiveJob(this, archiveID);
 	}
 
 	public void cancelPush() {
