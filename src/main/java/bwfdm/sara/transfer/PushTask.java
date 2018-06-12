@@ -57,7 +57,7 @@ public class PushTask extends Task {
 
 		final String id = Config.getRandomID();
 		beginTask("Creating project " + id, 1);
-		project = job.archive.createProject(id, false, job.meta);
+		project = job.archive.createProject(id, true, job.meta);
 
 		beginTask("Preparing repository for upload", 1);
 		pushRepoToArchive();

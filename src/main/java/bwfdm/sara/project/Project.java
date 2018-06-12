@@ -211,9 +211,9 @@ public class Project {
 	 * for multiple changes.
 	 */
 	public void invalidateMetadata() {
-		// FIXME change to PushTaskConfig to this is safe to do
-		// cancelPush();
-		// FIXME is there anything else we need to do here?
+		// this allows the user to trigger the clone again
+		// FIXME but it also crashes if (s)he returns after push finished!
+		cancelPush();
 	}
 
 	public Config getConfig() {
