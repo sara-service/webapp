@@ -122,6 +122,8 @@ public class PushTask extends Task {
 		// initialization with reasonable defaults
 		// email from working gitlab
 		i.repository_login_id = job.gitrepoEmail;
+		// submitter of publication
+		i.meta_submitter = meta.get(MetadataField.SUBMITTER);
 		// version of git project
 		i.meta_version = meta.get(MetadataField.VERSION);
 		// title of git project
