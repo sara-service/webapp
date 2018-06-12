@@ -12,6 +12,7 @@ public enum PublicationField {
 	DESCRIPTION("description"),
 	/** software version number */
 	VERSION("version"),
+	SUBMITTER("submitter"),
 	/** ID of the institutional repository to publish the item in */
 	PUBLICATION_REPOSITORY("pubrepo"),
 	/**
@@ -21,6 +22,8 @@ public enum PublicationField {
 	PUBREPO_COLLECTION("collection"),
 	PUBREPO_REPOSITORYNAME("pubrepo_displayname"),
 	PUBREPO_COLLECTIONNAME("collection_displayname"),
+	ARCHIVE_URL("archive_url"),
+	REPOSITORY_URL("repository_url"),
 	/**
 	 * user's login email in the institutional repository. may well be different
 	 * from the login email in the git repo!

@@ -81,7 +81,7 @@ public class PushTask extends Task {
 		beginTask("Preparing repository for upload", 1);
 		pushRepoToArchive();
 
-		beginTask("write dspace item into database", 1);
+		beginTask("Record metadata in database", 1);
 		itemUUID = createItemInDB(project.getWebURL(), job.meta);
 		endTask();
 	}
@@ -125,6 +125,7 @@ public class PushTask extends Task {
 		i.source_uuid = job.sourceUUID;
 		i.item_state = ItemState.CREATED.name();
 		i.item_state_sent = i.item_state;
+
 		if (job.isArchiveOnly) {
 			i.item_type = ItemType.ARCHIVE_HIDDEN.name();
 		} else {
@@ -136,7 +137,21 @@ public class PushTask extends Task {
 		i.contact_email = job.gitrepoEmail;
 		i.date_created = new Date();
 		i.date_last_modified = i.date_created;
-		
+
+		// initialization with reasonable defaults
+		// email from working gitlab
+		i.repository_login_id = job.gitrepoEmail;
+		// submitter of publication
+		i.meta_submitter = meta.get(MetadataField.SUBMITTER);
+		// version of git project
+		i.meta_version = meta.get(MetadataField.VERSION);
+		// title of git project
+		i.meta_title = meta.get(MetadataField.TITLE);
+		// description of git project
+		i.meta_description = meta.get(MetadataField.DESCRIPTION);
+		// URL where the archive has been deposited
+		i.archive_url = webURL;
+
 		i = pubDB.insertInDB(i);
 
 		logger.info("Item submission succeeded with item uuid " + i.uuid.toString());

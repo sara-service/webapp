@@ -44,6 +44,20 @@ public class Item implements DAO {
 	public String item_state_sent;
 	@DatabaseField
 	public String persistent_identifier;
+	@DatabaseField
+	public String repository_login_id;
+	@DatabaseField
+	public String meta_title;
+	@DatabaseField
+	public String meta_version;
+	@DatabaseField
+	public String meta_description;
+	@DatabaseField
+	public String meta_submitter;
+	@DatabaseField
+	public String archive_url;
+	@DatabaseField
+	public String repository_url;
 
 	public Item(@JsonProperty("uuid") UUID uuid) {
 		this.uuid = uuid;

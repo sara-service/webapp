@@ -94,7 +94,8 @@ public class Publication {
 
 		// TODO Metadata Mapping
 		// TODO Error Handling
-		Map<PublicationField, String> meta = project.getPublicationDatabase()
+		final Map<PublicationField, String> meta = project
+				.getPublicationDatabase()
 				.getMetadata(project.getItemUUID());
 
 		final UUID repository_uuid = UUID
@@ -108,12 +109,12 @@ public class Publication {
 		final String userLogin = meta.get(PublicationField.PUBREPO_LOGIN_EMAIL);
 
 		metadataMap.put("abstract", meta.get(PublicationField.DESCRIPTION));
-		metadataMap.put("contributor", project.getItem().contact_email);
+		metadataMap.put("contributor", meta.get(PublicationField.SUBMITTER));
 		metadataMap.put("title", meta.get(PublicationField.TITLE));
 		metadataMap.put("identifier", meta.get(PublicationField.VERSION));
 		metadataMap.put("type", "Software Sources");
 		metadataMap.put("publisher", "SARA Service");
-		metadataMap.put("source", "http://WEBURL");
+		metadataMap.put("source", meta.get(PublicationField.ARCHIVE_URL));
 		metadataMap.put("dateSubmitted", new Date().toString());
 
 		repo.publishMetadata(userLogin, collectionURL, metadataMap);
@@ -123,8 +124,13 @@ public class Publication {
 		i.item_state = ItemState.SUBMITTED.name();
 		i.repository_uuid = repository_uuid;
 		i.collection_id = collectionURL;
+		i.repository_url = repo.getDAO().url + "/xmlui/submissions";
 
 		project.getPublicationDatabase().updateInDB(i);
+
+		Map<PublicationField, String> m = new HashMap<PublicationField, String>();
+		m.put(PublicationField.REPOSITORY_URL, i.repository_url);
+		config.getPublicationDatabase().setMetadata(project.getItemUUID(), m);
 
 		return new RedirectView("/final.html");
 	}
@@ -219,15 +225,20 @@ public class Publication {
 		public final String title;
 		@JsonProperty("version")
 		public final String version;
+		@JsonProperty("description")
+		public final String description;
+		@JsonProperty("archive_url")
+		public final String archive_url;
 		@JsonProperty("item")
 		public final UUID item;
 
 		public PublicationItem(final UUID source, final Item item) {
 			this.item = item.uuid;
 			this.source = source;
-			// FIXME how do we get the title and version of the item??
-			title = "$" + item.uuid.toString();
-			version = "1.0";
+			title = item.meta_title;
+			version = item.meta_version;
+			description = item.meta_description;
+			archive_url = item.archive_url;
 		}
 	}
 }
