@@ -13,7 +13,6 @@ function initMeta(info) {
 	$("#content").removeClass("hidden");
 }
 
-
 $(function() {
 	API.get("load metadata fields", "/api/publish/meta", {}, initMeta);
 });
