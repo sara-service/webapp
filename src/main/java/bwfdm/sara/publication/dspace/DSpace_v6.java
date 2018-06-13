@@ -305,18 +305,14 @@ public class DSpace_v6 implements PublicationRepository {
 	}
 
 	@Override
-	public boolean publishMetadata(String userLogin, String collectionURL,
+	public String publishMetadata(String userLogin, String collectionURL,
 			Map<String, String> metadataMap) {
 
 		String mimeFormat = "application/atom+xml";
 		String packageFormat = UriRegistry.PACKAGE_BINARY;
 
-		if (publishElement(userLogin, collectionURL, mimeFormat, packageFormat,
-				null, metadataMap) != null) {
-			return true;
-		} else {
-			return false;
-		}
+		return publishElement(userLogin, collectionURL, mimeFormat,
+				packageFormat, null, metadataMap);
 	}
 
 	private String publishElement(String userLogin, String collectionURL,
@@ -362,7 +358,8 @@ public class DSpace_v6 implements PublicationRepository {
 
 			DepositReceipt receipt = sword_client.deposit(collectionURL,
 					deposit, authCredentials);
-			return receipt.getLocation(); // "Location" parameter from the response
+
+			return receipt.getSplashPageLink().getHref();
 
 		} catch (FileNotFoundException e) {
 			logger.error("Exception by accessing a file: " + e.getClass().getSimpleName() + ": " + e.getMessage());

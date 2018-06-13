@@ -1,8 +1,6 @@
 package bwfdm.sara.publication;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * General Interface for the publication repository.
@@ -76,7 +74,8 @@ public interface PublicationRepository {
 	 * @param metadataMap
 	 * @return
 	 */
-	public boolean publishMetadata(String userLogin, String collectionURL, Map<String, String> metadataMap);
+	public String publishMetadata(String userLogin, String collectionURL,
+			Map<String, String> metadataMap);
 		
 	/**
 	 * Publish metada only (without any file) to some collection, which is available for the user.

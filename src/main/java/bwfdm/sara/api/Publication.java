@@ -117,14 +117,15 @@ public class Publication {
 		metadataMap.put("source", meta.get(PublicationField.ARCHIVE_URL));
 		metadataMap.put("dateSubmitted", new Date().toString());
 
-		repo.publishMetadata(userLogin, collectionURL, metadataMap);
+		final String depositUrl = repo.publishMetadata(userLogin, collectionURL,
+				metadataMap);
 
 		Item i = project.getItem();
 		i.date_last_modified = new Date();
 		i.item_state = ItemState.SUBMITTED.name();
 		i.repository_uuid = repository_uuid;
 		i.collection_id = collectionURL;
-		i.repository_url = repo.getDAO().url + "/xmlui/submissions";
+		i.repository_url = depositUrl;
 
 		project.getPublicationDatabase().updateInDB(i);
 
