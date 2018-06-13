@@ -1,11 +1,14 @@
 package bwfdm.sara.api;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.TimeZone;
 import java.util.UUID;
 
 import javax.servlet.http.HttpSession;
@@ -110,12 +113,14 @@ public class Publication {
 
 		metadataMap.put("abstract", meta.get(PublicationField.DESCRIPTION));
 		metadataMap.put("contributor", meta.get(PublicationField.SUBMITTER));
+		// this is the preset for "author"
+		metadataMap.put("creator", meta.get(PublicationField.SUBMITTER));
 		metadataMap.put("title", meta.get(PublicationField.TITLE));
 		metadataMap.put("identifier", meta.get(PublicationField.VERSION));
-		metadataMap.put("type", "Software Sources");
+		// FIXME dc.type needs to be configurable by IR maintainers
+		metadataMap.put("type", "Software");
 		metadataMap.put("publisher", "SARA Service");
 		metadataMap.put("source", meta.get(PublicationField.ARCHIVE_URL));
-		metadataMap.put("dateSubmitted", new Date().toString());
 
 		final String depositUrl = repo.publishMetadata(userLogin, collectionURL,
 				metadataMap);
@@ -126,6 +131,14 @@ public class Publication {
 		i.repository_uuid = repository_uuid;
 		i.collection_id = collectionURL;
 		i.repository_url = depositUrl;
+
+		TimeZone tz = TimeZone.getTimeZone("UTC");
+		// Quoted "Z" to indicate UTC, no timezone offset
+		DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'");
+		df.setTimeZone(tz);
+
+		metadataMap.put("dateSubmitted", df.format(i.date_last_modified));
+		metadataMap.put("issued", df.format(i.date_created));
 
 		project.getPublicationDatabase().updateInDB(i);
 
