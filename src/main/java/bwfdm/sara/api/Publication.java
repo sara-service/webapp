@@ -122,15 +122,11 @@ public class Publication {
 		metadataMap.put("publisher", "SARA Service");
 		metadataMap.put("source", meta.get(PublicationField.ARCHIVE_URL));
 
-		final String depositUrl = repo.publishMetadata(userLogin, collectionURL,
-				metadataMap);
-
 		Item i = project.getItem();
 		i.date_last_modified = new Date();
 		i.item_state = ItemState.SUBMITTED.name();
 		i.repository_uuid = repository_uuid;
 		i.collection_id = collectionURL;
-		i.repository_url = depositUrl;
 
 		TimeZone tz = TimeZone.getTimeZone("UTC");
 		// Quoted "Z" to indicate UTC, no timezone offset
@@ -139,6 +135,11 @@ public class Publication {
 
 		metadataMap.put("dateSubmitted", df.format(i.date_last_modified));
 		metadataMap.put("issued", df.format(i.date_created));
+
+		final String depositUrl = repo.publishMetadata(userLogin, collectionURL,
+				metadataMap);
+
+		i.repository_url = depositUrl;
 
 		project.getPublicationDatabase().updateInDB(i);
 
