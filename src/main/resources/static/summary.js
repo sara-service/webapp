@@ -18,7 +18,7 @@ function blockLoaded(name) {
 
 function initMeta(info) {
 	$.each(["title", "description", "version", "pubrepo_displayname", "collection_displayname",
-		"email"], function(_, name) {
+		"email", "submitter"], function(_, name) {
 			$("#" + name).text(info[name]);
 		});
 
@@ -26,7 +26,6 @@ function initMeta(info) {
 	$('#collection_displayname').prop('title',info["collection"]);
 	blockLoaded("meta");
 }
-
 
 $(function() {
 	API.get("load metadata fields", "/api/publish/meta", {}, initMeta);
