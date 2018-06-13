@@ -19,6 +19,7 @@ import bwfdm.sara.git.AuthProvider;
 import bwfdm.sara.git.GitRepo;
 import bwfdm.sara.project.Project;
 import bwfdm.sara.project.PublicationSession;
+import bwfdm.sara.publication.Item;
 
 @RestController
 @ControllerAdvice
@@ -83,16 +84,19 @@ public class Authorization {
 
 	@GetMapping("publish")
 	public RedirectView authForPublication(
-			@RequestParam("repo") final String gitRepo,
-			@RequestParam(name = "item", required = false) final String item,
+			@RequestParam("item") final String itemID,
 			final RedirectAttributes redir, final HttpSession session) {
-		// if the user does not have a session for this repo, create one
-		final UUID sourceUUID = UUID.fromString(gitRepo);
-		if (!PublicationSession.hasInstance(session) || !PublicationSession
-				.getInstance(session).getSourceUUID().equals(sourceUUID)) {
-			final GitRepo repo = config.getConfigDatabase().newGitRepo(gitRepo);
-			PublicationSession.createInstance(session, sourceUUID, repo,
-					UUID.fromString(item), config);
+		final UUID itemUUID = UUID.fromString(itemID);
+		final Item item = config.getPublicationDatabase()
+					.updateFromDB(new Item(itemUUID));
+
+		if (!PublicationSession.hasInstance(session)
+				|| !PublicationSession.getInstance(session).getSourceUUID()
+						.equals(item.source_uuid)) {
+			final GitRepo repo = config.getConfigDatabase()
+					.newGitRepo(item.source_uuid.toString());
+			PublicationSession.createInstance(session, item.source_uuid, repo,
+					itemUUID, config);
 		}
 
 		final PublicationSession publish = PublicationSession

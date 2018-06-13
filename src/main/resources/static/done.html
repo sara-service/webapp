@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="icon" href="lib/icon.png" type="image/png"/>
+	<link rel="shortcut icon" href="lib/icon.png" type="image/png"/>
+	<link rel="stylesheet" href="lib/bootstrap.min.css" />
+	<link rel="stylesheet" href="lib/sara.css" />
+	<script src="lib/jquery.min.js"></script>
+	<script src="lib/uri.min.js"></script>
+	<script src="done.js"></script>
+	<title>Item archived — SARA software publishing</title>
+</head>
+<body><div class="fluid-container">
+	<div class="row">
+		<div class="col-xs-12">
+			<img src="lib/header.svg" class="logo-header" />
+		</div>
+	</div>
+
+	<div class="row">
+		<div class="col-xs-12 action-header">
+			<h1>Your software artefact has been archived</h1>
+		</div>
+	</div>
+
+	<div id="loading" class="loading"><span class="sr-only">loading, please wait...</span></div>
+	<div id="content" class="hidden">
+		<p>Your archive ID is:</p>
+		<h3 id="item" class="col-sm-offset-1 col-sm-11">Dammit, something went wrong... Please bookmark the page anyway!</h3>
+		<p><b>Please write this value down</b> and store it in a safe place, or bookmark this page.
+			You will need the archive ID if you want to retrieve your artefact from the archive later on.</p>
+	</div>
+
+	<p style="height:3ex"></p>
+	<div class="row">
+		<a class="btn btn-primary disabled col-sm-4 col-sm-offset-8" id="next_button">create a bibliographical record for this item</a>
+	</div>
+	<p style="height:3ex"></p>
+</div></body>
+</html>

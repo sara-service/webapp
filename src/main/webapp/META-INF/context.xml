@@ -9,12 +9,9 @@
 		description="tells spring to use the datasource defined above (no need to change)" />
 
 	<Parameter name="sara.webroot"
-		value="https://sara.unikn.netfuture.ch"
+		value="https://demo.sara-project.org"
 		description="publicly visible URL of servlet root" />
 	<Parameter name="temp.dir"
 		value="temp"
 		description="directory for temporary files, relative to servlet container's temp dir or absolute" />
-	<Parameter name="publish.config"
-		value="publish.json"
-		description="path to JSON file listing all publication repositories" />
 </Context>

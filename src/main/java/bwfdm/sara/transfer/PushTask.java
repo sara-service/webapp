@@ -81,7 +81,7 @@ public class PushTask extends Task {
 		beginTask("Preparing repository for upload", 1);
 		pushRepoToArchive();
 
-		beginTask("write dspace item into database", 1);
+		beginTask("Record metadata in database", 1);
 		itemUUID = createItemInDB(project.getWebURL(), job.meta);
 		endTask();
 	}
