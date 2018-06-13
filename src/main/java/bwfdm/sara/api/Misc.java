@@ -48,26 +48,10 @@ public class Misc {
 		private final String repo;
 		@JsonProperty("project")
 		private final String projectPath;
-		@JsonProperty
-		private final IRMeta ir;
 
 		public SessionInfo(final Project project) {
 			repo = project.getRepoID();
 			projectPath = project.getProjectPath();
-			// TODO read this from the session as well
-			ir = new IRMeta("https://kops.uni-konstanz.de/", "kops.svg");
-		}
-	}
-
-	private class IRMeta {
-		@JsonProperty
-		private final String url;
-		@JsonProperty
-		private final String logo;
-
-		public IRMeta(final String url, final String logo) {
-			this.url = url;
-			this.logo = logo;
 		}
 	}
 }

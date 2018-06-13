@@ -159,4 +159,12 @@ public class TransferRepo {
 		// FIXME 32-bit timestamp in an API! in 2017!!! wtf????
 		return repo.parseCommit(id).getCommitTime();
 	}
+
+	public String getHeadCommitID(final String ref) throws IOException {
+		checkInitialized();
+		final ObjectId id = repo.resolve(ref);
+		if (id == null)
+			throw new NoSuchElementException(ref);
+		return id.getName();
+	}
 }

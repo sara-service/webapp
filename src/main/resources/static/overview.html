@@ -9,6 +9,7 @@
 	<link rel="stylesheet" href="lib/bootstrap.min.css" />
 	<link rel="stylesheet" href="lib/sara.css" />
 	<script src="lib/jquery.min.js"></script>
+	<script src="lib/uri.min.js"></script>
 	<script src="lib/common.js"></script>
 	<script src="overview.js"></script>
 	<title>Archiving task overview — SARA software publishing</title>
@@ -48,7 +49,6 @@
 			<a class="col-xs-9 col-xs-offset-3 col-sm-3 col-sm-offset-0 btn btn-default" href="/license.html">edit license</a>
 		</div>
 		<ul id="licenses">
-			<li id="license" class="hidden">GNU GPL 3.0</li>
 			<li id="template_licenses" class="hidden">
 				<span name="type">branch</span> <b name="name">master</b>:
 				<span name="license">GNU GPL 3.0</span></li>
@@ -60,9 +60,10 @@
 			<a class="col-xs-9 col-xs-offset-3 col-sm-3 col-sm-offset-0 btn btn-default" href="/meta.html">edit metadata</a>
 		</div>
 		<dl class="dl-horizontal">
+			<dt>submitter</dt><dd id="submitter">Clara Fall</dd>
 			<dt>publication title</dt><dd id="title">SARA-server</dd>
 			<dt>version</dt><dd id="version">3.1.4.1.5</dd>
-			<dt>description</dt><dd id="description">nothing</dd>
+			<dt>description</dt><dd id="description" class="multiline">nothing</dd>
 		</dl>
 	</div>
 

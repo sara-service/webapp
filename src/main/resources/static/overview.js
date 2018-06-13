@@ -18,22 +18,6 @@ var publish = {
 		text: "archive without record" }
 };
 
-var has_block = { meta: false, branches: false, licenses: false };
-
-function blockLoaded(name) {
-	has_block[name] = true;
-	if (Object.values(has_block).indexOf(false) >= 0)
-		return;
-
-	$("#loading").remove();
-	$("#content").removeClass("hidden");
-	$("#next_button").click(function() {
-		// FIXME ?id=deadbeef
-		location.href = "/api/push/trigger";
-	});
-	$("#next_button").removeClass("disabled");
-}
-
 function initBranches(info) {
 	$.each(info, function(_, action) {
 		var line = template(action.firstCommit == "HEAD" ?
@@ -46,49 +30,43 @@ function initBranches(info) {
 			line.start.text(action.firstCommit);
 		$("#branches").append(line.root);
 	});
-	blockLoaded("branches");
 }
 
 function initLicenses(info) {
-	if (info.multiple) {
-		$.each(info.branches, function(_, branch) {
-			var line = template("template_licenses");
-			line.type.text(branch.ref.type);
-			line.name.text(branch.ref.name);
-			if (branch.effective == "keep")
-				line.license.text("keep " + branch.detected.id);
-			else if (branch.detected != null)
-				line.license.text("replace LICENSE file with " + branch.effective);
-			else
-				line.license.text("choose " + branch.effective);
-			$("#licenses").append(line.root);
-		});
-	} else {
-		if (info.user == "keep")
-			// note: to get here, the user must have selected "keep" for
-			// ALL branches, AND this must result in all branches having
-			// the same license. IOW: only one license was detected
-			$("#license").text("keep " + info.detected[0].id);
+	$.each(info, function(ref, license) {
+		var line = template("template_licenses");
+		line.type.text(ref.type);
+		line.name.text(ref.name);
+		if (license == "keep")
+			line.license.text("keep existing LICENSE file");
 		else
-			$("#license").text(info.user);
-		$("#license").removeClass("hidden");
-	}
-	blockLoaded("licenses");
+			line.license.text(license);
+		$("#licenses").append(line.root);
+	});
 }
 
 function initMeta(info) {
-	$.each(["title", "description", "version"],
+	$.each(["submitter", "title", "description", "version"],
 		function(_, name) {
-			$("#" + name).text(info[name].value);
+			$("#" + name).text(info[name]);
 		});
-	blockLoaded("meta");
+}
+
+function init(info) {
+	$("#project").text(info.sourceProject);
+	initBranches(info.actions);
+	initMeta(info.meta);
+	initLicenses(info.licenses);
+	$("#loading").remove();
+	$("#content").removeClass("hidden");
+	$("#next_button").click(function() {
+		location.href = new URI("/api/push/trigger").search({
+				token: info.token
+			});
+	});
+	$("#next_button").removeClass("disabled");
 }
 
 $(function() {
-	API.get("initialize page", "/api/session-info", {}, function(info) {
-		$("#project").text(info.project);
-	});
-	API.get("load metadata fields", "/api/meta", {}, initMeta);
-	API.get("load license choice", "/api/licenses", {}, initLicenses);
-	API.get("load branch list", "/api/repo/actions", {}, initBranches);
+	API.get("initialize page", "/api/push/overview", {}, init);
 });
