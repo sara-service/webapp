@@ -14,6 +14,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import bwfdm.sara.db.FrontendDatabase;
+import bwfdm.sara.extractor.LicenseFile;
 import bwfdm.sara.extractor.MetadataExtractor;
 import bwfdm.sara.project.RefAction.PublicationMethod;
 import bwfdm.sara.transfer.TransferRepo;
@@ -101,10 +102,16 @@ public class ArchiveJob {
 			throw new IllegalArgumentException(
 					"main branch branch not selected for publication");
 		// license(s).html
+		final Map<Ref, LicenseFile> detectedLicenses = metadataExtractor
+				.getLicenses();
 		licenses = frontend.getLicenses();
 		for (RefAction action : actions)
-			checkNullOrEmpty(action.ref.path + ".license",
-					licenses.get(action.ref));
+			// null means keep the existing license. which is fine – as long as
+			// we have something to keep!
+			if (licenses.get(action.ref) == null
+					&& !detectedLicenses.containsKey(action.ref))
+				throw new IllegalArgumentException(
+						"branch " + action.ref.path + " has no license");
 		// archive selection, currently just hardcoded
 		this.archiveUUID = UUID.fromString(archiveUUID); // implicit check
 	}
