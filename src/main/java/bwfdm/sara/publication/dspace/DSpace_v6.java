@@ -71,13 +71,10 @@ public class DSpace_v6 implements PublicationRepository {
 			@JsonProperty("dao") final Repository dao) {
 		this.dao = dao;
 
-		if (dao.url.endsWith("/"))
-			throw new IllegalArgumentException("url must not end with slash: " + dao.url);
-
-		rest_api_endpoint = dao.url + "/" + re;
+		rest_api_endpoint = re;
 		sword_user = su;
 		sword_pwd = sp;
-		sword_api_endpoint = dao.url + "/" + se;
+		sword_api_endpoint = se;
 		sword_servicedocumentpath = sword_api_endpoint + "/servicedocument";
 
 		rest_client = WebUtils.getClientWithoutSSL(); // Ignore SSL-Verification

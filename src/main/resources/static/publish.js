@@ -19,7 +19,7 @@ function doQueryHierarchy(pubrepo, email) {
 
 // query-hierarchy is slow and expensive. this method thus does two things:
 // 1. it caches query results locally
-// 2. it delays all queries by 1.5s
+// 2. it delays all queries by 500ms
 // if the result isn't in cache, it returns null, starts the download in the
 // background and calls email validation once the query is finished. it is
 // expected that email validation then calls queryHierarchy() again, and this
@@ -41,7 +41,7 @@ function queryHierarchy(force) {
 		clearTimeout(timer);
 	timer = setTimeout(function() {
 		doQueryHierarchy(pubrepo, email);
-	}, 1500);
+	}, 500);
 	return null;
 }
 
@@ -58,7 +58,7 @@ function validateEmail(email) {
 	if (!userInfo["user-valid"])
 		return "Your email isn't registered there!";
 	if (userInfo.hierarchy == null)
-		return "You don't have submit rights anywhere!";
+		return "You don't have submit rights to any collection!";
 	return true;
 }
 
@@ -150,6 +150,7 @@ function initPubRepos(info) {
 			$("#ir_logo").attr("src", logo);
 		else
 			$("#ir_logo").removeAttr("src");
+		$("#ir_link").attr("href", repo.url);
 		// delegate to email validation. the two fields have basically the
 		// same role (influencing the collection list), but we want the UI
 		// messages below the email to which they refer.
