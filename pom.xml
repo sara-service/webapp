@@ -118,8 +118,8 @@
 		     detection -->
 		<dependency>
 			<groupId>org.jruby</groupId>
-			<artifactId>jruby-complete</artifactId>
-			<version>9.1.12.0</version>
+			<artifactId>jruby</artifactId>
+			<version>9.1.17.0</version>
 		</dependency>
 		<!-- juniversalchardet to guess character encoding of files.
 		     mvnrepo says this is MPL 1.1, but the project's site
