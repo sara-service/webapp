@@ -40,28 +40,20 @@ INSERT INTO source_params(id, param, value) VALUES
 
 -- GitHub "development" app (return address: http://localhost:8080/)
 INSERT INTO source(display_name, contact_email, adapter, url, enabled) VALUES
-	('GitHub, Inc. (return to localhost:8080)', 'devnull@unikn.netfuture.ch',
+	('GitHub, Inc. (return to localhost:8080)', 'github@sara-service.org',
 		'GitHubRESTv3', 'https://github.com', TRUE)
 	RETURNING uuid INTO sRef2;
 INSERT INTO source_params(id, param, value) VALUES
 	(sRef2, 'oauthID', 'a71475f487dc3438b132'),
 	(sRef2, 'oauthSecret', 'f84451f01d60ea507955e3454526ea396a77b479');
--- GitHub "test" app (return address: https://sara.unikn.netfuture.ch/)
-INSERT INTO source(display_name, contact_email, adapter, url, enabled) VALUES
-	('GitHub, Inc.', 'devnull@unikn.netfuture.ch', 'GitHubRESTv3',
-		'https://github.com', TRUE)
-	RETURNING uuid INTO sRef2;
-INSERT INTO source_params(id, param, value) VALUES
-	(sRef2, 'oauthID', '7a0fc631e187589a8d2a'),
-	(sRef2, 'oauthSecret', 'a0acf7b6eb2848e0df2a2efb8a135a97f0e65eb7');
 
 -- "Testarchiv" default git archive
 INSERT INTO archive(display_name, contact_email, adapter, url, enabled) VALUES
-	('Testarchiv', 'devnull@testarchiv.unikn.netfuture.ch', 'GitLabArchiveRESTv4',
-		'https://testarchiv.unikn.netfuture.ch', TRUE)
+	('Testarchiv', 'devnull@testarchiv.sara-service.org', 'GitLabArchiveRESTv4',
+		'https://testarchiv.sara-service.org', TRUE)
 	RETURNING uuid INTO aRef;
 INSERT INTO archive_params(id, param, value) VALUES
-	(aRef, 'url', 'https://testarchiv.unikn.netfuture.ch'),
+	(aRef, 'url', 'https://testarchiv.sara-service.org'),
 	(aRef, 'temp-namespace', 'temp-archive'),
 	(aRef, 'main-namespace', 'archive'),
 	(aRef, 'dark-namespace', 'dark-archive'),
