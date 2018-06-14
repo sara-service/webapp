@@ -1,14 +1,11 @@
 package bwfdm.sara.api;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.TimeZone;
 import java.util.UUID;
 
 import javax.servlet.http.HttpSession;
@@ -26,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.view.RedirectView;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.util.ISO8601DateFormat;
 
 import bwfdm.sara.Config;
 import bwfdm.sara.project.Project;
@@ -40,6 +38,7 @@ import bwfdm.sara.publication.db.PublicationField;
 @RestController
 @RequestMapping("/api/publish")
 public class Publication {
+	private static final ISO8601DateFormat ISO8601 = new ISO8601DateFormat();
 	private static final Log logger = LogFactory.getLog(Publication.class);
 	@Autowired
 	private Config config;
@@ -128,13 +127,8 @@ public class Publication {
 		i.repository_uuid = repository_uuid;
 		i.collection_id = collectionURL;
 
-		TimeZone tz = TimeZone.getTimeZone("UTC");
-		// Quoted "Z" to indicate UTC, no timezone offset
-		DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'");
-		df.setTimeZone(tz);
-
-		metadataMap.put("dateSubmitted", df.format(i.date_last_modified));
-		metadataMap.put("issued", df.format(i.date_created));
+		metadataMap.put("dateSubmitted", ISO8601.format(i.date_last_modified));
+		metadataMap.put("issued", ISO8601.format(i.date_created));
 
 		final String depositUrl = repo.publishMetadata(userLogin, collectionURL,
 				metadataMap);
