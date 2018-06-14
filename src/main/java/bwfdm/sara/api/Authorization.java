@@ -90,21 +90,30 @@ public class Authorization {
 		final Item item = config.getPublicationDatabase()
 					.updateFromDB(new Item(itemUUID));
 
-		if (!PublicationSession.hasInstance(session)
-				|| !PublicationSession.getInstance(session).getSourceUUID()
-						.equals(item.source_uuid)) {
-			final GitRepo repo = config.getConfigDatabase()
+		final GitRepo repo;
+		if (Project.hasInstance(session)
+				&& UUID.fromString(Project.getInstance(session).getRepoID())
+						.equals(item.source_uuid))
+			// if user already has a Project for this GitRepo, recycle its
+			// authorization
+			repo = Project.getInstance(session).getGitRepo();
+		else
+			repo = config.getConfigDatabase()
 					.newGitRepo(item.source_uuid.toString());
+
+		// if the user doesn't yet have a session for this item, create one
+		if (!PublicationSession.hasInstance(session)
+				|| !PublicationSession.getInstance(session).getItemUUID()
+						.equals(itemUUID))
 			PublicationSession.createInstance(session, item.source_uuid, repo,
 					itemUUID, config);
-		}
-
 		final PublicationSession publish = PublicationSession
 				.getInstance(session);
+
 		final AuthProvider auth = publish.getAuth();
-		// if the user already has a session and the token still works, we're
-		// done; no need to bother the user with authorization again.
 		if (auth.hasWorkingToken())
+			// if the user already has a session and the token still works,
+			// we're done; no need to bother the user with authorization again.
 			return authFinished(publish);
 
 		// user doesn't have a token or it has expired. trigger authorization

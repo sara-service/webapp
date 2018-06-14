@@ -1,7 +1,5 @@
 package bwfdm.sara.api;
 
-import java.util.UUID;
-
 import javax.servlet.http.HttpSession;
 
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,7 +12,6 @@ import org.springframework.web.servlet.view.RedirectView;
 
 import bwfdm.sara.project.ArchiveJob;
 import bwfdm.sara.project.Project;
-import bwfdm.sara.project.PublicationSession;
 import bwfdm.sara.transfer.PushTask;
 import bwfdm.sara.transfer.Task.TaskStatus;
 
@@ -66,35 +63,14 @@ public class Push {
 			throw new IllegalStateException(
 					"finishArchiving before push is done");
 
+		final Project project = Project.getInstance(session);
 		// FIXME kill Project so everything just redirects to END
 		// TODO and also get rid of the TransferRepo!
 
-		final Project project = Project.getInstance(session);
 		final PushTask push = project.getPushTask();
-		final UUID item = push.getItemUUID();
-		if (push.getArchiveJob().isArchiveOnly) {
-			redir.addAttribute("item", item);
+		redir.addAttribute("item", push.getItemUUID());
+		if (push.getArchiveJob().isArchiveOnly)
 			return new RedirectView("/done.html");
-		}
-
-		final PublicationSession publish;
-		if (PublicationSession.hasInstance(session)) {
-			// no need to panic if we already have a publication session. but do
-			// panic if it's for a different item; that should never happen.
-			publish = PublicationSession.getInstance(session);
-			UUID prevItem = publish.getItemUUID();
-			if (prevItem != item)
-				throw new IllegalStateException(
-						"finishArchiving would override exiting session: "
-								+ prevItem + " → " + item);
-		} else
-			// directly create new session, inheriting authorization from
-			// archiving part. this is the common case, obviously.
-			publish = PublicationSession.createInstance(session,
-					UUID.fromString(project.getRepoID()), project.getGitRepo(),
-					item, project.getConfig());
-		publish.initialize();
-
-		return new RedirectView("/publish.html");
+		return new RedirectView("/api/auth/publish");
 	}
 }

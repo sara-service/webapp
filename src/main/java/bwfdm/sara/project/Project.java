@@ -224,10 +224,6 @@ public class Project {
 		cancelPush();
 	}
 
-	public Config getConfig() {
-		return config;
-	}
-
 	public static Project getInstance(final HttpSession session) {
 		final Project repo = (Project) session.getAttribute(PROJECT_ATTR);
 		if (repo == null)
