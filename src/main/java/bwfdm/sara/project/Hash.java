@@ -18,15 +18,28 @@ public class Hash {
 	private static final Encoder BASE64 = Base64.getUrlEncoder()
 			.withoutPadding();
 	private static final Charset UTF8 = Charset.forName("UTF-8");
+	private static final byte[] NULL = new byte[32];
 	private final ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 
 	public void add(String data) {
-		add(data.getBytes(UTF8));
+		if (data == null)
+			addNull();
+		else
+			add(data.getBytes(UTF8));
 	}
 
 	public void add(byte[] bytes) {
-		byte[] digest = DigestUtils.md5Digest(bytes);
-		buffer.write(digest, 0, digest.length); // doesn't throw exceptions
+		if (bytes != null) {
+			byte[] digest = DigestUtils.md5Digest(bytes);
+			buffer.write(digest, 0, digest.length); // doesn't throw exceptions
+		} else
+			addNull();
+	}
+
+	private void addNull() {
+		// TO DO if we do find something that hashes to an all-zero MD5, causing
+		// a collision here, make sure we write a paper about it...
+		buffer.write(NULL, 0, NULL.length);
 	}
 
 	public String getHash() {

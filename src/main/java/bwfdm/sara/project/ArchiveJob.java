@@ -13,6 +13,7 @@ import java.util.UUID;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import bwfdm.sara.api.LicensesInfo;
 import bwfdm.sara.db.FrontendDatabase;
 import bwfdm.sara.extractor.LicenseFile;
 import bwfdm.sara.extractor.MetadataExtractor;
@@ -39,7 +40,7 @@ public class ArchiveJob {
 	public final Map<MetadataField, String> meta;
 	@JsonProperty
 	private Set<MetadataField> update;
-	@JsonProperty
+	@JsonIgnore
 	private Map<Ref, String> licenses;
 	@JsonProperty
 	public final UUID archiveUUID;
@@ -141,6 +142,14 @@ public class ArchiveJob {
 		HashMap<Ref, String> res = new HashMap<Ref, String>();
 		for (Ref ref : selectedRefs)
 			res.put(ref, getHead(ref));
+		return res;
+	}
+
+	@JsonProperty("licenses")
+	public Map<Ref, String> getLicenses() {
+		Map<Ref, String> res = new HashMap<Ref, String>();
+		for (Ref ref : selectedRefs)
+			res.put(ref, LicensesInfo.mapKeep(licenses.get(ref)));
 		return res;
 	}
 
