@@ -196,7 +196,10 @@ log in as admin:
 	- Name: "Archive" (or something more useful)
 	- Visibility: Public, don't allow request access
 - add `sara-user` to `archive` as **Master** (not Owner – this way it cannot delete projects there!)
-- in GitLab settings (https://gitlabdomain/admin/application_settings) open *Sign-in restrictions* and set *Home page URL* to `https://gitlabdomain/explore/projects`
+- in GitLab settings (https://gitlabdomain/admin/application_settings):
+	- in *Sign-in restrictions*, set *Home page URL* to `https://gitlabdomain/explore/projects`
+	- in *Repository maintenance*, make sure housekeeping is enabled
+		- FIXME we'll eventually want tho have these disabled and run them ourselves
 
 ## Set Up SARA User
 
