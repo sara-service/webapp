@@ -8,7 +8,7 @@ DECLARE testarchiv_privkey oid := lo_import('/saradb/config/testarchiv.key');
 DECLARE testarchiv_pubkey oid  := lo_import('/saradb/config/testarchiv.key.pub');
 DECLARE testarchiv_known oid   := lo_import('/saradb/config/testarchiv.known');
 
-DECLARE arbeitsgitlab text  := 'arbeits-gitlab.unikn.netfuture.ch';
+DECLARE arbeitsgitlab text  := 'demogitlab.sara-service.org';
 DECLARE stefansgitlab text  := 'bwcloud-vm92.rz.uni-ulm.de';
 DECLARE testarchiv text     := 'testarchiv.sara-service.org';
 DECLARE oparu_demo text     := 'https://bwcloud-vm65.rz.uni-ulm.de:8080';
@@ -120,12 +120,6 @@ INSERT INTO metadatamapping(repository_uuid, display_name, map_from, map_to, ena
 	(rRef, 'author', 'dc.author', '0567', TRUE),
 	(rRef, 'second author', 'dc.other_author', '0568', TRUE),
 	(rRef, 'archive link', 'dc.archive_link', '1045', TRUE);
-
-INSERT INTO item(source_uuid, archive_uuid, repository_uuid,  contact_email, item_type,
-		item_state, item_state_sent, date_created, date_last_modified, source_user_id) VALUES
-	(sRef, aRef, rRef, 'stefan.kombrink@uni-ulm.de', 'PUBLISH', 'CREATED', 'CREATED',
-		now(), now(), 'stefan.kombrink@uni-ulm.de')
-	RETURNING uuid INTO iRef;
 
 -- erase the temporary large objects
 PERFORM lo_unlink(kops_logo), lo_unlink(oparu_logo), lo_unlink(testarchiv_privkey),
