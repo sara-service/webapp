@@ -7,14 +7,19 @@
 ## Set up PostgreSQL
 
 - install PostgreSQL (`sudo apt install postgresql`)
-- create user: `sudo -u postgres createuser -d -l -R -S sarauser`
-	- FIXME: `-l -R -S` is the default; `-d` should be unnecessary (user doesn't need to create databases)
+- create user: `sudo -u postgres createuser -l -D -R -S sarauser`
 - set a password: `sudo -u postgres psql -d test -c "ALTER USER sarauser WITH PASSWORD 'sarapassword'"` (run `apg` to create a good one)
 - create database: `sudo -u postgres createdb -E UTF8 -O sarauser saradb`
-- create tables: undocumented (FIXME). best guess right now:
-	- search `initdb.sh` for the line that does `cat saradb/… … ….sql >temp.sql`
-	- remove the files that just create test data, then concatenate the rest *in the right order*
-	- run `sudo -u postgres psql -d saradb -f temp.sql`
+- enable `pgcrypto` extension: `sudo -u postgres psql -d satadb -f saradb/adminconfig.sql`
+- create tables: `sudo -u postgres psql -d satadb -f saradb/schema.sql`
+- edit `saradb/permissions.sql`, replacing `test` with `sarauser`
+- grant permissions: `sudo -u postgres psql -d satadb -f saradb/permissions.sql`
+- create at least one git repo (table `source`)
+- create *exactly one* (right now) git archive (table `archive`)
+	- FIXME: change once multiple archives supported
+- create at least one institutional repositry (table `repository`)
+- import licenses: `sudo -u postgres psql -d satadb -f saradb/licenses.sql`
+	- FIXME: should be able to run the import tool instead
 
 ## Set up the Apache proxy
 
@@ -191,6 +196,7 @@ log in as admin:
 	- Name: "Archive" (or something more useful)
 	- Visibility: Public, don't allow request access
 - add `sara-user` to `archive` as **Master** (not Owner – this way it cannot delete projects there!)
+- in GitLab settings (https://gitlabdomain/admin/application_settings) open *Sign-in restrictions* and set *Home page URL* to `https://gitlabdomain/explore/projects`
 
 ## Set Up SARA User
 
