@@ -142,7 +142,7 @@
 		<dependency>
 			<groupId>com.github.swordapp</groupId>
 			<artifactId>JavaClient2.0</artifactId>
-			<version>master-SNAPSHOT</version>
+			<version>sword2-client-0.9.3</version>
 		</dependency>
 	</dependencies>
 </project>
