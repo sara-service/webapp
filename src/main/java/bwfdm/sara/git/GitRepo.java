@@ -2,6 +2,7 @@ package bwfdm.sara.git;
 
 import java.util.List;
 
+import bwfdm.sara.auth.AuthProvider;
 import bwfdm.sara.project.Project;
 
 /**

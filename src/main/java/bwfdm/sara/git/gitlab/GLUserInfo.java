@@ -3,7 +3,7 @@ package bwfdm.sara.git.gitlab;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import bwfdm.sara.git.AuthProvider.UserInfo;
+import bwfdm.sara.auth.AuthProvider.UserInfo;
 import bwfdm.sara.git.DataObject;
 
 /** data class for GitLab project info. */

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.core.ParameterizedTypeReference;
@@ -52,8 +53,6 @@ public class GitHubRESTv3 implements GitRepo {
 	 *            OAuth application ID
 	 * @param appSecret
 	 *            OAuth application secret
-	 * @param gitlab
-	 *            URL to GitLab root
 	 */
 	@JsonCreator
 	public GitHubRESTv3(@JsonProperty("oauthID") final String appID,
@@ -120,7 +119,7 @@ public class GitHubRESTv3 implements GitRepo {
 	@Override
 	public boolean parseAuthResponse(
 			final java.util.Map<String, String> params,
-			final HttpSession session) {
+			final HttpSession session, final HttpServletRequest request) {
 		if (auth == null)
 			return false;
 

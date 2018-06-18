@@ -3,6 +3,7 @@ package bwfdm.sara.api;
 import java.util.Map;
 import java.util.UUID;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +16,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 
 import bwfdm.sara.Config;
-import bwfdm.sara.git.AuthProvider;
+import bwfdm.sara.auth.AuthProvider;
 import bwfdm.sara.git.GitRepo;
 import bwfdm.sara.project.Project;
 import bwfdm.sara.project.PublicationSession;
@@ -123,9 +124,17 @@ public class Authorization {
 	}
 
 	@GetMapping("redirect")
-	public RedirectView getOAuthToken(
+	public RedirectView parseOAuthResponseWithoutShib(
 			@RequestParam final Map<String, String> args,
 			final RedirectAttributes redir, final HttpSession session) {
+		return parseOAuthResponse(args, redir, session, null);
+	}
+
+	@GetMapping("shibboleth")
+	public RedirectView parseOAuthResponse(
+			@RequestParam final Map<String, String> args,
+			final RedirectAttributes redir, final HttpSession session,
+			final HttpServletRequest request) {
 		final AuthProvider auth;
 		if (PublicationSession.hasInstance(session))
 			auth = PublicationSession.getInstance(session).getAuth();
@@ -136,7 +145,7 @@ public class Authorization {
 			// happen (but it just did).
 			return new RedirectView("/autherror.html");
 
-		if (!auth.parseAuthResponse(args, session))
+		if (!auth.parseAuthResponse(args, session, request))
 			// authorization failed. there isn't much we can do here;
 			// retrying probably won't help.
 			return new RedirectView("/autherror.html");

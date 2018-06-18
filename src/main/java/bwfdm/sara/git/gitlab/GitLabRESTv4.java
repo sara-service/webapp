@@ -4,6 +4,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.core.ParameterizedTypeReference;
@@ -110,7 +111,7 @@ public class GitLabRESTv4 implements GitRepo {
 	@Override
 	public boolean parseAuthResponse(
 			final java.util.Map<String, String> params,
-			final HttpSession session) {
+			final HttpSession session, final HttpServletRequest request) {
 		if (auth == null)
 			return false;
 
