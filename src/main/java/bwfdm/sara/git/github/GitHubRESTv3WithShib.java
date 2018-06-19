@@ -1,14 +1,12 @@
 package bwfdm.sara.git.github;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import bwfdm.sara.auth.ShibAuth;
 
 /** Extends {@link GitHubRESTv3} to add Shibboleth authentication. */
+// TODO this can basically wrap every GitRepo; maybe reimplement it so it does?
 public class GitHubRESTv3WithShib extends GitHubRESTv3 {
 	private final ShibAuth shib;
 
@@ -39,12 +37,13 @@ public class GitHubRESTv3WithShib extends GitHubRESTv3 {
 	}
 
 	@Override
-	public boolean parseAuthResponse(final java.util.Map<String, String> params,
-			final HttpSession session, final HttpServletRequest request) {
-		if (!super.parseAuthResponse(params, session, null))
-			return false;
-		shib.parseAuthResponse(request);
-		return true;
+	public boolean hasWorkingToken() {
+		return shib.hasValidInfo() && super.hasWorkingToken();
+	}
+
+	@Override
+	public ShibAuth getShibAuth() {
+		return shib;
 	}
 
 	@Override

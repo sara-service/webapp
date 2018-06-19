@@ -2,8 +2,6 @@ package bwfdm.sara.auth;
 
 import java.util.Map;
 
-import javax.servlet.ServletRequest;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -28,7 +26,7 @@ public interface AuthProvider {
 	 * 
 	 * @param redirURI
 	 *            login response URL. anything sent here will end up in
-	 *            {@link #parseAuthResponse(RedirectAttributes, HttpSession, ServletRequest)}
+	 *            {@link #parseAuthResponse(RedirectAttributes, HttpSession)}
 	 * @param redir
 	 *            {@link RedirectAttributes} for setting the query string
 	 *            attributes of the returned {@link RedirectView} (weird API)
@@ -52,14 +50,17 @@ public interface AuthProvider {
 	 * @param session
 	 *            the user's {@link HttpSession}, for retrieving that stored
 	 *            auth-related state
-	 * @param request
-	 *            the user's {@link ServletRequest} if doing Shibboleth, else
-	 *            <code>null</code>
 	 * @return <code>true</code> if authorization was successful;
 	 *         <code>false</code> redirects to an error page instead
 	 */
 	public boolean parseAuthResponse(final Map<String, String> params,
-			final HttpSession session, final HttpServletRequest request);
+			final HttpSession session);
+
+	/**
+	 * @return the {@link ShibAuth} instance when using Shibboleth. Usually just
+	 *         <code>null</code> to skip Shibboleth auth.
+	 */
+	public ShibAuth getShibAuth();
 
 	public static class UserInfo {
 		/**

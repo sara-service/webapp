@@ -4,7 +4,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.core.ParameterizedTypeReference;
@@ -16,6 +15,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import bwfdm.sara.auth.OAuthCode;
 import bwfdm.sara.auth.OAuthREST;
+import bwfdm.sara.auth.ShibAuth;
 import bwfdm.sara.git.DataObject;
 import bwfdm.sara.git.GitProject;
 import bwfdm.sara.git.GitRepo;
@@ -111,7 +111,7 @@ public class GitLabRESTv4 implements GitRepo {
 	@Override
 	public boolean parseAuthResponse(
 			final java.util.Map<String, String> params,
-			final HttpSession session, final HttpServletRequest request) {
+			final HttpSession session) {
 		if (auth == null)
 			return false;
 
@@ -120,6 +120,10 @@ public class GitLabRESTv4 implements GitRepo {
 		return token != null;
 	}
 
+	@Override
+	public ShibAuth getShibAuth() {
+		return null; // no shib necessary; we'll use the ID from GitLab
+	}
 	@Override
 	public String getHomePageURL() {
 		return root;

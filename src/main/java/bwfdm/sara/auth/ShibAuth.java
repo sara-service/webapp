@@ -75,6 +75,10 @@ public class ShibAuth {
 		return values[0];
 	}
 
+	public boolean hasValidInfo() {
+		return displayName != null && email != null && userID != null;
+	}
+
 	public void parseAuthResponse(final HttpServletRequest request) {
 		this.displayName = getShibAttr(request, displayNameAttribute);
 		this.email = getShibAttr(request, emailAttribute);

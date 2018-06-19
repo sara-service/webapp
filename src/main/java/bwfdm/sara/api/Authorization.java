@@ -17,6 +17,7 @@ import org.springframework.web.servlet.view.RedirectView;
 
 import bwfdm.sara.Config;
 import bwfdm.sara.auth.AuthProvider;
+import bwfdm.sara.auth.ShibAuth;
 import bwfdm.sara.git.GitRepo;
 import bwfdm.sara.project.Project;
 import bwfdm.sara.project.PublicationSession;
@@ -79,8 +80,7 @@ public class Authorization {
 
 		// user doesn't have a token or it has expired. trigger authorization
 		// again.
-		return repo.triggerAuth(config.getWebRoot() + "/api/auth/redirect",
-				redir, session);
+		return triggerAuth(repo, redir, session);
 	}
 
 	@GetMapping("publish")
@@ -119,8 +119,15 @@ public class Authorization {
 
 		// user doesn't have a token or it has expired. trigger authorization
 		// again.
-		return auth.triggerAuth(config.getWebRoot() + "/api/auth/redirect",
-				redir, session);
+		return triggerAuth(auth, redir, session);
+	}
+
+	private RedirectView triggerAuth(final AuthProvider auth,
+			final RedirectAttributes redir, final HttpSession session) {
+		final String ep = auth.getShibAuth() != null ? "shibboleth"
+				: "redirect";
+		return auth.triggerAuth(config.getWebRoot() + "/api/auth/" + ep, redir,
+				session);
 	}
 
 	@GetMapping("redirect")
@@ -145,7 +152,17 @@ public class Authorization {
 			// happen (but it just did).
 			return new RedirectView("/autherror.html");
 
-		if (!auth.parseAuthResponse(args, session, request))
+		// if we need Shib, make it parse the request first. this guarantees
+		// that auth.parseAuthResponse() won't put anything valid into the
+		// request if Shib fails.
+		final ShibAuth shib = auth.getShibAuth();
+		if (shib != null)
+			// FIXME maybe show an error instead of an exception?
+			// then again, not too much can go wrong with shib, and stuff that
+			// does tends to be un-fixable to the user anyway...
+			shib.parseAuthResponse(request);
+
+		if (!auth.parseAuthResponse(args, session))
 			// authorization failed. there isn't much we can do here;
 			// retrying probably won't help.
 			return new RedirectView("/autherror.html");
