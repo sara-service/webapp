@@ -63,7 +63,8 @@ public class PushTask extends Task {
 		if (project == null || !project.isEmpty())
 			return; // never remove projects that we didn't create!
 		// FIXME SARA user should not need this permission on the archive
-		project.deleteProject();
+		// FIXME implement create and move workflow so we can remove the project
+		// project.deleteProject();
 		project = null;
 	}
 
