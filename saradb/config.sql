@@ -10,6 +10,7 @@ DECLARE testarchiv_known oid   := lo_import('/saradb/config/testarchiv.known');
 
 DECLARE arbeitsgitlab text  := 'demogitlab.sara-service.org';
 DECLARE stefansgitlab text  := 'bwcloud-vm92.rz.uni-ulm.de';
+DECLARE demo_dspace text    := 'https://demo-dspace.sara-service.org';
 DECLARE testarchiv text     := 'testarchiv.sara-service.org';
 DECLARE oparu_demo text     := 'https://bwcloud-vm65.rz.uni-ulm.de:8080';
 DECLARE kops_demo text      := 'https://kops.uni-konstanz.de';
@@ -71,7 +72,7 @@ INSERT INTO archive_params(id, param, value) VALUES
 
 -- Stefan's OPARU Stand-In in bwCloud (https://bwcloud-vm65.rz.uni-ulm.de:8080/xmlui/)
 INSERT INTO repository(display_name, adapter, url, contact_email, enabled, logo_url) VALUES
-	('OPARU Ulm', 'DSpace_v6', oparu_demo || '/xmlui', 'help@oparu.uni-ulm.de', TRUE,
+	('OPARU Ulm Testsystem', 'DSpace_v6', oparu_demo || '/xmlui', 'help@oparu.uni-ulm.de', TRUE,
 		'data:image/svg+xml;base64,' || encode(lo_get(oparu_logo), 'base64'))
 	RETURNING uuid INTO rRef;
 INSERT INTO repository_params(id, param, value) VALUES
@@ -101,15 +102,15 @@ INSERT INTO repository_params(id, param, value) VALUES
 
 -- Official OPARU Test System?
 INSERT INTO repository(display_name, adapter, url, contact_email, enabled) VALUES
-	('OPARU TEST', 'DSpace_v6', oparu_test, 'help@oparu.uni-ulm.de', TRUE)
+	('DEMO DSPACE', 'DSpace_v6', demo_dspace, 'help@oparu.uni-ulm.de', TRUE)
 	RETURNING uuid INTO rRef3;
 INSERT INTO repository_params(id, param, value) VALUES
 	(rRef3, 'rest_user', 'project-sara@uni-konstanz.de'),
 	(rRef3, 'rest_pwd', 'SaraTest'),
-	(rRef3, 'rest_api_endpoint', oparu_test || '/rest'),
+	(rRef3, 'rest_api_endpoint', demo_dspace || '/rest'),
 	(rRef3, 'sword_user', 'project-sara@uni-konstanz.de'),
 	(rRef3, 'sword_pwd', 'SaraTest'),
-	(rRef3, 'sword_api_endpoint', oparu_test || '/swordv2');
+	(rRef3, 'sword_api_endpoint', demo_dspace || '/swordv2');
 
 --INSERT INTO collection(id, display_name, foreign_collection_uuid, enabled) VALUES(rRef, 'coffee management', '0815', TRUE);  -- coffee management
 --INSERT INTO collection(id, display_name, foreign_collection_uuid, enabled) VALUES(rRef, 'milk sciences', '0914', FALSE); -- milk sciences
