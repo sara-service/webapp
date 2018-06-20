@@ -16,6 +16,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import bwfdm.sara.auth.OAuthCode;
 import bwfdm.sara.auth.OAuthREST;
+import bwfdm.sara.auth.ShibAuth;
 import bwfdm.sara.git.DataObject;
 import bwfdm.sara.git.GitProject;
 import bwfdm.sara.git.GitRepo;
@@ -52,8 +53,6 @@ public class GitHubRESTv3 implements GitRepo {
 	 *            OAuth application ID
 	 * @param appSecret
 	 *            OAuth application secret
-	 * @param gitlab
-	 *            URL to GitLab root
 	 */
 	@JsonCreator
 	public GitHubRESTv3(@JsonProperty("oauthID") final String appID,
@@ -127,6 +126,11 @@ public class GitHubRESTv3 implements GitRepo {
 		token = auth.parse(params);
 		authRest.setToken(token);
 		return token != null;
+	}
+
+	@Override
+	public ShibAuth getShibAuth() {
+		return null; // non-Shib; use ID from GitHub account
 	}
 
 	@Override

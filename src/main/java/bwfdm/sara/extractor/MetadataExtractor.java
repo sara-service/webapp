@@ -11,8 +11,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+import bwfdm.sara.auth.AuthProvider.UserInfo;
 import bwfdm.sara.extractor.licensee.LicenseeExtractor;
-import bwfdm.sara.git.AuthProvider.UserInfo;
 import bwfdm.sara.git.GitProject;
 import bwfdm.sara.git.GitRepo;
 import bwfdm.sara.git.ProjectInfo;

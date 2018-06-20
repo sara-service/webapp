@@ -12,6 +12,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import bwfdm.sara.db.ConfigDatabase;
 import bwfdm.sara.git.github.GitHubRESTv3;
+import bwfdm.sara.git.github.GitHubRESTv3WithShib;
 import bwfdm.sara.git.gitlab.GitLabRESTv4;
 import bwfdm.sara.project.Project;
 
@@ -21,6 +22,7 @@ public class GitRepoFactory {
 	static {
 		ADAPTERS.put("GitLabRESTv4", GitLabRESTv4.class);
 		ADAPTERS.put("GitHubRESTv3", GitHubRESTv3.class);
+		ADAPTERS.put("GitHubRESTv3WithShib", GitHubRESTv3WithShib.class);
 	}
 
 	@JsonProperty("id")

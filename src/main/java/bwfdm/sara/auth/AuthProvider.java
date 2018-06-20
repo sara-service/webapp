@@ -1,4 +1,4 @@
-package bwfdm.sara.git;
+package bwfdm.sara.auth;
 
 import java.util.Map;
 
@@ -50,12 +50,17 @@ public interface AuthProvider {
 	 * @param session
 	 *            the user's {@link HttpSession}, for retrieving that stored
 	 *            auth-related state
-	 * 
 	 * @return <code>true</code> if authorization was successful;
 	 *         <code>false</code> redirects to an error page instead
 	 */
 	public boolean parseAuthResponse(final Map<String, String> params,
 			final HttpSession session);
+
+	/**
+	 * @return the {@link ShibAuth} instance when using Shibboleth. Usually just
+	 *         <code>null</code> to skip Shibboleth auth.
+	 */
+	public ShibAuth getShibAuth();
 
 	public static class UserInfo {
 		/**

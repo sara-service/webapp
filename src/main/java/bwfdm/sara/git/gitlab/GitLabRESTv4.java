@@ -15,6 +15,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import bwfdm.sara.auth.OAuthCode;
 import bwfdm.sara.auth.OAuthREST;
+import bwfdm.sara.auth.ShibAuth;
 import bwfdm.sara.git.DataObject;
 import bwfdm.sara.git.GitProject;
 import bwfdm.sara.git.GitRepo;
@@ -119,6 +120,10 @@ public class GitLabRESTv4 implements GitRepo {
 		return token != null;
 	}
 
+	@Override
+	public ShibAuth getShibAuth() {
+		return null; // no shib necessary; we'll use the ID from GitLab
+	}
 	@Override
 	public String getHomePageURL() {
 		return root;

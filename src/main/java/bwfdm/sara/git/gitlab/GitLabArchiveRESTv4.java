@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.regex.Pattern;
 
 import org.springframework.core.ParameterizedTypeReference;
 
@@ -17,6 +18,27 @@ import bwfdm.sara.git.ArchiveRepo;
 import bwfdm.sara.project.MetadataField;
 
 public class GitLabArchiveRESTv4 implements ArchiveRepo {
+	// "Name is too long (maximum is 255 characters)"
+	// "Path is too long (maximum is 255 characters)"
+	// → that length is actually characters, not bytes
+	// note for length budget:
+	// - 4 padding (3 spaces and 1 long-dash)
+	// - up to 16 characters for the ID (name must be unique!)
+	private static final int MAX_VERSION = 30;
+	private static final int MAX_TITLE = 200;
+	// name rules:
+	// "Name can contain only letters, digits, emojis, '_', '.', dash,
+	// space."
+	// → nobody needs or uses the emoji
+	// → "…" is apparently a letter? it is allowed!
+	// the actual regex (as of 10.8.3) is (! is a backslash):
+	// [!p{Alnum}!u{00A9}-!u{1f9c0}_][!p{Alnum}!p{Pd}!u{00A9}-!u{1f9c0}_!.]*
+	// note that 1f9c0 is incorrect; there's a few emoji after it...
+	// → permit only the stuff guaranteed unchangeable by Unicode consortium:
+	private static final Pattern NAME_FIRST = Pattern.compile("^[\\p{Alnum}_]");
+	private static final Pattern NAME_FORBIDDEN = Pattern
+			.compile("[^\\p{Alnum}\\p{Pd}_\\. ]");
+	private static final char ELLIPSIS = 0x2026; // "…"
 	/**
 	 * URL prefix for accessing the API. also defines which API version will be
 	 * used.
@@ -90,16 +112,16 @@ public class GitLabArchiveRESTv4 implements ArchiveRepo {
 	public ArchiveProject createProject(final String id, final boolean visible,
 			final Map<MetadataField, String> meta)
 			throws ProjectExistsException {
+		final String version = filter(meta, MetadataField.VERSION, MAX_VERSION);
+		final String title = filter(meta, MetadataField.TITLE, MAX_TITLE);
+		String name = title + " " + version + " \u2015 " + id;
+		// if name doesn't start with a permitted character, prepend something
+		if (!NAME_FIRST.matcher(name).find())
+			name = "\uD83D\uDCBE" + name;
+
 		final Map<String, String> args = new HashMap<>();
 		args.put("path", "p" + id);
-		// FIXME filter name:
-		// "Name can contain only letters, digits, emojis, '_', '.', dash,
-		// space."
-		// it's probably ok if we don't support the emojis...
-		// FIXME check whether there is a length limit!
-		final String name = meta.get(MetadataField.TITLE) + " "
-				+ meta.get(MetadataField.VERSION);
-		args.put("name", name + " _" + id + "_");
+		args.put("name", name);
 		args.put("description", meta.get(MetadataField.DESCRIPTION));
 		for (final String feature : UNUSED_FEATURES)
 			args.put(feature, "false");
@@ -112,6 +134,16 @@ public class GitLabArchiveRESTv4 implements ArchiveRepo {
 				});
 		return new GitLabArchiveProject(authRest, project, sshPrivateKey,
 				sshPublicKey, knownHostsFile, true);
+	}
+
+	private String filter(final Map<MetadataField, String> meta,
+			MetadataField field, int maxLength) {
+		// remove invalid characters
+		String value = NAME_FORBIDDEN.matcher(meta.get(field)).replaceAll("");
+		// shorten to maximum length
+		if (value.length() > maxLength)
+			value = value.substring(0, maxLength - 1) + ELLIPSIS;
+		return value;
 	}
 
 	private int getNamespaceID(final String namespace) {

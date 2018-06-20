@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import bwfdm.sara.Config;
 import bwfdm.sara.api.Authorization;
-import bwfdm.sara.git.AuthProvider;
+import bwfdm.sara.auth.AuthProvider;
 import bwfdm.sara.publication.Item;
 import bwfdm.sara.publication.db.PublicationDatabase;
 
