@@ -22,6 +22,7 @@ DECLARE sRef2 UUID;
 DECLARE rRef UUID;
 DECLARE rRef2 UUID;
 DECLARE rRef3 UUID;
+DECLARE rRef4 UUID;
 DECLARE iRef UUID;
 
 BEGIN
@@ -100,9 +101,9 @@ INSERT INTO repository_params(id, param, value) VALUES
 --	(rRef2, 'force_onbehalf', '1'),
 --	(rRef2, 'workflow_type', 'login_required');
 
--- Official OPARU Test System?
+-- DEMO DSpace sara-service.org
 INSERT INTO repository(display_name, adapter, url, contact_email, enabled) VALUES
-	('DEMO DSPACE', 'DSpace_v6', demo_dspace, 'help@oparu.uni-ulm.de', TRUE)
+	('DEMO DSPACE', 'DSpace_v6', demo_dspace, 'help@sara-service.org', TRUE)
 	RETURNING uuid INTO rRef3;
 INSERT INTO repository_params(id, param, value) VALUES
 	(rRef3, 'rest_user', 'project-sara@uni-konstanz.de'),
@@ -111,6 +112,19 @@ INSERT INTO repository_params(id, param, value) VALUES
 	(rRef3, 'sword_user', 'project-sara@uni-konstanz.de'),
 	(rRef3, 'sword_pwd', 'SaraTest'),
 	(rRef3, 'sword_api_endpoint', demo_dspace || '/swordv2');
+
+-- Official OPARU test system
+INSERT INTO repository(display_name, adapter, url, contact_email, enabled) VALUES
+        ('DEMO DSPACE', 'DSpace_v6', demo_dspace, 'help@oparu.uni-ulm.de', TRUE)
+        RETURNING uuid INTO rRef4;
+INSERT INTO repository_params(id, param, value) VALUES
+       (rRef4, 'rest_user', 'project-sara@uni-konstanz.de'),
+       (rRef4, 'rest_pwd', 'SaraTest'),
+       (rRef4, 'rest_api_endpoint', oparu_test || '/rest'),
+       (rRef4, 'sword_user', 'project-sara@uni-konstanz.de'),
+       (rRef4, 'sword_pwd', 'SaraTest'),
+       (rRef4, 'sword_api_endpoint', oparu_test || '/swordv2');
+
 
 --INSERT INTO collection(id, display_name, foreign_collection_uuid, enabled) VALUES(rRef, 'coffee management', '0815', TRUE);  -- coffee management
 --INSERT INTO collection(id, display_name, foreign_collection_uuid, enabled) VALUES(rRef, 'milk sciences', '0914', FALSE); -- milk sciences
