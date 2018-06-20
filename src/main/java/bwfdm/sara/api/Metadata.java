@@ -93,16 +93,6 @@ public class Metadata {
 				.get(MetadataField.forDisplayName(name));
 	}
 
-	@PutMapping("{field}")
-	public void setSingleField(@PathVariable("field") final String name,
-			@RequestParam("value") final String value,
-			final HttpSession session) {
-		final Project project = Project.getInstance(session);
-		project.getFrontendDatabase()
-				.setMetadata(MetadataField.forDisplayName(name), value);
-		project.invalidateMetadata();
-	}
-
 	/** @deprecated move to PushTask */
 	@PostMapping("title")
 	public void updateTitle(@RequestParam("value") final String title,
