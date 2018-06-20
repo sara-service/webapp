@@ -73,7 +73,7 @@ INSERT INTO archive_params(id, param, value) VALUES
 
 -- Stefan's OPARU Stand-In in bwCloud (https://bwcloud-vm65.rz.uni-ulm.de:8080/xmlui/)
 INSERT INTO repository(display_name, adapter, url, contact_email, enabled, logo_url) VALUES
-	('OPARU Ulm Testsystem', 'DSpace_v6', oparu_demo || '/xmlui', 'help@oparu.uni-ulm.de', TRUE,
+	('OPARU Devel', 'DSpace_v6', oparu_demo || '/xmlui', 'help@oparu.uni-ulm.de', TRUE,
 		'data:image/svg+xml;base64,' || encode(lo_get(oparu_logo), 'base64'))
 	RETURNING uuid INTO rRef;
 INSERT INTO repository_params(id, param, value) VALUES
@@ -115,7 +115,7 @@ INSERT INTO repository_params(id, param, value) VALUES
 
 -- Official OPARU test system
 INSERT INTO repository(display_name, adapter, url, contact_email, enabled) VALUES
-        ('DEMO DSPACE', 'DSpace_v6', demo_dspace, 'help@oparu.uni-ulm.de', TRUE)
+        ('OPARU Test', 'DSpace_v6', demo_dspace, 'help@oparu.uni-ulm.de', TRUE)
         RETURNING uuid INTO rRef4;
 INSERT INTO repository_params(id, param, value) VALUES
        (rRef4, 'rest_user', 'project-sara@uni-konstanz.de'),
