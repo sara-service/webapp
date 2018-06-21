@@ -53,9 +53,9 @@ function updateStatus(timeout) {
 			// if task finished or failed, redirect to appropriate page
 			if (status.status == "error") {
 				if (status.error) {
-					window.alert("operation failed: " +
-						status.error.exception + ": " +
-						status.error.message);
+					var operation = status.error.step ? status.error.step : "operation";
+					window.alert(operation + " failed!\n\n" +
+						status.error.exception + ": " + status.error.message);
 				}
 				location.replace(_error);
 			} else if (status.status == "success")

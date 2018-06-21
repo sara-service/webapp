@@ -154,7 +154,16 @@ public class GitLabProject implements GitProject {
 	@Override
 	public void updateProjectInfo(final String name, final String description) {
 		final GLProjectInfo info = new GLProjectInfo(name, description);
-		rest.put(rest.uri("" /* the project itself */), info);
+		try {
+			rest.put(rest.uri("" /* the project itself */), info);
+		} catch (HttpClientErrorException ex) {
+			if (ex.getStatusCode() == HttpStatus.BAD_REQUEST)
+				// GitLab API unfortunately doesn't report useful errors when
+				// requests fail some constraint check
+				throw new RuntimeException("Cannot update project info"
+						+ " (probably: title isn't a valid project name)", ex);
+			throw ex;
+		}
 	}
 
 	private static <T> List<T> toDataObject(

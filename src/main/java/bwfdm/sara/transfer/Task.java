@@ -11,20 +11,21 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.eclipse.jgit.lib.ProgressMonitor;
 
-import bwfdm.sara.project.ErrorInfo;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import bwfdm.sara.project.ErrorInfo;
 
 public abstract class Task implements ProgressMonitor, Runnable {
 	protected static final Log logger = LogFactory.getLog(Task.class);
 
 	private final List<Step> steps = new ArrayList<>();
 	private Map<String, Step> declaredSteps;
-	private Step currentSteps;
+	private Step currentStep;
 	private boolean started, done, cancelled;
 	private Exception exception;
+	private Step failedStep;
 	private Thread thread;
 
 	protected void declareSteps(final List<String> steps) {
@@ -61,8 +62,8 @@ public abstract class Task implements ProgressMonitor, Runnable {
 	@Override
 	public void beginTask(final String title, final int totalWork) {
 		endTask(); // JGit tends to not call this
-		currentSteps = findTask(title, totalWork);
-		currentSteps.start(totalWork);
+		currentStep = findTask(title, totalWork);
+		currentStep.start(totalWork);
 	}
 
 	private Step findTask(final String title, final int totalWork) {
@@ -86,14 +87,14 @@ public abstract class Task implements ProgressMonitor, Runnable {
 
 	@Override
 	public void update(final int completed) {
-		currentSteps.update(completed);
+		currentStep.update(completed);
 	}
 
 	@Override
 	public void endTask() {
-		if (currentSteps != null)
-			currentSteps.end();
-		currentSteps = null;
+		if (currentStep != null)
+			currentStep.end();
+		currentStep = null;
 	}
 
 	/** @return <code>true</code> if the task has finished successfully */
@@ -127,6 +128,7 @@ public abstract class Task implements ProgressMonitor, Runnable {
 			synchronized (this) {
 				cancelled = true;
 				exception = e;
+				failedStep = currentStep;
 			}
 			logger.debug(e);
 		} finally {
@@ -171,7 +173,9 @@ public abstract class Task implements ProgressMonitor, Runnable {
 							+ Task.this.getClass().getSimpleName() + ": "
 							+ exception.getClass().getSimpleName() + ": "
 							+ exception.getMessage(), exception);
-					error = new ErrorInfo(exception);
+					final String fail = failedStep != null ? failedStep.text
+							: null;
+					error = new ErrorInfo(exception, fail);
 				} else
 					error = null;
 			} else {
