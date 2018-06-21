@@ -33,7 +33,7 @@ public class GitLabProject implements GitProject {
 		this.token = token;
 		rest = new RESTHelper(authRest, "/projects/"
 				+ UrlEncode.encodePathSegment(project));
-		guiRoot = root + "/" + UrlEncode.decode(project);
+		guiRoot = root + "/" + project;
 	}
 
 	@Override
