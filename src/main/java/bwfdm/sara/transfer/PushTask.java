@@ -2,6 +2,7 @@ package bwfdm.sara.transfer;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Map;
@@ -19,12 +20,14 @@ import org.eclipse.jgit.transport.RefSpec;
 import org.eclipse.jgit.transport.URIish;
 
 import bwfdm.sara.Config;
+import bwfdm.sara.extractor.MetadataExtractor;
 import bwfdm.sara.git.ArchiveProject;
 import bwfdm.sara.git.ArchiveRepo;
 import bwfdm.sara.git.ArchiveRepo.ProjectExistsException;
 import bwfdm.sara.project.ArchiveJob;
 import bwfdm.sara.project.MetadataField;
 import bwfdm.sara.project.Ref;
+import bwfdm.sara.project.Ref.RefType;
 import bwfdm.sara.publication.Item;
 import bwfdm.sara.publication.ItemState;
 import bwfdm.sara.publication.ItemType;
@@ -32,6 +35,7 @@ import bwfdm.sara.publication.db.PublicationDatabase;
 
 /** Pushes a repository to a git archive. */
 public class PushTask extends Task {
+	private static final Charset UTF8 = Charset.forName("UTF-8");
 	private static final String TARGET_REMOTE = "target";
 
 	private final ArchiveJob job;
@@ -71,6 +75,11 @@ public class PushTask extends Task {
 	@Override
 	protected void execute() throws GitAPIException, URISyntaxException,
 			IOException, ProjectExistsException {
+		if (!job.update.isEmpty()) {
+			beginTask("updating metadata in git repo", 1);
+			updateMetadataInGitRepo();
+		}
+
 		beginTask("NOT committing metadata to git archive"
 				+ " (not implemented yet, either)", 1);
 		// TODO commit submitted_metadata.xml to repo
@@ -85,6 +94,33 @@ public class PushTask extends Task {
 		beginTask("Record metadata in database", 1);
 		itemUUID = createItemInDB(project.getWebURL(), job.meta);
 		endTask();
+	}
+
+	private void updateMetadataInGitRepo() {
+		final String title = getUpdateValue(MetadataField.TITLE);
+		final String desc = getUpdateValue(MetadataField.DESCRIPTION);
+		if (title != null || desc != null)
+			job.gitProject.updateProjectInfo(title, desc);
+
+		final String version = getUpdateValue(MetadataField.VERSION);
+		if (version != null) {
+			final Ref ref = new Ref(job.meta.get(MetadataField.MAIN_BRANCH));
+			if (!ref.type.equals(RefType.BRANCH))
+				throw new IllegalArgumentException(
+						"attempt to update VERSION in " + ref);
+			// TODO should probably use JGit here
+			// if we're ever going to write back the LICENSE, with JGit that's
+			// doable in a single commit. with putBlob (or the GitLab API, for
+			// that matter), committing several files currently isn't possible.
+			job.gitProject.putBlob(ref.name, MetadataExtractor.VERSION_FILE,
+					"update version to " + version, version.getBytes(UTF8));
+		}
+	}
+
+	private String getUpdateValue(MetadataField field) {
+		if (job.update.contains(field))
+			return job.meta.get(field);
+		return null;
 	}
 
 	private void pushRepoToArchive() throws GitAPIException, URISyntaxException,

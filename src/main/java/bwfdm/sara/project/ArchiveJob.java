@@ -17,6 +17,7 @@ import bwfdm.sara.api.LicensesInfo;
 import bwfdm.sara.db.FrontendDatabase;
 import bwfdm.sara.extractor.LicenseFile;
 import bwfdm.sara.extractor.MetadataExtractor;
+import bwfdm.sara.git.GitProject;
 import bwfdm.sara.project.RefAction.PublicationMethod;
 import bwfdm.sara.transfer.TransferRepo;
 
@@ -39,13 +40,16 @@ public class ArchiveJob {
 	@JsonProperty
 	public final Map<MetadataField, String> meta;
 	@JsonProperty
-	private Set<MetadataField> update;
+	public final Set<MetadataField> update;
 	@JsonIgnore
-	private Map<Ref, String> licenses;
+	public final Map<Ref, String> licenses;
 	@JsonProperty
 	public final UUID archiveUUID;
 	@JsonIgnore
 	public final TransferRepo clone;
+	/** <b>For writing back metadata ONLY!! */
+	@JsonIgnore
+	public final GitProject gitProject;
 
 	public ArchiveJob(final Project project, final String archiveUUID) {
 		final FrontendDatabase frontend = project.getFrontendDatabase();
@@ -57,6 +61,7 @@ public class ArchiveJob {
 		sourceUUID = UUID.fromString(project.getRepoID());
 		// projects.html
 		sourceProject = project.getProjectPath();
+		gitProject = project.getGitProject();
 		checkNullOrEmpty("sourceProject", sourceProject);
 		// oauth metadata
 		gitrepoEmail = metadataExtractor.getEmail();
