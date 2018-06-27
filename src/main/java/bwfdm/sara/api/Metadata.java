@@ -1,6 +1,5 @@
 package bwfdm.sara.api;
 
-import java.nio.charset.Charset;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -11,7 +10,6 @@ import javax.servlet.http.HttpSession;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,17 +20,13 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import bwfdm.sara.db.FrontendDatabase;
-import bwfdm.sara.extractor.MetadataExtractor;
 import bwfdm.sara.project.MetadataField;
 import bwfdm.sara.project.Project;
 import bwfdm.sara.project.Ref;
-import bwfdm.sara.project.Ref.RefType;
 
 @RestController
 @RequestMapping("/api/meta")
 public class Metadata {
-	private static final Charset UTF8 = Charset.forName("UTF-8");
-
 	@GetMapping("")
 	public Map<MetadataField, MetadataValue> getAllFields(
 			@RequestParam(name = "ref", required = false) final String refPath,
@@ -91,48 +85,6 @@ public class Metadata {
 			final HttpSession session) {
 		return getAllFields(null, session)
 				.get(MetadataField.forDisplayName(name));
-	}
-
-	@PutMapping("{field}")
-	public void setSingleField(@PathVariable("field") final String name,
-			@RequestParam("value") final String value,
-			final HttpSession session) {
-		final Project project = Project.getInstance(session);
-		project.getFrontendDatabase()
-				.setMetadata(MetadataField.forDisplayName(name), value);
-		project.invalidateMetadata();
-	}
-
-	/** @deprecated move to PushTask */
-	@PostMapping("title")
-	public void updateTitle(@RequestParam("value") final String title,
-			final HttpSession session) {
-		final Project project = Project.getInstance(session);
-		project.getGitProject().updateProjectInfo(title, null);
-	}
-
-	/** @deprecated move to PushTask */
-	@PostMapping("description")
-	public void updateDescription(
-			@RequestParam("value") final String description,
-			final HttpSession session) {
-		final Project project = Project.getInstance(session);
-		project.getGitProject().updateProjectInfo(null, description);
-	}
-
-	/** @deprecated move to PushTask */
-	@PostMapping("version")
-	public void updateVersion(
-			@RequestParam("branch") final String branch,
-			@RequestParam("value") final String version,
-			final HttpSession session) {
-		final Ref ref = new Ref(RefType.BRANCH, branch);
-		final Project project = Project.getInstance(session);
-
-		// always write as UTF-8; that shouldn't break anything
-		project.getGitProject().putBlob(ref.name,
-				MetadataExtractor.VERSION_FILE, "update version to " + version,
-				version.getBytes(UTF8));
 	}
 
 	public static class MetadataValue {

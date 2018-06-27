@@ -2,7 +2,6 @@ package bwfdm.sara.db;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -80,30 +79,6 @@ public class FrontendDatabase {
 				"select field, value from " + METADATA_TABLE
 						+ " where repo = ? and project = ?",
 				"field", MetadataField.class, String.class, gitRepo, project);
-	}
-
-	/**
-	 * Set a single metadata field.
-	 *
-	 * @param field
-	 *            the field to update, not {@code null}
-	 * @param value
-	 *            the new value, or {@code null} to revert to the autodetected
-	 *            value
-	 * @deprecated use {@link #setMetadata(Map)} if possible!
-	 */
-	@Deprecated
-	public void setMetadata(final MetadataField field, final String value) {
-		final Map<MetadataField, String> map = new HashMap<MetadataField, String>(
-				1);
-		map.put(field, value);
-		transaction.execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(
-					final TransactionStatus status) {
-				updateMetadata(map);
-			}
-		});
 	}
 
 	/**
