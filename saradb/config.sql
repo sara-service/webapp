@@ -12,7 +12,7 @@ DECLARE arbeitsgitlab text  := 'demogitlab.sara-service.org';
 DECLARE stefansgitlab text  := 'bwcloud-vm92.rz.uni-ulm.de';
 DECLARE demo_dspace text    := 'https://demo-dspace.sara-service.org';
 DECLARE testarchiv text     := 'testarchiv.sara-service.org';
-DECLARE oparu_demo text     := 'https://bwcloud-vm65.rz.uni-ulm.de:8080';
+DECLARE oparu_demo text     := 'https://devel-dspace.sara-service.org';
 DECLARE kops_demo text      := 'https://kops.uni-konstanz.de';
 DECLARE oparu_test text     := 'http://bib-test.rz.uni-ulm.de';
 
@@ -71,36 +71,6 @@ INSERT INTO archive_params(id, param, value) VALUES
 	(aRef, 'public-key', convert_from(lo_get(testarchiv_pubkey), 'UTF-8')),
 	(aRef, 'known-hosts', convert_from(lo_get(testarchiv_known), 'UTF-8'));
 
--- Stefan's OPARU Stand-In in bwCloud (https://bwcloud-vm65.rz.uni-ulm.de:8080/xmlui/)
-INSERT INTO repository(display_name, adapter, url, contact_email, enabled, logo_url) VALUES
-	('OPARU Devel', 'DSpace_v6', oparu_demo || '/xmlui', 'help@oparu.uni-ulm.de', TRUE,
-		'data:image/svg+xml;base64,' || encode(lo_get(oparu_logo), 'base64'))
-	RETURNING uuid INTO rRef;
-INSERT INTO repository_params(id, param, value) VALUES
-	(rRef, 'rest_user', 'project-sara@uni-konstanz.de'),
-	(rRef, 'rest_pwd', 'SaraTest'),
-	(rRef, 'rest_api_endpoint', oparu_demo || '/rest'),
-	(rRef, 'sword_user', 'project-sara@uni-konstanz.de'),
-	(rRef, 'sword_pwd', 'SaraTest'),
-	(rRef, 'sword_api_endpoint', oparu_demo || '/swordv2');
---	(rRef, 'force_onbehalf', '1'),
---	(rRef, 'workflow_type', 'login_required');
-
--- Fake KOPS (only for show; this doesn't work)
-INSERT INTO repository(display_name, adapter, url, contact_email, enabled, logo_url) VALUES
-	('KOPS Konstanz', 'DSpace_v6', kops_demo, 'kops.kim@uni-konstanz.de', TRUE,
-		'data:image/svg+xml;base64,' || encode(lo_get(kops_logo), 'base64'))
-	RETURNING uuid INTO rRef2;
-INSERT INTO repository_params(id, param, value) VALUES
-	(rRef2, 'rest_user', 'project-sara@uni-konstanz.de'),
-	(rRef2, 'rest_pwd', 'SaraTest'),
-	(rRef2, 'rest_api_endpoint', kops_demo || '/rest'),
-	(rRef2, 'sword_user', 'project-sara@uni-konstanz.de'),
-	(rRef2, 'sword_pwd', 'SaraTest'),
-	(rRef2, 'sword_api_endpoint', kops_demo || '/swordv2');
---	(rRef2, 'force_onbehalf', '1'),
---	(rRef2, 'workflow_type', 'login_required');
-
 -- DEMO DSpace sara-service.org
 INSERT INTO repository(display_name, adapter, url, contact_email, enabled) VALUES
 	('DEMO DSPACE', 'DSpace_v6', demo_dspace, 'help@sara-service.org', TRUE)
@@ -124,6 +94,36 @@ INSERT INTO repository_params(id, param, value) VALUES
        (rRef4, 'sword_user', 'project-sara@uni-konstanz.de'),
        (rRef4, 'sword_pwd', 'SaraTest'),
        (rRef4, 'sword_api_endpoint', oparu_test || '/swordv2');
+
+-- Stefan's OPARU Stand-In in bwCloud 
+INSERT INTO repository(display_name, adapter, url, contact_email, enabled, logo_url) VALUES
+	('OPARU Devel', 'DSpace_v6', oparu_demo || '/xmlui', 'help@oparu.uni-ulm.de', FALSE,
+		'data:image/svg+xml;base64,' || encode(lo_get(oparu_logo), 'base64'))
+	RETURNING uuid INTO rRef;
+INSERT INTO repository_params(id, param, value) VALUES
+	(rRef, 'rest_user', 'project-sara@uni-konstanz.de'),
+	(rRef, 'rest_pwd', 'SaraTest'),
+	(rRef, 'rest_api_endpoint', oparu_demo || '/rest'),
+	(rRef, 'sword_user', 'project-sara@uni-konstanz.de'),
+	(rRef, 'sword_pwd', 'SaraTest'),
+	(rRef, 'sword_api_endpoint', oparu_demo || '/swordv2');
+--	(rRef, 'force_onbehalf', '1'),
+--	(rRef, 'workflow_type', 'login_required');
+
+-- Fake KOPS (only for show; this doesn't work)
+INSERT INTO repository(display_name, adapter, url, contact_email, enabled, logo_url) VALUES
+	('KOPS Konstanz', 'DSpace_v6', kops_demo, 'kops.kim@uni-konstanz.de', FALSE,
+		'data:image/svg+xml;base64,' || encode(lo_get(kops_logo), 'base64'))
+	RETURNING uuid INTO rRef2;
+INSERT INTO repository_params(id, param, value) VALUES
+	(rRef2, 'rest_user', 'project-sara@uni-konstanz.de'),
+	(rRef2, 'rest_pwd', 'SaraTest'),
+	(rRef2, 'rest_api_endpoint', kops_demo || '/rest'),
+	(rRef2, 'sword_user', 'project-sara@uni-konstanz.de'),
+	(rRef2, 'sword_pwd', 'SaraTest'),
+	(rRef2, 'sword_api_endpoint', kops_demo || '/swordv2');
+--	(rRef2, 'force_onbehalf', '1'),
+--	(rRef2, 'workflow_type', 'login_required');
 
 
 --INSERT INTO collection(id, display_name, foreign_collection_uuid, enabled) VALUES(rRef, 'coffee management', '0815', TRUE);  -- coffee management
