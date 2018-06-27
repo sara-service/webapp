@@ -1,13 +1,24 @@
 "use strict";
 
+var repo_uuid;
+
+function initRepoInfo(list) {
+	$.each(list, function(_, r) {
+		if (r.uuid === repo_uuid) {
+			$('#contact_mail').text(r.contact_email);
+			$('#contact_mail').attr('href', "mailto:"+r.contact_email+"?subject=SARA%20Service");
+			$('#help_text').text(r.help);
+			}
+		} );
+}
+
 function initMeta(info) {
-	$('#archive_url').text(info["archive_url"]);
-	$('#archive_url').attr('href',info["archive_url"]);
-	$('#publish_url').text(info["repository_url"]);
-	$('#publish_url').attr('href',info["repository_url"]);
+	repo_uuid = info["pubrepo"];
+
+	API.get("retrieve repo info", "/api/pubrepo-list", {}, initRepoInfo );
 	
+	$('#next_button').attr('href',info["repository_url"]);
 	$('#next_button').removeClass("disabled");
-	$('#next_button').attr('href','index.html');
 	
 	$("#loading").remove();
 	$("#content").removeClass("hidden");

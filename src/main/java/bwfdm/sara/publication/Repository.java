@@ -24,6 +24,8 @@ public class Repository implements DAO {
 	@DatabaseField
 	public String logo_url;
 	@DatabaseField
+	public String help;
+	@DatabaseField
 	public boolean enabled;
 
 	public Repository(@JsonProperty("uuid") UUID uuid) {

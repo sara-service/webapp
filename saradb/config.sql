@@ -16,6 +16,8 @@ DECLARE oparu_demo text     := 'https://devel-dspace.sara-service.org';
 DECLARE kops_demo text      := 'https://kops.uni-konstanz.de';
 DECLARE oparu_test text     := 'http://bib-test.rz.uni-ulm.de';
 
+DECLARE demo_dspace_help text := 'Sie werden nun direkt zu OPARU weitergeleitet. Loggen Sie sich ein, klicken Sie auf "Veröffentlichung aufnehmen", ergänzen Sie die Metadaten und schicken Sie die Veröffentlichung ab. Wir prüfen Ihre Einreichung und melden uns ggf. bei Ihnen. Ist alles in Ordnung, wird Ihre Veröffentlichung in OPARU freigeschaltet und Sie erhalten eine Nachricht von uns.';
+
 DECLARE aRef UUID;
 DECLARE sRef UUID;
 DECLARE sRef2 UUID;
@@ -72,8 +74,8 @@ INSERT INTO archive_params(id, param, value) VALUES
 	(aRef, 'known-hosts', convert_from(lo_get(testarchiv_known), 'UTF-8'));
 
 -- DEMO DSpace sara-service.org
-INSERT INTO repository(display_name, adapter, url, contact_email, enabled) VALUES
-	('DEMO DSPACE', 'DSpace_v6', demo_dspace, 'help@sara-service.org', TRUE)
+INSERT INTO repository(display_name, adapter, url, contact_email, help, enabled) VALUES
+	('DEMO DSPACE', 'DSpace_v6', demo_dspace, 'help@oparu.de', demo_dspace_help, TRUE)
 	RETURNING uuid INTO rRef3;
 INSERT INTO repository_params(id, param, value) VALUES
 	(rRef3, 'rest_user', 'project-sara@uni-konstanz.de'),
