@@ -99,7 +99,7 @@ INSERT INTO repository_params(id, param, value) VALUES
 
 -- Stefan's OPARU Stand-In in bwCloud 
 INSERT INTO repository(display_name, adapter, url, contact_email, enabled, logo_url) VALUES
-	('OPARU Devel', 'DSpace_v6', oparu_demo || '/xmlui', 'help@oparu.uni-ulm.de', FALSE,
+	('OPARU Devel', 'DSpace_v6', oparu_demo || '/xmlui', 'help@oparu.uni-ulm.de', TRUE,
 		'data:image/svg+xml;base64,' || encode(lo_get(oparu_logo), 'base64'))
 	RETURNING uuid INTO rRef;
 INSERT INTO repository_params(id, param, value) VALUES
