@@ -58,8 +58,18 @@ public class Project {
 		return config.getConfigDatabase();
 	}
 
+	/**
+	 * Changes the project path, re-initializing this project. This is for use
+	 * in the {@link Authorization authorization logic} and nowhere else.
+	 */
 	public synchronized void setProjectPath(final String projectPath) {
+		if (this.projectPath != null && this.projectPath.equals(projectPath))
+			return;
+
 		this.projectPath = projectPath;
+		project = null;
+		db = null;
+		disposeTransferRepo();
 	}
 
 	public void initializeProject() {
@@ -167,12 +177,14 @@ public class Project {
 	}
 
 	public void disposeTransferRepo() {
+		invalidateMetadata();
 		// cancelling the CloneTask is always possible, even after it has
 		// finished, and will always clean up the TransferRepo.
 		if (clone != null)
 			clone.cancel();
 		clone = null;
 		transferRepo = null;
+		metadataExtractor = null;
 	}
 
 	public TaskStatus getInitStatus() {

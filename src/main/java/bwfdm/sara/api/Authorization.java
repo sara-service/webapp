@@ -88,28 +88,23 @@ public class Authorization {
 			@RequestParam("repo") final String gitRepo,
 			@RequestParam(name = "project", required = false) final String projectPath,
 			final RedirectAttributes redir, final HttpSession session) {
-		final boolean needNewProject;
-		if (Project.hasInstance(session)) {
-			final Project existingProject = Project
-					.getCompletedInstance(session);
-			// if the user does not have a session for this repo, or the
-			// existing session has been completed, we need to create a new one
-			needNewProject = !existingProject.getRepoID().equals(gitRepo)
-					|| existingProject.isDone();
-		} else
-			needNewProject = true;
-		if (needNewProject)
+		// if the user does not have a session for this repo, create a new one.
+		// deliberately reuses completed projects: setProjectPath() will restore
+		// these to "virgin" condition, which allows reusing their
+		// authorization.
+		if (!Project.hasInstance(session) || !Project
+				.getCompletedInstance(session).getRepoID().equals(gitRepo))
 			Project.createInstance(session, gitRepo, projectPath, config);
 		
-		// note: at this point, the project must not be completed, so it's
-		// getInstance() here
-		final Project project = Project.getInstance(session);
-		final GitRepo repo = project.getGitRepo();
+		// note: at this point, the project may be completed, but the
+		// setProjectPath() below will take care of that.
+		final Project project = Project.getCompletedInstance(session);
 		// if project selected, remember for later. if no project selected,
 		// remember to show the selection screen instead.
 		project.setProjectPath(projectPath);
 		// if the user already has a session and the token still works, we're
 		// done; no need to bother the user with authorization again.
+		final GitRepo repo = project.getGitRepo();
 		if (repo.hasWorkingToken())
 			return authFinished(project);
 
