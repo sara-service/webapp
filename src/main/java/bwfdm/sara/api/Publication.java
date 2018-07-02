@@ -153,11 +153,14 @@ public class Publication {
 		final UUID sourceUUID;
 		final String userID;
 		if (PublicationSession.hasInstance(session)) {
-		PublicationSession project = PublicationSession.getInstance(session);
+			PublicationSession project = PublicationSession
+					.getInstance(session);
 			sourceUUID = project.getSourceUUID();
 			userID = project.getSourceUserID();
 		} else {
-			Project project = Project.getInstance(session);
+			// NoSessionException thown here if there is no session.
+			// (and we definitely want that exception here)
+			Project project = Project.getCompletedInstance(session);
 			sourceUUID = UUID.fromString(project.getRepoID());
 			userID = project.getGitRepo().getUserInfo().userID;
 		}

@@ -15,7 +15,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import bwfdm.sara.project.ErrorInfo;
+import bwfdm.sara.api.Error.ErrorInfo;
 
 public abstract class Task implements ProgressMonitor, Runnable {
 	protected static final Log logger = LogFactory.getLog(Task.class);
@@ -163,7 +163,7 @@ public abstract class Task implements ProgressMonitor, Runnable {
 		@JsonProperty
 		private final List<Step> steps;
 		@JsonProperty
-		private final ErrorInfo error;
+		private final TaskErrorInfo error;
 
 		private TaskStatus() {
 			if (cancelled) {
@@ -175,7 +175,7 @@ public abstract class Task implements ProgressMonitor, Runnable {
 							+ exception.getMessage(), exception);
 					final String fail = failedStep != null ? failedStep.text
 							: null;
-					error = new ErrorInfo(exception, fail);
+					error = new TaskErrorInfo(exception, fail);
 				} else
 					error = null;
 			} else {
@@ -193,5 +193,16 @@ public abstract class Task implements ProgressMonitor, Runnable {
 		SUCCESS, //
 		@JsonProperty("error")
 		ERROR
+	}
+
+	@JsonInclude(Include.NON_NULL)
+	public static class TaskErrorInfo extends ErrorInfo {
+		@JsonProperty
+		public final String step;
+
+		public TaskErrorInfo(final Exception e, final String step) {
+			super(e);
+			this.step = step;
+		}
 	}
 }

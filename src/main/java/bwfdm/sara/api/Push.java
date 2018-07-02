@@ -26,10 +26,12 @@ public class Push {
 
 	@GetMapping("status")
 	public TaskStatus getStatus(final HttpSession session) {
-		return Project.getInstance(session).getPushTask().getStatus();
+		// getCompletedInstance because the project is expected to transition to
+		// "done" while polling
+		return Project.getCompletedInstance(session).getPushTask().getStatus();
 	}
 
-	@PostMapping("trigger") // FIXME triggerPush
+	@PostMapping("trigger")
 	public TaskStatus triggerPush(@RequestParam("token") final String hash,
 			final HttpSession session) {
 		final Project project = Project.getInstance(session);
@@ -58,12 +60,13 @@ public class Push {
 	@GetMapping("redirect")
 	public RedirectView redirectAfterArchiving(final HttpSession session,
 			final RedirectAttributes redir) {
-		if (!Project.getInstance(session).getPushTask().isDone())
+		final Project project = Project.getCompletedInstance(session);
+		if (!project.isDone())
 			// TODO or maybe just redirect to push.html instead?
+			// beware infinite loops though if "done" detection fails
 			throw new IllegalStateException(
 					"finishArchiving before push is done");
 
-		final Project project = Project.getInstance(session);
 		// FIXME kill Project so everything just redirects to END
 		// TODO and also get rid of the TransferRepo!
 

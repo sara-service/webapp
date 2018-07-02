@@ -1,5 +1,7 @@
 package bwfdm.sara.project;
 
+import java.util.UUID;
+
 import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -224,11 +226,49 @@ public class Project {
 		cancelPush();
 	}
 
+	/**
+	 * @return <code>true</code> if the archiving part of the project is
+	 *         completed, ie. if {@link PushTask#isDone()} or he push wasn't
+	 *         started yet
+	 */
+	public boolean isDone() {
+		if (push == null)
+			return false;
+		return push.isDone();
+	}
+
+	/**
+	 * Get the {@link Project} instance associated with the given
+	 * {@link HttpSession}.
+	 * 
+	 * @throws ProjectCompletedException
+	 *             if the project {@link #isDone() is completed}
+	 */
 	public static Project getInstance(final HttpSession session) {
-		final Project repo = (Project) session.getAttribute(PROJECT_ATTR);
-		if (repo == null)
+		final Project project = getCompletedInstance(session);
+		if (project.isDone())
+			throw new ProjectCompletedException(
+					project.getPushTask().getItemUUID());
+		return project;
+	}
+
+	/**
+	 * Get the {@link Project} instance associated with the given
+	 * {@link HttpSession}, even if that {@link Project} is already completed.
+	 * Only intended for logic that needs to check {@link #isDone()} manually,
+	 * or to get auth info from the completed project. For general API stuff,
+	 * use {@link #getInstance(HttpSession)}!
+	 * 
+	 * @throws NoSessionException
+	 *             if the session doesn't have {@link Project} associated with
+	 *             it
+	 * @return the {@link Project} instance
+	 */
+	public static Project getCompletedInstance(final HttpSession session) {
+		Project project = (Project) session.getAttribute(PROJECT_ATTR);
+		if (project == null)
 			throw new NoSessionException();
-		return repo;
+		return project;
 	}
 
 	/**
@@ -240,7 +280,7 @@ public class Project {
 	}
 
 	public static boolean hasInstance(final HttpSession session) {
-		return session.getAttribute(PROJECT_ATTR) != null;
+		return (Project) session.getAttribute(PROJECT_ATTR) != null;
 	}
 
 	/**
@@ -280,6 +320,16 @@ public class Project {
 	public static class NoProjectException extends RuntimeException {
 		private NoProjectException() {
 			super("no project selected");
+		}
+	}
+
+	@SuppressWarnings("serial")
+	public static class ProjectCompletedException extends RuntimeException {
+		public final UUID itemID;
+
+		private ProjectCompletedException(final UUID itemID) {
+			super("archiving project already completed");
+			this.itemID = itemID;
 		}
 	}
 

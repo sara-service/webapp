@@ -37,20 +37,13 @@ public class Authorization {
 			final RedirectAttributes redir, final HttpSession session) {
 		// check whether the user is pushy and tries to archive two projects at
 		// once. if so, make sure he knows it won't work.
-		if (Project.hasInstance(session)) {
-			final Project project = Project.getInstance(session);
-			final String prevProject = project.getProjectPath();
-			if (prevProject != null)
-				// user is in the middle of the publication workflow for some
-				// project and is about to start a new one. bad user; show
-				// warning.
-				if (!project.getRepoID().equals(gitRepo) // different repo
-						|| projectPath == null // any selection on index.html
-						|| !prevProject.equals(projectPath)) { // diff. project
-					redir.addAttribute("repo", gitRepo);
-					redir.addAttribute("project", projectPath);
-					return new RedirectView("/pushy.html");
-			}
+		if (Project.hasInstance(session) && isPushy(
+				Project.getCompletedInstance(session), gitRepo, projectPath)) {
+			// user is in the middle of the publication workflow for some
+			// project and is about to start a new one. bad user; show warning.
+			redir.addAttribute("repo", gitRepo);
+			redir.addAttribute("project", projectPath);
+			return new RedirectView("/pushy.html");
 		}
 
 		// everything else is just the same whether the user is returning from
@@ -58,16 +51,57 @@ public class Authorization {
 		return forceAuth(gitRepo, projectPath, redir, session);
 	}
 
+	private boolean isPushy(final Project existingProject, final String gitRepo,
+			final String projectPath) {
+		// existing project is done; don't show a message that it isn't!
+		if (existingProject.isDone())
+			return false;
+
+		// no project selected yet, so continuing doesn't make sense because
+		// there's nothing to continue with. easy to trigger if the user selects
+		// a git repo on index.html, goes back and selects a different git repo,
+		// without ever selecting a project.
+		final String prevProject = existingProject.getProjectPath();
+		if (prevProject == null)
+			return false;
+
+		// different repo selected, so must be different project
+		if (!existingProject.getRepoID().equals(gitRepo))
+			return true;
+		// user is coming from index.html and has selected something there
+		if (projectPath == null)
+			return true;
+		// user explicitly selected a different project
+		if (!prevProject.equals(projectPath))
+			return true;
+
+		// user starting to publish the same project again. there's nothing
+		// wrong with that; in fact the warning could be silly because both
+		// continuing the existing workflow and starting a new workflow would
+		// archive exactly the same project.
+		return false;
+	}
+
 	@GetMapping("new")
 	public RedirectView forceAuth(
 			@RequestParam("repo") final String gitRepo,
 			@RequestParam(name = "project", required = false) final String projectPath,
 			final RedirectAttributes redir, final HttpSession session) {
-		// if the user does not have a session for this repo, create one
-		if (!Project.hasInstance(session)
-				|| !Project.getInstance(session).getRepoID().equals(gitRepo))
+		final boolean needNewProject;
+		if (Project.hasInstance(session)) {
+			final Project existingProject = Project
+					.getCompletedInstance(session);
+			// if the user does not have a session for this repo, or the
+			// existing session has been completed, we need to create a new one
+			needNewProject = !existingProject.getRepoID().equals(gitRepo)
+					|| existingProject.isDone();
+		} else
+			needNewProject = true;
+		if (needNewProject)
 			Project.createInstance(session, gitRepo, projectPath, config);
-
+		
+		// note: at this point, the project must not be completed, so it's
+		// getInstance() here
 		final Project project = Project.getInstance(session);
 		final GitRepo repo = project.getGitRepo();
 		// if project selected, remember for later. if no project selected,
@@ -92,12 +126,11 @@ public class Authorization {
 					.updateFromDB(new Item(itemUUID));
 
 		final GitRepo repo;
-		if (Project.hasInstance(session)
-				&& UUID.fromString(Project.getInstance(session).getRepoID())
-						.equals(item.source_uuid))
+		if (Project.hasInstance(session) && item.source_uuid.equals(UUID
+				.fromString(Project.getCompletedInstance(session).getRepoID())))
 			// if user already has a Project for this GitRepo, recycle its
 			// authorization
-			repo = Project.getInstance(session).getGitRepo();
+			repo = Project.getCompletedInstance(session).getGitRepo();
 		else
 			repo = config.getConfigDatabase()
 					.newGitRepo(item.source_uuid.toString());
@@ -146,6 +179,7 @@ public class Authorization {
 		if (PublicationSession.hasInstance(session))
 			auth = PublicationSession.getInstance(session).getAuth();
 		else if (Project.hasInstance(session))
+			// if Project is done here, something's seriously wrong!
 			auth = Project.getInstance(session).getGitRepo();
 		else
 			// session has timed out before user returned. this should never

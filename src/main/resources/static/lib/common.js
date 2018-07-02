@@ -67,6 +67,14 @@ APIERR.handleJSON = function(step, info) {
 		location.href = "/clone.html";
 		return;
 	}
+	if (info.exception == "ProjectCompletedException") {
+		window.alert("Your software artefact has already been archived!");
+		// redirect the user to "done" page, where he can start a publication.
+		// safe to just concatenate query string here; the item UUID cannot
+		// contain anything dangerous because it's only hex digits and dashes.
+		location.href = "/done.html?item=" + info.itemID;
+		return;
+	}
 	APIERR.handleOther(step, info.exception, info.message);
 };
 APIERR.handle = function(step, status, http, body) {

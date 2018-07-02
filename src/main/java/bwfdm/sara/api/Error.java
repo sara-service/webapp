@@ -1,5 +1,7 @@
 package bwfdm.sara.api;
 
+import java.util.UUID;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.http.HttpStatus;
@@ -8,9 +10,13 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-import bwfdm.sara.project.ErrorInfo;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import bwfdm.sara.project.Project.NoProjectException;
 import bwfdm.sara.project.Project.NoSessionException;
+import bwfdm.sara.project.Project.ProjectCompletedException;
 
 @ControllerAdvice("bwfdm.sara.api")
 public class Error {
@@ -21,6 +27,13 @@ public class Error {
 	@ResponseStatus(HttpStatus.UNAUTHORIZED)
 	public ErrorInfo handleNoSession(final NoSessionException e) {
 		return new ErrorInfo(e);
+	}
+
+	@ResponseBody
+	@ExceptionHandler
+	@ResponseStatus(HttpStatus.CONFLICT)
+	public ErrorInfo handleProjectCompleted(final ProjectCompletedException e) {
+		return new ProjectCompletedErrorInfo(e, e.itemID);
 	}
 
 	@ResponseBody
@@ -43,5 +56,27 @@ public class Error {
 	}
 
 	// TODO set up a handler for /error and return something nice for 404s etc
+	@JsonInclude(Include.NON_NULL)
+	public static class ErrorInfo {
+		@JsonProperty
+		public final String exception;
+		@JsonProperty
+		public final String message;
 
+		public ErrorInfo(final Exception e) {
+			exception = e.getClass().getSimpleName();
+			message = e.getMessage();
+		}
+	}
+
+	@JsonInclude(Include.NON_NULL)
+	public static class ProjectCompletedErrorInfo extends ErrorInfo {
+		@JsonProperty
+		public final UUID itemID;
+
+		public ProjectCompletedErrorInfo(final Exception e, final UUID itemID) {
+			super(e);
+			this.itemID = itemID;
+ 		}
+	}
 }
