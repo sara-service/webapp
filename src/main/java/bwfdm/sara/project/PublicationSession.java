@@ -39,12 +39,12 @@ public class PublicationSession {
 	}
 
 	public String getSourceUserID() {
+		checkHaveItem();
 		return userID;
 	}
 
 	public void initialize() {
-		this.userID = auth.getUserInfo().userID;
-
+		final String userID = auth.getUserInfo().userID;
 		// check that the user actually owns the item, and show a nasty error
 		// message if not
 		final Item item = config.getPublicationDatabase()
@@ -52,12 +52,18 @@ public class PublicationSession {
 		if (!item.source_uuid.equals(sourceUUID)
 				|| !item.source_user_id.equals(userID))
 			throw new InvalidItemException(userID);
+
+		this.userID = userID;
 		this.item = item;
 	}
 
 	private void checkHaveItem() {
-		if (item == null)
+		if (!hasItem())
 			throw new NoSessionException();
+	}
+
+	public boolean hasItem() {
+		return item != null;
 	}
 
 	public Item getItem() {

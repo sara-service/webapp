@@ -54,6 +54,7 @@ public class Authorization {
 	private boolean isPushy(final Project existingProject, final String gitRepo,
 			final String projectPath) {
 		// existing project is done; don't show a message that it isn't!
+		// FIXME should also check that publication done or disabled!
 		if (existingProject.isDone())
 			return false;
 
@@ -121,9 +122,8 @@ public class Authorization {
 	public RedirectView authForPublication(
 			@RequestParam("item") final String itemID,
 			final RedirectAttributes redir, final HttpSession session) {
-		final UUID itemUUID = UUID.fromString(itemID);
 		final Item item = config.getPublicationDatabase()
-					.updateFromDB(new Item(itemUUID));
+				.updateFromDB(new Item(UUID.fromString(itemID)));
 
 		final GitRepo repo;
 		if (Project.hasInstance(session) && item.source_uuid.equals(UUID
@@ -137,13 +137,12 @@ public class Authorization {
 
 		// if the user doesn't yet have a session for this item, create one
 		if (!PublicationSession.hasInstance(session)
-				|| !PublicationSession.getInstance(session).getItemUUID()
-						.equals(itemUUID))
+				|| !canReuse(PublicationSession.getInstance(session), item))
 			PublicationSession.createInstance(session, item.source_uuid, repo,
-					itemUUID, config);
+					item.uuid, config);
+
 		final PublicationSession publish = PublicationSession
 				.getInstance(session);
-
 		final AuthProvider auth = publish.getAuth();
 		if (auth.hasWorkingToken())
 			// if the user already has a session and the token still works,
@@ -153,6 +152,24 @@ public class Authorization {
 		// user doesn't have a token or it has expired. trigger authorization
 		// again.
 		return triggerAuth(auth, redir, session);
+	}
+
+	private boolean canReuse(final PublicationSession existingSession,
+			final Item item) {
+		if (!existingSession.hasItem())
+			// existing session still uninitialized; just create a new one
+			return false;
+
+		// we can only reuse a session if it's for the same item. in that case,
+		// we obviously want to reuse it.
+		if (!existingSession.getItemUUID().equals(item.uuid))
+			return false;
+
+		// sanity check: only allow reuse when source and user ID match. they
+		// always should, but if we just return true here, the user cannot
+		// recover if wrong values ever end up in there.
+		return existingSession.getSourceUserID().equals(item.source_user_id)
+				&& existingSession.getSourceUUID().equals(item.source_uuid);
 	}
 
 	private RedirectView triggerAuth(final AuthProvider auth,
@@ -175,20 +192,24 @@ public class Authorization {
 			@RequestParam final Map<String, String> args,
 			final RedirectAttributes redir, final HttpSession session,
 			final HttpServletRequest request) {
+		boolean hasActiveProject = Project.hasInstance(session)
+				&& !Project.getCompletedInstance(session).isDone();
 		final AuthProvider auth;
-		if (PublicationSession.hasInstance(session))
-			auth = PublicationSession.getInstance(session).getAuth();
-		else if (Project.hasInstance(session))
-			// if Project is done here, something's seriously wrong!
+		if (hasActiveProject)
 			auth = Project.getInstance(session).getGitRepo();
+		else if (PublicationSession.hasInstance(session))
+			auth = PublicationSession.getInstance(session).getAuth();
 		else
 			// session has timed out before user returned. this should never
 			// happen (but it just did).
-			return new RedirectView("/autherror.html");
+			throw new IllegalStateException(
+					"session expired while waiting for authorization"
+							+ " (overzealous cookie cleaning extension?)");
 
 		// if we need Shib, make it parse the request first. this guarantees
 		// that auth.parseAuthResponse() won't put anything valid into the
-		// request if Shib fails.
+		// request if Shib fails (because Shib will just throw an exception if
+		// anything goes wrong).
 		final ShibAuth shib = auth.getShibAuth();
 		if (shib != null)
 			// FIXME maybe show an error instead of an exception?
@@ -201,14 +222,10 @@ public class Authorization {
 			// retrying probably won't help.
 			return new RedirectView("/autherror.html");
 
-		if (PublicationSession.hasInstance(session))
-			return authFinished(PublicationSession.getInstance(session));
-		else if (Project.hasInstance(session))
+		if (hasActiveProject)
 			return authFinished(Project.getInstance(session));
 		else
-			// huh? we did have one of those beforehand!!
-			throw new IllegalStateException(
-					"session has suddenly disappeared?!");
+			return authFinished(PublicationSession.getInstance(session));
 	}
 
 	private RedirectView authFinished(final PublicationSession publish) {
