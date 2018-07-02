@@ -59,6 +59,7 @@ CREATE TABLE repository(
 	contact_email text NOT NULL, -- an email address to contact the repository
 	adapter text NOT NULL,
 	logo_url text, -- URL of logo, either https:// or data: (optional)
+        help text, -- help for users how publication can be finished
 	enabled boolean NOT NULL
 );
 

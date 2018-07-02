@@ -12,9 +12,11 @@ DECLARE arbeitsgitlab text  := 'demogitlab.sara-service.org';
 DECLARE stefansgitlab text  := 'bwcloud-vm92.rz.uni-ulm.de';
 DECLARE demo_dspace text    := 'https://demo-dspace.sara-service.org';
 DECLARE testarchiv text     := 'testarchiv.sara-service.org';
-DECLARE oparu_demo text     := 'https://bwcloud-vm65.rz.uni-ulm.de:8080';
+DECLARE oparu_demo text     := 'https://devel-dspace.sara-service.org';
 DECLARE kops_demo text      := 'https://kops.uni-konstanz.de';
 DECLARE oparu_test text     := 'http://bib-test.rz.uni-ulm.de';
+
+DECLARE demo_dspace_help text := 'Sie werden nun direkt zu OPARU weitergeleitet. Loggen Sie sich ein, klicken Sie auf "Veröffentlichung aufnehmen", ergänzen Sie die Metadaten und schicken Sie die Veröffentlichung ab. Wir prüfen Ihre Einreichung und melden uns ggf. bei Ihnen. Ist alles in Ordnung, wird Ihre Veröffentlichung in OPARU freigeschaltet und Sie erhalten eine Nachricht von uns.';
 
 DECLARE aRef UUID;
 DECLARE sRef UUID;
@@ -22,6 +24,7 @@ DECLARE sRef2 UUID;
 DECLARE rRef UUID;
 DECLARE rRef2 UUID;
 DECLARE rRef3 UUID;
+DECLARE rRef4 UUID;
 DECLARE iRef UUID;
 
 BEGIN
@@ -70,9 +73,33 @@ INSERT INTO archive_params(id, param, value) VALUES
 	(aRef, 'public-key', convert_from(lo_get(testarchiv_pubkey), 'UTF-8')),
 	(aRef, 'known-hosts', convert_from(lo_get(testarchiv_known), 'UTF-8'));
 
--- Stefan's OPARU Stand-In in bwCloud (https://bwcloud-vm65.rz.uni-ulm.de:8080/xmlui/)
+-- DEMO DSpace sara-service.org
+INSERT INTO repository(display_name, adapter, url, contact_email, help, enabled) VALUES
+	('DEMO DSPACE', 'DSpace_v6', demo_dspace, 'help@oparu.de', demo_dspace_help, TRUE)
+	RETURNING uuid INTO rRef3;
+INSERT INTO repository_params(id, param, value) VALUES
+	(rRef3, 'rest_user', 'project-sara@uni-konstanz.de'),
+	(rRef3, 'rest_pwd', 'SaraTest'),
+	(rRef3, 'rest_api_endpoint', demo_dspace || '/rest'),
+	(rRef3, 'sword_user', 'project-sara@uni-konstanz.de'),
+	(rRef3, 'sword_pwd', 'SaraTest'),
+	(rRef3, 'sword_api_endpoint', demo_dspace || '/swordv2');
+
+-- Official OPARU test system
+INSERT INTO repository(display_name, adapter, url, contact_email, enabled) VALUES
+        ('OPARU Test', 'DSpace_v6', demo_dspace, 'help@oparu.uni-ulm.de', TRUE)
+        RETURNING uuid INTO rRef4;
+INSERT INTO repository_params(id, param, value) VALUES
+       (rRef4, 'rest_user', 'project-sara@uni-konstanz.de'),
+       (rRef4, 'rest_pwd', 'SaraTest'),
+       (rRef4, 'rest_api_endpoint', oparu_test || '/rest'),
+       (rRef4, 'sword_user', 'project-sara@uni-konstanz.de'),
+       (rRef4, 'sword_pwd', 'SaraTest'),
+       (rRef4, 'sword_api_endpoint', oparu_test || '/swordv2');
+
+-- Stefan's OPARU Stand-In in bwCloud 
 INSERT INTO repository(display_name, adapter, url, contact_email, enabled, logo_url) VALUES
-	('OPARU Ulm Testsystem', 'DSpace_v6', oparu_demo || '/xmlui', 'help@oparu.uni-ulm.de', TRUE,
+	('OPARU Devel', 'DSpace_v6', oparu_demo || '/xmlui', 'help@oparu.uni-ulm.de', TRUE,
 		'data:image/svg+xml;base64,' || encode(lo_get(oparu_logo), 'base64'))
 	RETURNING uuid INTO rRef;
 INSERT INTO repository_params(id, param, value) VALUES
@@ -87,7 +114,7 @@ INSERT INTO repository_params(id, param, value) VALUES
 
 -- Fake KOPS (only for show; this doesn't work)
 INSERT INTO repository(display_name, adapter, url, contact_email, enabled, logo_url) VALUES
-	('KOPS Konstanz', 'DSpace_v6', kops_demo, 'kops.kim@uni-konstanz.de', TRUE,
+	('KOPS Konstanz', 'DSpace_v6', kops_demo, 'kops.kim@uni-konstanz.de', FALSE,
 		'data:image/svg+xml;base64,' || encode(lo_get(kops_logo), 'base64'))
 	RETURNING uuid INTO rRef2;
 INSERT INTO repository_params(id, param, value) VALUES
@@ -100,17 +127,6 @@ INSERT INTO repository_params(id, param, value) VALUES
 --	(rRef2, 'force_onbehalf', '1'),
 --	(rRef2, 'workflow_type', 'login_required');
 
--- Official OPARU Test System?
-INSERT INTO repository(display_name, adapter, url, contact_email, enabled) VALUES
-	('DEMO DSPACE', 'DSpace_v6', demo_dspace, 'help@oparu.uni-ulm.de', TRUE)
-	RETURNING uuid INTO rRef3;
-INSERT INTO repository_params(id, param, value) VALUES
-	(rRef3, 'rest_user', 'project-sara@uni-konstanz.de'),
-	(rRef3, 'rest_pwd', 'SaraTest'),
-	(rRef3, 'rest_api_endpoint', demo_dspace || '/rest'),
-	(rRef3, 'sword_user', 'project-sara@uni-konstanz.de'),
-	(rRef3, 'sword_pwd', 'SaraTest'),
-	(rRef3, 'sword_api_endpoint', demo_dspace || '/swordv2');
 
 --INSERT INTO collection(id, display_name, foreign_collection_uuid, enabled) VALUES(rRef, 'coffee management', '0815', TRUE);  -- coffee management
 --INSERT INTO collection(id, display_name, foreign_collection_uuid, enabled) VALUES(rRef, 'milk sciences', '0914', FALSE); -- milk sciences
