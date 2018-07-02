@@ -64,7 +64,7 @@ APIERR.handleJSON = function(step, info) {
 		// we need a local repo but don't have one. let's change that.
 		// unfortunately this resets the workflow back to right after
 		// the clone...
-		location.href = "/clone.html";
+		location.href = "/api/clone/trigger";
 		return;
 	}
 	if (info.exception == "ProjectCompletedException") {

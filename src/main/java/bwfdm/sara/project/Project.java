@@ -99,7 +99,7 @@ public class Project {
 	}
 
 	private void checkHaveTransferRepo() {
-		if (!transferRepo.isUpToDate())
+		if (transferRepo == null || !transferRepo.isUpToDate())
 			throw new NeedCloneException();
 	}
 
