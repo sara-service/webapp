@@ -36,13 +36,15 @@ import bwfdm.sara.publication.Hierarchy;
 import bwfdm.sara.publication.Item;
 import bwfdm.sara.publication.PublicationRepository;
 import bwfdm.sara.publication.Repository;
+import bwfdm.sara.publication.SaraMetaDataField;
 import bwfdm.sara.publication.dspace.dto.v6.CollectionObject;
 import bwfdm.sara.publication.dspace.dto.v6.HierarchyObject;
 import bwfdm.sara.utils.JsonUtils;
 import bwfdm.sara.utils.WebUtils;
 
 public class DSpace_v6 implements PublicationRepository {
-	protected static final Logger logger = LoggerFactory.getLogger(DSpace_v6.class);
+	protected static final Logger logger = LoggerFactory
+			.getLogger(DSpace_v6.class);
 
 	private final String rest_api_endpoint;
 	private final String sword_user, sword_pwd, sword_api_endpoint,
@@ -62,12 +64,23 @@ public class DSpace_v6 implements PublicationRepository {
 	private final WebTarget hierarchyWebTarget;
 	private HierarchyObject rest_hierarchy;
 
+	// for IR
+	private final String deposit_type;
+	private final String name_regex;
+	private final String name_replace;
+
 	private Client rest_client;
 
 	@JsonCreator
-	public DSpace_v6(@JsonProperty("rest_user") final String ru, @JsonProperty("rest_pwd") final String rp,
-			@JsonProperty("rest_api_endpoint") final String re, @JsonProperty("sword_user") final String su,
-			@JsonProperty("sword_pwd") final String sp, @JsonProperty("sword_api_endpoint") final String se,
+	public DSpace_v6(@JsonProperty("rest_user") final String ru,
+			@JsonProperty("rest_pwd") final String rp,
+			@JsonProperty("rest_api_endpoint") final String re,
+			@JsonProperty("sword_user") final String su,
+			@JsonProperty("sword_pwd") final String sp,
+			@JsonProperty("sword_api_endpoint") final String se,
+			@JsonProperty(value = "deposit_type", required = false) final String dt,
+			@JsonProperty(value = "name_regex", required = false) final String nrx,
+			@JsonProperty(value = "name_replace", required = false) final String nrp,
 			@JsonProperty("dao") final Repository dao) {
 		this.dao = dao;
 
@@ -76,6 +89,14 @@ public class DSpace_v6 implements PublicationRepository {
 		sword_pwd = sp;
 		sword_api_endpoint = se;
 		sword_servicedocumentpath = sword_api_endpoint + "/servicedocument";
+
+		deposit_type = dt;
+		name_regex = nrx;
+		name_replace = nrp;
+
+		System.out.println(dt);
+		System.out.println(nrx);
+		System.out.println(nrp);
 
 		rest_client = WebUtils.getClientWithoutSSL(); // Ignore SSL-Verification
 		// client = ClientBuilder.newClient();
@@ -92,7 +113,11 @@ public class DSpace_v6 implements PublicationRepository {
 		sword_workspaces = null;
 	}
 
-	public DSpace_v6(String serviceDocumentURL, String restURL, String saraUser, String saraPassword) {
+	public DSpace_v6(String serviceDocumentURL, String restURL, String saraUser,
+			String saraPassword) {
+		deposit_type = "workspace";
+		name_regex = "(\\S{2,})\\s{1,}(.*)";
+		name_replace = "$2, $1";
 		sword_servicedocumentpath = serviceDocumentURL;
 		sword_user = saraUser;
 		sword_pwd = saraPassword;
@@ -207,7 +232,7 @@ public class DSpace_v6 implements PublicationRepository {
 		}
 
 		List<String> communityList = new ArrayList<String>(0);
-		
+
 		if (rest_hierarchy == null) {
 			final Response response = getResponse(hierarchyWebTarget,
 					MediaType.APPLICATION_JSON, MediaType.APPLICATION_JSON);
@@ -235,7 +260,8 @@ public class DSpace_v6 implements PublicationRepository {
 		String swordCollectionPath = ""; // collectionURL without a host name
 											// and port
 
-		// Find a collectionURL inside of all available collections. SWORD is used.
+		// Find a collectionURL inside of all available collections. SWORD is
+		// used.
 		for (SWORDWorkspace workspace : sword_workspaces) {
 			for (SWORDCollection collection : workspace.getCollections()) {
 				if (collection.getHref().toString().equals(collectionURL)) {
@@ -323,7 +349,8 @@ public class DSpace_v6 implements PublicationRepository {
 			return null;
 		}
 
-		AuthCredentials authCredentials = new AuthCredentials(sword_user, sword_pwd, userLogin);
+		AuthCredentials authCredentials = new AuthCredentials(sword_user,
+				sword_pwd, userLogin);
 
 		Deposit deposit = new Deposit();
 
@@ -333,7 +360,17 @@ public class DSpace_v6 implements PublicationRepository {
 				EntryPart ep = new EntryPart();
 				for (Map.Entry<String, String> metadataEntry : metadataMap
 						.entrySet()) {
-					ep.addDublinCore(metadataEntry.getKey(), metadataEntry.getValue());
+					if ((metadataEntry.getKey()
+							.equals(SaraMetaDataField.AUTHOR.toString()))
+							|| (metadataEntry.getKey().equals(
+									SaraMetaDataField.SUBMITTER.toString()))) {
+						if (name_regex != null && name_replace != null) {
+							metadataEntry.setValue(metadataEntry.getValue()
+									.replaceAll(name_regex, name_replace));
+						}
+					}
+					ep.addDublinCore(metadataEntry.getKey(),
+							metadataEntry.getValue());
 				}
 				deposit.setEntryPart(ep);
 			}
@@ -344,12 +381,27 @@ public class DSpace_v6 implements PublicationRepository {
 				deposit.setFilename(file.getName()); // deposit works properly
 														// ONLY with a
 														// "filename" parameter
-														// --> in curl: -H "Content-Disposition: filename=file.zip"
+														// --> in curl: -H
+														// "Content-Disposition:
+														// filename=file.zip"
 			}
 
 			deposit.setMimeType(mimeFormat);
 			deposit.setPackaging(packageFormat);
-			deposit.setInProgress(true);
+
+			if (deposit_type != null) {
+				switch (deposit_type.toLowerCase()) {
+				case "workspace":
+					deposit.setInProgress(true);
+					break;
+				case "workflow":
+					deposit.setInProgress(false);
+					break;
+				}
+			} else {
+				deposit.setInProgress(true);
+			}
+
 			// deposit.setMd5("fileMD5");
 			// deposit.setSuggestedIdentifier("abcdefg");
 
@@ -359,17 +411,21 @@ public class DSpace_v6 implements PublicationRepository {
 			return receipt.getSplashPageLink().getHref();
 
 		} catch (FileNotFoundException e) {
-			logger.error("Exception by accessing a file: " + e.getClass().getSimpleName() + ": " + e.getMessage());
+			logger.error("Exception by accessing a file: "
+					+ e.getClass().getSimpleName() + ": " + e.getMessage());
 			return null;
 
-		} catch (SWORDClientException | SWORDError | ProtocolViolationException e) {
-			logger.error("Exception by making deposit: " + e.getClass().getSimpleName() + ": " + e.getMessage());
+		} catch (SWORDClientException | SWORDError
+				| ProtocolViolationException e) {
+			logger.error("Exception by making deposit: "
+					+ e.getClass().getSimpleName() + ": " + e.getMessage());
 			return null;
 		}
 	}
 
 	@Override
-	public boolean publishMetadata(String userLogin, String collectionURL, File metadataFileXML) {
+	public boolean publishMetadata(String userLogin, String collectionURL,
+			File metadataFileXML) {
 		// TODO Auto-generated method stub
 		return false;
 	}

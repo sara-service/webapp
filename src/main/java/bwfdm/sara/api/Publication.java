@@ -33,6 +33,7 @@ import bwfdm.sara.publication.Item;
 import bwfdm.sara.publication.ItemState;
 import bwfdm.sara.publication.PublicationRepository;
 import bwfdm.sara.publication.Repository;
+import bwfdm.sara.publication.SaraMetaDataField;
 import bwfdm.sara.publication.db.PublicationField;
 
 @RestController
@@ -98,8 +99,7 @@ public class Publication {
 		// TODO Metadata Mapping
 		// TODO Error Handling
 		final Map<PublicationField, String> meta = project
-				.getPublicationDatabase()
-				.getMetadata(project.getItemUUID());
+				.getPublicationDatabase().getMetadata(project.getItemUUID());
 
 		final UUID repository_uuid = UUID
 				.fromString(meta.get(PublicationField.PUBLICATION_REPOSITORY));
@@ -111,16 +111,23 @@ public class Publication {
 				.get(PublicationField.PUBREPO_COLLECTION);
 		final String userLogin = meta.get(PublicationField.PUBREPO_LOGIN_EMAIL);
 
-		metadataMap.put("sara-abstract", meta.get(PublicationField.DESCRIPTION));
-		metadataMap.put("sara-submitter", meta.get(PublicationField.SUBMITTER));
-		metadataMap.put("sara-author", meta.get(PublicationField.SUBMITTER)+"(Author)");
-		metadataMap.put("sara-title", meta.get(PublicationField.TITLE));
-		metadataMap.put("sara-version", meta.get(PublicationField.VERSION));
+		metadataMap.put("sara-abstract",
+				meta.get(PublicationField.DESCRIPTION));
+		metadataMap.put(SaraMetaDataField.SUBMITTER.toString(),
+				meta.get(PublicationField.SUBMITTER));
+		metadataMap.put(SaraMetaDataField.AUTHOR.toString(),
+				meta.get(PublicationField.SUBMITTER));
+		metadataMap.put(SaraMetaDataField.TITLE.toString(),
+				meta.get(PublicationField.TITLE));
+		metadataMap.put(SaraMetaDataField.VERSION.toString(),
+				meta.get(PublicationField.VERSION));
 		// FIXME dc.type needs to be configurable by IR maintainers
-		metadataMap.put("sara-type", "Software");
-		metadataMap.put("sara-publisher", "SARA Service version 'Prototype'");
-		metadataMap.put("sara-archiveUrl", meta.get(PublicationField.ARCHIVE_URL));
-		
+		metadataMap.put(SaraMetaDataField.TYPE.toString(), "Software");
+		metadataMap.put(SaraMetaDataField.PUBLISHER.toString(),
+				"SARA Service version 'Prototype'");
+		metadataMap.put(SaraMetaDataField.ARCHIVE_URL.toString(),
+				meta.get(PublicationField.ARCHIVE_URL));
+
 		Item i = project.getItem();
 		i.date_last_modified = new Date();
 		i.item_state = ItemState.SUBMITTED.name();
@@ -128,7 +135,7 @@ public class Publication {
 		i.collection_id = collectionURL;
 
 		metadataMap.put("sara-dateArchived", ISO8601.format(i.date_created));
-		
+
 		final String depositUrl = repo.publishMetadata(userLogin, collectionURL,
 				metadataMap);
 
