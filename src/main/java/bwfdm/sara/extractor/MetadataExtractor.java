@@ -6,9 +6,11 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import bwfdm.sara.auth.AuthProvider.UserInfo;
@@ -58,6 +60,7 @@ public class MetadataExtractor {
 	private final GitProject project;
 	private final GitRepo repo;
 	private final Map<Ref, LicenseFile> licenses = new HashMap<>();
+	private final Set<LicenseFile> licenseSet = new HashSet<>();
 	private UserInfo userInfo;
 
 	public MetadataExtractor(final TransferRepo clone, final GitRepo repo,
@@ -101,10 +104,13 @@ public class MetadataExtractor {
 	public Map<Ref, LicenseFile> detectLicenses(final Collection<Ref> refs)
 			throws IOException {
 		licenses.clear();
+		licenseSet.clear();
 		for (final Ref ref : refs) {
 			final LicenseFile license = detectLicenses(ref);
-			if (license != null)
+			if (license != null) {
 				licenses.put(ref, license);
+				licenseSet.add(license);
+			}
 		}
 		return licenses;
 	}
@@ -160,6 +166,10 @@ public class MetadataExtractor {
 
 	public Map<Ref, LicenseFile> getLicenses() {
 		return licenses;
+	}
+
+	public Set<LicenseFile> getLicenseSet() {
+		return licenseSet;
 	}
 
 	public Ref detectMasterBranch(final Collection<Ref> refs)

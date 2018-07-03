@@ -39,6 +39,8 @@ public class LicensesInfo {
 	/** holds both the autodetected and the user-set license for each branch */
 	@JsonProperty("branches")
 	public final List<LicenseInfo> branches;
+	@JsonProperty("detected")
+	public final Set<License> detectedLicenses;
 
 	/**
 	 * @param supported
@@ -49,19 +51,32 @@ public class LicensesInfo {
 	 * @param detected
 	 *            the autodetected licenses, as returned by
 	 *            {@link MetadataExtractor#getLicenses()}
+	 * @param licensesSet
+	 *            the set of all detected unique license files
 	 * @param user
 	 *            the user-specified licenses, as stored in the database, ie.
 	 *            {@link FrontendDatabase#getLicenses()}
 	 */
 	public LicensesInfo(final List<License> supported,
 			final Collection<Ref> refs, final Map<Ref, LicenseFile> detected,
+			final Set<LicenseFile> licensesSet,
 			final Map<Ref, String> user) {
 		this.supported = supported;
+		// auxiliary map for mapping licenses by ID
 		final Map<String, License> map = new HashMap<>();
 		for (final License l : supported)
 			map.put(l.id, l);
 		map.put(null, UNRECOGNIZED_LICENSE_INFO);
 
+		// build list of distinct detected licenses. there must be exactly one
+		// distinct license for "keeping" to be meaningful.
+		// note that this can contain duplicates if there are several copies of
+		// the same license, but with different file hashes!
+		this.detectedLicenses = new HashSet<>();
+		for (final LicenseFile det : licensesSet)
+			detectedLicenses.add(map.get(det.licenseID));
+
+		// build per-branch license list
 		branches = new ArrayList<>();
 		for (final Ref ref : refs) {
 			final LicenseFile det = detected.get(ref);
@@ -90,19 +105,9 @@ public class LicensesInfo {
 				userLicense = map.get(license).id;
 			} else
 				userLicense = null;
-			branches.add(new LicenseInfo(ref, file, detectedLicense,
-					userLicense));
+			branches.add(
+					new LicenseInfo(ref, file, detectedLicense, userLicense));
 		}
-	}
-
-	/** set of all licenses autodetected in the project */
-	@JsonProperty("detected")
-	public final Set<License> getDetectedLicenses() {
-		final HashSet<License> res = new HashSet<>();
-		for (final LicenseInfo b : branches)
-			if (b.detected != null)
-				res.add(b.detected);
-		return res;
 	}
 
 	/**
@@ -178,6 +183,18 @@ public class LicensesInfo {
 			if (b.getEffectiveLicense() == null)
 				return true;
 		return false;
+	}
+
+	/**
+	 * Returns the license applicable to all branches, or <code>null</code> if
+	 * there is no license that can be meaningfully considered to be applicable
+	 * to all branches.
+	 */
+	@JsonProperty("primary")
+	public License getPrimaryLicense() {
+		if (detectedLicenses.size() != 1)
+			return null;
+		return detectedLicenses.iterator().next();
 	}
 
 	/** maps a <code>null</code> license to "keep" */

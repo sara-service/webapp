@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import bwfdm.sara.Config;
 import bwfdm.sara.db.FrontendDatabase;
 import bwfdm.sara.db.License;
+import bwfdm.sara.extractor.MetadataExtractor;
 import bwfdm.sara.project.Project;
 import bwfdm.sara.project.Ref;
 
@@ -32,8 +33,9 @@ public class Licenses {
 	public LicensesInfo getLicenses(final HttpSession session) {
 		final Project project = Project.getInstance(session);
 		final FrontendDatabase db = project.getFrontendDatabase();
+		MetadataExtractor meta = project.getMetadataExtractor();
 		return new LicensesInfo(getLicenseList(), db.getSelectedRefs(),
-				project.getMetadataExtractor().getLicenses(), db.getLicenses());
+				meta.getLicenses(), meta.getLicenseSet(), db.getLicenses());
 	}
 
 	@PostMapping("")

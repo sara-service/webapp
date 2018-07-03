@@ -1,11 +1,14 @@
 package bwfdm.sara.transfer;
 
+import org.eclipse.jgit.lib.ObjectId;
+
 public final class RepoFile {
 	private final String name;
-	private final String hash;
+	private final ObjectId hash;
 	private final FileType type;
 
-	public RepoFile(final String name, final String hash, final FileType type) {
+	public RepoFile(final String name, final ObjectId hash,
+			final FileType type) {
 		this.name = name;
 		this.hash = hash;
 		this.type = type;
@@ -15,7 +18,7 @@ public final class RepoFile {
 		return name;
 	}
 
-	public String getHash() {
+	public ObjectId getHash() {
 		return hash;
 	}
 

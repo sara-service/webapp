@@ -1,10 +1,13 @@
 package bwfdm.sara.extractor;
 
-import bwfdm.sara.transfer.RepoFile;
+import org.eclipse.jgit.lib.ObjectId;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import bwfdm.sara.transfer.RepoFile;
 
 @JsonInclude(Include.NON_NULL)
 public class LicenseFile {
@@ -12,8 +15,8 @@ public class LicenseFile {
 	@JsonProperty("filename")
 	public final String path;
 	/** SHA-1 of the file which contains the license, never <code>null</code> */
-	@JsonProperty("hash")
-	public final String hash;
+	@JsonIgnore
+	public final ObjectId hash;
 	/**
 	 * {@link https://spdx.org/licenses/ SPDX License ID}, or <code>null</code>
 	 * if there is a license file but its contents are unrecognizable
@@ -24,7 +27,7 @@ public class LicenseFile {
 	@JsonProperty("confidence")
 	public final float score;
 
-	public LicenseFile(final String path, final String hash,
+	public LicenseFile(final String path, final ObjectId hash,
 			final String licenseID, final float score) {
 		this.path = path;
 		this.hash = hash;
@@ -38,5 +41,15 @@ public class LicenseFile {
 		hash = file.getHash();
 		this.licenseID = licenseID;
 		this.score = score;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		return ((LicenseFile) obj).hash.equals(hash);
+	}
+
+	@Override
+	public int hashCode() {
+		return hash.hashCode();
 	}
 }

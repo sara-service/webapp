@@ -43,6 +43,8 @@ public class ArchiveJob {
 	public final Set<MetadataField> update;
 	@JsonIgnore
 	public final Map<Ref, String> licenses;
+	@JsonIgnore
+	private Set<LicenseFile> licensesSet;
 	@JsonProperty
 	public final UUID archiveUUID;
 	@JsonIgnore
@@ -111,13 +113,22 @@ public class ArchiveJob {
 		final Map<Ref, LicenseFile> detectedLicenses = metadataExtractor
 				.getLicenses();
 		licenses = frontend.getLicenses();
-		for (RefAction action : actions)
-			// null means keep the existing license. which is fine – as long as
-			// we have something to keep!
-			if (licenses.get(action.ref) == null
-					&& !detectedLicenses.containsKey(action.ref))
-				throw new IllegalArgumentException(
-						"branch " + action.ref.path + " has no license");
+		licensesSet = metadataExtractor.getLicenseSet();
+		if (licensesSet.size() != 1)
+			// - if multiple different licenses detected, "keep" branches must
+			// have a detected license (because we cannot choose which of
+			// several licenses to keep)
+			// - if no licenses detected, there must not be any "keep" branches
+			// (because there isn't anything to keep).
+			// → check that all "keep" branches have a detected license. if no
+			// licenses detected, "keep" branches cannot have a detected
+			// license, so that's effectively a check that there are no "keep"
+			// branches.
+			for (RefAction action : actions)
+				if (licenses.get(action.ref) == null
+						&& !detectedLicenses.containsKey(action.ref))
+					throw new IllegalArgumentException(
+							"branch " + action.ref.path + " has no license");
 		// archive selection, currently just hardcoded
 		this.archiveUUID = UUID.fromString(archiveUUID); // implicit check
 	}

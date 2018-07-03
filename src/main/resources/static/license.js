@@ -15,18 +15,16 @@ function initSingleLicense(info) {
 		function(_, id) {
 			form[id] = $("#" + id);
 		});
-
-	var detected = info.detected.length > 0 ? info.detected[0] : null;
-	initLicenseList("all", form, info.supported, detected, info.user);
+	initLicenseList("all", form, info.supported, info.primary, info.user);
 	$("#declare_group").removeClass("hidden");
 
-	if (detected != null) {
-		if (detected.id != "other") {
+	if (info.primary != null) {
+		if (info.primary.id != "other") {
 			// show label naming the detected license
 			$("#single_existing").removeClass("hidden");
-			$("#single_detected").text(detected.name);
-			if (detected.url != null)
-				$("#single_detected").attr("href", detected.url);
+			$("#single_detected").text(info.primary.name);
+			if (info.primary.url != null)
+				$("#single_detected").attr("href", info.primary.url);
 		} else
 			$("#other_existing").removeClass("hidden");
 	} else
@@ -65,7 +63,7 @@ function initMultiLicense(licenses, missing) {
 }
 
 function initLicense(info) {
-	if (info.multiple || info.detected.length > 1)
+	if (info.multiple || !info.primary)
 		// multiple licenses detected, or multiple effective licenses
 		// selected. user needs to clean up that mess on the per-branch
 		// licenses page (or, even better, in the git repo).

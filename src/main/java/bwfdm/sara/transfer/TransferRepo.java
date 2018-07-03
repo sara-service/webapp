@@ -144,7 +144,7 @@ public class TransferRepo {
 			while (walk.next()) {
 				final FileType type = walk.isSubtree() ? FileType.DIRECTORY
 						: FileType.FILE;
-				final String hash = walk.getObjectId(0).getName();
+				final ObjectId hash = walk.getObjectId(0);
 				files.add(new RepoFile(walk.getNameString(), hash, type));
 			}
 		}
