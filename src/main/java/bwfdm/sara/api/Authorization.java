@@ -37,8 +37,8 @@ public class Authorization {
 			final RedirectAttributes redir, final HttpSession session) {
 		// check whether the user is pushy and tries to archive two projects at
 		// once. if so, make sure he knows it won't work.
-		if (Project.hasInstance(session) && isPushy(
-				Project.getCompletedInstance(session), gitRepo, projectPath)) {
+		if (Project.hasInstance(session)
+				&& isPushy(session, gitRepo, projectPath)) {
 			// user is in the middle of the publication workflow for some
 			// project and is about to start a new one. bad user; show warning.
 			redir.addAttribute("repo", gitRepo);
@@ -51,12 +51,26 @@ public class Authorization {
 		return forceAuth(gitRepo, projectPath, redir, session);
 	}
 
-	private boolean isPushy(final Project existingProject, final String gitRepo,
+	private boolean isPushy(final HttpSession session, final String gitRepo,
 			final String projectPath) {
-		// existing project is done; don't show a message that it isn't!
-		// FIXME should also check that publication done or disabled!
-		if (existingProject.isDone())
-			return false;
+		final Project existingProject=Project.getCompletedInstance(session);
+		// if existing project is done; don't show a message that it isn't!
+		if (existingProject.isDone()) {
+			// if archive-only, ignore publication part
+			if (existingProject.getPushTask().getArchiveJob().isArchiveOnly)
+				return false;
+			// if the user wanted to publish but didn't even start yet, that's
+			// definitey pushy behavior.
+			// note that this is quite hard to trigger. the user has to close
+			// push.html while it's working, wait for archiving to finish, and
+			// then return to index.html. anything else either doesn't have the
+			// archiving finished yet, or hits the automatic redirect after
+			// archiving which creates a publish session.
+			if (!PublicationSession.hasInstance(session))
+				return true;
+			// if publication not yet finished, show the "pushy" warning
+			return !PublicationSession.getInstance(session).isDone();
+		}
 
 		// no project selected yet, so continuing doesn't make sense because
 		// there's nothing to continue with. easy to trigger if the user selects

@@ -6,7 +6,11 @@ $(function() {
 				.search(document.location.search));
 		});
 		$("#keep_project").click(function() {
-			location.replace("/branches.html");
+			if (info.item)
+				location.replace(new URI("/api/auth/publish").search(
+					{ item: info.item }));
+			else
+				location.replace("/branches.html");
 		});
 		$("#change_project,#keep_project").removeClass("disabled");
 		$("#warning").removeClass("hidden");

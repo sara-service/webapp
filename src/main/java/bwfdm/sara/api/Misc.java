@@ -1,6 +1,7 @@
 package bwfdm.sara.api;
 
 import java.util.List;
+import java.util.UUID;
 
 import javax.servlet.http.HttpSession;
 
@@ -40,7 +41,7 @@ public class Misc {
 
 	@GetMapping("session-info")
 	public SessionInfo getSessionInfo(final HttpSession session) {
-		return new SessionInfo(Project.getInstance(session));
+		return new SessionInfo(Project.getCompletedInstance(session));
 	}
 
 	private class SessionInfo {
@@ -48,10 +49,16 @@ public class Misc {
 		private final String repo;
 		@JsonProperty("project")
 		private final String projectPath;
+		@JsonProperty("item")
+		private UUID item;
 
 		public SessionInfo(final Project project) {
 			repo = project.getRepoID();
 			projectPath = project.getProjectPath();
+			if (project.isDone())
+				item = project.getPushTask().getItemUUID();
+			else
+				item = null;
 		}
 	}
 }

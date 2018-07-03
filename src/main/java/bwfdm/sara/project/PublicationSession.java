@@ -74,15 +74,15 @@ public class PublicationSession {
 	}
 
 	public boolean isDone() {
-		// if no item at all then session "is done"
-		if (!hasItem()) {
-			return true;
-		}
+		// if uninitialized, there is no well-defined answer to whether it's
+		// done or not. just throw an exception instead...
+		checkHaveItem();
+
 		// update the item
 		final Item item = config.getPublicationDatabase()
 				.updateFromDB(new Item(itemUUID));
 		// do not lose an open session while item is in CREATED state
-		if (item.item_state == ItemState.CREATED.name()) {
+		if (item.item_state.equals(ItemState.CREATED.name())) {
 			return false;
 		} else {
 			return true;
