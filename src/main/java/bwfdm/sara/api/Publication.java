@@ -111,21 +111,21 @@ public class Publication {
 				.get(PublicationField.PUBREPO_COLLECTION);
 		final String userLogin = meta.get(PublicationField.PUBREPO_LOGIN_EMAIL);
 
-		metadataMap.put("sara-abstract",
+		metadataMap.put(SaraMetaDataField.ABSTRACT.getDisplayName(),
 				meta.get(PublicationField.DESCRIPTION));
-		metadataMap.put(SaraMetaDataField.SUBMITTER.toString(),
+		metadataMap.put(SaraMetaDataField.SUBMITTER.getDisplayName(),
 				meta.get(PublicationField.SUBMITTER));
-		metadataMap.put(SaraMetaDataField.AUTHOR.toString(),
+		metadataMap.put(SaraMetaDataField.AUTHOR.getDisplayName(),
 				meta.get(PublicationField.SUBMITTER));
-		metadataMap.put(SaraMetaDataField.TITLE.toString(),
+		metadataMap.put(SaraMetaDataField.TITLE.getDisplayName(),
 				meta.get(PublicationField.TITLE));
-		metadataMap.put(SaraMetaDataField.VERSION.toString(),
+		metadataMap.put(SaraMetaDataField.VERSION.getDisplayName(),
 				meta.get(PublicationField.VERSION));
 		// FIXME dc.type needs to be configurable by IR maintainers
-		metadataMap.put(SaraMetaDataField.TYPE.toString(), "Software");
-		metadataMap.put(SaraMetaDataField.PUBLISHER.toString(),
+		metadataMap.put(SaraMetaDataField.TYPE.getDisplayName(), "Software");
+		metadataMap.put(SaraMetaDataField.PUBLISHER.getDisplayName(),
 				"SARA Service version 'Prototype'");
-		metadataMap.put(SaraMetaDataField.ARCHIVE_URL.toString(),
+		metadataMap.put(SaraMetaDataField.ARCHIVE_URL.getDisplayName(),
 				meta.get(PublicationField.ARCHIVE_URL));
 
 		Item i = project.getItem();
