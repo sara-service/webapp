@@ -98,8 +98,8 @@ INSERT INTO repository_params(id, param, value) VALUES
        (rRef4, 'sword_api_endpoint', oparu_test || '/swordv2');
 
 -- Stefan's OPARU Stand-In in bwCloud 
-INSERT INTO repository(display_name, adapter, url, contact_email, enabled, logo_url) VALUES
-	('OPARU Devel', 'DSpace_v6', oparu_demo || '/xmlui', 'help@oparu.uni-ulm.de', TRUE,
+INSERT INTO repository(display_name, adapter, url, contact_email, help, enabled, logo_url) VALUES
+	('OPARU Devel', 'DSpace_v6', oparu_demo || '/xmlui', 'help@oparu.uni-ulm.de', demo_dspace_help, TRUE,
 		'data:image/svg+xml;base64,' || encode(lo_get(oparu_logo), 'base64'))
 	RETURNING uuid INTO rRef;
 INSERT INTO repository_params(id, param, value) VALUES
@@ -108,7 +108,10 @@ INSERT INTO repository_params(id, param, value) VALUES
 	(rRef, 'rest_api_endpoint', oparu_demo || '/rest'),
 	(rRef, 'sword_user', 'project-sara@uni-konstanz.de'),
 	(rRef, 'sword_pwd', 'SaraTest'),
-	(rRef, 'sword_api_endpoint', oparu_demo || '/swordv2');
+	(rRef, 'sword_api_endpoint', oparu_demo || '/swordv2'),
+        (rRef, 'deposit_type', 'workspace'),
+        (rRef, 'name_regex', '(\S{2,})\s{1,}(.*)'),
+        (rRef, 'name_replace', '$2, $1');
 --	(rRef, 'force_onbehalf', '1'),
 --	(rRef, 'workflow_type', 'login_required');
 
