@@ -361,9 +361,10 @@ public class DSpace_v6 implements PublicationRepository {
 				for (Map.Entry<String, String> metadataEntry : metadataMap
 						.entrySet()) {
 					if ((metadataEntry.getKey()
-							.equals(SaraMetaDataField.AUTHOR.toString()))
-							|| (metadataEntry.getKey().equals(
-									SaraMetaDataField.SUBMITTER.toString()))) {
+							.equals(SaraMetaDataField.AUTHOR.getDisplayName()))
+							|| (metadataEntry.getKey()
+									.equals(SaraMetaDataField.SUBMITTER
+											.getDisplayName()))) {
 						if (name_regex != null && name_replace != null) {
 							metadataEntry.setValue(metadataEntry.getValue()
 									.replaceAll(name_regex, name_replace));
