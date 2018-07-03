@@ -122,7 +122,7 @@ public class Publication {
 		metadataMap.put(SaraMetaDataField.VERSION.getDisplayName(),
 				meta.get(PublicationField.VERSION));
 		// FIXME dc.type needs to be configurable by IR maintainers
-		metadataMap.put(SaraMetaDataField.TYPE.getDisplayName(), "Software");
+		metadataMap.put(SaraMetaDataField.TYPE.getDisplayName(), "GitArchive");
 		metadataMap.put(SaraMetaDataField.PUBLISHER.getDisplayName(),
 				"SARA Service version 'Prototype'");
 		metadataMap.put(SaraMetaDataField.ARCHIVE_URL.getDisplayName(),
