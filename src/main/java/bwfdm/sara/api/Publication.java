@@ -111,26 +111,24 @@ public class Publication {
 				.get(PublicationField.PUBREPO_COLLECTION);
 		final String userLogin = meta.get(PublicationField.PUBREPO_LOGIN_EMAIL);
 
-		metadataMap.put("abstract", meta.get(PublicationField.DESCRIPTION));
-		metadataMap.put("contributor", meta.get(PublicationField.SUBMITTER));
-		// this is the preset for "author"
-		metadataMap.put("creator", meta.get(PublicationField.SUBMITTER));
-		metadataMap.put("title", meta.get(PublicationField.TITLE));
-		metadataMap.put("identifier", meta.get(PublicationField.VERSION));
+		metadataMap.put("sara-abstract", meta.get(PublicationField.DESCRIPTION));
+		metadataMap.put("sara-submitter", meta.get(PublicationField.SUBMITTER));
+		metadataMap.put("sara-author", meta.get(PublicationField.SUBMITTER)+"(Author)");
+		metadataMap.put("sara-title", meta.get(PublicationField.TITLE));
+		metadataMap.put("sara-version", meta.get(PublicationField.VERSION));
 		// FIXME dc.type needs to be configurable by IR maintainers
-		metadataMap.put("type", "Software");
-		metadataMap.put("publisher", "SARA Service");
-		metadataMap.put("source", meta.get(PublicationField.ARCHIVE_URL));
-
+		metadataMap.put("sara-type", "Software");
+		metadataMap.put("sara-publisher", "SARA Service version 'Prototype'");
+		metadataMap.put("sara-archiveUrl", meta.get(PublicationField.ARCHIVE_URL));
+		
 		Item i = project.getItem();
 		i.date_last_modified = new Date();
 		i.item_state = ItemState.SUBMITTED.name();
 		i.repository_uuid = repository_uuid;
 		i.collection_id = collectionURL;
 
-		metadataMap.put("dateSubmitted", ISO8601.format(i.date_last_modified));
-		metadataMap.put("issued", ISO8601.format(i.date_created));
-
+		metadataMap.put("sara-dateArchived", ISO8601.format(i.date_created));
+		
 		final String depositUrl = repo.publishMetadata(userLogin, collectionURL,
 				metadataMap);
 
