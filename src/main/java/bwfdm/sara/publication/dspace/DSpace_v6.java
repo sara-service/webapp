@@ -68,6 +68,7 @@ public class DSpace_v6 implements PublicationRepository {
 	private final String deposit_type;
 	private final String name_regex;
 	private final String name_replace;
+	private final String publication_type;
 
 	private Client rest_client;
 
@@ -81,6 +82,7 @@ public class DSpace_v6 implements PublicationRepository {
 			@JsonProperty(value = "deposit_type", required = false) final String dt,
 			@JsonProperty(value = "name_regex", required = false) final String nrx,
 			@JsonProperty(value = "name_replace", required = false) final String nrp,
+			@JsonProperty(value = "publication_type", required = false) final String pt,
 			@JsonProperty("dao") final Repository dao) {
 		this.dao = dao;
 
@@ -93,6 +95,7 @@ public class DSpace_v6 implements PublicationRepository {
 		deposit_type = dt;
 		name_regex = nrx;
 		name_replace = nrp;
+		publication_type = pt;
 
 		System.out.println(dt);
 		System.out.println(nrx);
@@ -118,6 +121,7 @@ public class DSpace_v6 implements PublicationRepository {
 		deposit_type = "workspace";
 		name_regex = "(\\S{2,})\\s{1,}(.*)";
 		name_replace = "$2, $1";
+		publication_type = "Software";
 		sword_servicedocumentpath = serviceDocumentURL;
 		sword_user = saraUser;
 		sword_pwd = saraPassword;
@@ -360,6 +364,12 @@ public class DSpace_v6 implements PublicationRepository {
 				EntryPart ep = new EntryPart();
 				for (Map.Entry<String, String> metadataEntry : metadataMap
 						.entrySet()) {
+					if (metadataEntry.getKey()
+							.equals(SaraMetaDataField.TYPE.getDisplayName())) {
+						if (publication_type != null) {
+							metadataEntry.setValue(publication_type);
+						}
+					}
 					if ((metadataEntry.getKey()
 							.equals(SaraMetaDataField.AUTHOR.getDisplayName()))
 							|| (metadataEntry.getKey()

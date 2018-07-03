@@ -111,7 +111,8 @@ INSERT INTO repository_params(id, param, value) VALUES
 	(rRef, 'sword_api_endpoint', oparu_demo || '/swordv2'),
         (rRef, 'deposit_type', 'workspace'),
         (rRef, 'name_regex', '(\S{2,})\s{1,}(.*)'),
-        (rRef, 'name_replace', '$2, $1');
+        (rRef, 'name_replace', '$2, $1'),
+        (rRef, 'publication_type', 'Software');
 --	(rRef, 'force_onbehalf', '1'),
 --	(rRef, 'workflow_type', 'login_required');
 
