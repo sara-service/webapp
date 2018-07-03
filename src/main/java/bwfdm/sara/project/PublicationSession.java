@@ -10,10 +10,12 @@ import bwfdm.sara.Config;
 import bwfdm.sara.api.Authorization;
 import bwfdm.sara.auth.AuthProvider;
 import bwfdm.sara.publication.Item;
+import bwfdm.sara.publication.ItemState;
 import bwfdm.sara.publication.db.PublicationDatabase;
 
 public class PublicationSession {
-	private static final String PROJECT_ATTR = PublicationSession.class.getCanonicalName();
+	private static final String PROJECT_ATTR = PublicationSession.class
+			.getCanonicalName();
 
 	private final Config config;
 	private final UUID sourceUUID;
@@ -71,13 +73,31 @@ public class PublicationSession {
 		return item;
 	}
 
+	public boolean isDone() {
+		// if no item at all then session "is done"
+		if (!hasItem()) {
+			return true;
+		}
+		// update the item
+		final Item item = config.getPublicationDatabase()
+				.updateFromDB(new Item(itemUUID));
+		// do not lose an open session while item is in CREATED state
+		if (item.item_state == ItemState.CREATED.name()) {
+			return false;
+		} else {
+			return true;
+		}
+
+	}
+
 	public PublicationDatabase getPublicationDatabase() {
 		checkHaveItem();
 		return config.getPublicationDatabase();
 	}
 
 	public static PublicationSession getInstance(final HttpSession session) {
-		final PublicationSession repo = (PublicationSession) session.getAttribute(PROJECT_ATTR);
+		final PublicationSession repo = (PublicationSession) session
+				.getAttribute(PROJECT_ATTR);
 		if (repo == null)
 			throw new NoSessionException();
 		return repo;
