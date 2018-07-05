@@ -1,12 +1,20 @@
 -- adding some default entries
+--\echo :'basedir'
+
+CREATE TEMP TABLE args (
+    basedir text
+);
+INSERT INTO args (basedir) VALUES (:'basedir');
 
 DO $$
 
-DECLARE kops_logo oid  := lo_import('/saradb/config/kops.svg');
-DECLARE oparu_logo oid := lo_import('/saradb/config/oparu.svg');
-DECLARE testarchiv_privkey oid := lo_import('/saradb/config/testarchiv.key');
-DECLARE testarchiv_pubkey oid  := lo_import('/saradb/config/testarchiv.key.pub');
-DECLARE testarchiv_known oid   := lo_import('/saradb/config/testarchiv.known');
+DECLARE base_dir text := (SELECT basedir from args LIMIT 1);
+
+DECLARE kops_logo oid  := lo_import( base_dir || '/config/kops.svg');
+DECLARE oparu_logo oid := lo_import( base_dir || '/config/oparu.svg');
+DECLARE testarchiv_privkey oid := lo_import( base_dir || '/config/testarchiv.key');
+DECLARE testarchiv_pubkey oid  := lo_import( base_dir || '/config/testarchiv.key.pub');
+DECLARE testarchiv_known oid   := lo_import( base_dir ||'/config/testarchiv.known');
 
 DECLARE arbeitsgitlab text  := 'demogitlab.sara-service.org';
 DECLARE stefansgitlab text  := 'bwcloud-vm92.rz.uni-ulm.de';
