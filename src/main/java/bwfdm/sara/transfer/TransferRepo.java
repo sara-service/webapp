@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+import org.eclipse.jgit.errors.MissingObjectException;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
@@ -102,8 +103,13 @@ public class TransferRepo {
 	}
 
 	public byte[] readBlob(final String hash) throws IOException {
+		return readBlob(ObjectId.fromString(hash));
+	}
+
+	private byte[] readBlob(ObjectId oid)
+			throws MissingObjectException, IOException {
 		checkInitialized();
-		return repo.open(ObjectId.fromString(hash)).getBytes();
+		return repo.open(oid).getBytes();
 	}
 
 	public String readString(final Ref ref, final String path)
@@ -111,7 +117,7 @@ public class TransferRepo {
 		return detectEncoding(readBlob(ref, path));
 	}
 
-	public String readString(final String hash) throws IOException {
+	public String readString(final ObjectId hash) throws IOException {
 		return detectEncoding(readBlob(hash));
 	}
 
