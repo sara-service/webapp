@@ -47,7 +47,7 @@ function initLicenses(info) {
 }
 
 function initMeta(info) {
-	$.each(["submitter", "title", "description", "version"],
+	$.each(["submitter", "title", "description", "version", "master"],
 		function(_, name) {
 			$("#" + name).text(info[name]);
 		});
