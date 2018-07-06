@@ -38,9 +38,10 @@
 				<div class="col-sm-3 nopad">
 					<button type="button" class="btn btn-sm btn-warning" id="reset_submitter">use name from git repo</button>
 				</div>
-				<p class="col-sm-10 col-sm-offset-2">
-					This is almost always you, whether you wrote most of the software or not.
+				<p class="col-sm-7 col-sm-offset-2">
+					This is <b>almost always you</b>, whether you wrote most of the software or not.
 					Think of it as being the editor of a book.
+					The only exception is when you're submitting something on behalf of someone else.
 				</p>
 			</div>
 			<div class="form-group has-feedback">
@@ -53,7 +54,7 @@
 				<div class="col-sm-3 nopad">
 					<button type="button" class="btn btn-sm btn-warning" id="reset_title">use project name from git repo</button>
 				</div>
-				<div class="col-sm-10 col-sm-offset-2"><label class="form-check-label control-label">
+				<div class="col-sm-7 col-sm-offset-2"><label class="form-check-label control-label">
 					<input class="form-check-input" type="checkbox" id="update_title">
 					update project name in git repo
 				</label></div>
@@ -89,6 +90,10 @@
 					<button type="button" class="btn btn-sm btn-warning" id="reset_master" disabled>autodetect from version history</button>
 					<div id="master_loading" class="loading-inline hidden"><span class="sr-only">detecting metadata for this branch...</span></div>
 				</div>
+				<p class="col-sm-10 col-sm-offset-2">
+					This is the branch shown when someone first
+					looks at your software artefact in the git archive.
+				</p>
 			</div>
 
 			<div class="form-group has-feedback">
