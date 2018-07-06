@@ -142,31 +142,34 @@ CREATE TABLE fe_temp_pubmeta(
 CREATE TABLE fe_temp_actions(
 	repo text NOT NULL,
 	project text NOT NULL,
+	uid text NOT NULL,
 	ref text NOT NULL,
 	action text NOT NULL,
 	start text NOT NULL,
 	CHECK (action IN ('PUBLISH_FULL', 'PUBLISH_ABBREV', 'PUBLISH_LATEST',
 			'ARCHIVE_PUBLIC', 'ARCHIVE_HIDDEN')),
-	PRIMARY KEY (repo, project, ref)
+	PRIMARY KEY (repo, project, uid, ref)
 );
 
 -- selected licenses per branch
 CREATE TABLE fe_temp_licenses(
 	repo text NOT NULL,
 	project text NOT NULL,
+	uid text NOT NULL,
 	ref text NOT NULL,
 	license text NOT NULL,
-	PRIMARY KEY (repo, project, ref)
+	PRIMARY KEY (repo, project, uid, ref)
 );
 
 -- archiving metadata fields (ie. basic metadata only)
 CREATE TABLE fe_temp_metadata(
 	repo text NOT NULL,
 	project text NOT NULL,
+	uid text NOT NULL,
 	field text NOT NULL,
 	value text NOT NULL,
 	CHECK (field in ('title', 'description', 'version', 'master', 'submitter')),
-	PRIMARY KEY (repo, project, field)
+	PRIMARY KEY (repo, project, uid, field)
 );
 
 -- list of licenses shown on license selection pages

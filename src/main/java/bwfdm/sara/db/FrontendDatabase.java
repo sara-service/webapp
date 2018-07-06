@@ -35,14 +35,11 @@ public class FrontendDatabase {
 
 	private final String gitRepo;
 	private final String project;
+	private final String user;
 	private final JacksonTemplate db;
 	private final TransactionTemplate transaction;
 	private Set<MetadataField> update;
 
-	/*
-	 * TODO if settings are to be per-user instead of per-project, must add a
-	 * "user" field here and to the database schema.
-	 */
 	/**
 	 * Creates a DAO for reading / writing values for a particular project.
 	 *
@@ -52,11 +49,14 @@ public class FrontendDatabase {
 	 *            ID of the git repo, to qualify the project name
 	 * @param project
 	 *            the project name, used as database key together with gitRepo
+	 * @param user
+	 *            the user's unique user ID within the git repo
 	 */
 	public FrontendDatabase(final DataSource db, final String gitRepo,
-			final String project) {
+			final String project, final String user) {
 		this.gitRepo = gitRepo;
 		this.project = project;
+		this.user = user;
 		this.db = new JacksonTemplate(db);
 		transaction = new TransactionTemplate(
 				new DataSourceTransactionManager(db));
@@ -77,8 +77,9 @@ public class FrontendDatabase {
 	public Map<MetadataField, String> getMetadata() {
 		return db.queryRowToMap(
 				"select field, value from " + METADATA_TABLE
-						+ " where repo = ? and project = ?",
-				"field", MetadataField.class, String.class, gitRepo, project);
+						+ " where repo = ? and project = ? and uid = ?",
+				"field", MetadataField.class, String.class, gitRepo, project,
+				user);
 	}
 
 	/**
@@ -88,25 +89,24 @@ public class FrontendDatabase {
 	 *            a map of field name to field value
 	 */
 	public void setMetadata(final Map<MetadataField, String> values) {
-			transaction.execute(new TransactionCallbackWithoutResult() {
-				@Override
-				protected void doInTransactionWithoutResult(
-						final TransactionStatus status) {
-					updateMetadata(values);
-				}
+		transaction.execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(
+					final TransactionStatus status) {
+				updateMetadata(values);
+			}
 		});
 	}
 
 	private void updateMetadata(final Map<MetadataField, String> values) {
 		for (MetadataField field : values.keySet()) {
 			final String fieldName = field.getDisplayName();
-			db.update(
-					"delete from " + METADATA_TABLE
-							+ " where repo = ? and project = ? and field = ?",
-					gitRepo, project, fieldName);
+			db.update("delete from " + METADATA_TABLE
+					+ " where repo = ? and project = ? and uid = ? and field = ?",
+					gitRepo, project, user, fieldName);
 			db.update("insert into " + METADATA_TABLE
-					+ "(repo, project, field, value) values(?, ?, ?, ?)",
-					gitRepo, project, fieldName, values.get(field));
+					+ "(repo, project, uid, field, value) values(?, ?, ?, ?, ?)",
+					gitRepo, project, user, fieldName, values.get(field));
 		}
 	}
 
@@ -137,8 +137,8 @@ public class FrontendDatabase {
 	public Map<Ref, String> getLicenses() {
 		return db.queryRowToMap(
 				"select ref, license from " + LICENSES_TABLE
-						+ " where repo = ? and project = ?",
-				"ref", Ref.class, String.class, gitRepo, project);
+						+ " where repo = ? and project = ? and uid = ?",
+				"ref", Ref.class, String.class, gitRepo, project, user);
 	}
 
 	/**
@@ -170,25 +170,25 @@ public class FrontendDatabase {
 	 *            are left unchanged.
 	 */
 	public void setLicenses(final Map<Ref, String> values) {
-		transaction.execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(
-					final TransactionStatus status) {
+			transaction.execute(new TransactionCallbackWithoutResult() {
+				@Override
+				protected void doInTransactionWithoutResult(
+						final TransactionStatus status) {
 				for (final Entry<Ref, String> e : values.entrySet())
 					updateLicense(e.getKey(), e.getValue());
-			}
+				}
 		});
 	}
 
 	private void updateLicense(final Ref ref, final String value) {
-		db.update(
+			db.update(
 				"delete from " + LICENSES_TABLE
-						+ " where repo = ? and project = ? and ref = ?",
-				gitRepo, project, ref.path);
+						+ " where repo = ? and project = ? and uid = ? and ref = ?",
+				gitRepo, project, user, ref.path);
 		if (value != null)
 			db.update("insert into " + LICENSES_TABLE
-					+ "(repo, project, ref, license) values(?, ?, ?, ?)",
-					gitRepo, project, ref.path, value);
+					+ "(repo, project, uid, ref, license) values(?, ?, ?, ?, ?)",
+					gitRepo, project, user, ref.path, value);
 	}
 
 	/**
@@ -203,8 +203,8 @@ public class FrontendDatabase {
 	public List<RefAction> getRefActions() {
 		return db.queryRowToList(
 				"select ref, action, start from " + ACTION_TABLE
-						+ " where repo = ? and project = ?",
-				RefAction.class, gitRepo, project);
+						+ " where repo = ? and project = ? and uid = ?",
+				RefAction.class, gitRepo, project, user);
 	}
 
 	/**
@@ -218,8 +218,8 @@ public class FrontendDatabase {
 	public List<Ref> getSelectedRefs() {
 		return db.queryRowToList(
 				"select ref from " + ACTION_TABLE
-						+ " where repo = ? and project = ?",
-				Ref.class, gitRepo, project);
+						+ " where repo = ? and project = ? and uid = ?",
+				Ref.class, gitRepo, project, user);
 	}
 
 	/**
@@ -240,12 +240,14 @@ public class FrontendDatabase {
 	}
 
 	private void updateRefActions(final Collection<RefAction> actions) {
-		db.update("delete from " + ACTION_TABLE
-				+ " where repo = ? and project = ?", gitRepo, project);
+		db.update(
+				"delete from " + ACTION_TABLE
+						+ " where repo = ? and project = ? and uid = ?",
+				gitRepo, project, user);
 		for (RefAction action : actions)
 			db.update("insert into " + ACTION_TABLE
-				+ "(repo, project, ref, action, start) values(?, ?, ?, ?, ?)",
-					gitRepo, project, action.ref.path,
+					+ "(repo, project, uid, ref, action, start) values(?, ?, ?, ?, ?, ?)",
+					gitRepo, project, user, action.ref.path,
 					action.publicationMethod.name(), action.firstCommit);
+		}
 	}
-}

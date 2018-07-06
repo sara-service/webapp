@@ -74,7 +74,8 @@ public class Project {
 
 	public void initializeProject() {
 		project = repo.getGitProject(projectPath);
-		db = new FrontendDatabase(config.getDatabase(), gitRepo, projectPath);
+		db = new FrontendDatabase(config.getDatabase(), gitRepo, projectPath,
+				repo.getUserInfo().userID);
 		// if the project changes, the transferRepo doesn't just become
 		// outdated, it becomes completely invalid, and we'll have to recreate
 		// it completely.
