@@ -162,11 +162,24 @@ public class ArchiveJob {
 	}
 
 	@JsonProperty("licenses")
-	public Map<Ref, String> getLicenses() {
-		Map<Ref, String> res = new HashMap<Ref, String>();
+	public List<LicenseInfo> getLicenses() {
+		List<LicenseInfo> res = new ArrayList<>();
 		for (Ref ref : selectedRefs)
-			res.put(ref, LicensesInfo.mapKeep(licenses.get(ref)));
+			res.add(new LicenseInfo(ref,
+					LicensesInfo.mapKeep(licenses.get(ref))));
 		return res;
+	}
+
+	public static class LicenseInfo {
+		@JsonProperty("ref")
+		public final Ref ref;
+		@JsonProperty("license")
+		public final String license;
+
+		public LicenseInfo(Ref ref, String license) {
+			this.ref = ref;
+			this.license = license;
+		}
 	}
 
 	private String getHead(Ref a) {

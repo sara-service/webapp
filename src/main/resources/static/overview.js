@@ -33,14 +33,15 @@ function initBranches(info) {
 }
 
 function initLicenses(info) {
-	$.each(info, function(ref, license) {
+	$.each(info, function(_, branch) {
 		var line = template("template_licenses");
-		line.type.text(ref.type);
-		line.name.text(ref.name);
-		if (license == "keep")
-			line.license.text("keep existing LICENSE file");
-		else
-			line.license.text(license);
+		line.type.text(branch.ref.type);
+		line.name.text(branch.ref.name);
+		if (branch.license != "keep") {
+			line.license.text(branch.license);
+			line.keep.remove();
+		} else
+			line.license.remove();
 		$("#licenses").append(line.root);
 	});
 }
