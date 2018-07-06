@@ -63,7 +63,7 @@ function initMultiLicense(licenses, missing) {
 }
 
 function initLicense(info) {
-	if (info.multiple || !info.primary)
+	if (info.multiple || info.detected.length > 1)
 		// multiple licenses detected, or multiple effective licenses
 		// selected. user needs to clean up that mess on the per-branch
 		// licenses page (or, even better, in the git repo).
