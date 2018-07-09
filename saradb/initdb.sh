@@ -1,39 +1,24 @@
-#!/bin/bash
+#!/bin/bash -ex
 
-env|grep SINGULARITY_CONTAINER && 
-  RD="/udocker" ||
-  RD="$HOME/.udocker" 
+BASEDIR=$(readlink -f $(dirname $0))
+cd $BASEDIR
 
-mkdir -p $(readlink -f $RD/containers)
+pg_dropcluster --stop 10 main
+service postgresql restart
+pg_createcluster --start 10 main
 
-if [ -f "udocker.py" ]; then
-  echo "UDocker v1.1.1 is downloaded already"
-else
-  wget https://raw.githubusercontent.com/indigo-dc/udocker/v1.1.1/udocker.py
-  chmod u+x udocker.py
-fi
+createuser -l -D -R -S test
+createdb -E UTF8 -O test test
+psql -d test -c "ALTER USER test WITH PASSWORD 'test'"
+createuser -l -D -R -S admin
+psql -d test -c "ALTER USER admin WITH PASSWORD 'admin'"
 
-echo -n "check whether running instances exist before we restart the database..."
-if [ "$(./udocker.py ps | grep c1t4r/sara-server-vre)" != "" ]; then
-  echo "YES...killing them..."
-  ./udocker.py --repo=$RD ps | awk '/c1t4r.sara-server-vre/{print $1}' | xargs ./udocker.py rm
-else
-  echo "NOPE"
-fi
+psql -d test -f ./adminconfig.sql
+psql -d test -f ./schema.sql
+psql -d test -c "GRANT ALL ON ALL TABLES IN SCHEMA public TO admin"
+psql -d test -f ./permissions.sql
+psql -d test -v basedir=$BASEDIR -f ./config.sql
+psql -d test -f ./licenses.sql
 
-echo -n "check whether any postgres instances are running..."
-if [ "$(ps aux | grep post[g]res)" != "" ]; then
-  echo "YES...killing them..."
-  echo "ps aux | grep pos[t]gres | awk '{print \$2}' | xargs kill"
-  ps aux | grep pos[t]gres | awk '{print $2}' | xargs kill
-else
-  echo "NOPE"
-fi
-
-echo "starting database..."
-exec ./udocker.py --repo=$RD run \
-  -v $PWD:/saradb \
-  -v $PWD/postgresql.sh:/init.sh \
-  -i -t --rm --user postgres \
-  c1t4r/sara-server-vre \
-  /init.sh
+psql -d test
+service postgresql stop
