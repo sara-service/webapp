@@ -18,7 +18,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import bwfdm.sara.db.JacksonTemplate;
 import bwfdm.sara.publication.Item;
-import bwfdm.sara.publication.PublicationMetadatum;
 import bwfdm.sara.publication.PublicationRepository;
 import bwfdm.sara.publication.PublicationRepositoryFactory;
 import bwfdm.sara.publication.Repository;
@@ -252,37 +251,6 @@ public class PublicationDatabase {
 			repos.add(newPublicationRepository(r));
 		}
 		return repos;
-	}
-    
-	public Map<PublicationField, String> getMetadata(final UUID item) {
-		List<PublicationMetadatum> data = getList(PublicationMetadatum.class,
-				"where item_uuid = ?", item);
-		Map<PublicationField, String> map = new HashMap<PublicationField, String>(
-				data.size());
-		for (PublicationMetadatum datum : data)
-			map.put(PublicationField.forDisplayName(datum.field), datum.value);
-
-		// initialize publication meta data
-		Item i = new Item(item);
-		i = updateFromDB(i);
-
-		map.put(PublicationField.TITLE, i.meta_title);
-		map.put(PublicationField.VERSION, i.meta_version);
-		map.put(PublicationField.DESCRIPTION, i.meta_description);
-		map.put(PublicationField.SUBMITTER, i.meta_submitter);
-		map.put(PublicationField.ARCHIVE_URL, i.archive_url);
-
-		return map;
-	}
-
-	public void setMetadata(final UUID item,
-			final Map<PublicationField, String> values) {
-		for (PublicationField field : values.keySet()) {
-			final PublicationMetadatum row = new PublicationMetadatum(
-					item, field.getDisplayName());
-			row.value = values.get(field);
-			upsertInDB(row);
-		}
 	}
 
 	public List<Item> getPublishedItems(final UUID sourceUUID,

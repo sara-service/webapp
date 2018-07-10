@@ -2,6 +2,7 @@ package bwfdm.sara.api;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -71,9 +72,8 @@ public class Publication {
 	@GetMapping("meta")
 	public Map<PublicationField, String> getMetadata(
 			final HttpSession session) {
-		PublicationSession project = PublicationSession.getInstance(session);
-		final Map<PublicationField, String> data = project
-				.getPublicationDatabase().getMetadata(project.getItemUUID());
+		final Map<PublicationField, String> data = PublicationSession
+				.getInstance(session).getMetadata();
 		// make sure all keys exist (JavaScript needs this)
 		for (PublicationField field : PublicationField.values())
 			if (!data.containsKey(field))
@@ -85,10 +85,7 @@ public class Publication {
 	public void setMetadata(
 			@RequestBody final Map<PublicationField, String> values,
 			final HttpSession session) {
-		final PublicationSession project = PublicationSession
-				.getInstance(session);
-		project.getPublicationDatabase().setMetadata(project.getItemUUID(),
-				values);
+		PublicationSession.getInstance(session).setMetadata(values);
 	}
 
 	@GetMapping("trigger")
@@ -98,8 +95,7 @@ public class Publication {
 
 		// TODO Metadata Mapping
 		// TODO Error Handling
-		final Map<PublicationField, String> meta = project
-				.getPublicationDatabase().getMetadata(project.getItemUUID());
+		final Map<PublicationField, String> meta = project.getMetadata();
 
 		final UUID repository_uuid = UUID
 				.fromString(meta.get(PublicationField.PUBLICATION_REPOSITORY));
@@ -143,9 +139,9 @@ public class Publication {
 
 		project.getPublicationDatabase().updateInDB(i);
 
-		Map<PublicationField, String> m = new HashMap<PublicationField, String>();
+		Map<PublicationField, String> m = new EnumMap<>(PublicationField.class);
 		m.put(PublicationField.REPOSITORY_URL, i.repository_url);
-		config.getPublicationDatabase().setMetadata(project.getItemUUID(), m);
+		project.setMetadata(m);
 
 		return new RedirectView("/final.html");
 	}

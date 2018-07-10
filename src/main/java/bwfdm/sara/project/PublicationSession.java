@@ -1,5 +1,7 @@
 package bwfdm.sara.project;
 
+import java.util.EnumMap;
+import java.util.Map;
 import java.util.UUID;
 
 import javax.servlet.http.HttpSession;
@@ -12,6 +14,7 @@ import bwfdm.sara.auth.AuthProvider;
 import bwfdm.sara.publication.Item;
 import bwfdm.sara.publication.ItemState;
 import bwfdm.sara.publication.db.PublicationDatabase;
+import bwfdm.sara.publication.db.PublicationField;
 
 public class PublicationSession {
 	private static final String PROJECT_ATTR = PublicationSession.class
@@ -21,6 +24,8 @@ public class PublicationSession {
 	private final UUID sourceUUID;
 	private final UUID itemUUID;
 	private final AuthProvider auth;
+	private final EnumMap<PublicationField, String> meta = new EnumMap<>(
+			PublicationField.class);
 	private String userID;
 	private Item item;
 
@@ -54,6 +59,13 @@ public class PublicationSession {
 		if (!item.source_uuid.equals(sourceUUID)
 				|| !item.source_user_id.equals(userID))
 			throw new InvalidItemException(userID);
+
+		// initialize publication metadata from item
+		meta.put(PublicationField.TITLE, item.meta_title);
+		meta.put(PublicationField.VERSION, item.meta_version);
+		meta.put(PublicationField.DESCRIPTION, item.meta_description);
+		meta.put(PublicationField.SUBMITTER, item.meta_submitter);
+		meta.put(PublicationField.ARCHIVE_URL, item.archive_url);
 
 		this.userID = userID;
 		this.item = item;
@@ -93,6 +105,14 @@ public class PublicationSession {
 	public PublicationDatabase getPublicationDatabase() {
 		checkHaveItem();
 		return config.getPublicationDatabase();
+	}
+
+	public Map<PublicationField, String> getMetadata() {
+		return meta;
+	}
+
+	public void setMetadata(final Map<PublicationField, String> values) {
+		meta.putAll(values);
 	}
 
 	public static PublicationSession getInstance(final HttpSession session) {

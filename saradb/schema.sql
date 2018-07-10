@@ -129,15 +129,6 @@ CREATE TABLE metadatavalue(
 	data text NOT NULL
 );
 
--- temp storage of publication metadata fields for publication frontend
-CREATE TABLE fe_temp_pubmeta(
-	item_uuid UUID REFERENCES item(uuid) ON DELETE CASCADE,
-	field text NOT NULL,
-	value text NOT NULL,
-	CHECK (field in ('title', 'description', 'version', 'pubrepo', 'pubrepo_displayname', 'collection', 'collection_displayname', 'email', 'submitter', 'repository_url', 'archive_url')),
-	PRIMARY KEY (item_uuid, field)
-);
-
 -- branch selection
 CREATE TABLE fe_temp_actions(
 	repo text NOT NULL,
