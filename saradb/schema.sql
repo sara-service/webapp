@@ -109,15 +109,16 @@ CREATE TABLE item(
 -- index to speed up the query for the artefacts archived by a particular user
 CREATE INDEX ON item(source_uuid, source_user_id);
 
--- Table: metadatamapping (WIP)
+-- Table: metadatamapping
 CREATE TABLE metadatamapping(
 	uuid UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 	repository_uuid UUID REFERENCES repository(uuid) ON DELETE CASCADE,
 	display_name text NOT NULL,
 	map_from text NOT NULL,
-	map_to text NOT NULL, -- foreign uuid
+	map_to text NOT NULL,
 	remark text,
 	enabled boolean NOT NULL,
+	CHECK( map_from IN ('sara-author', 'sara-submitter', 'sara-abstract', 'sara-dateArchived', 'sara-version', 'sara-title', 'sara-archiveUrl', 'sara-publisher', 'sara-type') ),
 	UNIQUE (repository_uuid, map_from, map_to)
 );
 
