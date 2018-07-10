@@ -66,6 +66,8 @@ public class PublicationSession {
 		meta.put(PublicationField.DESCRIPTION, item.meta_description);
 		meta.put(PublicationField.SUBMITTER, item.meta_submitter);
 		meta.put(PublicationField.ARCHIVE_URL, item.archive_url);
+		meta.put(PublicationField.PUBREPO_LOGIN_EMAIL,
+				item.repository_login_id);
 
 		this.userID = userID;
 		this.item = item;
