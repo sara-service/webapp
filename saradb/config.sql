@@ -1,5 +1,4 @@
 -- adding some default entries
---\echo :'basedir'
 
 CREATE TEMP TABLE args (
     basedir text
@@ -124,6 +123,9 @@ INSERT INTO repository_params(id, param, value) VALUES
 --	(rRef, 'force_onbehalf', '1'),
 --	(rRef, 'workflow_type', 'login_required');
 
+INSERT INTO metadatamapping (repository_uuid, display_name, map_from, map_to, enabled) VALUES
+        (rRef, 'submitter as dc.contributor', 'sara-submitter', 'contributor', TRUE);
+
 -- Fake KOPS (only for show; this doesn't work)
 INSERT INTO repository(display_name, adapter, url, contact_email, enabled, logo_url) VALUES
 	('KOPS Konstanz', 'DSpace_v6', kops_demo, 'kops.kim@uni-konstanz.de', FALSE,
@@ -143,12 +145,12 @@ INSERT INTO repository_params(id, param, value) VALUES
 --INSERT INTO collection(id, display_name, foreign_collection_uuid, enabled) VALUES(rRef, 'coffee management', '0815', TRUE);  -- coffee management
 --INSERT INTO collection(id, display_name, foreign_collection_uuid, enabled) VALUES(rRef, 'milk sciences', '0914', FALSE); -- milk sciences
 
-INSERT INTO metadatamapping(repository_uuid, display_name, map_from, map_to, enabled) VALUES
-	(rRef, 'publication title', 'dc.title', '0714', TRUE),
-	(rRef, 'email adress', 'dc.contact', '0698', FALSE),
-	(rRef, 'author', 'dc.author', '0567', TRUE),
-	(rRef, 'second author', 'dc.other_author', '0568', TRUE),
-	(rRef, 'archive link', 'dc.archive_link', '1045', TRUE);
+--INSERT INTO metadatamapping(repository_uuid, display_name, map_from, map_to, enabled) VALUES
+--	(rRef, 'publication title', 'dc.title', '0714', TRUE),
+--	(rRef, 'email adress', 'dc.contact', '0698', FALSE),
+--	(rRef, 'author', 'dc.author', '0567', TRUE),
+--	(rRef, 'second author', 'dc.other_author', '0568', TRUE),
+--	(rRef, 'archive link', 'dc.archive_link', '1045', TRUE);
 
 -- erase the temporary large objects
 PERFORM lo_unlink(kops_logo), lo_unlink(oparu_logo), lo_unlink(testarchiv_privkey),

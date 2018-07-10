@@ -32,6 +32,7 @@ import bwfdm.sara.project.PublicationSession;
 import bwfdm.sara.publication.Hierarchy;
 import bwfdm.sara.publication.Item;
 import bwfdm.sara.publication.ItemState;
+import bwfdm.sara.publication.MetadataMapping;
 import bwfdm.sara.publication.PublicationRepository;
 import bwfdm.sara.publication.Repository;
 import bwfdm.sara.publication.SaraMetaDataField;
@@ -88,13 +89,66 @@ public class Publication {
 		PublicationSession.getInstance(session).setMetadata(values);
 	}
 
+	@GetMapping("finalMapping")
+	private HashMap<String, String> finalMapping(final HttpSession session) {
+		final PublicationSession project = PublicationSession
+				.getInstance(session);
+
+		final Map<PublicationField, String> meta = project.getMetadata();
+
+		final UUID repository_uuid = UUID
+				.fromString(meta.get(PublicationField.PUBLICATION_REPOSITORY));
+
+		HashMap<String, String> finalMap = new HashMap<String, String>();
+
+		finalMap.putIfAbsent(SaraMetaDataField.ABSTRACT.getDisplayName(),
+				meta.get(PublicationField.DESCRIPTION));
+		finalMap.putIfAbsent(SaraMetaDataField.SUBMITTER.getDisplayName(),
+				meta.get(PublicationField.SUBMITTER));
+		finalMap.putIfAbsent(SaraMetaDataField.AUTHOR.getDisplayName(),
+				meta.get(PublicationField.SUBMITTER));
+		finalMap.putIfAbsent(SaraMetaDataField.TITLE.getDisplayName(),
+				meta.get(PublicationField.TITLE));
+		finalMap.putIfAbsent(SaraMetaDataField.VERSION.getDisplayName(),
+				meta.get(PublicationField.VERSION));
+		finalMap.putIfAbsent(SaraMetaDataField.TYPE.getDisplayName(),
+				"Git Archive");
+		finalMap.putIfAbsent(SaraMetaDataField.PUBLISHER.getDisplayName(),
+				"SARA SERVICE VERSION 'PROTOTYPE'");
+		finalMap.putIfAbsent(SaraMetaDataField.ARCHIVE_URL.getDisplayName(),
+				meta.get(PublicationField.ARCHIVE_URL));
+		finalMap.putIfAbsent(SaraMetaDataField.ABSTRACT.getDisplayName(),
+				meta.get(PublicationField.DESCRIPTION));
+		finalMap.putIfAbsent(SaraMetaDataField.DATE_ARCHIVED.getDisplayName(),
+				ISO8601.format(project.getItem().date_created));
+
+		// configured mappings (repository specific)
+		List<MetadataMapping> mms = project.getPublicationDatabase()
+				.getList(MetadataMapping.class);
+
+		// apply configured mappings
+		for (final MetadataMapping mm : mms) {
+			if (mm.repository_uuid.equals(repository_uuid)) {
+				// remap iff the new key entry does not exist yet
+				if (finalMap.containsKey(mm.map_from)) {
+					if (!finalMap.containsKey(mm.map_to)) {
+						// write new mapping
+						finalMap.put(mm.map_to, finalMap.get(mm.map_from));
+						// remove the original mapping
+						finalMap.remove(mm.map_from);
+					}
+				}
+			}
+		}
+
+		return finalMap;
+	}
+
 	@GetMapping("trigger")
 	public RedirectView triggerPublication(final HttpSession session) {
 		final PublicationSession project = PublicationSession
 				.getInstance(session);
 
-		// TODO Metadata Mapping
-		// TODO Error Handling
 		final Map<PublicationField, String> meta = project.getMetadata();
 
 		final UUID repository_uuid = UUID
@@ -102,27 +156,11 @@ public class Publication {
 		final PublicationRepository repo = project.getPublicationDatabase()
 				.getPubRepo(repository_uuid);
 
-		Map<String, String> metadataMap = new HashMap<String, String>();
 		final String collectionURL = meta
 				.get(PublicationField.PUBREPO_COLLECTION);
 		final String userLogin = meta.get(PublicationField.PUBREPO_LOGIN_EMAIL);
 
-		metadataMap.put(SaraMetaDataField.ABSTRACT.getDisplayName(),
-				meta.get(PublicationField.DESCRIPTION));
-		metadataMap.put(SaraMetaDataField.SUBMITTER.getDisplayName(),
-				meta.get(PublicationField.SUBMITTER));
-		metadataMap.put(SaraMetaDataField.AUTHOR.getDisplayName(),
-				meta.get(PublicationField.SUBMITTER));
-		metadataMap.put(SaraMetaDataField.TITLE.getDisplayName(),
-				meta.get(PublicationField.TITLE));
-		metadataMap.put(SaraMetaDataField.VERSION.getDisplayName(),
-				meta.get(PublicationField.VERSION));
-		// FIXME dc.type needs to be configurable by IR maintainers
-		metadataMap.put(SaraMetaDataField.TYPE.getDisplayName(), "GitArchive");
-		metadataMap.put(SaraMetaDataField.PUBLISHER.getDisplayName(),
-				"SARA Service version 'Prototype'");
-		metadataMap.put(SaraMetaDataField.ARCHIVE_URL.getDisplayName(),
-				meta.get(PublicationField.ARCHIVE_URL));
+		Map<String, String> metadataMap = finalMapping(session);
 
 		Item i = project.getItem();
 		i.date_last_modified = new Date();
@@ -130,7 +168,7 @@ public class Publication {
 		i.repository_uuid = repository_uuid;
 		i.collection_id = collectionURL;
 
-		metadataMap.put("sara-dateArchived", ISO8601.format(i.date_created));
+		// TODO Error Handling
 
 		final String depositUrl = repo.publishMetadata(userLogin, collectionURL,
 				metadataMap);
