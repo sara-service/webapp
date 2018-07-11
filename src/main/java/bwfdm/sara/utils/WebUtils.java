@@ -37,13 +37,16 @@ public class WebUtils {
 	private static final Logger logger = LoggerFactory.getLogger(DSpace_v6.class);
 	
 	/**
-	 * Get JAX-RS client without SSL 
-	 * Method is got from {@link https://dzone.com/articles/jersey-ignoring-ssl}
+	 * Get JAX-RS client without SSL Method is got from
+	 * {@link https://dzone.com/articles/jersey-ignoring-ssl}
 	 * 
 	 * @return Client client
-	 * @throws Exception 
+	 * @throws Exception
 	 * @author vk
+	 * 
+	 * @deprecated too insecure for use in production code
 	 */
+	@Deprecated
     public static Client getClientWithoutSSL() {
 	    try {
 		    SSLContext sslcontext = SSLContext.getInstance("TLS");
@@ -59,7 +62,7 @@ public class WebUtils {
 		    return ClientBuilder.newBuilder().sslContext(sslcontext).hostnameVerifier(new HostnameVerifier() {
 				@Override
 				public boolean verify(String hostname, SSLSession session) {
-					return true;
+						return false;
 					}
 				}).build();
 	    } catch (Exception e) {

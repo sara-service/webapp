@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
@@ -101,8 +102,7 @@ public class DSpace_v6 implements PublicationRepository {
 		System.out.println(nrx);
 		System.out.println(nrp);
 
-		rest_client = WebUtils.getClientWithoutSSL(); // Ignore SSL-Verification
-		// client = ClientBuilder.newClient();
+		rest_client = ClientBuilder.newClient();
 
 		// WebTargets
 		restWebTarget = rest_client.target(rest_api_endpoint);
@@ -129,8 +129,7 @@ public class DSpace_v6 implements PublicationRepository {
 		rest_api_endpoint = restURL;
 		dao = null;
 
-		rest_client = WebUtils.getClientWithoutSSL(); // Ignore SSL-Verification
-		// client = ClientBuilder.newClient();
+		rest_client = ClientBuilder.newClient();
 
 		restWebTarget = rest_client.target(rest_api_endpoint);
 		collectionsWebTarget = restWebTarget.path("collections");
