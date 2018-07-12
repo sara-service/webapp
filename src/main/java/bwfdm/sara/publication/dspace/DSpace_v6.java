@@ -98,10 +98,6 @@ public class DSpace_v6 implements PublicationRepository {
 		name_replace = nrp;
 		publication_type = pt;
 
-		System.out.println(dt);
-		System.out.println(nrx);
-		System.out.println(nrp);
-
 		rest_client = ClientBuilder.newClient();
 
 		// WebTargets
@@ -412,13 +408,13 @@ public class DSpace_v6 implements PublicationRepository {
 				deposit.setInProgress(true);
 			}
 
-			// deposit.setMd5("fileMD5");
-			// deposit.setSuggestedIdentifier("abcdefg");
-
 			DepositReceipt receipt = sword_client.deposit(collectionURL,
 					deposit, authCredentials);
 
-			return receipt.getSplashPageLink().getHref();
+			String[] parts = receipt.getLocation().split("/");
+
+			// FIXME Beware, evil hack. will need to rewrite whole class for Beta anyways...
+			return receipt.getSplashPageLink().getHref() + "|" + parts[parts.length-1];
 
 		} catch (FileNotFoundException e) {
 			logger.error("Exception by accessing a file: "
