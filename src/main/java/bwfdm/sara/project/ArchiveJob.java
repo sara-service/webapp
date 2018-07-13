@@ -14,6 +14,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import bwfdm.sara.api.LicensesInfo;
+import bwfdm.sara.db.ConfigDatabase;
 import bwfdm.sara.db.FrontendDatabase;
 import bwfdm.sara.extractor.LicenseFile;
 import bwfdm.sara.extractor.MetadataExtractor;
@@ -52,11 +53,16 @@ public class ArchiveJob {
 	/** <b>For writing back metadata ONLY!! */
 	@JsonIgnore
 	public final GitProject gitProject;
+	@JsonIgnore
+	private Map<Ref, LicenseFile> detectedLicenses;
+	@JsonIgnore
+	public final ConfigDatabase config;
 
 	public ArchiveJob(final Project project, final String archiveUUID) {
 		final FrontendDatabase frontend = project.getFrontendDatabase();
 		final MetadataExtractor metadataExtractor = project
 				.getMetadataExtractor();
+		config = project.getConfigDatabase();
 
 		// index.html
 		// UUID.fromString() performs an implicit check for a valid UUID
@@ -110,8 +116,7 @@ public class ArchiveJob {
 			throw new IllegalArgumentException(
 					"main branch branch not selected for publication");
 		// license(s).html
-		final Map<Ref, LicenseFile> detectedLicenses = metadataExtractor
-				.getLicenses();
+		detectedLicenses = metadataExtractor.getLicenses();
 		licenses = frontend.getLicenses();
 		licensesSet = metadataExtractor.getLicenseSet();
 		if (licensesSet.size() != 1)
@@ -168,6 +173,10 @@ public class ArchiveJob {
 			res.add(new LicenseInfo(ref,
 					LicensesInfo.mapKeep(licenses.get(ref))));
 		return res;
+	}
+
+	public LicenseFile getDetectedLicense(Ref ref) {
+		return detectedLicenses.get(ref);
 	}
 
 	public static class LicenseInfo {

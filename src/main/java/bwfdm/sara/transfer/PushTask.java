@@ -25,8 +25,11 @@ import org.eclipse.jgit.transport.RefSpec;
 import org.eclipse.jgit.transport.URIish;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.util.ISO8601DateFormat;
 
 import bwfdm.sara.Config;
+import bwfdm.sara.extractor.LicenseFile;
 import bwfdm.sara.extractor.MetadataExtractor;
 import bwfdm.sara.git.ArchiveProject;
 import bwfdm.sara.git.ArchiveRepo;
@@ -42,8 +45,14 @@ import bwfdm.sara.publication.db.PublicationDatabase;
 
 /** Pushes a repository to a git archive. */
 public class PushTask extends Task {
+	private static final ISO8601DateFormat ISO8601 = new ISO8601DateFormat();
+	private static final String METADATA_FILENAME = "submitted_metadata";
 	private static final Charset UTF8 = Charset.forName("UTF-8");
 	private static final String TARGET_REMOTE = "target";
+	private static final ObjectMapper JSON_MAPPER = new ObjectMapper();
+	static {
+		JSON_MAPPER.enable(SerializationFeature.INDENT_OUTPUT);
+	}
 
 	private final ArchiveJob job;
 	private final ArchiveRepo archive;
@@ -52,6 +61,7 @@ public class PushTask extends Task {
 	private ArchiveProject project;
 	private UUID itemUUID;
 	private Map<Ref, String> heads;
+	private Date now;
 
 	/**
 	 * @param job
@@ -88,6 +98,7 @@ public class PushTask extends Task {
 			updateMetadataInGitRepo();
 		}
 
+		now = new Date();
 		beginTask("committing metadata to git archive",
 				job.selectedRefs.size());
 		commitMetadataToRepo();
@@ -133,12 +144,7 @@ public class PushTask extends Task {
 
 	private void commitMetadataToRepo() throws IOException {
 		final String version = job.meta.get(MetadataField.VERSION);
-		final String metaJSON = new ObjectMapper().writeValueAsString(job);
-		final String metaXML = "here be metadata";
-		final Map<String, String> metaFiles = new HashMap<>(4);
-		metaFiles.put("VERSION", version);
-		metaFiles.put("sara_metadata.json", metaJSON);
-		metaFiles.put("sara_metadata.xml", metaXML);
+		final String metaJSON = JSON_MAPPER.writeValueAsString(job);
 
 		// TODO this should definitely be configurable!
 		final PersonIdent sara = new PersonIdent("SARA Service",
@@ -146,11 +152,30 @@ public class PushTask extends Task {
 
 		heads = new HashMap<Ref, String>();
 		for (Ref ref : job.selectedRefs) {
-			final String lic = job.licenses.get(ref);
-			// FIXME use full text instead
-			// TODO replace placeholders in full text
-			final String license = lic;
-			metaFiles.put("LICENSE", license);
+			final String licenseID = job.licenses.get(ref);
+			final String license = job.config
+					.getLicenseText(licenseID);
+			// TODO replace placeholders in license text
+
+			MetadataFormatter formatter = new MetadataFormatter();
+			formatter.addDC("title", job.meta.get(MetadataField.TITLE));
+			formatter.addDC("description",
+					job.meta.get(MetadataField.DESCRIPTION));
+			formatter.addDC("publisher", job.meta.get(MetadataField.SUBMITTER));
+			formatter.addDC("date", ISO8601.format(now));
+			formatter.addDC("type", "Software");
+			formatter.addDC("rights", licenseID);
+			final String metaXML = formatter.getSerializedXML();
+
+			final Map<String, String> metaFiles = new HashMap<>(4);
+			metaFiles.put(MetadataExtractor.VERSION_FILE, version);
+			metaFiles.put(METADATA_FILENAME + ".json", metaJSON);
+			metaFiles.put(METADATA_FILENAME + ".xml", metaXML);
+			final LicenseFile existingLicense = job.getDetectedLicense(ref);
+			final String licenseFile = existingLicense != null
+					? existingLicense.path
+					: MetadataExtractor.PREFERRED_LICENSE_FILE;
+			metaFiles.put(licenseFile, license);
 
 			final CommitBuilder commit = new CommitBuilder();
 			commit.setCommitter(sara);
@@ -218,7 +243,7 @@ public class PushTask extends Task {
 
 		i.source_user_id = job.sourceUserID;
 		i.contact_email = job.gitrepoEmail;
-		i.date_created = new Date();
+		i.date_created = now;
 		i.date_last_modified = i.date_created;
 
 		// initialization with reasonable defaults
