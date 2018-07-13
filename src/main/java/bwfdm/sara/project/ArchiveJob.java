@@ -182,9 +182,9 @@ public class ArchiveJob {
 		}
 	}
 
-	private String getHead(Ref a) {
+	private String getHead(final Ref a) {
 		try {
-			return clone.getHeadCommitID(a.path);
+			return clone.getCommit(a).getName();
 		} catch (IOException e) {
 			throw new IllegalStateException("accessing TransferRepo failed", e);
 		}

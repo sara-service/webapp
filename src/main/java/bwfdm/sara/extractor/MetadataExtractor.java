@@ -119,7 +119,7 @@ public class MetadataExtractor {
 		final List<RepoFile> obvious = new ArrayList<>();
 		final List<RepoFile> likely = new ArrayList<>();
 		// final List<RepoFile> possible = new ArrayList<>();
-		final List<RepoFile> files = clone.getFiles(ref, "");
+		final List<RepoFile> files = clone.getFiles(ref);
 		for (final Iterator<RepoFile> iter = files.iterator(); iter.hasNext();) {
 			final RepoFile file = iter.next();
 			if (file.getType() != FileType.FILE)
@@ -194,7 +194,8 @@ public class MetadataExtractor {
 		Ref best = refs.iterator().next();
 		long bestDate = Long.MIN_VALUE;
 		for (final Ref ref : refs) {
-			final long date = clone.getHeadCommitDate(ref.path);
+			// FIXME 32-bit timestamp in an API! in 2017!!! wtf????
+			final long date = clone.getCommit(ref).getCommitTime();
 			if ((best.type == RefType.TAG && ref.type == RefType.BRANCH)
 					|| (date > bestDate)) {
 				best = ref;
