@@ -145,7 +145,6 @@ public class PushTask extends Task {
 	private void commitMetadataToRepo() throws IOException {
 		final String version = job.meta.get(MetadataField.VERSION);
 		final String metaJSON = JSON_MAPPER.writeValueAsString(job);
-
 		// TODO this should definitely be configurable!
 		final PersonIdent sara = new PersonIdent("SARA Service",
 				"ingest@sara-service.org");
@@ -153,11 +152,10 @@ public class PushTask extends Task {
 		heads = new HashMap<Ref, String>();
 		for (Ref ref : job.selectedRefs) {
 			final String licenseID = job.licenses.get(ref);
-			final String license = job.config
-					.getLicenseText(licenseID);
+			final String license = job.config.getLicenseText(licenseID);
 			// TODO replace placeholders in license text
 
-			MetadataFormatter formatter = new MetadataFormatter();
+			final MetadataFormatter formatter = new MetadataFormatter();
 			formatter.addDC("title", job.meta.get(MetadataField.TITLE));
 			formatter.addDC("description",
 					job.meta.get(MetadataField.DESCRIPTION));
@@ -165,6 +163,7 @@ public class PushTask extends Task {
 			formatter.addDC("date", ISO8601.format(now));
 			formatter.addDC("type", "Software");
 			formatter.addDC("rights", licenseID);
+			// TODO include version and main branch as non-DC items?
 			final String metaXML = formatter.getSerializedXML();
 
 			final Map<String, String> metaFiles = new HashMap<>(4);

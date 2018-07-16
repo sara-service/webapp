@@ -13,7 +13,6 @@ import java.util.UUID;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import bwfdm.sara.api.LicensesInfo;
 import bwfdm.sara.db.ConfigDatabase;
 import bwfdm.sara.db.FrontendDatabase;
 import bwfdm.sara.extractor.LicenseFile;
@@ -57,6 +56,8 @@ public class ArchiveJob {
 	private Map<Ref, LicenseFile> detectedLicenses;
 	@JsonIgnore
 	public final ConfigDatabase config;
+	@JsonProperty("licenses")
+	public final LicensesInfo licensesInfo;
 
 	public ArchiveJob(final Project project, final String archiveUUID) {
 		final FrontendDatabase frontend = project.getFrontendDatabase();
@@ -119,21 +120,11 @@ public class ArchiveJob {
 		detectedLicenses = metadataExtractor.getLicenses();
 		licenses = frontend.getLicenses();
 		licensesSet = metadataExtractor.getLicenseSet();
-		if (licensesSet.size() != 1)
-			// - if multiple different licenses detected, "keep" branches must
-			// have a detected license (because we cannot choose which of
-			// several licenses to keep)
-			// - if no licenses detected, there must not be any "keep" branches
-			// (because there isn't anything to keep).
-			// → check that all "keep" branches have a detected license. if no
-			// licenses detected, "keep" branches cannot have a detected
-			// license, so that's effectively a check that there are no "keep"
-			// branches.
-			for (RefAction action : actions)
-				if (licenses.get(action.ref) == null
-						&& !detectedLicenses.containsKey(action.ref))
-					throw new IllegalArgumentException(
-							"branch " + action.ref.path + " has no license");
+		licensesInfo = new LicensesInfo(config.getLicenses(), selectedRefs,
+				detectedLicenses, licensesSet, licenses);
+		if (licensesInfo.hasUndefinedLicenses())
+			throw new IllegalArgumentException(
+					"not all branches have licenses!");
 		// archive selection, currently just hardcoded
 		this.archiveUUID = UUID.fromString(archiveUUID); // implicit check
 	}
@@ -166,29 +157,8 @@ public class ArchiveJob {
 		return res;
 	}
 
-	@JsonProperty("licenses")
-	public List<LicenseInfo> getLicenses() {
-		List<LicenseInfo> res = new ArrayList<>();
-		for (Ref ref : selectedRefs)
-			res.add(new LicenseInfo(ref,
-					LicensesInfo.mapKeep(licenses.get(ref))));
-		return res;
-	}
-
 	public LicenseFile getDetectedLicense(Ref ref) {
 		return detectedLicenses.get(ref);
-	}
-
-	public static class LicenseInfo {
-		@JsonProperty("ref")
-		public final Ref ref;
-		@JsonProperty("license")
-		public final String license;
-
-		public LicenseInfo(Ref ref, String license) {
-			this.ref = ref;
-			this.license = license;
-		}
 	}
 
 	private String getHead(final Ref a) {
