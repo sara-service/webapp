@@ -192,7 +192,14 @@ public class TransferRepo {
 		return files;
 	}
 
-	public ObjectId updateFiles(final Ref ref, final Map<String, String> files)
+	public ObjectId insertBlob(final String data) throws IOException {
+		try (final ObjectInserter ins = repo.newObjectInserter()) {
+			return ins.insert(Constants.OBJ_BLOB, data.getBytes(UTF8));
+		}
+	}
+
+	public ObjectId updateFiles(final Ref ref,
+			final Map<String, ObjectId> files)
 			throws IOException {
 		// build an initial index in-memory, because bare repos don't have one
 		// on disk
@@ -205,7 +212,7 @@ public class TransferRepo {
 		// delete all files to be replaced. this doesn't do anything for files
 		// that don't exist in the repo.
 		final DirCacheEditor delete = index.editor();
-		for (String file : files.keySet())
+		for (final String file : files.keySet())
 			delete.add(new DeletePath(file));
 		delete.finish();
 
@@ -214,11 +221,13 @@ public class TransferRepo {
 			// beforehand, this won't cause any duplicate paths.
 			final DirCacheBuilder create = index.builder();
 			create.keep(0, index.getEntryCount());
-			for (String file : files.keySet()) {
-				final byte[] data = files.get(file).getBytes(UTF8);
+			for (final String file : files.keySet()) {
+				final ObjectId data = files.get(file);
+				if (data == null)
+					continue;
 				final DirCacheEntry entry = new DirCacheEntry(file);
 				entry.setFileMode(FileMode.REGULAR_FILE);
-				entry.setObjectId(ins.insert(Constants.OBJ_BLOB, data));
+				entry.setObjectId(data);
 				create.add(entry);
 			}
 			create.finish();

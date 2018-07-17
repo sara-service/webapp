@@ -29,12 +29,14 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.util.ISO8601DateFormat;
 
 import bwfdm.sara.Config;
+import bwfdm.sara.db.License;
 import bwfdm.sara.extractor.LicenseFile;
 import bwfdm.sara.extractor.MetadataExtractor;
 import bwfdm.sara.git.ArchiveProject;
 import bwfdm.sara.git.ArchiveRepo;
 import bwfdm.sara.git.ArchiveRepo.ProjectExistsException;
 import bwfdm.sara.project.ArchiveJob;
+import bwfdm.sara.project.LicensesInfo.LicenseInfo;
 import bwfdm.sara.project.MetadataField;
 import bwfdm.sara.project.Ref;
 import bwfdm.sara.project.Ref.RefType;
@@ -143,53 +145,70 @@ public class PushTask extends Task {
 	}
 
 	private void commitMetadataToRepo() throws IOException {
+		final TransferRepo repo = job.clone;
 		final String version = job.meta.get(MetadataField.VERSION);
-		final String metaJSON = JSON_MAPPER.writeValueAsString(job);
+		final ObjectId versionFile = repo.insertBlob(version);
+		final ObjectId metaJSON = repo
+				.insertBlob(JSON_MAPPER.writeValueAsString(job));
 		// TODO this should definitely be configurable!
 		final PersonIdent sara = new PersonIdent("SARA Service",
 				"ingest@sara-service.org");
 
 		heads = new HashMap<Ref, String>();
 		for (Ref ref : job.selectedRefs) {
-			final String licenseID = job.licenses.get(ref);
-			final String license = job.config.getLicenseText(licenseID);
-			// TODO replace placeholders in license text
+			final LicenseInfo license = job.licensesInfo.getLicense(ref);
+			final License replace = license.getReplacementLicense();
+			final ObjectId licenseFile;
+			if (replace != null) {
+				final String data = job.config.getLicenseText(replace.id);
+				// TODO replace placeholders in license text
+				licenseFile = repo.insertBlob(data);
+			} else
+				licenseFile = license.getLicenseFileToKeep().hash;
+			final String metaXML = getMetadataXML(
+					license.getEffectiveLicense().id);
 
-			final MetadataFormatter formatter = new MetadataFormatter();
-			formatter.addDC("title", job.meta.get(MetadataField.TITLE));
-			formatter.addDC("description",
-					job.meta.get(MetadataField.DESCRIPTION));
-			formatter.addDC("publisher", job.meta.get(MetadataField.SUBMITTER));
-			formatter.addDC("date", ISO8601.format(now));
-			formatter.addDC("type", "Software");
-			formatter.addDC("rights", licenseID);
-			// TODO include version and main branch as non-DC items?
-			final String metaXML = formatter.getSerializedXML();
-
-			final Map<String, String> metaFiles = new HashMap<>(4);
-			metaFiles.put(MetadataExtractor.VERSION_FILE, version);
+			final Map<String, ObjectId> metaFiles = new HashMap<>(4);
+			// TODO maybe only update in master branch??
+			metaFiles.put(MetadataExtractor.VERSION_FILE, versionFile);
 			metaFiles.put(METADATA_FILENAME + ".json", metaJSON);
-			metaFiles.put(METADATA_FILENAME + ".xml", metaXML);
+			metaFiles.put(METADATA_FILENAME + ".xml", repo.insertBlob(metaXML));
+			// canonicalize license filename. that is, delete the existing
+			// license file if we don't like its name, and always create one
+			// with the proper name.
 			final LicenseFile existingLicense = job.getDetectedLicense(ref);
-			final String licenseFile = existingLicense != null
-					? existingLicense.path
-					: MetadataExtractor.PREFERRED_LICENSE_FILE;
-			metaFiles.put(licenseFile, license);
+			if (existingLicense != null && !existingLicense.path
+					.equals(MetadataExtractor.PREFERRED_LICENSE_FILE))
+				metaFiles.put(existingLicense.path, null);
+			metaFiles.put(MetadataExtractor.PREFERRED_LICENSE_FILE,
+					licenseFile);
 
 			final CommitBuilder commit = new CommitBuilder();
 			commit.setCommitter(sara);
 			commit.setAuthor(sara);
 			commit.setMessage("archive version " + version);
-			commit.addParentId(job.clone.getCommit(ref).getId());
-			commit.setTreeId(job.clone.updateFiles(ref, metaFiles));
-			final ObjectId commitId = job.clone.insertCommit(commit);
+			commit.addParentId(repo.getCommit(ref).getId());
+			commit.setTreeId(repo.updateFiles(ref, metaFiles));
+			final ObjectId commitId = repo.insertCommit(commit);
 
-			final RefUpdate ru = job.clone.getRepo()
+			final RefUpdate ru = repo.getRepo()
 					.updateRef(Constants.R_REFS + "rewritten/" + ref.path);
 			ru.setNewObjectId(commitId);
 			ru.forceUpdate();
 			heads.put(ref, ru.getName());
 		}
+	}
+
+	private String getMetadataXML(final String licenseID) {
+		final MetadataFormatter formatter = new MetadataFormatter();
+		formatter.addDC("title", job.meta.get(MetadataField.TITLE));
+		formatter.addDC("description", job.meta.get(MetadataField.DESCRIPTION));
+		formatter.addDC("publisher", job.meta.get(MetadataField.SUBMITTER));
+		formatter.addDC("date", ISO8601.format(now));
+		formatter.addDC("type", "Software");
+		formatter.addDC("rights", licenseID);
+		// TODO include version and main branch as non-DC items?
+		return formatter.getSerializedXML();
 	}
 
 	private void pushRepoToArchive() throws GitAPIException, URISyntaxException,

@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -241,6 +242,14 @@ public class LicensesInfo {
 		if (primary == null)
 			return null;
 		return supportedMap.get(primary.licenseID);
+	}
+
+	@JsonIgnore
+	public LicenseInfo getLicense(final Ref ref) {
+		for (final LicenseInfo b : branches)
+			if (b.ref.equals(ref))
+				return b;
+		throw new NoSuchElementException("no license for branch " + ref.path);
 	}
 
 	public class LicenseInfo {
