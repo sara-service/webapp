@@ -18,6 +18,7 @@ import bwfdm.sara.db.FrontendDatabase;
 import bwfdm.sara.extractor.LicenseFile;
 import bwfdm.sara.extractor.MetadataExtractor;
 import bwfdm.sara.git.GitProject;
+import bwfdm.sara.project.LicensesInfo.LicenseInfo;
 import bwfdm.sara.project.RefAction.PublicationMethod;
 import bwfdm.sara.transfer.TransferRepo;
 
@@ -56,7 +57,7 @@ public class ArchiveJob {
 	private Map<Ref, LicenseFile> detectedLicenses;
 	@JsonIgnore
 	public final ConfigDatabase config;
-	@JsonProperty("licenses")
+	@JsonIgnore
 	public final LicensesInfo licensesInfo;
 
 	public ArchiveJob(final Project project, final String archiveUUID) {
@@ -157,6 +158,11 @@ public class ArchiveJob {
 		return res;
 	}
 
+	@JsonProperty("licenses")
+	public List<LicenseInfo> getLicensesPerBranch() {
+		return licensesInfo.branches;
+	}
+
 	public LicenseFile getDetectedLicense(Ref ref) {
 		return detectedLicenses.get(ref);
 	}
@@ -216,7 +222,7 @@ public class ArchiveJob {
 		if (!job.gitrepoEmail.equals(gitrepoEmail))
 			return false;
 		// branches.html
-		// the list are sorted, so if they're identical, they must be in the
+		// the lists are sorted, so if they're identical, they must be in the
 		// same order as well. we can thus just compare them element by element
 		for (int i = 0; i < actions.size(); i++) {
 			RefAction a = actions.get(i);
@@ -235,9 +241,15 @@ public class ArchiveJob {
 			if (!job.meta.get(field).equals(meta.get(field)))
 				return false;
 		// license(s).html
-		for (RefAction a : actions)
-			if (!job.licenses.get(a.ref).equals(licenses.get(a.ref)))
+		for (RefAction a : actions) {
+			final String lic = job.licenses.get(a.ref);
+			final String other = licenses.get(a.ref);
+			if ((lic == null && other != null)
+					|| (lic != null && other == null))
 				return false;
+			if (!lic.equals(other))
+				return false;
+		}
 		// archive selection, currently just hardcoded
 		if (!job.archiveUUID.equals(archiveUUID))
 			return false;

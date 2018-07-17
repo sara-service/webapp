@@ -37,11 +37,17 @@ function initLicenses(info) {
 		var line = template("template_licenses");
 		line.type.text(branch.ref.type);
 		line.name.text(branch.ref.name);
-		if (branch.license != "keep") {
-			line.license.text(branch.license);
+		if (branch.user != null)
 			line.keep.remove();
-		} else
+		if (branch.effective.id != "other") {
+			line.license.text(branch.effective.name);
+			if (branch.effective.url)
+				line.license.attr("href", branch.effective.url);
+			line.other.remove();
+		} else {
+			line.other.text(branch.effective.name);
 			line.license.remove();
+		}
 		$("#licenses").append(line.root);
 	});
 }
