@@ -49,7 +49,9 @@ class ChoosealicenseParser {
 					throw new IllegalArgumentException("truncated file");
 				else
 					break;
-			append(line);
+			// strip leading blank lines from license text
+			if (curBuffer != text || curBuffer.length() > 0 || !line.isEmpty())
+				append(line);
 		}
 	}
 
