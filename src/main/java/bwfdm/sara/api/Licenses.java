@@ -20,12 +20,15 @@ import bwfdm.sara.Config;
 import bwfdm.sara.db.FrontendDatabase;
 import bwfdm.sara.db.License;
 import bwfdm.sara.extractor.MetadataExtractor;
+import bwfdm.sara.project.LicensesInfo;
 import bwfdm.sara.project.Project;
 import bwfdm.sara.project.Ref;
 
 @RestController
 @RequestMapping("/api/licenses")
 public class Licenses {
+	private static final String KEEP_LICENSE = "keep";
+
 	@Autowired
 	private Config config;
 
@@ -46,7 +49,7 @@ public class Licenses {
 
 		final Map<Ref, String> licenses = new HashMap<>();
 		for (final Ref ref : db.getSelectedRefs())
-			licenses.put(ref, LicensesInfo.unmapKeep(license));
+			licenses.put(ref, Licenses.unmapKeep(license));
 		db.setLicenses(licenses);
 		project.invalidateMetadata();
 	}
@@ -56,7 +59,7 @@ public class Licenses {
 			final HttpSession session) {
 		final Project project = Project.getInstance(session);
 		for (final Entry<Ref, String> e : licenses.entrySet())
-			e.setValue(LicensesInfo.unmapKeep(e.getValue()));
+			e.setValue(Licenses.unmapKeep(e.getValue()));
 		project.getFrontendDatabase().setLicenses(licenses);
 		// db.setLicense(new Ref(refPath), LicensesInfo.unmapKeep(license));
 		project.invalidateMetadata();
@@ -65,5 +68,18 @@ public class Licenses {
 	@GetMapping("supported")
 	public List<License> getLicenseList() {
 		return config.getConfigDatabase().getLicenses();
+	}
+
+	/**
+	 * maps a "keep" license to <code>null</code>. necessary because the
+	 * frontend cannot send <code>null</code> values. note that setting
+	 * <code>null</code> values explicitly is still possible.
+	 */
+	private static String unmapKeep(final String license) {
+		if (license == null)
+			return null;
+		if (license.equals(Licenses.KEEP_LICENSE))
+			return null;
+		return license;
 	}
 }

@@ -13,11 +13,12 @@ import java.util.UUID;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import bwfdm.sara.api.LicensesInfo;
+import bwfdm.sara.db.ConfigDatabase;
 import bwfdm.sara.db.FrontendDatabase;
 import bwfdm.sara.extractor.LicenseFile;
 import bwfdm.sara.extractor.MetadataExtractor;
 import bwfdm.sara.git.GitProject;
+import bwfdm.sara.project.LicensesInfo.LicenseInfo;
 import bwfdm.sara.project.RefAction.PublicationMethod;
 import bwfdm.sara.transfer.TransferRepo;
 
@@ -52,11 +53,18 @@ public class ArchiveJob {
 	/** <b>For writing back metadata ONLY!! */
 	@JsonIgnore
 	public final GitProject gitProject;
+	@JsonIgnore
+	private Map<Ref, LicenseFile> detectedLicenses;
+	@JsonIgnore
+	public final ConfigDatabase config;
+	@JsonIgnore
+	public final LicensesInfo licensesInfo;
 
 	public ArchiveJob(final Project project, final String archiveUUID) {
 		final FrontendDatabase frontend = project.getFrontendDatabase();
 		final MetadataExtractor metadataExtractor = project
 				.getMetadataExtractor();
+		config = project.getConfigDatabase();
 
 		// index.html
 		// UUID.fromString() performs an implicit check for a valid UUID
@@ -110,25 +118,14 @@ public class ArchiveJob {
 			throw new IllegalArgumentException(
 					"main branch branch not selected for publication");
 		// license(s).html
-		final Map<Ref, LicenseFile> detectedLicenses = metadataExtractor
-				.getLicenses();
+		detectedLicenses = metadataExtractor.getLicenses();
 		licenses = frontend.getLicenses();
 		licensesSet = metadataExtractor.getLicenseSet();
-		if (licensesSet.size() != 1)
-			// - if multiple different licenses detected, "keep" branches must
-			// have a detected license (because we cannot choose which of
-			// several licenses to keep)
-			// - if no licenses detected, there must not be any "keep" branches
-			// (because there isn't anything to keep).
-			// → check that all "keep" branches have a detected license. if no
-			// licenses detected, "keep" branches cannot have a detected
-			// license, so that's effectively a check that there are no "keep"
-			// branches.
-			for (RefAction action : actions)
-				if (licenses.get(action.ref) == null
-						&& !detectedLicenses.containsKey(action.ref))
-					throw new IllegalArgumentException(
-							"branch " + action.ref.path + " has no license");
+		licensesInfo = new LicensesInfo(config.getLicenses(), selectedRefs,
+				detectedLicenses, licensesSet, licenses);
+		if (licensesInfo.hasUndefinedLicenses())
+			throw new IllegalArgumentException(
+					"not all branches have licenses!");
 		// archive selection, currently just hardcoded
 		this.archiveUUID = UUID.fromString(archiveUUID); // implicit check
 	}
@@ -162,29 +159,17 @@ public class ArchiveJob {
 	}
 
 	@JsonProperty("licenses")
-	public List<LicenseInfo> getLicenses() {
-		List<LicenseInfo> res = new ArrayList<>();
-		for (Ref ref : selectedRefs)
-			res.add(new LicenseInfo(ref,
-					LicensesInfo.mapKeep(licenses.get(ref))));
-		return res;
+	public List<LicenseInfo> getLicensesPerBranch() {
+		return licensesInfo.branches;
 	}
 
-	public static class LicenseInfo {
-		@JsonProperty("ref")
-		public final Ref ref;
-		@JsonProperty("license")
-		public final String license;
-
-		public LicenseInfo(Ref ref, String license) {
-			this.ref = ref;
-			this.license = license;
-		}
+	public LicenseFile getDetectedLicense(Ref ref) {
+		return detectedLicenses.get(ref);
 	}
 
-	private String getHead(Ref a) {
+	private String getHead(final Ref a) {
 		try {
-			return clone.getHeadCommitID(a.path);
+			return clone.getCommit(a).getName();
 		} catch (IOException e) {
 			throw new IllegalStateException("accessing TransferRepo failed", e);
 		}
@@ -237,7 +222,7 @@ public class ArchiveJob {
 		if (!job.gitrepoEmail.equals(gitrepoEmail))
 			return false;
 		// branches.html
-		// the list are sorted, so if they're identical, they must be in the
+		// the lists are sorted, so if they're identical, they must be in the
 		// same order as well. we can thus just compare them element by element
 		for (int i = 0; i < actions.size(); i++) {
 			RefAction a = actions.get(i);
@@ -256,9 +241,15 @@ public class ArchiveJob {
 			if (!job.meta.get(field).equals(meta.get(field)))
 				return false;
 		// license(s).html
-		for (RefAction a : actions)
-			if (!job.licenses.get(a.ref).equals(licenses.get(a.ref)))
+		for (RefAction a : actions) {
+			final String lic = job.licenses.get(a.ref);
+			final String other = licenses.get(a.ref);
+			if ((lic == null && other != null)
+					|| (lic != null && other == null))
 				return false;
+			if (!lic.equals(other))
+				return false;
+		}
 		// archive selection, currently just hardcoded
 		if (!job.archiveUUID.equals(archiveUUID))
 			return false;

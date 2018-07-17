@@ -38,8 +38,8 @@ function initLicense(info) {
 	var forms = [];
 	$.each(info.branches, function(_, branch) {
 		var form = template("template");
-		initLicenseList(branch.ref.path, form, info.supported,
-			branch.detected, branch.user);
+		initLicenseList(branch.ref.path, form, info.supported, branch.keep,
+			branch.user);
 		initBranch(form, branch.ref, branch.file);
 		initDetected(form, branch.detected);
 		$("#branch_table").append(form.root);

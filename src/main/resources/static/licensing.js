@@ -7,36 +7,40 @@ function addLicense(form, license) {
 	form.declare.append(option);
 }
 
-function initLicenseList(ref, form, supported, detected, user) {
+function initLicenseList(ref, form, supported, keep, user) {
 	// create the "keep" entry separately. this automatically deals with
 	// the situation where it isn't in the list (ie. "other" or a hidden
 	// license).
-	if (detected != null) {
-		if (detected.id != "other") {
-			form.declare_keep.text("keep " + detected.name);
-			form.declare_keep.data("infourl", detected.url);
+	if (keep != null) {
+		if (keep.id != "other") {
+			form.declare_keep.text("keep " + keep.name);
+			form.declare_keep.data("infourl", keep.url);
 		} else
 			form.declare_keep.text("keep existing LICENSE file");
-		// if the user selected that license last time, then updated the
-		// git repo to match, its entry will now be called "keep" in the
-		// selection field.
-		// we could just fix that here by setting user = "keep", but
-		// then we'd have to write that back somehow. as this is a rare
-		// situation, just force the user to pick a license. this will
-		// trigger the required writeback, and having an explicit
-		// confirmation here is probably not a bad idea anyway since
-		// "replace with X" isn't exactly identical to "keep X" for
-		// licenses that contain placeholders.
-		if (user == detected.id)
-			user = null;
+		// the backend uses null to keep the license, but we cannot use
+		// that in the dropdown because null corresponds to "no selection"
+		// in dropdowns.
+		// boundary case: if the user selected that license last time and
+		// then updated the git repo to match, its entry will now be called
+		// "keep" in the selection field. so, make sure we select "keep"
+		// now, because the other entry won't be present any more. "keep X"
+		// isn't exactly identical to "replace with X" for licenses that
+		// contain placeholders, but the user explicitly put that license
+		// into the repo, so that's probably the form of the license he
+		// want to use...
+		if (user == null || user == keep.id)
+			user = "keep";
 	} else
-		// "keep" makes no sense whatsoever if there is nothing to keep
+		// "keep" makes no sense whatsoever if there is nothing to keep.
+		// note that this leaves the selection at null, forcing him to
+		// select something, if the user setting was "keep" last time.
 		form.declare_keep.remove();
 
 	$.each(supported, function(_, info) {
-		if (detected == null)
-			addLicense(form, info);
-		else if (detected.id != info.id)
+		// don't create both "replace with X" and "keep X" entries. there
+		// *is* a small difference (placeholders), but that distinction is
+		// almost impossible to communicate to the user.
+		if (keep == null || keep.id != info.id)
 			addLicense(form, info);
 	});
 
