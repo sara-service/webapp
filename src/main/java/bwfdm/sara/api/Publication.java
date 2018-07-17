@@ -169,11 +169,11 @@ public class Publication {
 		i.collection_id = collectionURL;
 
 		// TODO Error Handling
-
-		final String depositUrl = repo.publishMetadata(userLogin, collectionURL,
+		final String depositInfo = repo.publishMetadata(userLogin, collectionURL,
 				metadataMap);
-
-		i.repository_url = depositUrl;
+		i.repository_url = depositInfo.split("\\|")[0];
+		i.item_id = depositInfo.split("\\|")[1];
+		logger.info(i.repository_url);
 
 		project.getPublicationDatabase().updateInDB(i);
 
