@@ -2,12 +2,18 @@
 
 var meta, cache = {}, branches = [];
 
-function canWriteBack() {
+function writeBackProblem() {
 	var action = $("#master :selected").data("refAction");
 	// only allow updating branches that haven't been pushed back. tags
 	// cannot be written to, and trying to update branches a few commits
 	// back is impossible to do consistently.
-	return action.ref.type == "branch" && action.firstCommit == "HEAD";
+	if (action.ref.type == "tag")
+		return "cannot commit to a tag";
+	if (action.ref.type != "branch")
+		return "can only commit to branches";
+	if (action.firstCommit != "HEAD")
+		return "not archiving HEAD of " + action.ref.name;
+	return null;
 };
 
 function initField(id, branchDependent, validator, speshul) {
@@ -24,9 +30,9 @@ function initField(id, branchDependent, validator, speshul) {
 	validate.init(id, meta[id].value, validator, function(value, valid) {
 		var label = $("#update_" + id).parent("label");
 		var changed = value != meta[id].autodetected;
-		var allowWriteBack = branchDependent ? canWriteBack() : true;
+		var allow = branchDependent ? writeBackProblem() == null : true;
 
-		if (valid && changed && allowWriteBack) {
+		if (valid && changed && allow) {
 			update.prop("disabled", false);
 			label.removeClass("text-muted");
 		} else {
@@ -80,6 +86,14 @@ function initFields(info) {
 			if (!action)
 				return;
 			$("[data-master]").text(action.ref.type + " " + action.ref.name);
+			var problem = writeBackProblem();
+			if (problem) {
+				$("[data-noproblem]").css("text-decoration", "line-through");
+				$("[data-problem]").text("(" + problem + ")");
+			} else {
+				$("[data-noproblem]").css("text-decoration", "");
+				$("[data-problem]").text("");
+			}
 
 			var ref = action.ref.path;
 			if (!cache[ref]) {
