@@ -140,7 +140,7 @@ public class GitHubProject implements GitProject {
 		args.put("message", commitMessage);
 		args.put("content", Base64Utils.encodeToString(data));
 
-		final UriComponentsBuilder endpoint = rest.uri("/content/" + path);
+		final UriComponentsBuilder endpoint = rest.uri("/contents/" + path);
 		GHFile existing = getFileInfo("heads/" + branch, path);
 		if (existing != null)
 			args.put("sha", existing.sha1);
