@@ -9,10 +9,11 @@ else
 fi
 case "$1" in 
 	-*|"") ;;
-	*) WORKSPAEC="$1"; shift ;; # always allow workspace to be overridden
+	*) WORKSPACE="$1"; shift ;; # always allow workspace to be overridden
 esac
 
 containerize() {
+	mkdir -p $WORKSPACE
 	udocker run --user=$(whoami) --hostauth --hostenv -w "$WORKSPACE" -v "$WORKSPACE" -v "$GITDIR" sara "$@"
 	echo -e "\e[1;34mCONTAINER STOPPED\e[0m"
 }
