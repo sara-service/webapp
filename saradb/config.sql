@@ -94,7 +94,7 @@ INSERT INTO repository_params(id, param, value) VALUES
 
 -- Official OPARU test system
 INSERT INTO repository(display_name, adapter, url, contact_email, enabled) VALUES
-        ('OPARU Test', 'DSpace_v6', demo_dspace, 'help@oparu.uni-ulm.de', TRUE)
+        ('OPARU Test', 'DSpace_v6', oparu_test, 'help@oparu.uni-ulm.de', TRUE)
         RETURNING uuid INTO rRef4;
 INSERT INTO repository_params(id, param, value) VALUES
        (rRef4, 'rest_user', 'project-sara@uni-konstanz.de'),
@@ -102,7 +102,10 @@ INSERT INTO repository_params(id, param, value) VALUES
        (rRef4, 'rest_api_endpoint', oparu_test || '/rest'),
        (rRef4, 'sword_user', 'project-sara@uni-konstanz.de'),
        (rRef4, 'sword_pwd', 'SaraTest'),
-       (rRef4, 'sword_api_endpoint', oparu_test || '/swordv2');
+       (rRef4, 'sword_api_endpoint', oparu_test || '/swordv2'),
+       (rRef4, 'deposit_type', 'workspace'),
+       (rRef4, 'name_regex', '^([^,]*)\p{Z}+([^\p{Z},]+)$'),
+       (rRef4, 'name_replace', '$2, $1');
 
 -- Stefan's OPARU Stand-In in bwCloud 
 INSERT INTO repository(display_name, adapter, url, contact_email, help, enabled, logo_url) VALUES
