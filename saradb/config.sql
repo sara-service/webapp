@@ -19,7 +19,7 @@ DECLARE arbeitsgitlab text  := 'demogitlab.sara-service.org';
 DECLARE stefansgitlab text  := 'bwcloud-vm92.rz.uni-ulm.de';
 DECLARE demo_dspace text    := 'https://demo-dspace.sara-service.org';
 DECLARE testarchiv text     := 'testarchiv.sara-service.org';
-DECLARE oparu_demo text     := 'https://devel-dspace.sara-service.org';
+DECLARE oparu_demo text     := 'https://oparu-devel.sara-service.org';
 DECLARE kops_demo text      := 'https://kops.uni-konstanz.de';
 DECLARE oparu_test text     := 'https://bib-test.rz.uni-ulm.de';
 
@@ -126,8 +126,8 @@ INSERT INTO repository_params(id, param, value) VALUES
 --	(rRef, 'force_onbehalf', '1'),
 --	(rRef, 'workflow_type', 'login_required');
 
-INSERT INTO metadatamapping (repository_uuid, display_name, map_from, map_to, enabled) VALUES
-        (rRef, 'submitter as dc.contributor', 'sara-submitter', 'contributor', TRUE);
+--INSERT INTO metadatamapping (repository_uuid, display_name, map_from, map_to, enabled) VALUES
+--        (rRef, 'submitter as dc.contributor', 'sara-submitter', 'contributor', FALSE);
 
 -- Fake KOPS (only for show; this doesn't work)
 INSERT INTO repository(display_name, adapter, url, contact_email, enabled, logo_url) VALUES
