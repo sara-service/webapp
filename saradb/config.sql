@@ -19,7 +19,7 @@ DECLARE arbeitsgitlab text  := 'demogitlab.sara-service.org';
 DECLARE stefansgitlab text  := 'bwcloud-vm92.rz.uni-ulm.de';
 DECLARE demo_dspace text    := 'https://demo-dspace.sara-service.org';
 DECLARE testarchiv text     := 'testarchiv.sara-service.org';
-DECLARE oparu_demo text     := 'https://oparu-devel.sara-service.org';
+DECLARE oparu_demo text     := 'https://oparu-beta.sara-service.org';
 DECLARE kops_demo text      := 'https://kops.uni-konstanz.de';
 DECLARE oparu_test text     := 'https://bib-test.rz.uni-ulm.de';
 
