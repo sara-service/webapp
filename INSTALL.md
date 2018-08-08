@@ -92,7 +92,8 @@
 ## Build and deploy the actual webapp
 
 - install Tomcat (`sudo apt install tomcat8`)
-- enable AJP listener in `/etc/tomcat8/server.xml`, or just replace the whole thing with
+- enable an AJP listener on port 8009 in `/etc/tomcat8/server.xml`, or just replace the whole file with
+
 ```xml
 <?xml version='1.0' encoding='utf-8'?>
 <Server port="8005" shutdown="SHUTDOWN">
@@ -120,6 +121,7 @@
   </Service>
 </Server>
 ```
+
 - *build the WAR: `mvn clean install`
 - *copy `target/SaraServer-*.war` to `/var/lib/tomcat8/webapps/SaraServer.war` on server
 - copy `src/main/webapp/META-INF/context.xml` to `/etc/tomcat8/Catalina/localhost/SaraServer.xml` on server
