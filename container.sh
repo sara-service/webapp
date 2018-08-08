@@ -7,9 +7,9 @@ if [ -d "../eclipseconfig" ]; then
 else
 	WORKSPACE=/tmp/sara
 fi
-case "$1" in 
+case "$1" in
 	-*|"") ;;
-	*) WORKSPACE="$1"; shift ;; # always allow workspace to be overridden
+	*) WORKSPACE=$(cd "$1" && pwd); shift ;; # always allow workspace to be overridden
 esac
 
 containerize() {
@@ -32,7 +32,7 @@ eclipse() {
 	echo " 5) Congrats ... you're done!"
 	echo -e '\e[0m'
 	containerize /opt/eclipse/eclipse -configuration "$WORKSPACE/eclipseconfig" -data "$WORKSPACE" "$@"
-}	
+}
 
 case "$1" in
 	-*|"") eclipse "$@" ;; # no command, maybe optional args
