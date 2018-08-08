@@ -91,12 +91,12 @@
 
 ## Build and deploy the actual webapp
 
-- install Tomcat (`sudo apt install tomcat7`)
+- install Tomcat (`sudo apt install tomcat8`)
 - build the WAR: `mvn clean install`
-- copy `target/SaraServer-1.0-SNAPSHOT.war` to `/var/lib/tomcat7/webapps/SaraServer.war` on server
-- copy `src/main/webapp/META-INF/context.xml` to `/etc/tomcat7/Catalina/localhost/SaraServer.xml` on server
+- copy `target/SaraServer-*.war` to `/var/lib/tomcat8/webapps/SaraServer.war` on server
+- copy `src/main/webapp/META-INF/context.xml` to `/etc/tomcat8/Catalina/localhost/SaraServer.xml` on server
 - configure `SaraServer.xml` (database and `sara.webroot`)
-- restart tomcat (`sudo service tomcat7 restart`) and check `/var/log/tomcat7/catalina.out` for error messages
+- restart tomcat (`sudo service tomcat8 restart`) and check `/var/log/tomcat8/catalina.out` for error messages
 - it should now be running (and working) at `https://saradomain/`
 
 ## Add a few IRs
