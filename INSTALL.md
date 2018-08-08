@@ -122,14 +122,14 @@
 </Server>
 ```
 
-- *build the WAR: `mvn clean install`
-- *copy `target/SaraServer-*.war` to `/var/lib/tomcat8/webapps/SaraServer.war` on server
+- ⏵build the WAR: `mvn clean install`
+- ⏵copy `target/SaraServer-*.war` to `/var/lib/tomcat8/webapps/SaraServer.war` on server
 - copy `src/main/webapp/META-INF/context.xml` to `/etc/tomcat8/Catalina/localhost/SaraServer.xml` on server
 - configure `SaraServer.xml` (database and `sara.webroot`)
-- *restart tomcat (`sudo service tomcat8 restart`) and check `/var/log/tomcat8/catalina.out` for error messages
-- *it should now be running (and working) at `https://saradomain/`
+- ⏵restart tomcat (`sudo service tomcat8 restart`) and check `/var/log/tomcat8/catalina.out` for error messages
+- ⏵it should now be running (and working) at `https://saradomain/`
 
-to redeploy, repeat only the steps marked *
+to redeploy, repeat only the steps marked ⏵
 
 ## Add a few IRs
 
