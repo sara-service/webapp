@@ -83,7 +83,7 @@
 	SSLCertificateKeyFile /etc/letsencrypt/live/saradomain/privkey.pem
 ```
 - reload apache (`sudo service apache2 reload`)
-- visit `https://www.ssllabs.com/ssltest/analyze.html?d=saradomain` (replacing `saradomain` in URL!). if you don't get at least a "B", apply config from https://mozilla.github.io/server-side-tls/ssl-config-generator/
+- visit `https://www.ssllabs.com/ssltest/analyze.html?d=saradomain` (replacing `saradomain` in URL!). if you don't get at least a "B", apply config from https://mozilla.github.io/server-side-tls/ssl-config-generator/ . if you do get a "B", apply that config anyway.
 - set up periodic renewal: create `/etc/cron.d/letsencrypt` containing
 ```cron
 15 3 * * * root /usr/bin/letsencrypt renew && service apache2 reload
@@ -92,12 +92,40 @@
 ## Build and deploy the actual webapp
 
 - install Tomcat (`sudo apt install tomcat8`)
-- build the WAR: `mvn clean install`
-- copy `target/SaraServer-*.war` to `/var/lib/tomcat8/webapps/SaraServer.war` on server
+- enable AJP listener in `/etc/tomcat8/server.xml`, or just replace the whole thing with
+```xml
+<?xml version='1.0' encoding='utf-8'?>
+<Server port="8005" shutdown="SHUTDOWN">
+  <Listener className="org.apache.catalina.startup.VersionLoggerListener" />
+  <!-- Prevent memory leaks due to use of particular java/javax APIs-->
+  <Listener className="org.apache.catalina.core.JreMemoryLeakPreventionListener" />
+  <Listener className="org.apache.catalina.mbeans.GlobalResourcesLifecycleListener" />
+  <Listener className="org.apache.catalina.core.ThreadLocalLeakPreventionListener" />
+
+  <Service name="Catalina">
+    <!-- AJP Connector on port 8009, configured analogous to the default HTTP connector. -->
+    <Connector port="8009" address="127.0.0.1" protocol="AJP/1.3"
+		connectionTimeout="20000" URIEncoding="UTF-8"
+		redirectPort="8443" />
+    <Engine name="Catalina" defaultHost="localhost">
+      <!-- don't unpack or auto-deplay. unpacking tends to override newer WARs; auto-deploy
+           is rumored to be slow. -->
+      <Host name="localhost" appBase="webapps" unpackWARs="false" autoDeploy="true">
+        <Valve className="org.apache.catalina.valves.AccessLogValve" directory="logs"
+               prefix="localhost_access" suffix=".log" fileDateFormat=""
+               pattern="%h %l %u %t &quot;%r&quot; %s %b"
+               rotatable="false" checkExists="true" />
+      </Host>
+    </Engine>
+  </Service>
+</Server>
+```
+- *build the WAR: `mvn clean install`
+- *copy `target/SaraServer-*.war` to `/var/lib/tomcat8/webapps/SaraServer.war` on server
 - copy `src/main/webapp/META-INF/context.xml` to `/etc/tomcat8/Catalina/localhost/SaraServer.xml` on server
 - configure `SaraServer.xml` (database and `sara.webroot`)
-- restart tomcat (`sudo service tomcat8 restart`) and check `/var/log/tomcat8/catalina.out` for error messages
-- it should now be running (and working) at `https://saradomain/`
+- *restart tomcat (`sudo service tomcat8 restart`) and check `/var/log/tomcat8/catalina.out` for error messages
+- *it should now be running (and working) at `https://saradomain/`
 
 ## Add a few IRs
 
