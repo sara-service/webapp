@@ -129,6 +129,8 @@
 - *restart tomcat (`sudo service tomcat8 restart`) and check `/var/log/tomcat8/catalina.out` for error messages
 - *it should now be running (and working) at `https://saradomain/`
 
+to redeploy, repeat only the steps marked *
+
 ## Add a few IRs
 
 this is trivial
