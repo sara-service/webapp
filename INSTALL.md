@@ -75,7 +75,7 @@
 </VirtualHost>
 ```
 - enable sites and modules: `sudo a2dissite 000-default`, `sudo a2ensite redirect proxy`, `sudo a2enmod proxy_ajp ssl`, then restart Apache
-- install Letsencrypt (`sudo apt install letsencrypt`)
+- install Letsencrypt (`sudo apt install letsencrypt`), create webroot (`sudo mkdir -p /var/www/letsencrypt`)
 - get SSL certificate: `sudo letsencrypt certonly --webroot -w /var/www/letsencrypt -d saradomain`
 - edit `/etc/apache2/sites-available/proxy.conf`. delete the snakeoil lines and set
 ```apache
