@@ -14,4 +14,12 @@ dbtest:
   image: postgres:10.4
   script:
     - pg_createcluster --start 10 main
-    - gosu postgres saradb/testdb.sh
+    - gosu postgres saradb/initdb.sh </dev/null
+
+deploy:
+  stage: deploy
+  script:
+    - chmod 600 .deploy.key
+    - ssh -o UserKnownHostsFile=.deploy.known -i .deploy.key deploy@test.sara-service.org
+  only:
+    - test
