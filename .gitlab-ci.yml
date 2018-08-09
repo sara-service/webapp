@@ -1,0 +1,17 @@
+image: maven:3.5.4-jdk-8
+
+maven:
+  stage: build
+  before_script:
+    - mkdir -p /cache/m2
+    - ln -s /cache/m2 ~/.m2/repository || true
+  script: mvn clean install -DskipTests
+  artifacts:
+    paths:
+      - target/SaraServer-*.war
+
+dbtest:
+  image: postgres:10.4
+  script:
+    - pg_createcluster --start 10 main
+    - gosu postgres saradb/testdb.sh

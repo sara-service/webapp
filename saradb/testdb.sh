@@ -1,6 +1,6 @@
 #!/bin/bash -ex
-pg_dropcluster --stop 10 main || true
-pg_createcluster --start 10 main
+BASEDIR=$(readlink -f $(dirname "$0"))
+cd $BASEDIR
 
 createuser -l -D -R -S sara
 createdb -E UTF8 -O sara sara
