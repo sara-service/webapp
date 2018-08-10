@@ -1,10 +1,9 @@
 package bwfdm.sara.auth;
 
 import java.security.SecureRandom;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
-
-import javax.xml.bind.DatatypeConverter;
 
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -84,7 +83,7 @@ public class OAuthCode {
 		// some randomness to avoid CSRF
 		final byte[] random = new byte[10];
 		RNG.nextBytes(random);
-		state = DatatypeConverter.printBase64Binary(random);
+		state = Base64.getUrlEncoder().encodeToString(random);
 
 		// standard OAuth query
 		for (String attr : customAttributes.keySet())
