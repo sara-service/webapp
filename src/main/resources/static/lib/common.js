@@ -45,7 +45,6 @@ APIERR.handleOther = function(step, exception, message) {
 APIERR.handleJSON = function(step, info) {
 	if (info.exception == "NoSessionException") {
 		window.alert("Session expired!"
-			+ " (You didn't leave the tab open overnight, did you?)"
 			+ "\n\nYour progress has been saved. Please go through"
 			+ " the workflow once again and check that all fields"
 			+ " are the way you left them!");
@@ -68,11 +67,10 @@ APIERR.handleJSON = function(step, info) {
 		return;
 	}
 	if (info.exception == "ProjectCompletedException") {
-		window.alert("Your software artefact has already been archived!");
 		// redirect the user to "done" page, where he can start a publication.
 		// safe to just concatenate query string here; the item UUID cannot
 		// contain anything dangerous because it's only hex digits and dashes.
-		location.href = "/done.html?item=" + info.itemID;
+		location.replace("/done.html?item=" + info.itemID);
 		return;
 	}
 	APIERR.handleOther(step, info.exception, info.message);
