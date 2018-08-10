@@ -2,4 +2,4 @@
 .project
 .settings/
 target/
-temp.sql
+database.sql

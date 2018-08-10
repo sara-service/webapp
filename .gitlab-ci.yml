@@ -10,16 +10,25 @@ maven:
     paths:
       - target/SaraServer-*.war
 
-dbtest:
+postgres:
+  stage: build
   image: postgres:10.4
   script:
     - pg_createcluster --start 10 main
-    - gosu postgres saradb/initdb.sh </dev/null
+    - gosu postgres saradb/createdb.sh sara sara test </dev/null
+    - gosu postgres pg_dump --no-password --serializable-deferrable 
+      --quote-all-identifiers --no-tablespaces --no-owner --encoding utf8
+      --format plain sara >database.sql
+  artifacts:
+    paths:
+      - database.sql
 
 deploy:
   stage: deploy
   script:
     - chmod 600 .deploy.key
-    - ssh -o UserKnownHostsFile=.deploy.known -i .deploy.key deploy@test.sara-service.org
+    - export SSH='ssh -o UserKnownHostsFile=.deploy.known -i .deploy.key deploy@test.sara-service.org'
+    - $SSH tomcat <target/SaraServer-*.war
+    - $SSH postgres <database.sql
   only:
     - test
