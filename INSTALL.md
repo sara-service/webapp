@@ -47,7 +47,7 @@
 
 	<Location />
 		ProxyPass "ajp://localhost:8009/SaraServer/"
-		ProxyPassReverseCookiePath "/SaraServer/" "/"
+		ProxyPassReverseCookiePath "/SaraServer" "/"
 	</Location>
 	# handle Shibboleth locally
 	# FIXME we'll probably not need this
