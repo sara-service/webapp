@@ -2,6 +2,8 @@ image: maven:3.5.4-jdk-8
 
 maven:
   stage: build
+  variables:
+    GIT_SUBMODULE_STRATEGY: normal
   before_script:
     - mkdir -p /cache/m2
     - ln -s /cache/m2 ~/.m2/repository || true
