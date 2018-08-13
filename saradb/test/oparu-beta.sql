@@ -9,7 +9,7 @@ DECLARE oparu_logo oid := lo_import(base_dir || '/oparu.svg');
 
 DECLARE oparu_demo text     := 'https://oparu-beta.sara-service.org';
 
-DECLARE demo_dspace_help text := 'Sie werden nun direkt zu OPARU weitergeleitet. Loggen Sie sich ein, klicken Sie auf "Veröffentlichung aufnehmen", ergänzen Sie die Metadaten und schicken Sie die Veröffentlichung ab. Wir prüfen Ihre Einreichung und melden uns ggf. bei Ihnen. Ist alles in Ordnung, wird Ihre Veröffentlichung in OPARU freigeschaltet und Sie erhalten eine Nachricht von uns.';
+DECLARE demo_dspace_help text := 'You will now be redirected to the Institutional repository of Demo University. Please login, click "Resume" and submit the publication. You can edit metadata if necessary. Your submission will then be reviewed, and you will be notified as soon as it has been approved.';
 
 DECLARE rRef UUID;
 
@@ -17,7 +17,8 @@ BEGIN
 
 -- Stefan's OPARU Stand-In in bwCloud 
 INSERT INTO repository(display_name, adapter, url, contact_email, help, enabled, logo_url) VALUES
-	('OPARU Devel', 'DSpace_v6', oparu_demo || '/xmlui', 'help@oparu.uni-ulm.de', demo_dspace_help, TRUE,
+	('Demo University DSpace', 'DSpace_v6', oparu_demo || '/xmlui',
+		'project-sara+oparu-beta@uni-konstanz.de', demo_dspace_help, TRUE,
 		'data:image/svg+xml;base64,' || encode(lo_get(oparu_logo), 'base64'))
 	RETURNING uuid INTO rRef;
 INSERT INTO repository_params(id, param, value) VALUES
