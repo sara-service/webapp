@@ -251,13 +251,8 @@ public class PushTask extends Task {
 		i.item_state = ItemState.CREATED.name();
 		i.item_state_sent = i.item_state;
 
-		if (job.isArchiveOnly) {
-			i.item_type = ItemType.ARCHIVE_HIDDEN.name();
-		} else {
-			i.item_type = ItemType.ARCHIVE_PUBLIC.name();
-			// TODO make configurable via saradb whether items will be archived
-			// externally or within the IRs
-		}
+		// FIXME change set of item states in publication part?
+		i.item_type = ItemType.ARCHIVE_HIDDEN.name();
 
 		i.source_user_id = job.sourceUserID;
 		i.contact_email = job.gitrepoEmail;

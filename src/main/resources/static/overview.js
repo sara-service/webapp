@@ -1,21 +1,15 @@
 "use strict";
 
 var publish = {
-	PUBLISH_FULL: {
+	FULL: {
 		sara: "sara-green",
-		text: "publish full history of" },
-	PUBLISH_ABBREV: {
+		text: "full history of" },
+	ABBREV: {
 		sara: "sara-blue",
-		text: "publish abbreviated history of" },
-	PUBLISH_LATEST: {
+		text: "abbreviated history of" },
+	LATEST: {
 		sara: "sara-red",
-		text: "publish latest version of" },
-	ARCHIVE_PUBLIC: {
-		sara: "sara-orange",
-		text: "archive with public record" },
-	ARCHIVE_HIDDEN: {
-		sara: "sara-cyan",
-		text: "archive without record" }
+		text: "latest version of" },
 };
 
 function initBranches(info) {

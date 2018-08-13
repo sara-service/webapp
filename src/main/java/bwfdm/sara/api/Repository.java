@@ -66,7 +66,7 @@ public class Repository {
 			for (final RefInfo r : refs)
 				if (r.isProtected || r.isDefault)
 					actionList.add(
-							new RefAction(r.ref, PublicationMethod.PUBLISH_FULL,
+							new RefAction(r.ref, PublicationMethod.FULL,
 									RefAction.HEAD_COMMIT));
 			db.setRefActions(actionList);
 			// the user didn't change the list of branches, but we did. he will

@@ -32,7 +32,7 @@ function addBranch(branch) {
 	// default to publishing everything the user adds, because that's
 	// what we prefer.
 	if (!branch.action)
-		branch.action = { publish: "PUBLISH_FULL", firstCommit: "HEAD" };
+		branch.action = { publish: "FULL", firstCommit: "HEAD" };
 	// remove the name attributes, forcing validate.all to use the unique
 	// element ID as a key for the dropdown's value.
 	form.action.removeAttr("name");

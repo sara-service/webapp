@@ -72,8 +72,6 @@ public class Push {
 
 		final PushTask push = project.getPushTask();
 		redir.addAttribute("item", push.getItemUUID());
-		if (push.getArchiveJob().isArchiveOnly)
-			return new RedirectView("/done.html");
-		return new RedirectView("/api/auth/publish");
+		return new RedirectView("/done.html");
 	}
 }

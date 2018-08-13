@@ -138,8 +138,7 @@ CREATE TABLE fe_temp_actions(
 	ref text NOT NULL,
 	action text NOT NULL,
 	start text NOT NULL,
-	CHECK (action IN ('PUBLISH_FULL', 'PUBLISH_ABBREV', 'PUBLISH_LATEST',
-			'ARCHIVE_PUBLIC', 'ARCHIVE_HIDDEN')),
+	CHECK (action IN ('FULL', 'ABBREV', 'LATEST')),
 	PRIMARY KEY (repo, project, uid, ref)
 );
 

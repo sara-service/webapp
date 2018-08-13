@@ -19,7 +19,6 @@ import bwfdm.sara.extractor.LicenseFile;
 import bwfdm.sara.extractor.MetadataExtractor;
 import bwfdm.sara.git.GitProject;
 import bwfdm.sara.project.LicensesInfo.LicenseInfo;
-import bwfdm.sara.project.RefAction.PublicationMethod;
 import bwfdm.sara.transfer.TransferRepo;
 
 /** Data class containing all the information needed to archive an item. */
@@ -36,8 +35,6 @@ public class ArchiveJob {
 	private List<RefAction> actions;
 	@JsonProperty
 	public final List<Ref> selectedRefs;
-	@JsonProperty
-	public final boolean isArchiveOnly;
 	@JsonProperty
 	public final Map<MetadataField, String> meta;
 	@JsonProperty
@@ -87,11 +84,8 @@ public class ArchiveJob {
 			}
 		});
 		selectedRefs = new ArrayList<Ref>(actions.size());
-		boolean isArchiveOnly = true;
 		for (RefAction action : actions) {
 			selectedRefs.add(action.ref);
-			if (action.publicationMethod != PublicationMethod.ARCHIVE_HIDDEN)
-				isArchiveOnly = false;
 			// path implicitly checked by Ref constructor
 			if ( action.publicationMethod == null)
 				throw new IllegalArgumentException(
@@ -102,7 +96,6 @@ public class ArchiveJob {
 		if (actions.isEmpty())
 			throw new IllegalArgumentException(
 					"no branches selected for publication");
-		this.isArchiveOnly = isArchiveOnly;
 		clone = project.getTransferRepo();
 		// meta.html
 		meta = metadataExtractor.get(MetadataField.values());

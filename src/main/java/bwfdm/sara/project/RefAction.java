@@ -32,7 +32,7 @@ public class RefAction {
 	}
 
 	public enum PublicationMethod {
-		PUBLISH_FULL, PUBLISH_ABBREV, PUBLISH_LATEST, ARCHIVE_PUBLIC, ARCHIVE_HIDDEN
+		FULL, ABBREV, LATEST
 	}
 
 	@Override

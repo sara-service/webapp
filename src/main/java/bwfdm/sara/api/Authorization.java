@@ -57,7 +57,7 @@ public class Authorization {
 		// if existing project is done; don't show a message that it isn't!
 		if (existingProject.isDone()) {
 			// if archive-only, ignore publication part
-			if (existingProject.getPushTask().getArchiveJob().isArchiveOnly)
+			if (existingProject.isPublicationDeclined())
 				return false;
 			// if the user wanted to publish but didn't even start yet, that's
 			// definitey pushy behavior.

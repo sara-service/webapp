@@ -250,6 +250,11 @@ public class Project {
 		return push.isDone();
 	}
 
+	public boolean isPublicationDeclined() {
+		// FIXME actually ask the user about that one
+		return true;
+	}
+
 	/**
 	 * Get the {@link Project} instance associated with the given
 	 * {@link HttpSession}.
