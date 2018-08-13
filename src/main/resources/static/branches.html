@@ -77,14 +77,19 @@
 	<form class="form-horizontal" id="branches">
 		<div class="form-group has-feedback hidden" id="template">
 			<label class="col-sm-2 control-label" name="branch_label">branch master</label>
-			<div class="col-sm-6 nopad">
+			<div class="col-sm-6 nopad hidden" name="commit_select">
 				<label for="template_commit" class="control-label sr-only">starting point</label>
 				<select class="form-control" name="commit">
-					<option value="HEAD" selected>starting at most recent commit (HEAD of this branch)</option>
+					<option value="HEAD" name="head" selected>start at most recent commit (HEAD of this branch)</option>
 					<option disabled>… loading list of commits …</option>
 				</select>
 				<span class="form-control-feedback" aria-hidden="true"></span>
 				<span class="form-control-feedback-text text-danger hidden"></span>
+			</div>
+			<div class="col-sm-6 nopad" name="commit_display">
+				<div name="commit_info" class="text-muted">loading commit info</div>
+				<div><a name="commit_edit" href="#">pick an older commit as starting point (rewind branch)</a></div>
+				<div name="commit_norewind" class="hidden text-muted">nope!</div>
 			</div>
 			<div class="col-sm-3 nopad">
 				<label for="template_action" class="control-label sr-only">action</label>
