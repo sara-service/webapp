@@ -8,7 +8,7 @@ BEGIN
 
 -- Matthias' bwCloud GitLab (arbeits-gitlab.unikn.netfuture.ch)
 INSERT INTO source(display_name, contact_email, adapter, url, enabled) VALUES
-	('Generisches Arbeits-GitLab (bwCloud Konstanz)', 'devnull@' || arbeitsgitlab,
+	('Generisches Arbeits-GitLab (bwCloud Konstanz)', 'project-sara+demogitlab@uni-konstanz.de',
 		'GitLabRESTv4', 'https://' || arbeitsgitlab, TRUE)
 	RETURNING uuid INTO sRef;
 INSERT INTO source_params(id, param, value) VALUES
