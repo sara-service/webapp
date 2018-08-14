@@ -118,6 +118,10 @@ function updateCollections(_, valid) {
 			selectedCollection = initialCollection;
 		collection.empty();
 		setCollectionList(collection, "", userInfo.hierarchy);
+
+		var option = $("<option>").text("<Please click here to select a collection>").attr('disabled','disabled');
+		collection.append(option); collection.val(option.text());
+
 		collection.val(selectedCollection); // restore selection
 		collection_displayname = collection.find('option:selected').text();
 	} else
