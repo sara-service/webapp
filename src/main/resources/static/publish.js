@@ -119,11 +119,15 @@ function updateCollections(_, valid) {
 		collection.empty();
 		setCollectionList(collection, "", userInfo.hierarchy);
 
-		var option = $("<option>").text("<Please click here to select a collection>").attr('disabled','disabled');
-		collection.append(option); collection.val(option.text());
-
-		collection.val(selectedCollection); // restore selection
+		// restore selection if one existed
+		collection.val(selectedCollection);
 		collection_displayname = collection.find('option:selected').text();
+
+		if (collection_displayname == "") {
+			var option = $("<option>").text("<Please click here to select a collection>").attr('disabled','disabled');
+			collection.append(option); collection.val(option.text());
+		}
+
 	} else
 		collection.prop("disabled", true);
 }
