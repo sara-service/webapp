@@ -111,7 +111,7 @@
     <Engine name="Catalina" defaultHost="localhost">
       <!-- don't unpack or auto-deplay. unpacking tends to override newer WARs; auto-deploy
            is rumored to be slow. -->
-      <Host name="localhost" appBase="webapps" unpackWARs="false" autoDeploy="true">
+      <Host name="localhost" appBase="webapps" unpackWARs="true" autoDeploy="true">
         <Valve className="org.apache.catalina.valves.AccessLogValve" directory="logs"
                prefix="localhost_access" suffix=".log" fileDateFormat=""
                pattern="%h %l %u %t &quot;%r&quot; %s %b"
