@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 
+import bwfdm.sara.db.FrontendDatabase;
+import bwfdm.sara.project.ArchiveAccessMode;
 import bwfdm.sara.project.ArchiveJob;
 import bwfdm.sara.project.Project;
 import bwfdm.sara.transfer.PushTask;
@@ -57,20 +59,45 @@ public class Push {
 		return Project.getInstance(session).getArchiveJob();
 	}
 
-	@GetMapping("redirect")
-	public RedirectView redirectAfterArchiving(final HttpSession session,
-			final RedirectAttributes redir) {
+	@PostMapping("commit")
+	public void commitToArchive(
+			@RequestParam("access") final ArchiveAccessMode access,
+			@RequestParam("record") final boolean record,
+			final HttpSession session, final RedirectAttributes redir) {
 		final Project project = Project.getCompletedInstance(session);
 		if (!project.isDone())
 			// TODO or maybe just redirect to push.html instead?
 			// beware infinite loops though if "done" detection fails
 			throw new IllegalStateException(
-					"finishArchiving before push is done");
+					"commitToArchive before push is done");
 
-		// FIXME kill Project so everything just redirects to END
-		// TODO and also get rid of the TransferRepo!
+		project.getFrontendDatabase().setArchiveAccess(access, record);
+		project.getPushTask().commitToArchive(access);
+		project.getTransferRepo().dispose();
+	}
+
+	@GetMapping("redirect")
+	public RedirectView redirectAfterArchiving(final HttpSession session,
+			final RedirectAttributes redir) {
+		final Project project = Project.getCompletedInstance(session);
+		if (!project.isDone())
+			throw new IllegalStateException(
+					"redirectAfterArchiving before push is done");
 
 		final PushTask push = project.getPushTask();
+		final FrontendDatabase db = project.getFrontendDatabase();
+		if (db.getArchiveAccess() == ArchiveAccessMode.PRIVATE) {
+			redir.addAttribute("item", push.getItemUUID());
+			redir.addAttribute("token", push.getAccessToken());
+			return new RedirectView("/token.html");
+		}
+		if (db.getArchiveAccess()!= ArchiveAccessMode.PUBLIC) 
+			throw new UnsupportedOperationException(
+					"access mode " + db.getArchiveAccess());
+		
+		if (db.createPublicationRecord())
+			return new RedirectView("/publish.html");
+
 		redir.addAttribute("item", push.getItemUUID());
 		return new RedirectView("/done.html");
 	}

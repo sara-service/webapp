@@ -35,6 +35,7 @@ import bwfdm.sara.extractor.MetadataExtractor;
 import bwfdm.sara.git.ArchiveProject;
 import bwfdm.sara.git.ArchiveRepo;
 import bwfdm.sara.git.ArchiveRepo.ProjectExistsException;
+import bwfdm.sara.project.ArchiveAccessMode;
 import bwfdm.sara.project.ArchiveJob;
 import bwfdm.sara.project.LicensesInfo.LicenseInfo;
 import bwfdm.sara.project.MetadataField;
@@ -64,6 +65,7 @@ public class PushTask extends Task {
 	private UUID itemUUID;
 	private Map<Ref, String> heads;
 	private Date now;
+	private Item item;
 
 	/**
 	 * @param job
@@ -86,8 +88,7 @@ public class PushTask extends Task {
 	protected void cleanup() {
 		if (project == null || !project.isEmpty())
 			return; // never remove projects that we didn't create!
-		// FIXME SARA user should not need this permission on the archive
-		// FIXME implement create and move workflow so we can remove the project
+		// FIXME impl create-and-move workflow so we can remove project here
 		// project.deleteProject();
 		project = null;
 	}
@@ -245,13 +246,14 @@ public class PushTask extends Task {
 
 	private UUID createItemInDB(final String webURL,
 			Map<MetadataField, String> meta) {
-		Item i = new Item();
+		final Item i = new Item();
 		i.archive_uuid = job.archiveUUID;
 		i.source_uuid = job.sourceUUID;
 		i.item_state = ItemState.CREATED.name();
 		i.item_state_sent = i.item_state;
 
-		// FIXME change set of item states in publication part?
+		// FIXME is it ok to change this later in commitToArchive?
+		// should we only create a "provisional" entry here?
 		i.item_type = ItemType.ARCHIVE_HIDDEN.name();
 
 		i.source_user_id = job.sourceUserID;
@@ -273,11 +275,28 @@ public class PushTask extends Task {
 		// URL where the archive has been deposited
 		i.archive_url = webURL;
 
-		i = pubDB.insertInDB(i);
+		this.item = pubDB.insertInDB(i);
 
 		logger.info("Item submission succeeded with item uuid "
-				+ i.uuid.toString());
-		return i.uuid;
+				+ item.uuid.toString());
+		return item.uuid;
+	}
+
+	public void commitToArchive(ArchiveAccessMode access) {
+		// FIXME implement "move" part of create-and-move workflow here
+
+		switch (access) {
+		case PRIVATE:
+			item.item_type = ItemType.ARCHIVE_HIDDEN.name();
+			break;
+		case PUBLIC:
+			item.item_type = ItemType.ARCHIVE_PUBLIC.name();
+			break;
+		default:
+			throw new UnsupportedOperationException(
+					"archive access mode " + access);
+		}
+		pubDB.updateInDB(item);
 	}
 
 	public ArchiveJob getArchiveJob() {
@@ -289,5 +308,14 @@ public class PushTask extends Task {
 			throw new IllegalStateException(
 					"getItemUUID() on in-progress PushTask");
 		return itemUUID;
+	}
+
+	public String getWebURL() {
+		return project.getWebURL();
+	}
+
+	public String getAccessToken() {
+		// FIXME actually generate token and store it in item
+		return "t0K3n";
 	}
 }

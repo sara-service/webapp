@@ -15,6 +15,7 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import bwfdm.sara.project.ArchiveAccessMode;
 import bwfdm.sara.project.MetadataField;
 import bwfdm.sara.project.Ref;
 import bwfdm.sara.project.RefAction;
@@ -39,6 +40,8 @@ public class FrontendDatabase {
 	private final JacksonTemplate db;
 	private final TransactionTemplate transaction;
 	private Set<MetadataField> update;
+	private Boolean createPublicationRecord;
+	private ArchiveAccessMode access;
 
 	/**
 	 * Creates a DAO for reading / writing values for a particular project.
@@ -123,6 +126,30 @@ public class FrontendDatabase {
 		if (update == null)
 			return Collections.emptySet();
 		return update;
+	}
+
+	public void setArchiveAccess(final ArchiveAccessMode access,
+			final boolean createPublicationRecord) {
+		this.access = access;
+		this.createPublicationRecord = createPublicationRecord;
+	}
+
+	public boolean isPublicationRecordDecided() {
+		return createPublicationRecord != null && access != null;
+	}
+
+	public boolean createPublicationRecord() {
+		if (!isPublicationRecordDecided())
+			throw new IllegalStateException(
+					"we don't yet know whether to create a publciation record or not");
+		return createPublicationRecord;
+	}
+
+	public ArchiveAccessMode getArchiveAccess() {
+		if (!isPublicationRecordDecided())
+			throw new IllegalStateException(
+					"we don't yet know whether to create a publciation record or not");
+		return access;
 	}
 
 	/**

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="icon" href="lib/icon.png" type="image/png"/>
+	<link rel="shortcut icon" href="lib/icon.png" type="image/png"/>
+	<link rel="stylesheet" href="lib/bootstrap.min.css" />
+	<link rel="stylesheet" href="lib/sara.css" />
+	<script src="lib/jquery.min.js"></script>
+	<script src="lib/uri.min.js"></script>
+	<script src="lib/common.js"></script>
+	<script src="access.js"></script>
+	<title>Access rights — SARA software publishing</title>
+</head>
+<body><div class="fluid-container">
+	<div class="row">
+		<div class="col-xs-12">
+			<img src="lib/header.svg" class="logo-header" />
+		</div>
+	</div>
+
+	<div class="row">
+		<div class="col-xs-12 action-header">
+			<h1>Who can access your archived software artefact?</h1>
+		</div>
+	</div>
+
+	<form class="form-horizontal" id="access"><div class="form-group">
+		<div class="col-xs-12 custom-control custom-radio">
+			<input type="radio" name="access" value="public" id="public" class="custom-control-input" checked>
+			<label class="custom-control-label" for="public"><i>publish</i> data in git repo
+				(recommended)</label>
+		</div>
+		<p class="col-xs-12 pad">
+			<b>Everybody will be able to clone</b> the archived git repo
+			and continue working where you left off.
+			You will probably not get famous,
+			but <b>you might get citations</b>
+			for your software artefact
+			if you also create a bibliographical record.
+			Publication cannot be undone.</p>
+		<div class="col-xs-12 custom-control custom-radio">
+			<input type="radio" name="access" value="private" id="private" class="custom-control-input">
+			<label class="custom-control-label" for="private">keep data in git repo <i>private</i></label>
+		</div>
+		<p class="col-xs-12 pad">
+			The archived <b>repo will be inaccessible</b>.
+			You can always make it public later on if you change your mind.
+			Choose this option for <b>data that you want to</b> (or have to) <b>keep private</b>.
+		</p><p class="col-xs-12 pad">
+			You will be given a token
+			you can use to retrieve or publish your data.
+			Store this token securely –
+			you will not be able to access
+			the archived data without it!</p>
+	</div></form>
+	<p class="row" style="height:1ex"></p>
+	<form class="form-horizontal"><div class="form-group">
+		<div class="col-xs-12 custom-control custom-checkbox">
+			<input type="checkbox" class="custom-control-input" id="record" checked>
+			<label class="custom-control-label" for="record">create a bibliographical record
+				for this item (strongly recommended)</label>
+		</div>
+		<p class="col-xs-12 pad">
+			Creating a bibliographical record
+			will make it possible for you and others
+			to <b>cite your archived software artefact</b>.
+			It will also make it much easier to find your software artefact,
+			and <b>may count as a publication</b> in its own right.</p>
+	</div></form>
+
+	<p style="height:3ex"></p>
+	<div class="row">
+		<a class="btn btn-primary col-sm-4 col-sm-offset-8 disabled" id="next_button">next →</a>
+	</div>
+	<p style="height:3ex"></p>
+</div></body>
+</html>

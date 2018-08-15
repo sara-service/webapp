@@ -18,6 +18,7 @@ import org.springframework.web.servlet.view.RedirectView;
 import bwfdm.sara.Config;
 import bwfdm.sara.auth.AuthProvider;
 import bwfdm.sara.auth.ShibAuth;
+import bwfdm.sara.db.FrontendDatabase;
 import bwfdm.sara.git.GitRepo;
 import bwfdm.sara.project.Project;
 import bwfdm.sara.project.PublicationSession;
@@ -54,23 +55,9 @@ public class Authorization {
 	private boolean isPushy(final HttpSession session, final String gitRepo,
 			final String projectPath) {
 		final Project existingProject=Project.getCompletedInstance(session);
-		// if existing project is done; don't show a message that it isn't!
-		if (existingProject.isDone()) {
-			// if archive-only, ignore publication part
-			if (existingProject.isPublicationDeclined())
-				return false;
-			// if the user wanted to publish but didn't even start yet, that's
-			// definitey pushy behavior.
-			// note that this is quite hard to trigger. the user has to close
-			// push.html while it's working, wait for archiving to finish, and
-			// then return to index.html. anything else either doesn't have the
-			// archiving finished yet, or hits the automatic redirect after
-			// archiving which creates a publish session.
-			if (!PublicationSession.hasInstance(session))
-				return true;
-			// if publication not yet finished, show the "pushy" warning
-			return !PublicationSession.getInstance(session).isDone();
-		}
+		// if existing project is done, don't show a message that it isn't!
+		if (isDone(existingProject, session))
+			return false;
 
 		// no project selected yet, so continuing doesn't make sense because
 		// there's nothing to continue with. easy to trigger if the user selects
@@ -91,10 +78,39 @@ public class Authorization {
 			return true;
 
 		// user starting to publish the same project again. there's nothing
-		// wrong with that; in fact the warning could be silly because both
+		// wrong with that; in fact the warning would be silly because both
 		// continuing the existing workflow and starting a new workflow would
 		// archive exactly the same project.
 		return false;
+	}
+
+	private boolean isDone(final Project existingProject,
+			final HttpSession session) {
+		if (!existingProject.isDone())
+				return false;
+
+		// if archive-only, ignore publication part
+		final FrontendDatabase db = existingProject.getFrontendDatabase();
+		if (!db.isPublicationRecordDecided())
+			// user still has to decide whether that's going to be
+			// archive-only or not! ie. not yet done
+			return false;
+		if (!db.createPublicationRecord())
+			// user definitely chose archive-only, so publication part is
+			// done because there isn't any publication part
+			return true;
+
+		// user definitely chose to publish. that is, we now require the
+		// publication part to be done as well.
+		if (!PublicationSession.hasInstance(session))
+			// user wants to publish, but hasn't even started yet.
+			// his is quite hard to trigger: the user has to close push.html
+			// while it's working, wait for archiving to finish, and THEN return
+			// to index.html. anything else either doesn't have the archiving
+			// finished yet, or hits the automatic redirect after archiving
+			// which creates a publish session.
+			return false;
+		return PublicationSession.getInstance(session).isDone();
 	}
 
 	@GetMapping("new")

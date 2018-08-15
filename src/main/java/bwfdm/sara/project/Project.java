@@ -69,7 +69,7 @@ public class Project {
 		this.projectPath = projectPath;
 		project = null;
 		db = null;
-		disposeTransferRepo();
+		resetTransferRepo();
 	}
 
 	public void initializeProject() {
@@ -79,7 +79,7 @@ public class Project {
 		// if the project changes, the transferRepo doesn't just become
 		// outdated, it becomes completely invalid, and we'll have to recreate
 		// it completely.
-		disposeTransferRepo();
+		resetTransferRepo();
 	}
 
 	public synchronized String getProjectPath() {
@@ -177,13 +177,18 @@ public class Project {
 		// case.
 	}
 
-	public void disposeTransferRepo() {
+	/**
+	 * Resets the transfer repo to a state where it can be used for another
+	 * clone.
+	 */
+	public void resetTransferRepo() {
 		invalidateMetadata();
 		// cancelling the CloneTask is always possible, even after it has
 		// finished, and will always clean up the TransferRepo.
 		if (clone != null)
 			clone.cancel();
 		clone = null;
+		transferRepo.dispose();
 		transferRepo = null;
 		metadataExtractor = null;
 	}
@@ -248,11 +253,6 @@ public class Project {
 		if (push == null)
 			return false;
 		return push.isDone();
-	}
-
-	public boolean isPublicationDeclined() {
-		// FIXME actually ask the user about that one
-		return true;
 	}
 
 	/**
