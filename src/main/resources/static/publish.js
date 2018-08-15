@@ -167,7 +167,7 @@ function initPubRepos(info) {
 
 	validate.init("collection", null, function(value) {
 		if (value == null || queryHierarchy() == null)
-			return "Please select a collection (usually, your department)!";
+			return "Please select a collection!";
 		return true;
 	});
 	initialCollection = info.meta.collection;
