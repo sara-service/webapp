@@ -5,11 +5,11 @@ DO $$
 
 DECLARE base_dir text := (SELECT basedir from args LIMIT 1);
 
-DECLARE oparu_logo oid := lo_import(base_dir || '/oparu.svg');
+DECLARE oparu_logo oid := lo_import(base_dir || '/dspace.svg');
 
 DECLARE oparu_demo text     := 'https://oparu-beta.sara-service.org';
 
-DECLARE demo_dspace_help text := 'You will now be redirected to the Institutional repository of Demo University. Please login, click "Resume" and submit the publication. You can edit metadata if necessary. Your submission will then be reviewed, and you will be notified as soon as it has been approved.';
+DECLARE demo_dspace_help text := 'Now you will be asked to review your publication. Please login the institutional repository of Demo University and click on "Resume". You can edit metadata if necessary. Your submission will then be reviewed, and you will be notified by email as soon as it has been approved.';
 
 DECLARE rRef UUID;
 

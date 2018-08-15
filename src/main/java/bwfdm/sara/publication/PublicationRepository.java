@@ -11,6 +11,18 @@ import java.io.File;
 import java.util.Map;
 
 public interface PublicationRepository {
+	
+	public class SubmissionInfo {
+		public SubmissionInfo() {
+			item_ref = null;
+			edit_ref = null;
+		}
+		// identifier to refer to the item (internally for the IR)
+		public String item_ref;
+		// link for submitters to edit their items metadata
+		// may be "null" which means they can't make changes afterwards!
+		public String edit_ref; 
+	}
 
 	/**
 	 * Check if publication repository is accessible via API
@@ -74,7 +86,7 @@ public interface PublicationRepository {
 	 * @param metadataMap
 	 * @return
 	 */
-	public String publishMetadata(String userLogin, String collectionURL,
+	public SubmissionInfo publishMetadata(String userLogin, String collectionURL,
 			Map<String, String> metadataMap);
 		
 	/**
