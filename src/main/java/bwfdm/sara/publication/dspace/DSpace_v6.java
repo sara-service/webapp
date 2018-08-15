@@ -327,7 +327,7 @@ public class DSpace_v6 implements PublicationRepository {
 	}
 
 	@Override
-	public String publishMetadata(String userLogin, String collectionURL,
+	public SubmissionInfo publishMetadata(String userLogin, String collectionURL,
 			Map<String, String> metadataMap) {
 
 		String mimeFormat = "application/atom+xml";
@@ -337,9 +337,11 @@ public class DSpace_v6 implements PublicationRepository {
 				packageFormat, null, metadataMap);
 	}
 
-	private String publishElement(String userLogin, String collectionURL,
+	private SubmissionInfo publishElement(String userLogin, String collectionURL,
 			String mimeFormat, String packageFormat, File file,
 			Map<String, String> metadataMap) {
+		
+		SubmissionInfo submissionInfo = new SubmissionInfo();
 
 		// Check if only 1 parameter is used (metadata OR file).
 		// Multipart is not supported.
@@ -413,8 +415,11 @@ public class DSpace_v6 implements PublicationRepository {
 
 			String[] parts = receipt.getLocation().split("/");
 
-			// FIXME Beware, evil hack. will need to rewrite whole class for Beta anyways...
-			return receipt.getSplashPageLink().getHref() + "|" + parts[parts.length-1];
+			if (receipt.getSplashPageLink() != null) {
+				submissionInfo.edit_ref = receipt.getSplashPageLink().getHref();
+			}
+			submissionInfo.item_ref = parts[parts.length-1];
+			return submissionInfo;
 
 		} catch (FileNotFoundException e) {
 			logger.error("Exception by accessing a file: "

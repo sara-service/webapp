@@ -34,6 +34,7 @@ import bwfdm.sara.publication.Item;
 import bwfdm.sara.publication.ItemState;
 import bwfdm.sara.publication.MetadataMapping;
 import bwfdm.sara.publication.PublicationRepository;
+import bwfdm.sara.publication.PublicationRepository.SubmissionInfo;
 import bwfdm.sara.publication.Repository;
 import bwfdm.sara.publication.SaraMetaDataField;
 import bwfdm.sara.publication.db.PublicationField;
@@ -169,11 +170,24 @@ public class Publication {
 		i.collection_id = collectionURL;
 
 		// TODO Error Handling
-		final String depositInfo = repo.publishMetadata(userLogin, collectionURL,
+		final SubmissionInfo submissionInfo = repo.publishMetadata(userLogin, collectionURL,
 				metadataMap);
-		i.repository_url = depositInfo.split("\\|")[0];
-		i.item_id = depositInfo.split("\\|")[1];
-		logger.info(i.repository_url);
+
+		i.repository_url = submissionInfo.edit_ref;
+		i.item_id = submissionInfo.item_ref;
+
+		String redirectionUrl;
+
+		if (submissionInfo.edit_ref != null) {
+			logger.info("submitted into workspace, user review needed!");
+			logger.info(i.repository_url);
+			logger.info(i.item_id);
+			redirectionUrl = "/final_workspace.html";
+		} else {
+			logger.info("submitted into workflow, no user review needed!");
+			logger.info(i.item_id);
+			redirectionUrl = "/final_workflow.html";
+		}
 
 		project.getPublicationDatabase().updateInDB(i);
 
@@ -181,7 +195,7 @@ public class Publication {
 		m.put(PublicationField.REPOSITORY_URL, i.repository_url);
 		project.setMetadata(m);
 
-		return new RedirectView("/final.html");
+		return new RedirectView(redirectionUrl);
 	}
 
 	@GetMapping("list")

@@ -50,15 +50,15 @@ function validateEmail(email) {
 	// if the browser doesn't support <input type=email>, everything will be
 	// valid, which isn't too bad an approximation of RFC822.
 	if (email == "" || $("#email").is(":invalid"))
-		return "Please enter a valid email address!";
+		return "Please enter a valid email address";
 
 	var userInfo = queryHierarchy();
 	if (userInfo == null)
 		return null; // no checkmark yet; AJAX will call us back with status
 	if (!userInfo["user-valid"])
-		return "Your email isn't registered there!";
+		return "Your email isn't registered there";
 	if (userInfo.hierarchy == null)
-		return "You don't have submit rights to any collection!";
+		return "You don't have submit rights to any collection";
 	return true;
 }
 
@@ -144,7 +144,7 @@ function initPubRepos(info) {
 	validate.init("email", info.meta.email, validateEmail, updateCollections);
 	validate.init("pubrepo", info.meta.pubrepo, function(value) {
 		if (value == null)
-			return "Please select your institutional repository!";
+			return "Please select your institutional repository";
 		return true;
 	}, function(valud, valid, elem, disableFeedback) {
 		pubrepo_displayname = $("#pubrepo :selected").text();
@@ -167,7 +167,7 @@ function initPubRepos(info) {
 
 	validate.init("collection", null, function(value) {
 		if (value == null || queryHierarchy() == null)
-			return "Please select a collection (usually, your department)!";
+			return "Please select a collection";
 		return true;
 	});
 	initialCollection = info.meta.collection;
