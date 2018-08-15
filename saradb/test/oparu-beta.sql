@@ -5,7 +5,7 @@ DO $$
 
 DECLARE base_dir text := (SELECT basedir from args LIMIT 1);
 
-DECLARE oparu_logo oid := lo_import(base_dir || '/oparu.svg');
+DECLARE oparu_logo oid := lo_import(base_dir || '/dspace.svg');
 
 DECLARE oparu_demo text     := 'https://oparu-beta.sara-service.org';
 
