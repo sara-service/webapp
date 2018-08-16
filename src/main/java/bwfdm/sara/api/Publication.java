@@ -182,11 +182,9 @@ public class Publication {
 			logger.info("submitted into workspace, user review needed!");
 			logger.info(i.repository_url);
 			logger.info(i.item_id);
-			redirectionUrl = "/final_workspace.html";
 		} else {
 			logger.info("submitted into workflow, no user review needed!");
 			logger.info(i.item_id);
-			redirectionUrl = "/final_workflow.html";
 		}
 
 		project.getPublicationDatabase().updateInDB(i);
@@ -194,6 +192,12 @@ public class Publication {
 		Map<PublicationField, String> m = new EnumMap<>(PublicationField.class);
 		m.put(PublicationField.REPOSITORY_URL, i.repository_url);
 		project.setMetadata(m);
+		
+		if (submissionInfo.inProgress) {
+			redirectionUrl = "/final_workspace.html";
+		} else {
+			redirectionUrl = "/final_workflow.html";
+		}
 
 		return new RedirectView(redirectionUrl);
 	}
