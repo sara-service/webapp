@@ -401,13 +401,16 @@ public class DSpace_v6 implements PublicationRepository {
 				switch (deposit_type.toLowerCase()) {
 				case "workspace":
 					deposit.setInProgress(true);
+					submissionInfo.inProgress = true;
 					break;
 				case "workflow":
 					deposit.setInProgress(false);
+					submissionInfo.inProgress = false;
 					break;
 				}
 			} else {
 				deposit.setInProgress(true);
+				submissionInfo.inProgress = true;
 			}
 
 			DepositReceipt receipt = sword_client.deposit(collectionURL,

@@ -21,7 +21,10 @@ public interface PublicationRepository {
 		public String item_ref;
 		// link for submitters to edit their items metadata
 		// may be "null" which means they can't make changes afterwards!
-		public String edit_ref; 
+		public String edit_ref;
+		// true:  the user will edit metadata in a subsequent step
+		// false: the user submits the metadata 'as is' to the IR
+		public boolean inProgress;
 	}
 
 	/**
