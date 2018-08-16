@@ -17,7 +17,7 @@ public enum ArchiveAccessMode {
 		}
 	}
 
-	public static ArchiveAccessMode forItemType(ItemType type) {
+	public static ArchiveAccessMode forItemType(final ItemType type) {
 		switch (type) {
 		case ARCHIVE_HIDDEN:
 			return PRIVATE;

@@ -73,7 +73,7 @@ public class Push {
 
 		project.getFrontendDatabase().setArchiveAccess(access, record);
 		project.getPushTask().commitToArchive(access);
-		project.getTransferRepo().dispose();
+		project.disposeTransferRepo();
 	}
 
 	@GetMapping("redirect")
@@ -86,19 +86,15 @@ public class Push {
 
 		final PushTask push = project.getPushTask();
 		final FrontendDatabase db = project.getFrontendDatabase();
-		if (db.getArchiveAccess() == ArchiveAccessMode.PRIVATE) {
+		if (db.getArchiveAccess() == ArchiveAccessMode.PUBLIC
+				&& db.createPublicationRecord()) {
 			redir.addAttribute("item", push.getItemUUID());
-			redir.addAttribute("token", push.getAccessToken());
-			return new RedirectView("/token.html");
+			return new RedirectView("/api/auth/publish");
 		}
-		if (db.getArchiveAccess()!= ArchiveAccessMode.PUBLIC) 
-			throw new UnsupportedOperationException(
-					"access mode " + db.getArchiveAccess());
-		
-		if (db.createPublicationRecord())
-			return new RedirectView("/publish.html");
 
+		if (db.getArchiveAccess() == ArchiveAccessMode.PRIVATE)
+			redir.addAttribute("token", push.getAccessToken());
 		redir.addAttribute("item", push.getItemUUID());
-		return new RedirectView("/done.html");
+		return new RedirectView("/info.html");
 	}
 }

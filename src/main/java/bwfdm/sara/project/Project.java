@@ -188,10 +188,19 @@ public class Project {
 		if (clone != null)
 			clone.cancel();
 		clone = null;
-		if (transferRepo != null)
-			transferRepo.dispose();
+		disposeTransferRepo();
 		transferRepo = null;
 		metadataExtractor = null;
+	}
+
+	/**
+	 * Deletes the transfer repo contents on disk. Doesn't actually invalidate
+	 * the transfer repo itself – this is just intended for cleanup once the
+	 * transfer repo is no longer necessary.
+	 */
+	public void disposeTransferRepo() {
+		if (transferRepo != null)
+			transferRepo.dispose();
 	}
 
 	public TaskStatus getInitStatus() {

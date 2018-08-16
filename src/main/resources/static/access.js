@@ -3,9 +3,9 @@
 function commit() {
 	var access = "invalid";
 	if ($("#private").prop("checked"))
-		access = "private";
+		access = "PRIVATE";
 	else if ($("#public").prop("checked"))
-		access = "public";
+		access = "PUBLIC";
 	else {
 		$("#public").prop("checked", true);
 		$("#public").focus();
@@ -13,8 +13,7 @@ function commit() {
 	}
 	var record = $("#record").prop("checked");
 	API.post("save access permissions", "/api/push/commit",
-		{ access: access, record: record },
-		function() {
+		{ access: access, record: record }, function() {
 			location.href = "/api/push/redirect";
 		});
 }

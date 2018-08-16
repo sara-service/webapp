@@ -10,7 +10,7 @@
 	<link rel="stylesheet" href="lib/sara.css" />
 	<script src="lib/jquery.min.js"></script>
 	<script src="lib/uri.min.js"></script>
-	<script src="done.js"></script>
+	<script src="info.js"></script>
 	<title>Item archived — SARA software publishing</title>
 </head>
 <body><div class="fluid-container">
@@ -35,7 +35,7 @@
 		<dt>access rights</dt><dd id="access"></dd>
 		<dt>description</dt><dd id="description" class="multiline"></dd>
 	</dl>
-	<div id="content" class="hidden">
+	<div id="public" class="hidden">
 		<p>You can access your archived data at:
 			<a id="url" target="_blank">unable to retrieve link</a>.
 			Alternatively, you can use the archive's search function
@@ -50,6 +50,24 @@
 			just bookmark this page.
 			You can then return to create one whenever you want.</p>
 	</div>
+	<div id="private" class="hidden">
+		<p>Your archive ID and access token, respectively, are:</p>
+		<h3 id="item" class="col-sm-offset-1 col-sm-11"></h3>
+		<h3 id="token" class="col-sm-offset-1 col-sm-11">
+				Dammit, something went wrong...
+				Please bookmark the page anyway!</h3>
+		<p><b>Please write these values down</b> (or print this page)
+			and store them in a safe place.
+			You will need the archive ID and access token
+			if you want to retrieve your artefact from the archive later on!</p>
+		<p>If you think you may want to create a publication record later,
+			just bookmark this page.
+			You can then return to create one whenever you want.</p>
+	</div>
+	<p id="error" class="hidden text-warning">
+		Failed to retrieve metadata!
+		Please bookmark this page, or write down the URL.
+		You may need it to retrieve the archived data later on!</p>
 
 	<p style="height:3ex"></p>
 	<div class="row">
