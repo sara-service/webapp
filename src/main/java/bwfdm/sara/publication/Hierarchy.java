@@ -11,6 +11,8 @@ public class Hierarchy{
 	@JsonProperty
     private String name = null;
 	@JsonProperty
+	private String policy = null;
+	@JsonProperty
 	private String handle = null;
 	@JsonProperty
 	private String URL = null;
@@ -21,8 +23,9 @@ public class Hierarchy{
 	@JsonBackReference
 	private Hierarchy parent = null;
 
-    public Hierarchy(String name) {
+    public Hierarchy(String name, String policy) {
         this.name = name;
+        this.policy = policy;
     }
 
     public void addChild(Hierarchy child) {
@@ -30,8 +33,8 @@ public class Hierarchy{
         this.children.add(child);
     }
 
-    public Hierarchy addChild(String name) {
-        Hierarchy newChild = new Hierarchy(name);
+    public Hierarchy addChild(String name, String policy) {
+        Hierarchy newChild = new Hierarchy(name, policy);
         newChild.setParent(this);
         children.add(newChild);
         return newChild;
@@ -64,6 +67,10 @@ public class Hierarchy{
         return name;
     }
     
+    public String getPolicy() {
+    	return policy;
+    }
+    
     public String getHandle() {
     	return handle;
     }
@@ -74,6 +81,10 @@ public class Hierarchy{
 
     public void setName(String name) {
         this.name = name;
+    }
+    
+    public void setPolicy(String policy) {
+    	this.policy = policy;
     }
     
     public void setHandle(String handle) {

@@ -13,18 +13,19 @@ import java.util.Map;
 public interface PublicationRepository {
 	
 	public class SubmissionInfo {
-		public SubmissionInfo() {
-			item_ref = null;
-			edit_ref = null;
-		}
 		// identifier to refer to the item (internally for the IR)
-		public String item_ref;
+		public String item_ref = null;
 		// link for submitters to edit their items metadata
 		// may be "null" which means they can't make changes afterwards!
-		public String edit_ref;
+		public String edit_ref = null;
 		// true:  the user will edit metadata in a subsequent step
 		// false: the user submits the metadata 'as is' to the IR
-		public boolean inProgress;
+		public boolean inProgress = true;
+	}
+	
+	public class CollectionInfo {
+		public String name;
+		public String policy;
 	}
 
 	/**
@@ -67,7 +68,7 @@ public interface PublicationRepository {
 	 * @param on-behalf-of user name, if null, use service user
 	 * @return Map of Strings, where key="Collection full URL", value="Collection full name"
 	 */
-	public Map<String, String> getAvailableCollectionPaths(String separator, String loginName);
+	public Map<String, CollectionInfo> getAvailableCollectionPaths(String separator, String loginName);
 
 	
 	/**

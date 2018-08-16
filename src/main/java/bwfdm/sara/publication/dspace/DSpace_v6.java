@@ -192,13 +192,13 @@ public class DSpace_v6 implements PublicationRepository {
 	public Hierarchy getHierarchy(String loginName) {
 		Hierarchy hierarchy;
 
-		hierarchy = new Hierarchy("");
-		hierarchy.setName("Uni-Bibliographie");
+		hierarchy = new Hierarchy("", null);
+		hierarchy.setName("bibliography");
 
 		AuthCredentials authCredentials = new AuthCredentials(sword_user,
 				sword_pwd, loginName); // "on-behalf-of:
 										// loginName"
-		Map<String, String> collectionsMap = getAvailableCollectionsViaSWORD(
+		Map<String, CollectionInfo> collectionsMap = getAvailableCollectionsViaSWORD(
 				authCredentials);
 
 		for (String url : collectionsMap.keySet()) {
@@ -214,9 +214,9 @@ public class DSpace_v6 implements PublicationRepository {
 					}
 				}
 				if (!found)
-					entry = entry.addChild(community);
+					entry = entry.addChild(community, null);
 			}
-			entry = entry.addChild(collectionsMap.get(url));
+			entry = entry.addChild(collectionsMap.get(url).name, collectionsMap.get(url).policy);
 			entry.setURL(url);
 			entry.setCollection(true);
 		}
@@ -298,22 +298,31 @@ public class DSpace_v6 implements PublicationRepository {
 		return response;
 	}
 
-	private Map<String, String> getAvailableCollectionsViaSWORD(
+	private Map<String, CollectionInfo> getAvailableCollectionsViaSWORD(
 			AuthCredentials authCredentials) {
-		Map<String, String> collections = new HashMap<String, String>();
+		Map<String, CollectionInfo> collections = new HashMap<String, CollectionInfo>();
 
 		for (SWORDWorkspace workspace : sword_workspaces) {
 			for (SWORDCollection collection : workspace.getCollections()) {
-				// key = full URL, value = Title
-				collections.put(collection.getHref().toString(),
-						collection.getTitle());
+				// key = full URL, value = name/policy
+				CollectionInfo collectionInfo = new CollectionInfo();
+				if (this.deposit_type.equals("workflow")) {
+					try {
+						collectionInfo.policy = collection.getCollectionPolicy().toString();
+					} catch (ProtocolViolationException e) {
+						logger.error("Misconfigured IR: the policy cannot be retrieved but is needed!");
+						e.printStackTrace();
+					}
+				}
+				collectionInfo.name = collection.getTitle();
+				collections.put(collection.getHref().toString(), collectionInfo);
 			}
 		}
 		return collections;
 	}
 
 	@Override
-	public Map<String, String> getAvailableCollectionPaths(String separator,
+	public Map<String, CollectionInfo> getAvailableCollectionPaths(String separator,
 			String loginName) {
 		// TODO Auto-generated method stub
 		return null;
