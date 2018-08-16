@@ -164,8 +164,6 @@ function initPubRepos(info) {
 		select.append(option);
 	});
 
-	$("#collection").click( initPolicy() );
-	
 	validate.init("email", info.meta.email, validateEmail, updateCollections);
 	validate.init("pubrepo", info.meta.pubrepo, function(value) {
 		if (value == null)
@@ -218,6 +216,7 @@ function initPubRepos(info) {
 }
 
 $(function() {
+	$("#collection").click( function(){ initPolicy(); } );
 	API.get("load list of institutional repositories", "/api/publish", {},
 			initPubRepos);
 	$("form").submit(function() {
