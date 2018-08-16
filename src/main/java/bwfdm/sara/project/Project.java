@@ -188,7 +188,8 @@ public class Project {
 		if (clone != null)
 			clone.cancel();
 		clone = null;
-		transferRepo.dispose();
+		if (transferRepo != null)
+			transferRepo.dispose();
 		transferRepo = null;
 		metadataExtractor = null;
 	}

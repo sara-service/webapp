@@ -130,6 +130,10 @@ public class FrontendDatabase {
 
 	public void setArchiveAccess(final ArchiveAccessMode access,
 			final boolean createPublicationRecord) {
+		if (isPublicationRecordDecided() && (this.access != access
+				|| this.createPublicationRecord != createPublicationRecord))
+			throw new IllegalStateException(
+					"cannot change archive access mode once set");
 		this.access = access;
 		this.createPublicationRecord = createPublicationRecord;
 	}

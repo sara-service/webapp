@@ -282,20 +282,10 @@ public class PushTask extends Task {
 		return item.uuid;
 	}
 
-	public void commitToArchive(ArchiveAccessMode access) {
+	public void commitToArchive(final ArchiveAccessMode access) {
 		// FIXME implement "move" part of create-and-move workflow here
 
-		switch (access) {
-		case PRIVATE:
-			item.item_type = ItemType.ARCHIVE_HIDDEN.name();
-			break;
-		case PUBLIC:
-			item.item_type = ItemType.ARCHIVE_PUBLIC.name();
-			break;
-		default:
-			throw new UnsupportedOperationException(
-					"archive access mode " + access);
-		}
+		item.item_type = access.getItemType().name();
 		pubDB.updateInDB(item);
 	}
 

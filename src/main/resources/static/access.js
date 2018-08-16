@@ -16,12 +16,6 @@ function commit() {
 		{ access: access, record: record },
 		function() {
 			location.href = "/api/push/redirect";
-			if (access == "private")
-				location.href = "/token.html";
-			else if (record)
-				location.href = "/publish.html";
-			else
-				location.href = "/done.html";
 		});
 }
 
