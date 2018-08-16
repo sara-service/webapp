@@ -75,13 +75,34 @@ function setCollectionList(select, collection_path, hierarchy) {
 		});
 	} else {
 		// TODO shouldn't we add this even if there are sub-collections?
-		var option = $("<option>").attr("value", hierarchy.url).text(
-				collection_path);
+		var option = $("<option>").attr("value", hierarchy.url)
+			.text(collection_path)
+			.data("policy", hierarchy.policy);
 		select.append(option);
 	}
 }
 
 var initialCollection;
+
+function initPolicy() {
+	var policy = $("#collection").find('option:selected').data("policy");
+	if (!policy) {
+		$("#policy_group").addClass("hidden");
+		$("#spacing").removeClass("hidden");
+		$("#ToS").addClass("hidden");
+		$("#policyOk").addClass("hidden");
+		$("#policyOk").prop('checked', true);
+		$("#policyLbl").addClass("hidden");
+	} else {
+		$("#policy_group").removeClass("hidden");
+		$("#spacing").addClass("hidden");
+		$("#ToS").removeClass("hidden");
+		$("#policyOk").removeClass("hidden");
+		$("#policyOk").prop('checked', false);
+		$("#policyLbl").removeClass("hidden");
+	}
+	$("#policy").val(policy);
+};
 
 function updateCollections(_, valid) {
 	// remove status display on the collection field, otherwise it tends to
@@ -130,6 +151,8 @@ function updateCollections(_, valid) {
 
 	} else
 		collection.prop("disabled", true);
+	
+	initPolicy();
 }
 
 function initPubRepos(info) {
@@ -141,6 +164,8 @@ function initPubRepos(info) {
 		select.append(option);
 	});
 
+	$("#collection").click( initPolicy() );
+	
 	validate.init("email", info.meta.email, validateEmail, updateCollections);
 	validate.init("pubrepo", info.meta.pubrepo, function(value) {
 		if (value == null)
@@ -164,15 +189,19 @@ function initPubRepos(info) {
 		// messages below the email to which they refer.
 		validate.check("email", disableFeedback);
 	});
-
+	
 	validate.init("collection", null, function(value) {
 		if (value == null || queryHierarchy() == null)
 			return "Please select a collection";
 		return true;
 	});
+	
 	initialCollection = info.meta.collection;
-
+	
 	$("#next_button").click(function() {
+		if (!$("#policyOk").prop('checked'))
+			return;
+		
 		var values = validate.all([ "pubrepo", "email", "collection" ]);
 		if (values == null)
 			return;
