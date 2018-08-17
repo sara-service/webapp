@@ -58,6 +58,10 @@ public class Item implements DAO {
 	public String archive_url;
 	@DatabaseField
 	public String repository_url;
+	@DatabaseField
+	public String token;
+	@DatabaseField
+	public boolean is_public;
 
 	public Item(@JsonProperty("uuid") UUID uuid) {
 		this.uuid = uuid;

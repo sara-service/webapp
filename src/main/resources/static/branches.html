@@ -23,7 +23,7 @@
 
 	<div class="row">
 		<div class="col-xs-12 action-header">
-			<h1>How much do you want to publish?</h1>
+			<h1>How much do you want to archive?</h1>
 		</div>
 	</div>
 	<div class="row panel-group" id="accordion" role="tablist" aria-multiselectable="true"><div class="panel panel-default">
@@ -43,44 +43,29 @@
 			<div style="padding:.5ex 1.5em">
 				<!--<div style="display:inline-block;height:0px;width:10em"></div>-->
 				<ul>
-				<li><strong class="sara-green">Publish full history</strong>
-					publishes <strong>all commits in the version history</strong>,
+				<li><strong class="sara-green">Full history</strong>
+					archives <strong>all commits in the version history</strong>,
 					even those excluded in previous publications (if any).
 					It does not change commit IDs,
 					and is the <strong>recommended</strong> option because
 					it allows replicating your research process.
 				</li>
-				<li><strong class="sara-blue">Publish abbreviated history</strong>
-					publishes only <strong>significant points</strong>
+				<li><strong class="sara-blue">Abbreviated history</strong>
+					archives only <strong>significant points</strong>
 					of the version history and thus
 					<strong>changes commit IDs.</strong>
 					Significant points are defined to be merge commits
 					and commits that have been tagged with <kbd>git tag</kbd>.
-<!--
-					The full history will be archived non-publicly.
--->
 					This is useful <!-- if your development process
 					is so shoddy that you are ashamed of it -->
 					if you need to omit parts of your development process.
 				</li>
-				<li><strong class="sara-red">Publish latest version only</strong>
-					publishes only the <strong>HEAD revision</strong>,
+				<li><strong class="sara-red">Latest version only</strong>
+					archives only the <strong>HEAD revision</strong>,
 					omitting the version history
 					except for previously published versions.
-<!--
-					The full history will be archived non-publicly.
--->
 					This option is <strong>not recommended</strong>
 					if you have other options.
-				</li>
-				<li><strong class="sara-orange">Private access, public record</strong>
-					privately archives the full history of a branch
-					and publishes a bibliographical record only.
-					This is suitable for data that you want to (or have to) keep private.
-				</li>
-				<li><strong class="sara-cyan">Private access, no record</strong>
-					privately archives the full history of a branch.
-					The existence of the archived data will not be published.
 				</li>
 			</ul><p>Please note that none of these options
 				are suitable for highly sensitive data.
@@ -92,23 +77,26 @@
 	<form class="form-horizontal" id="branches">
 		<div class="form-group has-feedback hidden" id="template">
 			<label class="col-sm-2 control-label" name="branch_label">branch master</label>
-			<div class="col-sm-6 nopad">
+			<div class="col-sm-6 nopad hidden" name="commit_select">
 				<label for="template_commit" class="control-label sr-only">starting point</label>
 				<select class="form-control" name="commit">
-					<option value="HEAD" selected>starting at most recent commit (HEAD of this branch)</option>
+					<option value="HEAD" name="head" selected>start at most recent commit (HEAD of this branch)</option>
 					<option disabled>… loading list of commits …</option>
 				</select>
 				<span class="form-control-feedback" aria-hidden="true"></span>
 				<span class="form-control-feedback-text text-danger hidden"></span>
 			</div>
+			<div class="col-sm-6 nopad" name="commit_display">
+				<div name="commit_info" class="text-muted">loading commit info</div>
+				<div><a name="commit_edit" href="#">pick an older commit as starting point (rewind branch)</a></div>
+				<div name="commit_norewind" class="hidden text-muted">nope!</div>
+			</div>
 			<div class="col-sm-3 nopad">
 				<label for="template_action" class="control-label sr-only">action</label>
 				<select class="form-control" name="action">
-					<option value="PUBLISH_FULL" selected class="sara-green">publish full history (recommended)</option>
-					<option value="PUBLISH_ABBREV" class="sara-blue">publish abbreviated history</option>
-					<option value="PUBLISH_LATEST" class="sara-red">publish latest version only</option>
-					<option value="ARCHIVE_PUBLIC" class="sara-orange">private access, public record</option>
-					<option value="ARCHIVE_HIDDEN" class="sara-cyan">private access, no record</option>
+					<option value="FULL" selected class="sara-green">full history (recommended)</option>
+					<option value="ABBREV" class="sara-blue">abbreviated history</option>
+					<option value="LATEST" class="sara-red">latest version only</option>
 				</select>
 				<span class="form-control-feedback" aria-hidden="true"></span>
 				<span class="form-control-feedback-text text-danger hidden"></span>
@@ -136,7 +124,7 @@
 		</svg>
 
 		Merged branches and tags on selected branches
-		are always included when publishing full or abbreviated history.
+		are always included when archiving full or abbreviated history.
 		You do not have to add them explicitly.
 	</p>
 

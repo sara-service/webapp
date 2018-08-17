@@ -23,6 +23,23 @@ import bwfdm.sara.publication.db.PublicationDatabase;
 
 @Component
 public class Config implements ServletContextAware {
+	// human-safe, non-ambiguous base32 alphabet. we omit:
+	// - O because it looks like 0
+	// - j because in handwriting it may look like i
+	// - I and l because they look like 1 (in fact many fixed-width fonts use
+	//   the same glyph for 1 and l, including the most popular one, Courier)
+	// we use lowercase because lowercase is easier to read than uppercase.
+	public static final String TOKEN_ALPHABET = "0123456789abcdefghkmnpqrstuvwxyz";
+	// 64 bits security level. since the alphabet has 32 bits per character, we
+	// might as well use that extra bit.
+	private static final int TOKEN_LENGTH = 13;
+	private static final int TOKEN_BITS = 5 * TOKEN_LENGTH;
+
+	// 80 bits is enough that collisions happen only after 2^40 > 10^12
+	// operations (50% chance), which in practice is the same as "never".
+	// we use 82 to fill as much of the 16-digit radix-36 space as possible.
+	private static final int RANDOM_ID_BITS = 80;
+
 	/**
 	 * Name of the properties file that Spring loads on startup. Use for calling
 	 * {@link #Config(String)} in testcases and support scripts.
@@ -166,8 +183,6 @@ public class Config implements ServletContextAware {
 	 * @return a unique temp directory
 	 */
 	public File getRandomTempDir() {
-		// 80 bits is enough that collisions happen only every 2^40 > 10^12
-		// operations, which in practice is the same as "never".
 		final String name = "r" + getRandomID();
 		final File temp = new File(temproot, name);
 		temp.mkdirs(); // ignore errors; we only need it to exist afterwards
@@ -183,7 +198,35 @@ public class Config implements ServletContextAware {
 	 * @return a unique string
 	 */
 	public static String getRandomID() {
-		return new BigInteger(80, RNG).toString(Character.MAX_RADIX);
+		return new BigInteger(RANDOM_ID_BITS, RNG)
+				.toString(Character.MAX_RADIX);
+	}
+
+	/**
+	 * Creates a new random, user-readable security token. The returned string
+	 * has enough entropy that it is impossible to guess.
+	 * 
+	 * @return a random, unpredictable token
+	 */
+	public static String getToken() {
+		final StringBuilder buffer = new StringBuilder(TOKEN_LENGTH);
+		BigInteger token = new BigInteger(TOKEN_BITS, RNG);
+		for (int i = 0; i < TOKEN_LENGTH; i++) {
+			buffer.append(TOKEN_ALPHABET.charAt(token.intValue() & 31));
+			token = token.shiftRight(5);
+		}
+		return buffer.toString();
+	}
+
+	/**
+	 * Normalizes a token to replace impossible characters with their most
+	 * likely look-alikes.
+	 * 
+	 * @see Config#TOKEN_ALPHABET
+	 */
+	public static String normalizeToken(final String token) {
+		return token.toLowerCase().replaceAll("[ijl]", "1").replaceAll("o",
+				"0");
 	}
 
 	/**

@@ -59,7 +59,7 @@ CREATE TABLE repository(
 	contact_email text NOT NULL, -- an email address to contact the repository
 	adapter text NOT NULL,
 	logo_url text, -- URL of logo, either https:// or data: (optional)
-        help text, -- help for users how publication can be finished
+	help text, -- help for users how publication can be finished
 	enabled boolean NOT NULL
 );
 
@@ -81,14 +81,17 @@ CREATE TABLE item(
 	repository_uuid UUID REFERENCES repository(uuid) ON DELETE RESTRICT,
 
 	source_user_id text NOT NULL, -- unique user ID in source
-        repository_login_id text,
-        meta_title text,
-        meta_description text,
-        meta_version text,
-        meta_submitter text,
-        archive_url text,
-        repository_url text,
+	repository_login_id text,
+	meta_title text,
+	meta_description text,
+	meta_version text,
+	meta_submitter text,
+	archive_url text,
+	repository_url text,
 	contact_email text NOT NULL, -- email address to be used for contacting the user
+
+	is_public boolean NOT NULL,
+	token text,
 
 	collection_id text, -- ID of collection in institutional repository
 	item_id text, -- ID of submitted item in institutional repository
@@ -102,6 +105,7 @@ CREATE TABLE item(
 
 	persistent_identifier text, -- DOI, URN, HDL, ...
 
+	CHECK (is_public OR token IS NOT NULL),
 	CHECK (item_type IN ('PUBLISH', 'ARCHIVE_PUBLIC', 'ARCHIVE_HIDDEN')),
 	CHECK (item_state IN ('CREATED', 'VERIFIED', 'SUBMITTED', 'ACCEPTED', 'DONE', 'REJECTED', 'DELETED')),
 	CHECK (item_state_sent IN ('CREATED', 'VERIFIED', 'SUBMITTED', 'ACCEPTED', 'DONE', 'REJECTED', 'DELETED'))
@@ -138,8 +142,7 @@ CREATE TABLE fe_temp_actions(
 	ref text NOT NULL,
 	action text NOT NULL,
 	start text NOT NULL,
-	CHECK (action IN ('PUBLISH_FULL', 'PUBLISH_ABBREV', 'PUBLISH_LATEST',
-			'ARCHIVE_PUBLIC', 'ARCHIVE_HIDDEN')),
+	CHECK (action IN ('FULL', 'ABBREV', 'LATEST')),
 	PRIMARY KEY (repo, project, uid, ref)
 );
 

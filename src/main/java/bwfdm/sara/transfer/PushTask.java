@@ -64,6 +64,7 @@ public class PushTask extends Task {
 	private UUID itemUUID;
 	private Map<Ref, String> heads;
 	private Date now;
+	private Item item;
 
 	/**
 	 * @param job
@@ -86,8 +87,7 @@ public class PushTask extends Task {
 	protected void cleanup() {
 		if (project == null || !project.isEmpty())
 			return; // never remove projects that we didn't create!
-		// FIXME SARA user should not need this permission on the archive
-		// FIXME implement create and move workflow so we can remove the project
+		// FIXME impl create-and-move workflow so we can remove project here
 		// project.deleteProject();
 		project = null;
 	}
@@ -106,7 +106,7 @@ public class PushTask extends Task {
 		commitMetadataToRepo();
 
 		final String id = Config.getRandomID();
-		beginTask("Creating project " + id, 1);
+		beginTask("Creating project in archive", 1);
 		project = archive.createProject(id, true, job.meta);
 
 		beginTask("Preparing repository for upload", 1);
@@ -245,19 +245,16 @@ public class PushTask extends Task {
 
 	private UUID createItemInDB(final String webURL,
 			Map<MetadataField, String> meta) {
-		Item i = new Item();
+		final Item i = new Item();
 		i.archive_uuid = job.archiveUUID;
 		i.source_uuid = job.sourceUUID;
 		i.item_state = ItemState.CREATED.name();
 		i.item_state_sent = i.item_state;
 
-		if (job.isArchiveOnly) {
-			i.item_type = ItemType.ARCHIVE_HIDDEN.name();
-		} else {
-			i.item_type = ItemType.ARCHIVE_PUBLIC.name();
-			// TODO make configurable via saradb whether items will be archived
-			// externally or within the IRs
-		}
+		// FIXME we don't know that yet!
+		// is it ok to change this later in commitToArchive?
+		// should we only create a "provisional" entry here?
+		i.item_type = ItemType.ARCHIVE_HIDDEN.name();
 
 		i.source_user_id = job.sourceUserID;
 		i.contact_email = job.gitrepoEmail;
@@ -278,11 +275,23 @@ public class PushTask extends Task {
 		// URL where the archive has been deposited
 		i.archive_url = webURL;
 
-		i = pubDB.insertInDB(i);
+		// not public yet, though that might change in commitToArchive()
+		i.is_public = false;
+		// randomly generated access token for the user
+		i.token = Config.getToken();
+
+		this.item = pubDB.insertInDB(i);
 
 		logger.info("Item submission succeeded with item uuid "
-				+ i.uuid.toString());
-		return i.uuid;
+				+ item.uuid.toString());
+		return item.uuid;
+	}
+
+	public void commitToArchive(final boolean isPublic) {
+		// FIXME implement "move" part of create-and-move workflow here
+
+		item.is_public = isPublic;
+		pubDB.updateInDB(item);
 	}
 
 	public ArchiveJob getArchiveJob() {
@@ -294,5 +303,13 @@ public class PushTask extends Task {
 			throw new IllegalStateException(
 					"getItemUUID() on in-progress PushTask");
 		return itemUUID;
+	}
+
+	public String getWebURL() {
+		return project.getWebURL();
+	}
+
+	public String getAccessToken() {
+		return item.token;
 	}
 }

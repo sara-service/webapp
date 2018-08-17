@@ -4,10 +4,7 @@ function addProjectButton(project) {
 	var form = template("template");
 	form.title.text(project.title);
 	form.version.text(project.version);
-	form.select.attr("href", URI("/api/auth/publish").search({
-		repo: project.source,
-		item: project.item
-	}));
+	form.select.attr("href", URI("/done.html").search({ item: project.item }));
 	$("#projects").append(form.root);
 }
 

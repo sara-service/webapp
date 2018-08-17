@@ -17,7 +17,7 @@ import bwfdm.sara.transfer.Task.TaskStatus;
 public class Clone {
 	@GetMapping("cancel")
 	public RedirectView abortClone(final HttpSession session) {
-		Project.getInstance(session).disposeTransferRepo();
+		Project.getInstance(session).resetTransferRepo();
 		return new RedirectView("/branches.html");
 	}
 

@@ -2,19 +2,51 @@
 
 var forms = {};
 
-function addCommits(branch, select, commits) {
+function revealCommits(branch) {
+	var form = forms[branch.ref.path];
+	form.commit_display.remove();
+	form.commit_select.removeClass("hidden");
+}
+
+function formatCommitInfo(commit) {
+	var shortid = commit.id.substr(0, 7);
+	return shortid + ": " + commit.title + " (" + commit.date + ")";
+}
+
+function addCommits(branch, form, commits) {
+	if (commits.length == 0)
+		return;
+
+	var head = formatCommitInfo(commits.shift());
+	// show commit info
+	form.commit_info.text(head);
+	form.commit_info.removeClass("text-muted");
+	form.head.text("archive latest commit " + head);
+
+	// fill the combo box
 	$.each(commits, function(_, commit) {
-		var shortid = commit.id.substr(0, 7);
-		var title = shortid + " and before: " + commit.title + " ("
-			+ commit.date + ")";
+		var title = "rewind to " + formatCommitInfo(commit);
 		var option = $("<option>").attr("value", commit.id).text(title);
-		select.append(option);
+		form.commit.append(option);
 	});
+
 	// get rid of the placeholder
-	$("option:disabled", select).remove();
+	$("option:disabled", form.commit).remove();
 	// select previously selected option
-	if (branch.action)
-		select.val(branch.action.firstCommit);
+	if (branch.action) {
+		form.commit.val(branch.action.firstCommit);
+		if (branch.action.firstCommit != "HEAD")
+			revealCommits(branch);
+	}
+
+	if (branch.ref.type != "branch") {
+		form.commit_norewind.text("cannot rewind a " + branch.ref.type);
+		form.commit_norewind.removeClass("hidden");
+		form.commit_edit.remove();
+	} else
+		form.commit_edit.click(function() {
+			revealCommits(branch);
+		});
 }
 
 function addBranch(branch) {
@@ -32,7 +64,7 @@ function addBranch(branch) {
 	// default to publishing everything the user adds, because that's
 	// what we prefer.
 	if (!branch.action)
-		branch.action = { publish: "PUBLISH_FULL", firstCommit: "HEAD" };
+		branch.action = { publish: "FULL", firstCommit: "HEAD" };
 	// remove the name attributes, forcing validate.all to use the unique
 	// element ID as a key for the dropdown's value.
 	form.action.removeAttr("name");
@@ -66,7 +98,7 @@ function addBranch(branch) {
 			ref: branch.ref.path,
 			limit: 20,
 		}, function(commits) {
-			addCommits(branch, form.commit, commits);
+			addCommits(branch, form, commits);
 		});
 }
 

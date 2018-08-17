@@ -39,6 +39,8 @@ public class FrontendDatabase {
 	private final JacksonTemplate db;
 	private final TransactionTemplate transaction;
 	private Set<MetadataField> update;
+	private Boolean createPublicationRecord;
+	private Boolean isPublic;
 
 	/**
 	 * Creates a DAO for reading / writing values for a particular project.
@@ -123,6 +125,34 @@ public class FrontendDatabase {
 		if (update == null)
 			return Collections.emptySet();
 		return update;
+	}
+
+	public void setArchiveAccess(final boolean isPublic,
+			final boolean createPublicationRecord) {
+		if (isPublicationRecordDecided() && (this.isPublic != isPublic
+				|| this.createPublicationRecord != createPublicationRecord))
+			throw new IllegalStateException(
+					"cannot change archive access mode once set");
+		this.isPublic = isPublic;
+		this.createPublicationRecord = createPublicationRecord;
+	}
+
+	public boolean isPublicationRecordDecided() {
+		return createPublicationRecord != null && isPublic != null;
+	}
+
+	public boolean createPublicationRecord() {
+		if (!isPublicationRecordDecided())
+			throw new IllegalStateException(
+					"we don't yet know whether to create a publciation record or not");
+		return createPublicationRecord;
+	}
+
+	public boolean isPublic() {
+		if (!isPublicationRecordDecided())
+			throw new IllegalStateException(
+					"we don't yet know whether to create a publciation record or not");
+		return isPublic;
 	}
 
 	/**

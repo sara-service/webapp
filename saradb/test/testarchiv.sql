@@ -17,7 +17,7 @@ BEGIN
 
 -- "Testarchiv" default git archive
 INSERT INTO archive(display_name, contact_email, adapter, url, enabled) VALUES
-	('Testarchiv', 'devnull@' || testarchiv, 'GitLabArchiveRESTv4',
+	('Testarchiv', 'project-sara+testarchiv@uni-konstanz.de', 'GitLabArchiveRESTv4',
 		'https://' || testarchiv, TRUE)
 	RETURNING uuid INTO aRef;
 INSERT INTO archive_params(id, param, value) VALUES

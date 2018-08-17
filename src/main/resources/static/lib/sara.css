@@ -109,6 +109,10 @@ body {
 	padding: 0px .25em;
 }
 
+.pad {
+	padding: 0px 2em;
+}
+
 .smallpad {
 	padding: .25em;
 }

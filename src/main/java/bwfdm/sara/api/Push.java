@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 
+import bwfdm.sara.db.FrontendDatabase;
 import bwfdm.sara.project.ArchiveJob;
 import bwfdm.sara.project.Project;
 import bwfdm.sara.transfer.PushTask;
@@ -57,23 +58,41 @@ public class Push {
 		return Project.getInstance(session).getArchiveJob();
 	}
 
-	@GetMapping("redirect")
-	public RedirectView redirectAfterArchiving(final HttpSession session,
-			final RedirectAttributes redir) {
+	@PostMapping("commit")
+	public void commitToArchive(
+			@RequestParam("public_access") final boolean isPublic,
+			@RequestParam("record") final boolean record,
+			final HttpSession session, final RedirectAttributes redir) {
 		final Project project = Project.getCompletedInstance(session);
 		if (!project.isDone())
 			// TODO or maybe just redirect to push.html instead?
 			// beware infinite loops though if "done" detection fails
 			throw new IllegalStateException(
-					"finishArchiving before push is done");
+					"commitToArchive before push is done");
 
-		// FIXME kill Project so everything just redirects to END
-		// TODO and also get rid of the TransferRepo!
+		project.getFrontendDatabase().setArchiveAccess(isPublic, record);
+		project.getPushTask().commitToArchive(isPublic);
+		project.disposeTransferRepo();
+	}
+
+	@GetMapping("redirect")
+	public RedirectView redirectAfterArchiving(final HttpSession session,
+			final RedirectAttributes redir) {
+		final Project project = Project.getCompletedInstance(session);
+		if (!project.isDone())
+			throw new IllegalStateException(
+					"redirectAfterArchiving before push is done");
 
 		final PushTask push = project.getPushTask();
+		final FrontendDatabase db = project.getFrontendDatabase();
+		if (db.isPublic() && db.createPublicationRecord()) {
+			redir.addAttribute("item", push.getItemUUID());
+			return new RedirectView("/api/auth/publish");
+		}
+
+		if (!db.isPublic())
+			redir.addAttribute("token", push.getAccessToken());
 		redir.addAttribute("item", push.getItemUUID());
-		if (push.getArchiveJob().isArchiveOnly)
-			return new RedirectView("/done.html");
-		return new RedirectView("/api/auth/publish");
+		return new RedirectView("/info.html");
 	}
 }
