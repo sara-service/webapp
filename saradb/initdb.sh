@@ -4,7 +4,7 @@ cd $BASEDIR
 
 pg_dropcluster --stop 10 main
 service postgresql restart
-pg_createcluster --start 10 main
+pg_createcluster -p 5432 --start 10 main
 
 ./createdb.sh test test devel
 

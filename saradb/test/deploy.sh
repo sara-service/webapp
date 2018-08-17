@@ -11,8 +11,8 @@ tomcat)
 	sudo service tomcat8 restart </dev/null
 	;;
 postgres)
-	sudo pg_dropcluster -p 5432 --stop 10 main </dev/null || true
-	sudo pg_createcluster --start 10 main </dev/null
+	sudo pg_dropcluster --stop 10 main </dev/null || true
+	sudo pg_createcluster -p 5432 --start 10 main </dev/null
 	sudo -u postgres -H createuser -l -D -R -S sara </dev/null
 	sudo -u postgres -H createdb -E UTF8 -O sara sara </dev/null
 	sudo -u postgres -H psql -d sara -c "ALTER USER sara WITH PASSWORD '6shnatBab_'" </dev/null
