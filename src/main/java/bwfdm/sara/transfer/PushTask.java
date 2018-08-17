@@ -35,7 +35,6 @@ import bwfdm.sara.extractor.MetadataExtractor;
 import bwfdm.sara.git.ArchiveProject;
 import bwfdm.sara.git.ArchiveRepo;
 import bwfdm.sara.git.ArchiveRepo.ProjectExistsException;
-import bwfdm.sara.project.ArchiveAccessMode;
 import bwfdm.sara.project.ArchiveJob;
 import bwfdm.sara.project.LicensesInfo.LicenseInfo;
 import bwfdm.sara.project.MetadataField;
@@ -107,7 +106,7 @@ public class PushTask extends Task {
 		commitMetadataToRepo();
 
 		final String id = Config.getRandomID();
-		beginTask("Creating project " + id, 1);
+		beginTask("Creating project in archive", 1);
 		project = archive.createProject(id, true, job.meta);
 
 		beginTask("Preparing repository for upload", 1);
@@ -252,7 +251,8 @@ public class PushTask extends Task {
 		i.item_state = ItemState.CREATED.name();
 		i.item_state_sent = i.item_state;
 
-		// FIXME is it ok to change this later in commitToArchive?
+		// FIXME we don't know that yet!
+		// is it ok to change this later in commitToArchive?
 		// should we only create a "provisional" entry here?
 		i.item_type = ItemType.ARCHIVE_HIDDEN.name();
 
@@ -275,6 +275,11 @@ public class PushTask extends Task {
 		// URL where the archive has been deposited
 		i.archive_url = webURL;
 
+		// not public yet, though that might change in commitToArchive()
+		i.is_public = false;
+		// randomly generated access token for the user
+		i.token = Config.getToken();
+
 		this.item = pubDB.insertInDB(i);
 
 		logger.info("Item submission succeeded with item uuid "
@@ -282,10 +287,10 @@ public class PushTask extends Task {
 		return item.uuid;
 	}
 
-	public void commitToArchive(final ArchiveAccessMode access) {
+	public void commitToArchive(final boolean isPublic) {
 		// FIXME implement "move" part of create-and-move workflow here
 
-		item.item_type = access.getItemType().name();
+		item.is_public = isPublic;
 		pubDB.updateInDB(item);
 	}
 
@@ -305,7 +310,6 @@ public class PushTask extends Task {
 	}
 
 	public String getAccessToken() {
-		// FIXME actually generate token and store it in item
-		return "t0K3n";
+		return item.token;
 	}
 }

@@ -11,7 +11,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 
 import bwfdm.sara.db.FrontendDatabase;
-import bwfdm.sara.project.ArchiveAccessMode;
 import bwfdm.sara.project.ArchiveJob;
 import bwfdm.sara.project.Project;
 import bwfdm.sara.transfer.PushTask;
@@ -61,7 +60,7 @@ public class Push {
 
 	@PostMapping("commit")
 	public void commitToArchive(
-			@RequestParam("access") final ArchiveAccessMode access,
+			@RequestParam("public_access") final boolean isPublic,
 			@RequestParam("record") final boolean record,
 			final HttpSession session, final RedirectAttributes redir) {
 		final Project project = Project.getCompletedInstance(session);
@@ -71,8 +70,8 @@ public class Push {
 			throw new IllegalStateException(
 					"commitToArchive before push is done");
 
-		project.getFrontendDatabase().setArchiveAccess(access, record);
-		project.getPushTask().commitToArchive(access);
+		project.getFrontendDatabase().setArchiveAccess(isPublic, record);
+		project.getPushTask().commitToArchive(isPublic);
 		project.disposeTransferRepo();
 	}
 
@@ -86,13 +85,12 @@ public class Push {
 
 		final PushTask push = project.getPushTask();
 		final FrontendDatabase db = project.getFrontendDatabase();
-		if (db.getArchiveAccess() == ArchiveAccessMode.PUBLIC
-				&& db.createPublicationRecord()) {
+		if (db.isPublic() && db.createPublicationRecord()) {
 			redir.addAttribute("item", push.getItemUUID());
 			return new RedirectView("/api/auth/publish");
 		}
 
-		if (db.getArchiveAccess() == ArchiveAccessMode.PRIVATE)
+		if (!db.isPublic())
 			redir.addAttribute("token", push.getAccessToken());
 		redir.addAttribute("item", push.getItemUUID());
 		return new RedirectView("/info.html");

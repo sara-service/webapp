@@ -1,11 +1,11 @@
 "use strict";
 
 function commit() {
-	var access = "invalid";
+	var public_access = "invalid";
 	if ($("#private").prop("checked"))
-		access = "PRIVATE";
+		public_access = false;
 	else if ($("#public").prop("checked"))
-		access = "PUBLIC";
+		public_access = true;
 	else {
 		$("#public").prop("checked", true);
 		$("#public").focus();
@@ -13,8 +13,8 @@ function commit() {
 	}
 	var record = $("#record").prop("checked");
 	API.post("save access permissions", "/api/push/commit",
-		{ access: access, record: record }, function() {
-			location.href = "/api/push/redirect";
+		{ public_access: public_access, record: record }, function() {
+			location.replace("/api/push/redirect");
 		});
 }
 

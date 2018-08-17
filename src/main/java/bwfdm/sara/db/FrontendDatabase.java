@@ -15,7 +15,6 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import bwfdm.sara.project.ArchiveAccessMode;
 import bwfdm.sara.project.MetadataField;
 import bwfdm.sara.project.Ref;
 import bwfdm.sara.project.RefAction;
@@ -41,7 +40,7 @@ public class FrontendDatabase {
 	private final TransactionTemplate transaction;
 	private Set<MetadataField> update;
 	private Boolean createPublicationRecord;
-	private ArchiveAccessMode access;
+	private Boolean isPublic;
 
 	/**
 	 * Creates a DAO for reading / writing values for a particular project.
@@ -128,18 +127,18 @@ public class FrontendDatabase {
 		return update;
 	}
 
-	public void setArchiveAccess(final ArchiveAccessMode access,
+	public void setArchiveAccess(final boolean isPublic,
 			final boolean createPublicationRecord) {
-		if (isPublicationRecordDecided() && (this.access != access
+		if (isPublicationRecordDecided() && (this.isPublic != isPublic
 				|| this.createPublicationRecord != createPublicationRecord))
 			throw new IllegalStateException(
 					"cannot change archive access mode once set");
-		this.access = access;
+		this.isPublic = isPublic;
 		this.createPublicationRecord = createPublicationRecord;
 	}
 
 	public boolean isPublicationRecordDecided() {
-		return createPublicationRecord != null && access != null;
+		return createPublicationRecord != null && isPublic != null;
 	}
 
 	public boolean createPublicationRecord() {
@@ -149,11 +148,11 @@ public class FrontendDatabase {
 		return createPublicationRecord;
 	}
 
-	public ArchiveAccessMode getArchiveAccess() {
+	public boolean isPublic() {
 		if (!isPublicationRecordDecided())
 			throw new IllegalStateException(
 					"we don't yet know whether to create a publciation record or not");
-		return access;
+		return isPublic;
 	}
 
 	/**

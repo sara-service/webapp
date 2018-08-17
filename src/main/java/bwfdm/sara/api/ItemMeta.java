@@ -20,10 +20,8 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import bwfdm.sara.Config;
-import bwfdm.sara.project.ArchiveAccessMode;
 import bwfdm.sara.project.Project;
 import bwfdm.sara.publication.Item;
-import bwfdm.sara.publication.ItemType;
 
 @RestController
 @RequestMapping("/api/item")
@@ -45,13 +43,10 @@ public class ItemMeta {
 
 	private boolean canAccess(final Item item, final String token,
 			final HttpSession session) {
-		final ItemType type = ItemType.valueOf(item.item_type);
-		if (type == ItemType.ARCHIVE_PUBLIC)
+		if (item.is_public)
 			return true;
-		if (type != ItemType.ARCHIVE_HIDDEN)
-			throw new UnsupportedOperationException("ItemType " + type);
-
-		// FIXME if (token != null) return token == item.token;
+		if (token != null)
+			return Config.normalizeToken(token).equals(item.token);
 
 		if (!Project.hasInstance(session))
 			return false;
@@ -66,8 +61,9 @@ public class ItemMeta {
 	public static class ItemInfo {
 		@JsonProperty
 		public final UUID item;
-		@JsonProperty
-		public final ArchiveAccessMode access;
+		@JsonProperty("public_access")
+		public final boolean isPublic;
+
 		@JsonProperty
 		public final String title;
 		@JsonProperty
@@ -86,25 +82,21 @@ public class ItemMeta {
 
 		public ItemInfo(final Item item) {
 			this.item = item.uuid;
-			access = ArchiveAccessMode.forItemType(item.getType());
+			isPublic = item.is_public;
 			title = item.meta_title;
 			description = item.meta_description;
 			version = item.meta_version;
 			submitter = item.meta_submitter;
 			date = item.date_created;
-			switch (access) {
-			case PUBLIC:
+			if (isPublic) {
 				url = item.archive_url;
+				// deliberately not revealing the token here. if we ever use it
+				// for anything on public items, we definitely don't want to
+				// reveal it to everybody!
 				token = null;
-				break;
-			case PRIVATE:
+			} else {
 				url = null;
-				// FIXME get token from item table instead
-				token = "t0K3n";
-				break;
-			default:
-				throw new UnsupportedOperationException(
-						"access mode " + access);
+				token = item.token;
 			}
 		}
 	}
