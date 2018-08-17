@@ -192,13 +192,13 @@ public class DSpace_v6 implements PublicationRepository {
 	public Hierarchy getHierarchy(String loginName) {
 		Hierarchy hierarchy;
 
-		hierarchy = new Hierarchy("");
-		hierarchy.setName("Uni-Bibliographie");
+		hierarchy = new Hierarchy("", null);
+		hierarchy.setName("bibliography");
 
 		AuthCredentials authCredentials = new AuthCredentials(sword_user,
 				sword_pwd, loginName); // "on-behalf-of:
 										// loginName"
-		Map<String, String> collectionsMap = getAvailableCollectionsViaSWORD(
+		Map<String, CollectionInfo> collectionsMap = getAvailableCollectionsViaSWORD(
 				authCredentials);
 
 		for (String url : collectionsMap.keySet()) {
@@ -214,9 +214,9 @@ public class DSpace_v6 implements PublicationRepository {
 					}
 				}
 				if (!found)
-					entry = entry.addChild(community);
+					entry = entry.addChild(community, null);
 			}
-			entry = entry.addChild(collectionsMap.get(url));
+			entry = entry.addChild(collectionsMap.get(url).name, collectionsMap.get(url).policy);
 			entry.setURL(url);
 			entry.setCollection(true);
 		}
@@ -298,22 +298,31 @@ public class DSpace_v6 implements PublicationRepository {
 		return response;
 	}
 
-	private Map<String, String> getAvailableCollectionsViaSWORD(
+	private Map<String, CollectionInfo> getAvailableCollectionsViaSWORD(
 			AuthCredentials authCredentials) {
-		Map<String, String> collections = new HashMap<String, String>();
+		Map<String, CollectionInfo> collections = new HashMap<String, CollectionInfo>();
 
 		for (SWORDWorkspace workspace : sword_workspaces) {
 			for (SWORDCollection collection : workspace.getCollections()) {
-				// key = full URL, value = Title
-				collections.put(collection.getHref().toString(),
-						collection.getTitle());
+				// key = full URL, value = name/policy
+				CollectionInfo collectionInfo = new CollectionInfo();
+				if (this.deposit_type.equals("workflow")) {
+					try {
+						collectionInfo.policy = collection.getCollectionPolicy().toString();
+					} catch (ProtocolViolationException e) {
+						logger.error("Misconfigured IR: the policy cannot be retrieved but is needed!");
+						e.printStackTrace();
+					}
+				}
+				collectionInfo.name = collection.getTitle();
+				collections.put(collection.getHref().toString(), collectionInfo);
 			}
 		}
 		return collections;
 	}
 
 	@Override
-	public Map<String, String> getAvailableCollectionPaths(String separator,
+	public Map<String, CollectionInfo> getAvailableCollectionPaths(String separator,
 			String loginName) {
 		// TODO Auto-generated method stub
 		return null;
@@ -327,7 +336,7 @@ public class DSpace_v6 implements PublicationRepository {
 	}
 
 	@Override
-	public String publishMetadata(String userLogin, String collectionURL,
+	public SubmissionInfo publishMetadata(String userLogin, String collectionURL,
 			Map<String, String> metadataMap) {
 
 		String mimeFormat = "application/atom+xml";
@@ -337,9 +346,11 @@ public class DSpace_v6 implements PublicationRepository {
 				packageFormat, null, metadataMap);
 	}
 
-	private String publishElement(String userLogin, String collectionURL,
+	private SubmissionInfo publishElement(String userLogin, String collectionURL,
 			String mimeFormat, String packageFormat, File file,
 			Map<String, String> metadataMap) {
+		
+		SubmissionInfo submissionInfo = new SubmissionInfo();
 
 		// Check if only 1 parameter is used (metadata OR file).
 		// Multipart is not supported.
@@ -399,13 +410,16 @@ public class DSpace_v6 implements PublicationRepository {
 				switch (deposit_type.toLowerCase()) {
 				case "workspace":
 					deposit.setInProgress(true);
+					submissionInfo.inProgress = true;
 					break;
 				case "workflow":
 					deposit.setInProgress(false);
+					submissionInfo.inProgress = false;
 					break;
 				}
 			} else {
 				deposit.setInProgress(true);
+				submissionInfo.inProgress = true;
 			}
 
 			DepositReceipt receipt = sword_client.deposit(collectionURL,
@@ -413,8 +427,11 @@ public class DSpace_v6 implements PublicationRepository {
 
 			String[] parts = receipt.getLocation().split("/");
 
-			// FIXME Beware, evil hack. will need to rewrite whole class for Beta anyways...
-			return receipt.getSplashPageLink().getHref() + "|" + parts[parts.length-1];
+			if (receipt.getSplashPageLink() != null) {
+				submissionInfo.edit_ref = receipt.getSplashPageLink().getHref();
+			}
+			submissionInfo.item_ref = parts[parts.length-1];
+			return submissionInfo;
 
 		} catch (FileNotFoundException e) {
 			logger.error("Exception by accessing a file: "

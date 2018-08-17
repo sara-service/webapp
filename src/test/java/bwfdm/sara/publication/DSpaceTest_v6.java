@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.junit.Test;
 
+import bwfdm.sara.publication.PublicationRepository.CollectionInfo;
 import bwfdm.sara.publication.dspace.DSpace_v6;
 
 public class DSpaceTest_v6 {
@@ -71,7 +72,7 @@ public class DSpaceTest_v6 {
 		
 		// Get user available collections with full names
 		output += "\n" + "== User available collections with full name \n\n";
-		for(Map.Entry<String, String> collection: dspaceRepository.getAvailableCollectionPaths("//", userLogin).entrySet()) {
+		for(Map.Entry<String, CollectionInfo> collection: dspaceRepository.getAvailableCollectionPaths("//", userLogin).entrySet()) {
 			output += collection.getValue() + "\n";
 			output += "-- URL:  " + collection.getKey() + 
 							   " -> Handle: " + dspaceRepository.getCollectionHandle(collection.getKey()) + "\n";
@@ -80,7 +81,7 @@ public class DSpaceTest_v6 {
 		
 		// Get SARA available collections with full names
 		output += "\n" + "== SARA available collections with full name \n\n";
-		for(Map.Entry<String, String> collection: dspaceRepository.getAvailableCollectionPaths("//", null).entrySet()) {
+		for(Map.Entry<String, CollectionInfo> collection: dspaceRepository.getAvailableCollectionPaths("//", null).entrySet()) {
 			output += collection.getValue() + "\n";
 			output += "-- URL:  " + collection.getKey() + 
 							   " -> Handle: " + dspaceRepository.getCollectionHandle(collection.getKey()) + "\n";

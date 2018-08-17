@@ -50,15 +50,15 @@ function validateEmail(email) {
 	// if the browser doesn't support <input type=email>, everything will be
 	// valid, which isn't too bad an approximation of RFC822.
 	if (email == "" || $("#email").is(":invalid"))
-		return "Please enter a valid email address!";
+		return "Please enter a valid email address";
 
 	var userInfo = queryHierarchy();
 	if (userInfo == null)
 		return null; // no checkmark yet; AJAX will call us back with status
 	if (!userInfo["user-valid"])
-		return "Your email isn't registered there!";
+		return "Your email isn't registered there";
 	if (userInfo.hierarchy == null)
-		return "You don't have submit rights to any collection!";
+		return "You don't have submit rights to any collection";
 	return true;
 }
 
@@ -75,13 +75,34 @@ function setCollectionList(select, collection_path, hierarchy) {
 		});
 	} else {
 		// TODO shouldn't we add this even if there are sub-collections?
-		var option = $("<option>").attr("value", hierarchy.url).text(
-				collection_path);
+		var option = $("<option>").attr("value", hierarchy.url)
+			.text(collection_path)
+			.data("policy", hierarchy.policy);
 		select.append(option);
 	}
 }
 
 var initialCollection;
+
+function initPolicy() {
+	var policy = $("#collection").find('option:selected').data("policy");
+	if (!policy) {
+		$("#policy_group").addClass("hidden");
+		$("#spacing").removeClass("hidden");
+		$("#ToS").addClass("hidden");
+		$("#policyOk").addClass("hidden");
+		$("#policyOk").prop('checked', true);
+		$("#policyLbl").addClass("hidden");
+	} else {
+		$("#policy_group").removeClass("hidden");
+		$("#spacing").addClass("hidden");
+		$("#ToS").removeClass("hidden");
+		$("#policyOk").removeClass("hidden");
+		$("#policyOk").prop('checked', false);
+		$("#policyLbl").removeClass("hidden");
+	}
+	$("#policy").val(policy);
+};
 
 function updateCollections(_, valid) {
 	// remove status display on the collection field, otherwise it tends to
@@ -118,10 +139,20 @@ function updateCollections(_, valid) {
 			selectedCollection = initialCollection;
 		collection.empty();
 		setCollectionList(collection, "", userInfo.hierarchy);
-		collection.val(selectedCollection); // restore selection
+
+		// restore selection if one existed
+		collection.val(selectedCollection);
 		collection_displayname = collection.find('option:selected').text();
+
+		if (collection_displayname == "") {
+			var option = $("<option>").text("<Please click here to select a collection>").attr('disabled','disabled');
+			collection.append(option); collection.val(option.text());
+		}
+
 	} else
 		collection.prop("disabled", true);
+	
+	initPolicy();
 }
 
 function initPubRepos(info) {
@@ -136,7 +167,7 @@ function initPubRepos(info) {
 	validate.init("email", info.meta.email, validateEmail, updateCollections);
 	validate.init("pubrepo", info.meta.pubrepo, function(value) {
 		if (value == null)
-			return "Please select your institutional repository!";
+			return "Please select your institutional repository";
 		return true;
 	}, function(valud, valid, elem, disableFeedback) {
 		pubrepo_displayname = $("#pubrepo :selected").text();
@@ -156,15 +187,19 @@ function initPubRepos(info) {
 		// messages below the email to which they refer.
 		validate.check("email", disableFeedback);
 	});
-
+	
 	validate.init("collection", null, function(value) {
 		if (value == null || queryHierarchy() == null)
-			return "Please select a collection (usually, your department)!";
+			return "Please select a collection";
 		return true;
 	});
+	
 	initialCollection = info.meta.collection;
-
+	
 	$("#next_button").click(function() {
+		if (!$("#policyOk").prop('checked'))
+			return;
+		
 		var values = validate.all([ "pubrepo", "email", "collection" ]);
 		if (values == null)
 			return;
@@ -181,6 +216,7 @@ function initPubRepos(info) {
 }
 
 $(function() {
+	$("#collection").click( function(){ initPolicy(); } );
 	API.get("load list of institutional repositories", "/api/publish", {},
 			initPubRepos);
 	$("form").submit(function() {
