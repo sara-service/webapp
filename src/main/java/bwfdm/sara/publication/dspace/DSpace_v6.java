@@ -189,6 +189,7 @@ public class DSpace_v6 implements PublicationRepository {
 	}
 
 	@Override
+	// FIXME this doesn't work unless called after .serviceDocument()!
 	public Hierarchy getHierarchy(String loginName) {
 		Hierarchy hierarchy;
 
