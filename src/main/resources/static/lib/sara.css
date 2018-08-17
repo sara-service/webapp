@@ -47,6 +47,14 @@
 	100% { transform: rotate(360deg); }
 }
 
+.list-group-item:first-child, .list-group-item:last-child {
+	border-radius: 0px;
+}
+
+.list-group-overflow {
+	text-align: center;
+}
+
 .btn-array {
 	margin: .3ex .3em;
 }

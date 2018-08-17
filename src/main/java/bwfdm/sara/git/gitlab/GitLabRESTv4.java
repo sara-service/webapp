@@ -133,7 +133,8 @@ public class GitLabRESTv4 implements GitRepo {
 	public List<ProjectInfo> getProjects() {
 		return toDataObject(rest.getList(
 				rest.uri("/projects").queryParam("simple", "true")
-						.queryParam("membership", "true"),
+						.queryParam("membership", "true")
+						.queryParam("order_by", "last_activity_at"),
 				new ParameterizedTypeReference<List<GLProjectInfo>>() {
 				}));
 	}

@@ -143,8 +143,8 @@ public class GitHubRESTv3 implements GitRepo {
 		// only list projects that the user is a member of, either directly by
 		// ownership, or indirectly by group membership
 		return toDataObject(rest.getList(
-				rest.uri("/user/repos").queryParam("affiliation",
-						"owner,organization_member"),
+				rest.uri("/user/repos").queryParam("sort", "pushed")
+						.queryParam("affiliation", "owner,organization_member"),
 				new ParameterizedTypeReference<List<GHProjectInfo>>() {
 				}));
 	}

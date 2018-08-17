@@ -11,7 +11,12 @@ import bwfdm.sara.project.Project;
  * to use.
  */
 public interface GitRepo extends AuthProvider {
-	/** @return a list of all projects in GitLab */
+	/**
+	 * Lists all projects of the user. If possible, sort by most recent
+	 * activity.
+	 * 
+	 * @return a list of all projects in GitLab
+	 */
 	public List<ProjectInfo> getProjects();
 
 	/**

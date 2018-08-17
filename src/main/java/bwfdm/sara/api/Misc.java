@@ -35,8 +35,20 @@ public class Misc {
 	}
 
 	@GetMapping("project-list")
-	public List<ProjectInfo> getProjectList(final HttpSession session) {
-		return Project.getInstance(session).getGitRepo().getProjects();
+	public ProjectList getProjectList(final HttpSession session) {
+		return new ProjectList(Project.getInstance(session));
+	}
+
+	private class ProjectList {
+		@JsonProperty
+		private final String repo;
+		@JsonProperty
+		private final List<ProjectInfo> projects;
+
+		private ProjectList(final Project project) {
+			repo = project.getRepoID();
+			projects = project.getGitRepo().getProjects();
+		}
 	}
 
 	@GetMapping("session-info")

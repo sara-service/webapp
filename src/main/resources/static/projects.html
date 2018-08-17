@@ -11,6 +11,7 @@
 	<script src="lib/jquery.min.js"></script>
 	<script src="lib/uri.min.js"></script>
 	<script src="lib/common.js"></script>
+	<script src="search.js"></script>
 	<script src="projects.js"></script>
 	<title>Project selection — SARA software publishing</title>
 </head>
@@ -27,13 +28,21 @@
 		</div>
 	</div>
 
-	<div id="projects">
-		<span class="hidden" id="template"><a class="btn btn-default btn-array" name="select">
-			<span name="display">SARA-server</span> (<tt name="internal">sara/SARA-server</tt>)
-		</a></span>
-		<div class="hidden" id="noprojects">
-			<p><b>No projects found!</b> Please <a class="btn btn-default" href="/api/repo/return">return to git repo</a> and create some!</p>
-		</div>
+	<form id="search_block" class="form-horizontal hidden">
+		<div class="form-group has-feedback"><div class="col-sm-12">
+			<input type="search" class="form-control" id="search" placeholder="type to search project names">
+		</div></div>
+	</form>
+	<div id="projects" class="list-group hidden">
+		<a id="template" class="list-group-item hidden">
+			<h4><span name="display">SARA-server</span>
+				(<tt name="internal">sara/SARA-server</tt>)</h4>
+			<div class="text-muted" name="description">blah</div>
+		</a>
+		<a class="list-group-item list-group-overflow text-muted" href="#" id="overflow">show more</a>
+	</div>
+	<div class="hidden" id="noprojects">
+		<p><b>No projects found!</b> Please <a class="btn btn-default" href="/api/repo/return">return to git repo</a> and create some!</p>
 	</div>
 	<div id="loading" class="loading"><span class="sr-only">loading, please wait...</span></div>
 
