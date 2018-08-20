@@ -13,8 +13,10 @@ function fillMetaData(meta) {
 	} else
 		$('#access').text("private");
 
-	$('#token').text(meta.token);
-	$('#tokeninfo').removeClass("hidden");
+	if (meta.token != null) {
+		$('#token').text(meta.token);
+		$('#tokeninfo').removeClass("hidden");
+	}
 
 	// note: this relies on the "token" parameter being omitted if the token
 	// is null!
