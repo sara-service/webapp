@@ -1,22 +1,32 @@
 "use strict";
 
-function addRepoButton(repo) {
+"use strict";
+
+function addRepoButton(repo, project) {
 	var form = template("template");
 	form.display.text(repo.display_name);
-	form.select.attr("href", URI("/api/auth/login").search({
-		repo: repo.id
-	}));
-	$("#repos").append(form.root);
+	if (repo.logo != null)
+		form.icon.attr("src", repo.logo);
+	form.root.attr("href", URI("/api/auth/login").search({ repo: repo.id }));
+	form.root.insertBefore($("#overflow"));
+	return form.root;
 }
 
-function initRepos(list) {
-	if (list.length === 0)
-		$("#broken").removeClass("hidden")
-	else
-		$.each(list, function(_, repo) {
-			addRepoButton(repo);
+function initRepos(repos) {
+	if (repos.length > 0) {
+		var items = [];
+		$.each(repos, function(_, repo) {
+			items.push(addRepoButton(repo));
 		});
-	$("#loading").remove();	
+		initSearch($('#search'), items, $('#overflow'), 5);
+
+		$("#repos").removeClass("hidden");
+		$("#search_block").removeClass("hidden");
+		// pre-focus the box so the user just has to start typing
+		$('#search').focus();
+	} else
+		$("#broken").removeClass("hidden")
+	$("#loading").remove();
 }
 
 $(function() {

@@ -11,6 +11,7 @@
 	<script src="lib/jquery.min.js"></script>
 	<script src="lib/uri.min.js"></script>
 	<script src="lib/common.js"></script>
+	<script src="search.js"></script>
 	<script src="index.js"></script>
 	<title>SARA software publishing</title>
 </head>
@@ -27,11 +28,19 @@
 		</div>
 	</div>
 
-	<div id="repos">
-		<span class="hidden" id="template"><a class="btn btn-default btn-array" name="select">
-			<span name="display">SARA-server</span>
-		</a></span>
+	<form id="search_block" class="form-horizontal hidden">
+		<div class="form-group has-feedback"><div class="col-sm-12">
+			<input type="search" class="form-control" id="search" placeholder="type to filter by name">
+		</div></div>
+	</form>
+	<div id="repos" class="list-group hidden">
+		<a id="template" class="list-group-item list-group-icon hidden">
+			<img name="icon" src="git.svg">
+			<div><h4><span name="display">SARA-server</span></h4></div>
+		</a>
+		<a class="list-group-item list-group-overflow text-muted" href="#" id="overflow">show more</a>
 	</div>
+
 	<div id="broken" class="hidden"><h2>Error loading list!</h2>
 		<p>If reloading doesn't fix things,
 		you may want to contact the service administrator.</p></div>
