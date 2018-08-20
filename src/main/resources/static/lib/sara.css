@@ -112,6 +112,13 @@ li {
 	display: block;
 }
 
+#ir_logo {
+	height: 12ex;
+	margin: 0ex 0ex 0ex 0ex;
+	display: block;
+	float: right;
+}
+
 .action-header {
 	margin: 1ex auto 3ex 0ex;
 }

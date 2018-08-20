@@ -74,7 +74,6 @@ function setCollectionList(select, collection_path, hierarchy) {
 			setCollectionList(select, cp, child);
 		});
 	} else {
-		// TODO shouldn't we add this even if there are sub-collections?
 		var option = $("<option>").attr("value", hierarchy.url)
 			.text(collection_path)
 			.data("policy", hierarchy.policy);
@@ -88,14 +87,12 @@ function initPolicy() {
 	var policy = $("#collection").find('option:selected').data("policy");
 	if (!policy) {
 		$("#policy_group").addClass("hidden");
-		$("#spacing").removeClass("hidden");
 		$("#ToS").addClass("hidden");
 		$("#policyOk").addClass("hidden");
 		$("#policyOk").prop('checked', true);
 		$("#policyLbl").addClass("hidden");
 	} else {
 		$("#policy_group").removeClass("hidden");
-		$("#spacing").addClass("hidden");
 		$("#ToS").removeClass("hidden");
 		$("#policyOk").removeClass("hidden");
 		$("#policyOk").prop('checked', false);
@@ -142,13 +139,11 @@ function updateCollections(_, valid) {
 
 		// restore selection if one existed
 		collection.val(selectedCollection);
-		collection_displayname = collection.find('option:selected').text();
-
-		if (collection_displayname == "") {
-			var option = $("<option>").text("<Please click here to select a collection>").attr('disabled','disabled');
-			collection.append(option); collection.val(option.text());
-		}
-
+		// add placeholder (because placeholder="foo" doesn't work on dropdowns)
+		if (selectedCollection == null)
+			collection.prepend($("<option>").prop('disabled', true)
+				.prop('selected', true).attr("id", "collection_placeholder")
+				.text("Please select a collection").addClass("text-muted"));
 	} else
 		collection.prop("disabled", true);
 	
@@ -169,7 +164,7 @@ function initPubRepos(info) {
 		if (value == null)
 			return "Please select your institutional repository";
 		return true;
-	}, function(valud, valid, elem, disableFeedback) {
+	}, function(value, valid, elem, disableFeedback) {
 		pubrepo_displayname = $("#pubrepo :selected").text();
 		var repo = $("#pubrepo :selected").data("repo");
 		var logo = repo ? repo.logo_url : null;
@@ -192,14 +187,20 @@ function initPubRepos(info) {
 		if (value == null || queryHierarchy() == null)
 			return "Please select a collection";
 		return true;
+	}, function(value, valid, elem, disableFeedback) {
+		// hide placeholder when something valid is selected
+		$("#collection_placeholder").toggleClass("hidden", valid);
 	});
 	
 	initialCollection = info.meta.collection;
 	
 	$("#next_button").click(function() {
-		if (!$("#policyOk").prop('checked'))
+		if (!$("#policyOk").prop('checked')) {
+			// give at least a hint
+			$("#policyOk").focus();
 			return;
-		
+		}
+
 		var values = validate.all([ "pubrepo", "email", "collection" ]);
 		if (values == null)
 			return;
