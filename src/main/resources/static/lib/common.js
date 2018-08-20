@@ -171,7 +171,7 @@ validate.feedback = function(field, status) {
 	var elem = typeof field == "string" ? $("#" + field) : field;
 	var group = elem.parents(".form-group,.form-group-horizontal");
 	var text = elem.siblings(".form-control-feedback-text");
-	var icon = elem.siblings(".form-control-feedback");;
+	var icon = elem.siblings(".form-control-feedback");
 
 	group.removeClass("has-error");
 	icon.removeClass("text-success");

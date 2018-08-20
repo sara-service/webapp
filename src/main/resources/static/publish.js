@@ -2,9 +2,6 @@
 
 var cache = {}, timer;
 
-var pubrepo_displayname = null;
-var collection_displayname = null;
-
 // do not call directly, ever. call queryHierarchy() instead!
 function doQueryHierarchy(pubrepo, email) {
 	cache[pubrepo][email] = "busy"; // abuse of untyped language...
@@ -84,21 +81,16 @@ function setCollectionList(select, collection_path, hierarchy) {
 var initialCollection;
 
 function initPolicy() {
+	var policyOk = $("#policyOk");
+	var acceptedPolicy = policyOk.prop('checked') ? $("#policy").val() : null;
 	var policy = $("#collection").find('option:selected').data("policy");
-	if (!policy) {
-		$("#policy_group").addClass("hidden");
-		$("#ToS").addClass("hidden");
-		$("#policyOk").addClass("hidden");
-		$("#policyOk").prop('checked', true);
-		$("#policyLbl").addClass("hidden");
-	} else {
-		$("#policy_group").removeClass("hidden");
-		$("#ToS").removeClass("hidden");
-		$("#policyOk").removeClass("hidden");
-		$("#policyOk").prop('checked', false);
-		$("#policyLbl").removeClass("hidden");
-	}
 	$("#policy").val(policy);
+	$("#policy_group").toggleClass("hidden", policy == null);
+	// check the box if
+	// - there is no policy (and the box is hidden anyway)
+	// - it was checked before and it didn't change
+	// uncheck it in all other cases to get explicit user consent
+	policyOk.prop('checked', policy == acceptedPolicy || policy == null);
 };
 
 function updateCollections(_, valid) {
@@ -165,7 +157,6 @@ function initPubRepos(info) {
 			return "Please select your institutional repository";
 		return true;
 	}, function(value, valid, elem, disableFeedback) {
-		pubrepo_displayname = $("#pubrepo :selected").text();
 		var repo = $("#pubrepo :selected").data("repo");
 		var logo = repo ? repo.logo_url : null;
 		if (logo && !logo.match(/^(https:\/\/|data:)/))
@@ -190,22 +181,26 @@ function initPubRepos(info) {
 	}, function(value, valid, elem, disableFeedback) {
 		// hide placeholder when something valid is selected
 		$("#collection_placeholder").toggleClass("hidden", valid);
+		if (valid)
+			initPolicy();
+	});
+	validate.init("policyOk", false, function() {
+		if (!$("#policyOk").prop("checked"))
+			return "You have to accept the terms of service to continue";
+		return true;
 	});
 	
 	initialCollection = info.meta.collection;
 	
 	$("#next_button").click(function() {
-		if (!$("#policyOk").prop('checked')) {
-			// give at least a hint
-			$("#policyOk").focus();
-			return;
-		}
-
-		var values = validate.all([ "pubrepo", "email", "collection" ]);
+		var values = validate.all(["pubrepo", "email", "collection",
+			"policyOk"]);
 		if (values == null)
 			return;
-		values["pubrepo_displayname"] = pubrepo_displayname;
-		values["collection_displayname"] = collection_displayname;
+		values["pubrepo_displayname"] = $("#pubrepo :selected").text();
+		values["collection_displayname"] = $("#collection :selected").text();
+		// FIXME we should probably send the policy to server for checking!
+		delete values["policyOk"];
 		API.put("save fields", "/api/publish/meta", values, function() {
 			location.href = "/summary.html";
 		});
@@ -217,7 +212,6 @@ function initPubRepos(info) {
 }
 
 $(function() {
-	$("#collection").click( function(){ initPolicy(); } );
 	API.get("load list of institutional repositories", "/api/publish", {},
 			initPubRepos);
 	$("form").submit(function() {
