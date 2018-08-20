@@ -5,6 +5,7 @@
 function addRepoButton(repo, project) {
 	var form = template("template");
 	form.display.text(repo.display_name);
+	form.url.text(repo.url);
 	if (repo.logo != null)
 		form.icon.attr("src", repo.logo);
 	form.root.attr("href", URI("/api/auth/login").search({ repo: repo.id }));

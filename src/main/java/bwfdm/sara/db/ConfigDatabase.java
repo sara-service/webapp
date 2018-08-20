@@ -55,7 +55,7 @@ public class ConfigDatabase {
 	/** @return a list of all supported git repos */
 	public List<GitRepoFactory> getGitRepos() {
 		return db.<GitRepoFactory> queryRowToList(
-				"select uuid, display_name, logo_url, adapter from "
+				"select uuid, display_name, logo_url, url, adapter from "
 						+ GITREPOS_TABLE,
 				GitRepoFactory.class);
 	}

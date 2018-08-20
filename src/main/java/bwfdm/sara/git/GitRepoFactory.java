@@ -31,6 +31,8 @@ public class GitRepoFactory {
 	public final String displayName;
 	@JsonProperty("logo")
 	public final String logoURL;
+	@JsonProperty("url")
+	public final String homeURL;
 	@JsonIgnore
 	private final String adapter;
 
@@ -43,10 +45,12 @@ public class GitRepoFactory {
 	public GitRepoFactory(@JsonProperty("uuid") final String id,
 			@JsonProperty("display_name") final String displayName,
 			@JsonProperty("logo_url") final String logoURL,
+			@JsonProperty("url") final String homeURL,
 			@JsonProperty("adapter") final String adapter) {
 		this.id = id;
 		this.displayName = displayName;
 		this.logoURL = logoURL;
+		this.homeURL = homeURL;
 		this.adapter = adapter;
 	}
 
