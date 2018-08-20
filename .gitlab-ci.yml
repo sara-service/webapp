@@ -16,7 +16,7 @@ postgres:
   stage: build
   image: postgres:10.4
   script:
-    - pg_createcluster --start 10 main
+    - pg_createcluster --start 10 main -- --nosync
     - gosu postgres saradb/createdb.sh sara sara test </dev/null
     - gosu postgres pg_dump --no-password --serializable-deferrable 
       --quote-all-identifiers --no-tablespaces --no-owner --encoding utf8
