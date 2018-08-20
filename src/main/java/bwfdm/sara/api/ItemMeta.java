@@ -35,18 +35,20 @@ public class ItemMeta {
 			final HttpSession session) {
 		final Item item = config.getPublicationDatabase()
 				.updateFromDB(new Item(itemID));
-		if (!canAccess(item, token, session))
+
+		if (isAuthenticated(item, token, session))
+			return new ItemInfo(item, true);
+		else if (item.is_public)
+			return new ItemInfo(item, false);
+		else
 			throw new NoSuchElementException(
 					"item " + itemID + " not accessible to logged-in user");
-		return new ItemInfo(item);
 	}
 
-	private boolean canAccess(final Item item, final String token,
+	private boolean isAuthenticated(final Item item, final String token,
 			final HttpSession session) {
-		if (item.is_public)
+		if (token != null && Config.normalizeToken(token).equals(item.token))
 			return true;
-		if (token != null)
-			return Config.normalizeToken(token).equals(item.token);
 
 		if (!Project.hasInstance(session))
 			return false;
@@ -80,7 +82,7 @@ public class ItemMeta {
 		@JsonProperty
 		public final String token;
 
-		public ItemInfo(final Item item) {
+		public ItemInfo(final Item item, final boolean authenticated) {
 			this.item = item.uuid;
 			isPublic = item.is_public;
 			title = item.meta_title;
@@ -88,16 +90,8 @@ public class ItemMeta {
 			version = item.meta_version;
 			submitter = item.meta_submitter;
 			date = item.date_created;
-			if (isPublic) {
-				url = item.archive_url;
-				// deliberately not revealing the token here. if we ever use it
-				// for anything on public items, we definitely don't want to
-				// reveal it to everybody!
-				token = null;
-			} else {
-				url = null;
-				token = item.token;
-			}
+			url = isPublic ? item.archive_url : null;
+			token = authenticated ? item.token : null;
 		}
 	}
 }

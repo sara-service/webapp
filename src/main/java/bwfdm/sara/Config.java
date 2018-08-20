@@ -24,11 +24,14 @@ import bwfdm.sara.publication.db.PublicationDatabase;
 @Component
 public class Config implements ServletContextAware {
 	// human-safe, non-ambiguous base32 alphabet. we omit:
-	// - O because it looks like 0
-	// - j because in handwriting it may look like i
+	// - O because it looks almost exactly like 0
 	// - I and l because they look like 1 (in fact many fixed-width fonts use
-	//   the same glyph for 1 and l, including the most popular one, Courier)
+	//   the same glyph for 1 and l, especially the most popular one, Courier)
+	// - J because in (uppercase) handwriting it may look like I
 	// we use lowercase because lowercase is easier to read than uppercase.
+	// note: no attempt is made to prevent generation of profane tokens.
+	// removing vowels would avoid generating "motherfucker", but "mthrfckr"
+	// isn't that much better to warrant that particular mess.
 	public static final String TOKEN_ALPHABET = "0123456789abcdefghkmnpqrstuvwxyz";
 	// 64 bits security level. since the alphabet has 32 bits per character, we
 	// might as well use that extra bit.
@@ -225,8 +228,8 @@ public class Config implements ServletContextAware {
 	 * @see Config#TOKEN_ALPHABET
 	 */
 	public static String normalizeToken(final String token) {
-		return token.toLowerCase().replaceAll("[ijl]", "1").replaceAll("o",
-				"0");
+		return token.toLowerCase().replaceAll("\\s", "")
+				.replaceAll("[ijl]", "1").replaceAll("o", "0");
 	}
 
 	/**

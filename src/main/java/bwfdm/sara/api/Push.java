@@ -90,8 +90,7 @@ public class Push {
 			return new RedirectView("/api/auth/publish");
 		}
 
-		if (!db.isPublic())
-			redir.addAttribute("token", push.getAccessToken());
+		redir.addAttribute("token", push.getAccessToken());
 		redir.addAttribute("item", push.getItemUUID());
 		return new RedirectView("/info.html");
 	}

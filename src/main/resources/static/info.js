@@ -10,11 +10,12 @@ function fillMetaData(meta) {
 		$('#access').text("public");
 		$('#url').attr("href", meta.url);
 		$('#public').removeClass("hidden");
-	} else {
+	} else
 		$('#access').text("private");
-		$('#token').text(meta.token);
-		$('#private').removeClass("hidden");
-	}
+
+	$('#token').text(meta.token);
+	$('#tokeninfo').removeClass("hidden");
+
 	// note: this relies on the "token" parameter being omitted if the token
 	// is null!
 	$("#next_button").attr("href",

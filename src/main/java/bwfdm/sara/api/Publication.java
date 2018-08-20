@@ -210,18 +210,21 @@ public class Publication {
 		final UUID sourceUUID;
 		final String userID;
 		if (PublicationSession.hasInstance(session)) {
-			PublicationSession project = PublicationSession
+			final PublicationSession project = PublicationSession
 					.getInstance(session);
 			sourceUUID = project.getSourceUUID();
 			userID = project.getSourceUserID();
 		} else {
 			// NoSessionException thown here if there is no session.
 			// (and we definitely want that exception here)
-			Project project = Project.getCompletedInstance(session);
+			final Project project = Project.getCompletedInstance(session);
 			sourceUUID = UUID.fromString(project.getRepoID());
 			userID = project.getGitRepo().getUserInfo().userID;
 		}
 
+		// WARNING this discloses the token (so it's in the URL when coming from
+		// the resume screen). that is, make absolutely sure this isn't publicly
+		// accessible!!
 		final List<Item> items = config.getPublicationDatabase()
 				.getPublishedItems(sourceUUID, userID);
 		final List<PublicationItem> res = new ArrayList<PublicationItem>(
@@ -301,6 +304,8 @@ public class Publication {
 		public final String archive_url;
 		@JsonProperty("item")
 		public final UUID item;
+		@JsonProperty("token")
+		public final String token;
 
 		public PublicationItem(final UUID source, final Item item) {
 			this.item = item.uuid;
@@ -309,6 +314,7 @@ public class Publication {
 			version = item.meta_version;
 			description = item.meta_description;
 			archive_url = item.archive_url;
+			token = item.token;
 		}
 	}
 }
