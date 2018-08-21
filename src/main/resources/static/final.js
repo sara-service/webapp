@@ -8,8 +8,10 @@ function initRepoInfo(list) {
 			$('#contact_mail').text(r.contact_email);
 			$('#contact_mail').attr('href', "mailto:"+r.contact_email+"?subject=SARA%20Service");
 			$('#help_text').text(r.help);
-			}
-		} );
+			$('#next_button').text("log in to " + r.display_name + " and complete submission →");
+			return false;
+		}
+	});
 }
 
 function initMeta(info) {

@@ -70,12 +70,9 @@ function setCollectionList(select, collection_path, hierarchy) {
 			}
 			setCollectionList(select, cp, child);
 		});
-	} else {
-		var option = $("<option>").attr("value", hierarchy.url)
-			.text(collection_path)
-			.data("policy", hierarchy.policy);
-		select.append(option);
-	}
+	} else
+		select.append($("<option>").attr("value", hierarchy.url)
+			.text(collection_path).data("policy", hierarchy.policy));
 }
 
 var initialCollection;
