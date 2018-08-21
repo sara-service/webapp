@@ -143,10 +143,29 @@ body {
 	width: 100%;
 }
 
-.inline-icon {
-	margin: 0px 0.5em;
-	font-size: 150%;
-	line-height: 50%;
+.progress-icon {
+	display: block;
+	float: left;
+	width: 1.5em;
+	height: 1.5em;
+	margin: 0px 1em;
+	text-align: center;
+}
+
+.progress-icon > span {
+	font-size: 200%;
+	line-height: 60%;
+	vertical-align: baseline;
+}
+
+.loading-icon {
+	border-radius: 50%;
+	border-top: .276em solid #b45865;
+	border-right: .276em solid #bddd1f;
+	border-bottom: .276em solid #809fb1;
+	border-left: .276em solid #f9b10b;
+	-webkit-animation: spin 2s linear infinite;
+	animation: spin 2s linear infinite;
 }
 
 .inline-heading {
@@ -155,6 +174,8 @@ body {
 
 .progress-thin {
 	height: 1ex;
+	margin: .3em 0em .3em 3.5em;
+	display: block;
 }
 
 /* these are actually the dark colors so they are readable on white */

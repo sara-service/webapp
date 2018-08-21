@@ -1,11 +1,11 @@
 package bwfdm.sara.transfer;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -21,6 +21,7 @@ public abstract class Task implements ProgressMonitor, Runnable {
 	protected static final Log logger = LogFactory.getLog(Task.class);
 
 	private final List<Step> steps = new ArrayList<>();
+	private int lastCompletedIndex = -1;
 	private Map<String, Step> declaredSteps;
 	private Step currentStep;
 	private boolean started, done, cancelled;
@@ -36,6 +37,10 @@ public abstract class Task implements ProgressMonitor, Runnable {
 			this.steps.add(s);
 			declaredSteps.put(t, s);
 		}
+	}
+
+	protected void declareSteps(final String... steps) {
+		declareSteps(Arrays.asList(steps));
 	}
 
 	public synchronized Exception getException() {
@@ -60,41 +65,42 @@ public abstract class Task implements ProgressMonitor, Runnable {
 	}
 
 	@Override
+	public void endTask() {
+		// ignored. users tend to get confused when a step is completed but the
+		// next step hasn't started yet. thus we lie to them and delay ending
+		// the step until the next one has already started.
+	}
+
+	@Override
 	public void beginTask(final String title, final int totalWork) {
-		endTask(); // JGit tends to not call this
+		// ending steps here instead of endTask(), see above
+		endStep();
 		currentStep = findTask(title, totalWork);
 		currentStep.start(totalWork);
 	}
 
-	private Step findTask(final String title, final int totalWork) {
-		// if the list of tasks has been declared, we only allow these tasks to
-		// be reported
-		if (declaredSteps != null) {
-			if (!declaredSteps.containsKey(title))
-				throw new NoSuchElementException("unexpected step: " + title);
-			return declaredSteps.get(title);
-		}
+	private void endStep() {
+		if (currentStep != null)
+			currentStep.end();
+		currentStep = null;
+	}
 
-		// if the list of tasks is unknown, each new task is simply appended to
-		// the list
-		// note that the frontend will always append new tasks to the end of the
-		// displayed list, no matter where they are in the JSON list! thus
-		// trying to insert them correctly here doesn't make a lot of sense.
-		final Step step = new Step(title);
-		steps.add(step);
+	private Step findTask(final String title, final int totalWork) {
+		final Step step;
+		if (declaredSteps != null && declaredSteps.containsKey(title)) {
+			step = declaredSteps.get(title);
+			lastCompletedIndex = steps.indexOf(step);
+		} else {
+			step = new Step(title);
+			lastCompletedIndex++;
+			steps.add(lastCompletedIndex, step);
+		}
 		return step;
 	}
 
 	@Override
 	public void update(final int completed) {
 		currentStep.update(completed);
-	}
-
-	@Override
-	public void endTask() {
-		if (currentStep != null)
-			currentStep.end();
-		currentStep = null;
 	}
 
 	/** @return <code>true</code> if the task has finished successfully */
@@ -133,7 +139,8 @@ public abstract class Task implements ProgressMonitor, Runnable {
 			logger.debug(e);
 		} finally {
 			synchronized (this) {
-				endTask(); // JGit tends to not call this
+				// end the last step, finally setting checkmarks on everything
+				endStep();
 				done = true;
 				if (!cancelled)
 					return;

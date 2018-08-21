@@ -28,6 +28,9 @@ import bwfdm.sara.project.Ref;
 import bwfdm.sara.project.RefAction;
 
 public class CloneTask extends Task {
+	private static final String EXTRACT_META = "Extracting metadata";
+	private static final String ABBREV_HISTORY = "NOT abbreviating history (not implemented yet)";
+	private static final String INIT_REPO = "Initializing temporary repository";
 	private final MetadataExtractor extractor;
 	private final GitProject project;
 	private final List<RefAction> actions;
@@ -47,6 +50,7 @@ public class CloneTask extends Task {
 		for (final RefAction a : actions)
 			refs.add(a.ref);
 		root = transferRepo.getRoot();
+		declareSteps(INIT_REPO, ABBREV_HISTORY, EXTRACT_META);
 	}
 
 	@Override
@@ -57,18 +61,20 @@ public class CloneTask extends Task {
 	@Override
 	protected void execute() throws GitAPIException, URISyntaxException,
 			IOException {
+		beginTask(INIT_REPO, 1);
 		initRepo();
 		fetchHeads();
 		pushBackHeads();
+		beginTask(ABBREV_HISTORY, 1);
 		rewriteHistory();
 		transferRepo.setRepo(git.getRepository());
+		beginTask(EXTRACT_META, 3);
 		extractMetaData();
 		endTask();
 	}
 
 	private void initRepo() throws GitAPIException, URISyntaxException,
 			IOException {
-		beginTask("Initializing temporary repository", 1);
 		git = Git.init().setBare(true).setGitDir(root).call();
 		// add the "origin" remote
 		final RemoteAddCommand add = git.remoteAdd();
@@ -133,7 +139,7 @@ public class CloneTask extends Task {
 		if (pushBacks == 0)
 			return; // nothing to do
 
-		beginTask("Setting branch starting points", pushBacks);
+		beginTask("Rewinding branches", pushBacks);
 		for (final RefAction e : actions) {
 			if (e.firstCommit.equals(RefAction.HEAD_COMMIT))
 				continue;
@@ -158,12 +164,10 @@ public class CloneTask extends Task {
 	}
 
 	private void rewriteHistory() {
-		beginTask("NOT abbreviating history (not implemented yet)", 1);
 		// TODO handle abbreviated history etc, producing @version refs
 	}
 
 	private void extractMetaData() throws IOException {
-		beginTask("Extracting metadata", 3);
 		extractor.detectProjectInfo();
 		update(1);
 

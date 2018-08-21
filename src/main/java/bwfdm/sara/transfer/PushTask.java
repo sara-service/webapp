@@ -47,6 +47,11 @@ import bwfdm.sara.publication.db.PublicationDatabase;
 
 /** Pushes a repository to a git archive. */
 public class PushTask extends Task {
+	private static final String CREATE_ITEM = "Recording metadata in database";
+	private static final String PUSH_REPO = "Preparing repository for upload";
+	private static final String CREATE_PROJECT = "Creating project in archive";
+	private static final String COMMIT_META = "Committing metadata to git archive";
+	private static final String UPDATE_META = "Updating metadata in git repo";
 	private static final ISO8601DateFormat ISO8601 = new ISO8601DateFormat();
 	private static final String METADATA_FILENAME = "submitted_metadata";
 	private static final Charset UTF8 = Charset.forName("UTF-8");
@@ -81,6 +86,9 @@ public class PushTask extends Task {
 		this.job = job;
 		this.archive = archive;
 		this.pubDB = pubDB;
+		if (!job.update.isEmpty())
+			declareSteps(UPDATE_META);
+		declareSteps(COMMIT_META, CREATE_PROJECT, PUSH_REPO, CREATE_ITEM);
 	}
 
 	@Override
@@ -96,23 +104,22 @@ public class PushTask extends Task {
 	protected void execute() throws GitAPIException, URISyntaxException,
 			IOException, ProjectExistsException {
 		if (!job.update.isEmpty()) {
-			beginTask("updating metadata in git repo", 1);
+			beginTask(UPDATE_META, 1);
 			updateMetadataInGitRepo();
 		}
 
 		now = new Date();
-		beginTask("committing metadata to git archive",
-				job.selectedRefs.size());
+		beginTask(COMMIT_META, job.selectedRefs.size());
 		commitMetadataToRepo();
 
 		final String id = Config.getRandomID();
-		beginTask("Creating project in archive", 1);
+		beginTask(CREATE_PROJECT, 1);
 		project = archive.createProject(id, true, job.meta);
 
-		beginTask("Preparing repository for upload", 1);
+		beginTask(PUSH_REPO, 1);
 		pushRepoToArchive();
 
-		beginTask("Record metadata in database", 1);
+		beginTask(CREATE_ITEM, 1);
 		itemUUID = createItemInDB(project.getWebURL(), job.meta);
 		endTask();
 	}

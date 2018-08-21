@@ -1,46 +1,31 @@
 "use strict";
 
-var clone_status = {
-	pending: {
-		icon: "\u231A",
-		status_text: "pending",
-		text: "text-muted" },
-	working: {
-		icon: "\u21C4",
-		status_text: "working",
-		text: "text-primary" },
-	done: {
-		icon: "\u2714",
-		status_text: "done",
-		text: "text-success" },
-};
-
-var elements = {};
-
 function updateStatusItem(id, step) {
-	function setStatus(elem, name) {
-		setStatusClass(elem, clone_status, name,
-				clone_status[step.status]);
-	}
-
-	var line = elements[id];
-	if (typeof line == "undefined") {
-		line = template("template");
-		elements[id] = line;
-		$("#steps").append(line.root);
-	}
-	setStatus(line.root, "text");
-	line.icon.text(clone_status[step.status].icon);
-	line.status.text("(" + clone_status[step.status].status_text + ")");
+	var line = template("template");
 	line.text.text(step.text);
+	line.status.text("(" + step.status + ")");
 
+	// set icon and color
+	if (step.status == "done") {
+		line.icon.text("\u2714");
+		line.root.addClass("text-success");
+	} else if (step.status == "working") {
+		line.loading.addClass("loading-icon");
+		line.root.addClass("text-primary");
+	} else if (step.status == "pending")
+		line.root.addClass("text-muted");
+
+	// hide or update progress bar
 	if (step.status == "working") {
-		line.progress.removeClass("hidden");
-		var value = step.progress * 100;
+		// users don't like it when a progress bar is stuck at 100%, but the
+		// task isn't finished yet. 98% is visibly not-yet-complete...
+		var value = step.progress * 98;
 		line.bar.attr("aria-valuenow", value);
 		line.bar.css("width", value + "%");
 	} else
-		line.progress.addClass("hidden");
+		line.progress.remove();
+
+	$("#steps").append(line.root);
 }
 
 var _success, _error, _endpoint;
@@ -48,6 +33,7 @@ var _success, _error, _endpoint;
 function updateStatus(timeout) {
 	API.get("check progress", _endpoint, {},
 		function(status) {
+			$("#steps > li").not("#template").remove();
 			$.each(status.steps, updateStatusItem);
 
 			// if task finished or failed, redirect to appropriate page
