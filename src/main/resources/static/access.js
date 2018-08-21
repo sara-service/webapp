@@ -12,13 +12,21 @@ function commit() {
 		throw "Invalid access selection!";
 	}
 	var record = $("#record").prop("checked");
-	API.post("save access permissions", "/api/push/commit",
+	API.post("complete archiving process", "/api/push/commit",
 		{ public_access: public_access, record: record }, function() {
-			location.replace("/api/push/redirect");
+			location.href = "/api/push/redirect";
 		});
 }
 
 $(function() {
-	$("#next_button").click(commit);
-	$("#next_button").removeClass("disabled");
+	// this also fires ProjectCompletedException if the item has already been
+	// committed
+	API.get("check for completion", "/api/push/status", {}, function(status) {
+		if (status.status == "success") {
+			$("#next_button").click(commit);
+			$("#next_button").removeClass("disabled");
+			$("#loading").remove();
+		} else
+			location.href = "/push.html";
+	});
 });

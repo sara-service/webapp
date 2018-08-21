@@ -15,6 +15,7 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import bwfdm.sara.api.Push;
 import bwfdm.sara.project.MetadataField;
 import bwfdm.sara.project.Ref;
 import bwfdm.sara.project.RefAction;
@@ -127,6 +128,13 @@ public class FrontendDatabase {
 		return update;
 	}
 
+	/**
+	 * @throws IllegalStateException
+	 *             if attempting to change access rights on an item whose access
+	 *             rights have already been set.
+	 *             {@link Push#commitToArchive(boolean, boolean, javax.servlet.http.HttpSession)}
+	 *             depends on that exception to prevent inconsistent behavior!
+	 */
 	public void setArchiveAccess(final boolean isPublic,
 			final boolean createPublicationRecord) {
 		if (isPublicationRecordDecided() && (this.isPublic != isPublic

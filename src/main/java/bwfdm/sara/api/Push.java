@@ -27,9 +27,10 @@ public class Push {
 
 	@GetMapping("status")
 	public TaskStatus getStatus(final HttpSession session) {
-		// getCompletedInstance because the project is expected to transition to
-		// "done" while polling
-		return Project.getCompletedInstance(session).getPushTask().getStatus();
+		// getInstance() because the project only switches to "completed" once
+		// commitToArchive() has been called, which only happens after
+		// archiving.
+		return Project.getInstance(session).getPushTask().getStatus();
 	}
 
 	@PostMapping("trigger")
@@ -62,14 +63,11 @@ public class Push {
 	public void commitToArchive(
 			@RequestParam("public_access") final boolean isPublic,
 			@RequestParam("record") final boolean record,
-			final HttpSession session, final RedirectAttributes redir) {
+			final HttpSession session) {
 		final Project project = Project.getCompletedInstance(session);
-		if (!project.isDone())
-			// TODO or maybe just redirect to push.html instead?
-			// beware infinite loops though if "done" detection fails
-			throw new IllegalStateException(
-					"commitToArchive before push is done");
-
+		// note: setArchiveAccess throws an exception if we try to change the
+		// access rights on an already-committed item. we depend on that to
+		// avoid incorrect behavior!
 		project.getFrontendDatabase().setArchiveAccess(isPublic, record);
 		project.getPushTask().commitToArchive(isPublic);
 		project.disposeTransferRepo();

@@ -250,19 +250,17 @@ public class Project {
 	 */
 	public void invalidateMetadata() {
 		// this allows the user to trigger the clone again
-		// FIXME but it also crashes if (s)he returns after push finished!
 		cancelPush();
 	}
 
 	/**
 	 * @return <code>true</code> if the archiving part of the project is
-	 *         completed, ie. if {@link PushTask#isDone()} or he push wasn't
-	 *         started yet
+	 *         completed, ie. if {@link PushTask#isCommitted()}
 	 */
 	public boolean isDone() {
 		if (push == null)
 			return false;
-		return push.isDone();
+		return push.isCommitted();
 	}
 
 	/**

@@ -30,16 +30,12 @@
 	<form class="form-horizontal" id="access"><div class="form-group">
 		<div class="col-xs-12 custom-control custom-radio">
 			<input type="radio" name="access" value="public" id="public" class="custom-control-input" checked>
-			<label class="custom-control-label" for="public"><i>publish</i> data in git repo
+			<label class="custom-control-label" for="public">make data in git repo <i>public</i>
 				(recommended)</label>
 		</div>
 		<p class="col-xs-12 pad">
 			<b>Everybody will be able to clone</b> the archived git repo
 			and continue working where you left off.
-			You will probably not become famous,
-			but <b>you might get citations</b>
-			for your software artefact
-			if you also create a bibliographical record.
 			Publication cannot be undone.</p>
 		<div class="col-xs-12 custom-control custom-radio">
 			<input type="radio" name="access" value="private" id="private" class="custom-control-input">
@@ -48,7 +44,6 @@
 		<p class="col-xs-12 pad">
 			The archived <b>repo will be inaccessible</b>.
 			You can always make it public later on if you change your mind.
-			Choose this option for <b>data that you want to</b> (or have to) <b>keep private</b>.
 		</p><p class="col-xs-12 pad">
 			You will be given a token
 			you can use to retrieve or publish your data.
@@ -64,16 +59,16 @@
 				for this item (strongly recommended)</label>
 		</div>
 		<p class="col-xs-12 pad">
-			Creating a bibliographical record
-			will make it possible for you and others
-			to <b>cite your archived software artefact</b>.
-			It will also make it much easier to find your software artefact,
-			and <b>may count as a publication</b> in its own right.</p>
+			You will get a persistent identifier you can use
+			to <b>cite</b> your archived software artefact.</p>
 	</div></form>
+	<div id="loading" class="loading"><span class="sr-only">loading, please wait...</span></div>
 
 	<p style="height:3ex"></p>
 	<div class="row">
-		<a class="btn btn-primary col-sm-4 col-sm-offset-8 disabled" id="next_button">next →</a>
+		<a class="btn btn-default col-sm-3" href="/api/push/cancel">← previous</a>
+		<!-- note: this is NOT a next button! it cannot be undone! -->
+		<a class="btn btn-primary col-sm-4 col-sm-offset-5 disabled" id="next_button">complete archiving process →</a>
 	</div>
 	<p style="height:3ex"></p>
 </div></body>

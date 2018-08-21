@@ -88,7 +88,7 @@ public class PushTask extends Task {
 		this.pubDB = pubDB;
 		if (!job.update.isEmpty())
 			declareSteps(UPDATE_META);
-		declareSteps(COMMIT_META, CREATE_PROJECT, PUSH_REPO, CREATE_ITEM);
+		declareSteps(COMMIT_META, CREATE_PROJECT, PUSH_REPO);
 	}
 
 	@Override
@@ -118,10 +118,6 @@ public class PushTask extends Task {
 
 		beginTask(PUSH_REPO, 1);
 		pushRepoToArchive();
-
-		beginTask(CREATE_ITEM, 1);
-		itemUUID = createItemInDB(project.getWebURL(), job.meta);
-		endTask();
 	}
 
 	private void updateMetadataInGitRepo() {
@@ -251,17 +247,15 @@ public class PushTask extends Task {
 	}
 
 	private UUID createItemInDB(final String webURL,
-			Map<MetadataField, String> meta) {
+			Map<MetadataField, String> meta, boolean isPublic) {
 		final Item i = new Item();
 		i.archive_uuid = job.archiveUUID;
 		i.source_uuid = job.sourceUUID;
 		i.item_state = ItemState.CREATED.name();
 		i.item_state_sent = i.item_state;
 
-		// FIXME we don't know that yet!
-		// is it ok to change this later in commitToArchive?
-		// should we only create a "provisional" entry here?
-		i.item_type = ItemType.ARCHIVE_HIDDEN.name();
+		i.item_type = (isPublic ? ItemType.ARCHIVE_PUBLIC
+				: ItemType.ARCHIVE_HIDDEN).name();
 
 		i.source_user_id = job.sourceUserID;
 		i.contact_email = job.gitrepoEmail;
@@ -282,8 +276,7 @@ public class PushTask extends Task {
 		// URL where the archive has been deposited
 		i.archive_url = webURL;
 
-		// not public yet, though that might change in commitToArchive()
-		i.is_public = false;
+		i.is_public = isPublic;
 		// randomly generated access token for the user
 		i.token = Config.getToken();
 
@@ -295,10 +288,20 @@ public class PushTask extends Task {
 	}
 
 	public void commitToArchive(final boolean isPublic) {
+		if (isCommitted())
+			if (item.is_public != isPublic)
+				throw new IllegalStateException(
+						"item " + itemUUID + " already committed");
+			else
+				return;
+
 		// FIXME implement "move" part of create-and-move workflow here
 
-		item.is_public = isPublic;
-		pubDB.updateInDB(item);
+		itemUUID = createItemInDB(project.getWebURL(), job.meta, isPublic);
+	}
+
+	public boolean isCommitted() {
+		return itemUUID != null;
 	}
 
 	public ArchiveJob getArchiveJob() {
@@ -306,9 +309,9 @@ public class PushTask extends Task {
 	}
 
 	public UUID getItemUUID() {
-		if (!isDone())
+		if (!isCommitted())
 			throw new IllegalStateException(
-					"getItemUUID() on in-progress PushTask");
+					"getItemUUID() on uncommitted PushTask");
 		return itemUUID;
 	}
 
