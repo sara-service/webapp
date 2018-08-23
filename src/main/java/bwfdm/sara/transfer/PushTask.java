@@ -47,13 +47,12 @@ import bwfdm.sara.publication.db.PublicationDatabase;
 
 /** Pushes a repository to a git archive. */
 public class PushTask extends Task {
-	private static final String CREATE_ITEM = "Recording metadata in database";
 	private static final String PUSH_REPO = "Preparing repository for upload";
 	private static final String CREATE_PROJECT = "Creating project in archive";
 	private static final String COMMIT_META = "Committing metadata to git archive";
 	private static final String UPDATE_META = "Updating metadata in git repo";
 	private static final ISO8601DateFormat ISO8601 = new ISO8601DateFormat();
-	private static final String METADATA_FILENAME = "submitted_metadata";
+	private static final String METADATA_FILENAME = "submitted_metadata.xml";
 	private static final Charset UTF8 = Charset.forName("UTF-8");
 	private static final String TARGET_REMOTE = "target";
 	private static final ObjectMapper JSON_MAPPER = new ObjectMapper();
@@ -151,8 +150,6 @@ public class PushTask extends Task {
 		final TransferRepo repo = job.clone;
 		final String version = job.meta.get(MetadataField.VERSION);
 		final ObjectId versionFile = repo.insertBlob(version);
-		final ObjectId metaJSON = repo
-				.insertBlob(JSON_MAPPER.writeValueAsString(job));
 		// TODO this should definitely be configurable!
 		final PersonIdent sara = new PersonIdent("SARA Service",
 				"ingest@sara-service.org");
@@ -174,8 +171,7 @@ public class PushTask extends Task {
 			final Map<String, ObjectId> metaFiles = new HashMap<>(4);
 			// TODO maybe only update in master branch??
 			metaFiles.put(MetadataExtractor.VERSION_FILE, versionFile);
-			metaFiles.put(METADATA_FILENAME + ".json", metaJSON);
-			metaFiles.put(METADATA_FILENAME + ".xml", repo.insertBlob(metaXML));
+			metaFiles.put(METADATA_FILENAME, repo.insertBlob(metaXML));
 			// canonicalize license filename. that is, delete the existing
 			// license file if we don't like its name, and always create one
 			// with the proper name.
