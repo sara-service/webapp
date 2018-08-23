@@ -16,9 +16,9 @@ function writeBackProblem() {
 	return null;
 };
 
-function initField(id, branchDependent, validator, speshul) {
+function initField(id, reset, branchDependent, validator, speshul) {
 	var elem = $("#" + id);
-	$("#reset_" + id).click(function() {
+	$("#" + reset).click(function() {
 		// don't bother asking the server because we already have all the
 		// required info...
 		elem.val(meta[id].autodetected);
@@ -43,8 +43,6 @@ function initField(id, branchDependent, validator, speshul) {
 
 		if (speshul)
 			speshul();
-		var reset = $("#reset_" + id);
-		reset.prop("disabled", !changed);
 	});
 	update.prop("checked", meta[id].update);
 }
@@ -56,22 +54,27 @@ function updateBranchSpecific() {
 function initFields(info) {
 	meta = cache[info.master.value] = info;
 
-	initField("submitter", false, function(value) {
+	initField("submitter_family", "reset_submitter", false, function(value) {
 		if (value.trim() == "")
-			return "Who is submitting this software artefact? What's your name?";
+			return "Please provide your family name (lastname)";
 		return true;
 	});
-	initField("title", false, function(value) {
+	initField("submitter_given", "reset_submitter", false, function(value) {
+		if (value.trim() == "")
+			return "Please provide your given name (firstname)";
+		return true;
+	});
+	initField("title", "reset_title", false, function(value) {
 		if (value.trim() == "")
 			return "What title do you want to use for your publication?";
 		return true;
 	});
-	initField("description", false, function(value) {
+	initField("description", "reset_description", false, function(value) {
 		if (value.trim() != "")
 			return true;
 		return null;
 	});
-	initField("version", true, function(value) {
+	initField("version", "reset_version", true, function(value) {
 		if (value.trim() == "")
 			return "What version of your software artefact are you publishing?";
 		return true;
@@ -81,7 +84,7 @@ function initFields(info) {
 	// → just replace with autodetected best guess...
 	if (!branches.includes(meta.master.value))
 		meta.master.value = meta.master.autodetected;
-	initField("master", false, function() { return true; }, function() {
+	initField("master", "reset_master", false, function() { return true; }, function() {
 			var action = $("#master :selected").data("refAction");
 			if (!action)
 				return;
@@ -112,7 +115,7 @@ function initFields(info) {
 
 	$("#next_button").click(function() {
 		var values = validate.all(["title", "description", "master",
-			"version", "submitter"]);
+			"version", "submitter_family", "submitter_given"]);
 		if (!values)
 			return;
 		var data = {};

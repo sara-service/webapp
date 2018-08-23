@@ -13,6 +13,8 @@ import org.springframework.web.servlet.view.RedirectView;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import bwfdm.sara.auth.DisplayNameSplitter;
+import bwfdm.sara.auth.DisplayNameSplitter.Name;
 import bwfdm.sara.auth.OAuthCode;
 import bwfdm.sara.auth.OAuthREST;
 import bwfdm.sara.auth.ShibAuth;
@@ -39,6 +41,7 @@ public class GitLabRESTv4 implements GitRepo {
 	private final String root;
 	private final String appID;
 	private final String appSecret;
+	private final DisplayNameSplitter nameSplitter;
 	private OAuthCode auth;
 	private String token;
 
@@ -49,11 +52,14 @@ public class GitLabRESTv4 implements GitRepo {
 	 *            OAuth application secret
 	 * @param gitlab
 	 *            URL to GitLab root
+	 * @param nameRegex
+	 *            pattern for {@link DisplayNameSplitter}
 	 */
 	@JsonCreator
 	public GitLabRESTv4(@JsonProperty("url") final String root,
 			@JsonProperty("oauthID") final String appID,
-			@JsonProperty("oauthSecret") final String appSecret) {
+			@JsonProperty("oauthSecret") final String appSecret,
+			@JsonProperty("nameRegex") final String nameRegex) {
 		if (root.endsWith("/"))
 			throw new IllegalArgumentException(
 					"root URL must not end with slash: " + root);
@@ -63,6 +69,7 @@ public class GitLabRESTv4 implements GitRepo {
 		this.root = root;
 		this.appID = appID;
 		this.appSecret = appSecret;
+		this.nameSplitter = new DisplayNameSplitter(nameRegex);
 	}
 
 	@Override
@@ -92,9 +99,11 @@ public class GitLabRESTv4 implements GitRepo {
 
 	@Override
 	public UserInfo getUserInfo() {
-		return rest.get(rest.uri("/user"),
+		final GLUserInfo info = rest.get(rest.uri("/user"),
 				new ParameterizedTypeReference<GLUserInfo>() {
-				}).toDataObject();
+				});
+		final Name name = nameSplitter.split(info.displayName);
+		return new UserInfo(info.userID, info.email, name.family, name.given);
 	}
 
 	@Override

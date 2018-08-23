@@ -67,8 +67,6 @@ public class DSpace_v6 implements PublicationRepository {
 
 	// for IR
 	private final String deposit_type;
-	private final String name_regex;
-	private final String name_replace;
 	private final String publication_type;
 
 	private Client rest_client;
@@ -81,8 +79,6 @@ public class DSpace_v6 implements PublicationRepository {
 			@JsonProperty("sword_pwd") final String sp,
 			@JsonProperty("sword_api_endpoint") final String se,
 			@JsonProperty(value = "deposit_type", required = false) final String dt,
-			@JsonProperty(value = "name_regex", required = false) final String nrx,
-			@JsonProperty(value = "name_replace", required = false) final String nrp,
 			@JsonProperty(value = "publication_type", required = false) final String pt,
 			@JsonProperty("dao") final Repository dao) {
 		this.dao = dao;
@@ -94,8 +90,6 @@ public class DSpace_v6 implements PublicationRepository {
 		sword_servicedocumentpath = sword_api_endpoint + "/servicedocument";
 
 		deposit_type = dt;
-		name_regex = nrx;
-		name_replace = nrp;
 		publication_type = pt;
 
 		rest_client = ClientBuilder.newClient();
@@ -115,8 +109,6 @@ public class DSpace_v6 implements PublicationRepository {
 	public DSpace_v6(String serviceDocumentURL, String restURL, String saraUser,
 			String saraPassword) {
 		deposit_type = "workspace";
-		name_regex = "(\\S{2,})\\s{1,}(.*)";
-		name_replace = "$2, $1";
 		publication_type = "Software";
 		sword_servicedocumentpath = serviceDocumentURL;
 		sword_user = saraUser;
@@ -375,16 +367,6 @@ public class DSpace_v6 implements PublicationRepository {
 							.equals(SaraMetaDataField.TYPE.getDisplayName())) {
 						if (publication_type != null) {
 							metadataEntry.setValue(publication_type);
-						}
-					}
-					if ((metadataEntry.getKey()
-							.equals(SaraMetaDataField.AUTHOR.getDisplayName()))
-							|| (metadataEntry.getKey()
-									.equals(SaraMetaDataField.SUBMITTER
-											.getDisplayName()))) {
-						if (name_regex != null && name_replace != null) {
-							metadataEntry.setValue(metadataEntry.getValue()
-									.replaceAll(name_regex, name_replace));
 						}
 					}
 					ep.addDublinCore(metadataEntry.getKey(),

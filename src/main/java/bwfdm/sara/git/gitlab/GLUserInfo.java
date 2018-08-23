@@ -3,12 +3,9 @@ package bwfdm.sara.git.gitlab;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import bwfdm.sara.auth.AuthProvider.UserInfo;
-import bwfdm.sara.git.DataObject;
-
 /** data class for GitLab project info. */
 @JsonIgnoreProperties(ignoreUnknown = true)
-class GLUserInfo implements DataObject<UserInfo> {
+class GLUserInfo {
 	/** internal user ID (unchangeable) */
 	@JsonProperty("id")
 	String userID;
@@ -25,10 +22,5 @@ class GLUserInfo implements DataObject<UserInfo> {
 	 * doesn't care about visibility.
 	 */
 	private GLUserInfo() {
-	}
-
-	@Override
-	public UserInfo toDataObject() {
-		return new UserInfo(userID, email, displayName);
 	}
 }

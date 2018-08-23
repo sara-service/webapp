@@ -29,16 +29,23 @@
 		</div>
 		<form class="form-horizontal">
 			<div class="form-group has-feedback">
-				<label class="col-sm-2 control-label" for="submitter">full name of submitter</label>
-				<div class="col-sm-7 nopad">
-					<input type="text" class="form-control" id="submitter" placeholder="your full name" aria-describedby="submitter_text">
+				<label class="col-sm-2 col-xs-12 control-label" for="submitter">full name of submitter</label>
+				<div class="col-sm-3 col-xs-5 nopad">
+					<input type="text" class="form-control" id="submitter_family" placeholder="your family name" aria-describedby="submitter_text">
 					<span class="form-control-feedback" aria-hidden="true"></span>
 					<span class="form-control-feedback-text text-danger hidden"></span>
 				</div>
-				<div class="col-sm-3 nopad">
+				<div class="col-sm-4 col-xs-7 nopad">
+					<div class="field-with-comma">
+						<input type="text" class="form-control" id="submitter_given" placeholder="your given name" aria-describedby="submitter_text">
+						<span class="form-control-feedback" aria-hidden="true"></span>
+						<span class="form-control-feedback-text text-danger hidden"></span>
+					</div>
+				</div>
+				<div class="col-sm-3 col-xs-12 nopad">
 					<button type="button" class="btn btn-sm btn-warning" id="reset_submitter">use full name from user account</button>
 				</div>
-				<p class="col-sm-7 col-sm-offset-2">
+				<p class="col-sm-7 col-xs-12 col-sm-offset-2 field-info">
 					Please provide your full name
 					as it should appear in the archive record.
 				</p>
@@ -86,10 +93,10 @@
 					<span class="form-control-feedback-text text-danger hidden"></span>
 				</div>
 				<div class="col-sm-3 nopad">
-					<button type="button" class="btn btn-sm btn-warning" id="reset_master" disabled>autodetect from version history</button>
+					<button type="button" class="btn btn-sm btn-warning" id="reset_master">autodetect from version history</button>
 					<div id="master_loading" class="loading-inline hidden"><span class="sr-only">detecting metadata for this branch...</span></div>
 				</div>
-				<p class="col-sm-10 col-sm-offset-2">
+				<p class="col-sm-10 col-sm-offset-2 field-info">
 					This is the branch shown when someone first
 					looks at your software artefact in the git archive.
 				</p>
@@ -103,7 +110,7 @@
 					<span class="form-control-feedback-text text-danger hidden"></span>
 				</div>
 				<div class="col-sm-3 nopad">
-					<button type="button" class="btn btn-sm btn-warning" id="reset_version" disabled>autodetect from main branch</button>
+					<button type="button" class="btn btn-sm btn-warning" id="reset_version">autodetect from main branch</button>
 				</div>
 				<div class="col-sm-7 col-sm-offset-2"><label class="form-check-label control-label" data-noproblem>
 					<input class="form-check-input" type="checkbox" id="update_version">

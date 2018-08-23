@@ -3,10 +3,10 @@ package bwfdm.sara.git.github;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import bwfdm.sara.auth.DisplayNameSplitter;
 import bwfdm.sara.auth.ShibAuth;
 
-/** Extends {@link GitHubRESTv3} to add Shibboleth authentication. */
-// TODO this can basically wrap every GitRepo; maybe reimplement it so it does?
+/** Uses {@link GitHubRESTv3} with Shibboleth authentication. */
 public class GitHubRESTv3WithShib extends GitHubRESTv3 {
 	private final ShibAuth shib;
 
@@ -15,25 +15,39 @@ public class GitHubRESTv3WithShib extends GitHubRESTv3 {
 	 *            OAuth application ID
 	 * @param appSecret
 	 *            OAuth application secret
-	 * @param displayNameAttribute
-	 *            attribute containing display name from Shibboleth (usually
-	 *            {@code display-name})
-	 * @param displayEmail
+	 * @param familyNameAttribute
+	 *            attribute containing family name from Shibboleth (usually
+	 *            {@code sn})
+	 * @param givenNameAttribute
+	 *            attribute containing family name from Shibboleth (usually
+	 *            {@code given-name})
+	 * @param emailAttribute
 	 *            attribute containing email from Shibboleth (usually
 	 *            {@code email})
 	 * @param userIDAttribute
 	 *            attribute containing persistent user ID from Shibboleth
 	 *            (usually {@code persistent-id} to use the eduPersonTargetedID)
+	 * @param displayNameAttribute
+	 *            attribute containing display name from Shibboleth (usually
+	 *            {@code display-name}). may be <code>null</code> to ignore the
+	 *            display name.
+	 * @param nameRegex
+	 *            pattern for {@link DisplayNameSplitter}. <code>null</code>
+	 *            when not using the display name.
 	 */
 	@JsonCreator
 	public GitHubRESTv3WithShib(@JsonProperty("oauthID") final String appID,
 			@JsonProperty("oauthSecret") final String appSecret,
-			@JsonProperty("shibName") final String displayNameAttribute,
+			@JsonProperty("shibFamilyName") final String familyNameAttribute,
+			@JsonProperty("shibGivenName") final String givenNameAttribute,
 			@JsonProperty("shibEmail") final String emailAttribute,
-			@JsonProperty("shibID") final String userIDAttribute) {
+			@JsonProperty("shibID") final String userIDAttribute,
+			@JsonProperty(value = "shibDisplayName", required = false) final String displayNameAttribute,
+			@JsonProperty(value = "nameRegex", required = false) final String nameRegex) {
 		super(appID, appSecret);
-		shib = new ShibAuth(displayNameAttribute, emailAttribute,
-				userIDAttribute);
+		shib = new ShibAuth(familyNameAttribute, givenNameAttribute,
+				emailAttribute, userIDAttribute, displayNameAttribute,
+				nameRegex);
 	}
 
 	@Override

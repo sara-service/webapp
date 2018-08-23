@@ -94,6 +94,24 @@ li {
 	padding: 0em 1em;
 }
 
+.field-with-comma {
+	padding-left: .5em;
+}
+
+.field-with-comma:before {
+	content: ",";
+	position: absolute;
+	left: 0px;
+	bottom: .5ex;
+	font-weight: bold;
+	font-size: 120%;
+}
+
+.field-info {
+	/* makes sure the field is always below the field's label */
+	clear: left;
+}
+
 .multiline {
 	white-space: pre-wrap;
 }

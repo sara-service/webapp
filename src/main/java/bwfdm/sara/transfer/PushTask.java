@@ -206,7 +206,9 @@ public class PushTask extends Task {
 		final MetadataFormatter formatter = new MetadataFormatter();
 		formatter.addDC("title", job.meta.get(MetadataField.TITLE));
 		formatter.addDC("description", job.meta.get(MetadataField.DESCRIPTION));
-		formatter.addDC("publisher", job.meta.get(MetadataField.SUBMITTER));
+		final String submitter = job.meta.get(MetadataField.SUBMITTER_FAMILY)
+				+ ", " + job.meta.get(MetadataField.SUBMITTER_GIVEN);
+		formatter.addDC("publisher", submitter);
 		formatter.addDC("date", ISO8601.format(now));
 		formatter.addDC("type", "Software");
 		formatter.addDC("rights", licenseID);
@@ -266,7 +268,9 @@ public class PushTask extends Task {
 		// email from working gitlab
 		i.repository_login_id = job.gitrepoEmail;
 		// submitter of publication
-		i.meta_submitter = meta.get(MetadataField.SUBMITTER);
+		// FIXME store as separate fields in item!
+		i.meta_submitter = job.meta.get(MetadataField.SUBMITTER_FAMILY) + ", "
+				+ job.meta.get(MetadataField.SUBMITTER_GIVEN);
 		// version of git project
 		i.meta_version = meta.get(MetadataField.VERSION);
 		// title of git project

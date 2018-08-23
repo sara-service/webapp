@@ -28,9 +28,7 @@ INSERT INTO repository_params(id, param, value) VALUES
        (rRef, 'sword_user', 'project-sara@uni-konstanz.de'),
        (rRef, 'sword_pwd', 'SaraTest'),
        (rRef, 'sword_api_endpoint', oparu_test || '/swordv2'),
-       (rRef, 'deposit_type', 'workflow'),
-       (rRef, 'name_regex', '^([^,]*)\p{Z}+([^\p{Z},]+)$'),
-       (rRef, 'name_replace', '$2, $1');
+       (rRef, 'deposit_type', 'workflow');
 
 PERFORM lo_unlink(oparu_logo);
 

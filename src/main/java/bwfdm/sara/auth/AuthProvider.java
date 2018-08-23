@@ -74,16 +74,22 @@ public interface AuthProvider {
 		 */
 		public final String email;
 		/**
-		 * The user's preferred way of representing his/her name in a Unicode
-		 * string.
+		 * The user's preferred way of representing his/her family name in a
+		 * Unicode string.
 		 */
-		public final String displayName;
+		public final String familyName;
+		/**
+		 * The user's preferred way of representing his/her given name in a
+		 * Unicode string.
+		 */
+		public final String givenName;
 
 		public UserInfo(final String userID, final String email,
-				final String displayName) {
+				final String familyName, final String givenName) {
 			this.userID = userID;
 			this.email = email;
-			this.displayName = displayName;
+			this.familyName = familyName;
+			this.givenName = givenName;
 		}
 	}
 }

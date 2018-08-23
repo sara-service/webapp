@@ -105,7 +105,8 @@ public class ArchiveJob {
 		checkField(MetadataField.DESCRIPTION, true);
 		checkField(MetadataField.VERSION, false);
 		checkField(MetadataField.MAIN_BRANCH, false);
-		checkField(MetadataField.SUBMITTER, false);
+		checkField(MetadataField.SUBMITTER_FAMILY, false);
+		checkField(MetadataField.SUBMITTER_GIVEN, false);
 		final Ref master = new Ref(meta.get(MetadataField.MAIN_BRANCH));
 		if (!selectedRefs.contains(master))
 			throw new IllegalArgumentException(

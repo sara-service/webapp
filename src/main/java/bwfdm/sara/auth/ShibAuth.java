@@ -7,6 +7,7 @@ import javax.servlet.http.HttpServletRequest;
 import com.fasterxml.jackson.annotation.JsonCreator;
 
 import bwfdm.sara.auth.AuthProvider.UserInfo;
+import bwfdm.sara.auth.DisplayNameSplitter.Name;
 
 /**
  * Shibboleth authentication using shibd / mod_shib. Basically needs to read a
@@ -15,33 +16,81 @@ import bwfdm.sara.auth.AuthProvider.UserInfo;
  */
 public class ShibAuth {
 	private final String displayNameAttribute;
+	private final String familyNameAttribute;
+	private final String givenNameAttribute;
 	private final String emailAttribute;
 	private final String userIDAttribute;
+	private final DisplayNameSplitter nameSplitter;
 	private String userID;
 	private String email;
+	private String familyName;
+	private String givenName;
 	private String displayName;
 
 	/**
+	 * @param familyNameAttribute
+	 *            attribute containing family name from Shibboleth (usually
+	 *            {@code sn})
+	 * @param givenNameAttribute
+	 *            attribute containing family name from Shibboleth (usually
+	 *            {@code given-name})
+	 * @param userIDAttribute
+	 *            attribute containing persistent user ID from Shibboleth
+	 *            (usually {@code persistent-id} to use the eduPersonTargetedID)
+	 * @param displayEmail
+	 *            attribute containing email from Shibboleth (usually
+	 *            {@code email})
+	 * @param displayNameAttribute
+	 *            attribute containing display name from Shibboleth (usually
+	 *            {@code display-name}), or <code>null</code> to ignore the
+	 *            display name
+	 * @param nameRegex
+	 *            pattern for {@link DisplayNameSplitter}, or <code>null</code>
+	 *            when ignoring the display name
+	 */
+	@JsonCreator
+	public ShibAuth(final String familyNameAttribute,
+			final String givenNameAttribute, final String emailAttribute,
+			final String userIDAttribute, final String displayNameAttribute,
+			final String nameRegex) {
+		this.displayNameAttribute = displayNameAttribute;
+		this.familyNameAttribute = familyNameAttribute;
+		this.givenNameAttribute = givenNameAttribute;
+		this.emailAttribute = emailAttribute;
+		this.userIDAttribute = userIDAttribute;
+		this.nameSplitter = nameRegex == null ? null
+				: new DisplayNameSplitter(nameRegex);
+	}
+
+	/**
+	 * @param familyNameAttribute
+	 *            attribute containing family name from Shibboleth (usually
+	 *            {@code sn})
+	 * @param givenNameAttribute
+	 *            attribute containing family name from Shibboleth (usually
+	 *            {@code given-name})
+	 * @param userIDAttribute
+	 *            attribute containing persistent user ID from Shibboleth
+	 *            (usually {@code persistent-id} to use the eduPersonTargetedID)
 	 * @param displayNameAttribute
 	 *            attribute containing display name from Shibboleth (usually
 	 *            {@code display-name})
 	 * @param displayEmail
 	 *            attribute containing email from Shibboleth (usually
 	 *            {@code email})
-	 * @param userIDAttribute
-	 *            attribute containing persistent user ID from Shibboleth
-	 *            (usually {@code persistent-id} to use the eduPersonTargetedID)
+	 * @param nameRegex
+	 *            pattern for {@link DisplayNameSplitter}
 	 */
 	@JsonCreator
-	public ShibAuth(final String displayNameAttribute,
-			final String emailAttribute, final String userIDAttribute) {
-		this.displayNameAttribute = displayNameAttribute;
-		this.emailAttribute = emailAttribute;
-		this.userIDAttribute = userIDAttribute;
+	public ShibAuth(final String familyNameAttribute,
+			final String givenNameAttribute, final String emailAttribute,
+			final String userIDAttribute) {
+		this(familyNameAttribute, givenNameAttribute, emailAttribute,
+				userIDAttribute, null, null);
 	}
 
 	private String getShibAttr(final HttpServletRequest request,
-			final String name) {
+			final String name, final boolean required) {
 		// check that there is exactly one, non-null and non-empty header of the
 		// desired name. this is to guard against configuration errors where
 		// shib headers might be added instead of replacing existing headers.
@@ -49,8 +98,11 @@ public class ShibAuth {
 		// headers, and must be prevented.
 		final Enumeration<String> headers = request.getHeaders(name);
 		if (!headers.hasMoreElements())
-			throw new IllegalArgumentException(
-					"missing Shibboleth header " + name);
+			if (required)
+				throw new IllegalArgumentException(
+						"missing Shibboleth header " + name);
+			else
+				return null;
 		final String attr = headers.nextElement();
 		if (attr == null || attr.isEmpty())
 			throw new IllegalArgumentException(
@@ -70,8 +122,11 @@ public class ShibAuth {
 			throw new IllegalArgumentException(
 					"invalid Shibboleth attribute " + name);
 		if (values[0].isEmpty())
-			throw new IllegalArgumentException(
-					"empty Shibboleth attribute " + name);
+			if (required)
+				throw new IllegalArgumentException(
+						"empty Shibboleth attribute " + name);
+			else
+				return null;
 		return values[0];
 	}
 
@@ -80,12 +135,26 @@ public class ShibAuth {
 	}
 
 	public void parseAuthResponse(final HttpServletRequest request) {
-		this.displayName = getShibAttr(request, displayNameAttribute);
-		this.email = getShibAttr(request, emailAttribute);
-		this.userID = getShibAttr(request, userIDAttribute);
+		this.userID = getShibAttr(request, userIDAttribute, true);
+		this.email = getShibAttr(request, emailAttribute, true);
+		this.displayName = displayNameAttribute == null ? null
+				: getShibAttr(request, displayNameAttribute, false);
+		this.familyName = getShibAttr(request, familyNameAttribute, false);
+		this.givenName = getShibAttr(request, givenNameAttribute, false);
+		if (displayName == null && familyName == null)
+			throw new IllegalArgumentException(
+					"neither display name nor given name provided");
 	}
 
 	public UserInfo getUserInfo() {
-		return new UserInfo(userID, email, displayName);
+		// if we have an explicit family name from Shib, use it even if we don't
+		// have a given name. it's still better than splitting the display name
+		// incorrectly.
+		if (familyName != null)
+			return new UserInfo(userID, email, familyName,
+					givenName != null ? givenName : "");
+
+		final Name name = nameSplitter.split(displayName);
+		return new UserInfo(userID, email, name.family, name.given);
 	}
 }

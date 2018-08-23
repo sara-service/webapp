@@ -3,7 +3,6 @@ package bwfdm.sara.git.github;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.NoSuchElementException;
 
 import javax.servlet.http.HttpSession;
 
@@ -11,21 +10,17 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import bwfdm.sara.auth.OAuthCode;
 import bwfdm.sara.auth.OAuthREST;
-import bwfdm.sara.auth.ShibAuth;
 import bwfdm.sara.git.DataObject;
 import bwfdm.sara.git.GitProject;
 import bwfdm.sara.git.GitRepo;
 import bwfdm.sara.git.ProjectInfo;
 
-/** high-level abstraction of the GitLab REST API. */
-public class GitHubRESTv3 implements GitRepo {
+/** High-level abstraction of the GitLab REST API. */
+public abstract class GitHubRESTv3 implements GitRepo {
 	/** URL for accessing the GitHub API. */
-	static final String API_URL = "https://api.github.com";
+	private static final String API_URL = "https://api.github.com";
 	/** GitHub API version to request. */
 	private static final String API_VERSION = "application/vnd.github.v3+json";
 	/** Home page, used for "back to git repo". */
@@ -41,22 +36,14 @@ public class GitHubRESTv3 implements GitRepo {
 	 */
 	static final String DATE_FORMAT_PATTERN = "yyyy-MM-dd'T'HH:mm:ssXXX";
 
+	protected final RESTHelper rest;
 	private final OAuthREST authRest;
-	private final RESTHelper rest;
 	private final String appID;
 	private final String appSecret;
 	private OAuthCode auth;
 	private String token;
 
-	/**
-	 * @param appID
-	 *            OAuth application ID
-	 * @param appSecret
-	 *            OAuth application secret
-	 */
-	@JsonCreator
-	public GitHubRESTv3(@JsonProperty("oauthID") final String appID,
-			@JsonProperty("oauthSecret") final String appSecret) {
+	public GitHubRESTv3(final String appID, final String appSecret) {
 		authRest = new OAuthREST(API_URL, "token");
 		authRest.addHeader("Accept", API_VERSION);
 		rest = new RESTHelper(authRest, "");
@@ -86,28 +73,7 @@ public class GitHubRESTv3 implements GitRepo {
 	}
 
 	@Override
-	public UserInfo getUserInfo() {
-		GHUserInfo userInfo = rest.get(rest.uri("/user"),
-				new ParameterizedTypeReference<GHUserInfo>() {
-				});
-		return new UserInfo(userInfo.userID, getUserEmail(),
-				userInfo.getEffectiveDisplayName());
-	}
-
-	private String getUserEmail() {
-		final List<GHEmail> emails = rest.get(rest.uri("/user/emails"),
-				new ParameterizedTypeReference<List<GHEmail>>() {
-				});
-		for (GHEmail email : emails)
-			if (email.isPrimary && email.isVerified)
-				return email.address;
-		throw new NoSuchElementException(
-				"user has no primary, verified email!");
-	}
-
-	@Override
-	public RedirectView triggerAuth(final String redirURI,
-			final RedirectAttributes redir, final HttpSession session) {
+	public RedirectView triggerAuth(final String redirURI, final RedirectAttributes redir, final HttpSession session) {
 		if (hasWorkingToken())
 			return null;
 
@@ -117,20 +83,13 @@ public class GitHubRESTv3 implements GitRepo {
 	}
 
 	@Override
-	public boolean parseAuthResponse(
-			final java.util.Map<String, String> params,
-			final HttpSession session) {
+	public boolean parseAuthResponse(final java.util.Map<String, String> params, final HttpSession session) {
 		if (auth == null)
 			return false;
 
 		token = auth.parse(params);
 		authRest.setToken(token);
 		return token != null;
-	}
-
-	@Override
-	public ShibAuth getShibAuth() {
-		return null; // non-Shib; use ID from GitHub account
 	}
 
 	@Override
@@ -149,8 +108,7 @@ public class GitHubRESTv3 implements GitRepo {
 				}));
 	}
 
-	static <T> List<T> toDataObject(
-			final List<? extends DataObject<T>> items) {
+	static <T> List<T> toDataObject(final List<? extends DataObject<T>> items) {
 		final ArrayList<T> list = new ArrayList<>(items.size());
 		for (final DataObject<T> gldo : items)
 			list.add(gldo.toDataObject());
