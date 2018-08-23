@@ -114,8 +114,8 @@ function initFields(info) {
 		});
 
 	$("#next_button").click(function() {
-		var values = validate.all(["title", "description", "master",
-			"version", "submitter_family", "submitter_given"]);
+		var values = validate.all(["submitter_family", "submitter_given",
+			"title", "description", "master", "version", ]);
 		if (!values)
 			return;
 		var data = {};
