@@ -104,9 +104,15 @@ public class ShibAuth {
 			else
 				return null;
 		final String attr = headers.nextElement();
-		if (attr == null || attr.isEmpty())
+		if (attr == null)
 			throw new IllegalArgumentException(
 					"null Shibboleth header " + name);
+		if (attr.isEmpty())
+			if (required)
+				throw new IllegalArgumentException(
+						"empty Shibboleth header " + name);
+			else
+				return null;
 		if (headers.hasMoreElements())
 			throw new IllegalArgumentException(
 					"duplicate Shibboleth header " + name);
