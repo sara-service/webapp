@@ -115,7 +115,7 @@ public class Publication {
 		finalMap.putIfAbsent(SaraMetaDataField.TYPE.getDisplayName(),
 				"Git Archive");
 		finalMap.putIfAbsent(SaraMetaDataField.PUBLISHER.getDisplayName(),
-				"SARA SERVICE VERSION 'PROTOTYPE'");
+				"SARA SERVICE VERSION 'DSPACE ANWENDERTREFFEN'");
 		finalMap.putIfAbsent(SaraMetaDataField.ARCHIVE_URL.getDisplayName(),
 				meta.get(PublicationField.ARCHIVE_URL));
 		finalMap.putIfAbsent(SaraMetaDataField.ABSTRACT.getDisplayName(),
