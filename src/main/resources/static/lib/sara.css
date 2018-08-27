@@ -125,24 +125,46 @@ li {
 }
 
 .logo-header {
-	height: 10ex;
-	margin: 0ex 0ex 0ex 0ex;
+	height: 6ex;
+	margin: 0ex 0ex 2ex 0ex;
+	display: block;
+}
+
+.logo-header-noprogress {
+	height: 6ex;
+	margin: 0ex 0ex 4ex 0ex;
 	display: block;
 }
 
 #ir_logo {
-	height: 12ex;
+	height: 7ex;
 	margin: 0ex 0ex 0ex 0ex;
 	display: block;
 	float: right;
 }
 
+.progress-header {
+	margin: 4ex 0ex 0ex 0ex;
+}
+
+.progress-header .btn-group {
+	margin-right: 1em;
+}
+
+.progress-current {
+	font-weight: bold;
+}
+
 .action-header {
-	margin: 1ex auto 3ex 0ex;
+	margin: 0ex auto 3ex 0ex;
 }
 
 body {
 	padding: 30px;
+	/* so the page x position doesn't jump when pages get longer (necessary
+	 * only due to fixed-width contaienrs) */
+	overflow-y: scroll;
+	overflow-x: auto;
 }
 
 .nopad {
