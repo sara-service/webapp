@@ -20,7 +20,7 @@ INSERT INTO source(display_name, contact_email, adapter, url, enabled, logo_url)
 INSERT INTO source_params(id, param, value) VALUES
 	(sRef, 'oauthID', 'XXX'),
 	(sRef, 'oauthSecret', 'XXX'),
-	(sRef, 'shibFamilyName', 'sn'),
+	(sRef, 'shibSurname', 'sn'),
 	(sRef, 'shibGivenName', 'givenName'),
 	(sRef, 'shibEmail', 'mail'),
 	(sRef, 'shibID', 'persistent-id'),

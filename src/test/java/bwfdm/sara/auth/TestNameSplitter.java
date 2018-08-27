@@ -17,10 +17,10 @@ public class TestNameSplitter {
 	}
 
 	private static void test(DisplayNameSplitter splitter,
-			final String string, final String family, final String given) {
+			final String string, final String surname, final String given) {
 		final Name name = splitter.split(string);
-		assertEquals(name.family, family);
-		assertEquals(name.given, given);
+		assertEquals(name.surname, surname);
+		assertEquals(name.givenname, given);
 	}
 
 	@Test
@@ -47,7 +47,7 @@ public class TestNameSplitter {
 	public void testNoRewrite() {
 		// name already in correct format
 		test(western, "Trump, Donald", "Trump", "Donald");
-		// no family name, so we cannot rewrite anything
+		// no surname, so we cannot rewrite anything
 		test(western, "Jesus", "Jesus", "");
 		// kewl people
 		test(western, "dal33t", "dal33t", "");
@@ -71,12 +71,12 @@ public class TestNameSplitter {
 
 	@Test
 	public void testLastnameFirstname() {
-		// Chinese names have family name first, like most Asian names: 习 is the
-		// family name. however they are written without spaces, so the
-		// "eastern" rewriter doesn't actually handle the most common eastern
-		// language correctly....
+		// Chinese names have surname first, like most Asian names: 习 is the
+		// surname. however they are written without spaces, so the "eastern"
+		// rewriter doesn't actually handle the most common eastern language
+		// correctly....
 		test(eastern, "习近平", "习近平", "");
-		// ...and so do Japanese names: 安倍 is the family name.
+		// ...and so do Japanese names: 安倍 is the surname.
 		test(eastern, "安倍 晋三", "安倍", "晋三");
 		// hungarian names are already in the right format, but without the
 		// comma. rewriting this with the "western" rule yields "Mihály, Orbán
@@ -87,7 +87,7 @@ public class TestNameSplitter {
 	@Test
  	public void testCustomRegex() {
 		final DisplayNameSplitter noble = new DisplayNameSplitter(
-				"^(?<given>.*?)\\p{Z}+(?<family>[^\\p{Lu}\\p{Lt}]*[\\p{Lu}\\p{Lt}][^\\p{Z}]+)$");
+				"^(?<given>.*?)\\p{Z}+(?<surname>[^\\p{Lu}\\p{Lt}]*[\\p{Lu}\\p{Lt}][^\\p{Z}]+)$");
 		test(noble, "Stefan von Kombrink", "von Kombrink", "Stefan");
 		test(noble, "Karl-Theodor zu Copy&Paste", "zu Copy&Paste",
 				"Karl-Theodor");

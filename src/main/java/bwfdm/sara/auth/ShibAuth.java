@@ -16,23 +16,23 @@ import bwfdm.sara.auth.DisplayNameSplitter.Name;
  */
 public class ShibAuth {
 	private final String displayNameAttribute;
-	private final String familyNameAttribute;
+	private final String surnameAttribute;
 	private final String givenNameAttribute;
 	private final String emailAttribute;
 	private final String userIDAttribute;
 	private final DisplayNameSplitter nameSplitter;
 	private String userID;
 	private String email;
-	private String familyName;
+	private String surname;
 	private String givenName;
 	private String displayName;
 
 	/**
-	 * @param familyNameAttribute
-	 *            attribute containing family name from Shibboleth (usually
+	 * @param surnameAttribute
+	 *            attribute containing surname from Shibboleth (usually
 	 *            {@code sn})
 	 * @param givenNameAttribute
-	 *            attribute containing family name from Shibboleth (usually
+	 *            attribute containing given name from Shibboleth (usually
 	 *            {@code given-name})
 	 * @param userIDAttribute
 	 *            attribute containing persistent user ID from Shibboleth
@@ -49,12 +49,12 @@ public class ShibAuth {
 	 *            when ignoring the display name
 	 */
 	@JsonCreator
-	public ShibAuth(final String familyNameAttribute,
+	public ShibAuth(final String surnameAttribute,
 			final String givenNameAttribute, final String emailAttribute,
 			final String userIDAttribute, final String displayNameAttribute,
 			final String nameRegex) {
 		this.displayNameAttribute = displayNameAttribute;
-		this.familyNameAttribute = familyNameAttribute;
+		this.surnameAttribute = surnameAttribute;
 		this.givenNameAttribute = givenNameAttribute;
 		this.emailAttribute = emailAttribute;
 		this.userIDAttribute = userIDAttribute;
@@ -63,11 +63,11 @@ public class ShibAuth {
 	}
 
 	/**
-	 * @param familyNameAttribute
-	 *            attribute containing family name from Shibboleth (usually
+	 * @param surnameAttribute
+	 *            attribute containing surname from Shibboleth (usually
 	 *            {@code sn})
 	 * @param givenNameAttribute
-	 *            attribute containing family name from Shibboleth (usually
+	 *            attribute containing given name from Shibboleth (usually
 	 *            {@code given-name})
 	 * @param userIDAttribute
 	 *            attribute containing persistent user ID from Shibboleth
@@ -82,10 +82,10 @@ public class ShibAuth {
 	 *            pattern for {@link DisplayNameSplitter}
 	 */
 	@JsonCreator
-	public ShibAuth(final String familyNameAttribute,
+	public ShibAuth(final String surnameAttribute,
 			final String givenNameAttribute, final String emailAttribute,
 			final String userIDAttribute) {
-		this(familyNameAttribute, givenNameAttribute, emailAttribute,
+		this(surnameAttribute, givenNameAttribute, emailAttribute,
 				userIDAttribute, null, null);
 	}
 
@@ -145,22 +145,22 @@ public class ShibAuth {
 		this.email = getShibAttr(request, emailAttribute, true);
 		this.displayName = displayNameAttribute == null ? null
 				: getShibAttr(request, displayNameAttribute, false);
-		this.familyName = getShibAttr(request, familyNameAttribute, false);
+		this.surname = getShibAttr(request, surnameAttribute, false);
 		this.givenName = getShibAttr(request, givenNameAttribute, false);
-		if (displayName == null && familyName == null)
+		if (displayName == null && surname == null)
 			throw new IllegalArgumentException(
 					"neither display name nor given name provided");
 	}
 
 	public UserInfo getUserInfo() {
-		// if we have an explicit family name from Shib, use it even if we don't
+		// if we have an explicit surname from Shib, use it even if we don't
 		// have a given name. it's still better than splitting the display name
 		// incorrectly.
-		if (familyName != null)
-			return new UserInfo(userID, email, familyName,
+		if (surname != null)
+			return new UserInfo(userID, email, surname,
 					givenName != null ? givenName : "");
 
 		final Name name = nameSplitter.split(displayName);
-		return new UserInfo(userID, email, name.family, name.given);
+		return new UserInfo(userID, email, name.surname, name.givenname);
 	}
 }

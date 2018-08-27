@@ -54,14 +54,14 @@ function updateBranchSpecific() {
 function initFields(info) {
 	meta = cache[info.master.value] = info;
 
-	initField("submitter_family", "reset_submitter", false, function(value) {
+	initField("submitter_surname", "reset_submitter", false, function(value) {
 		if (value.trim() == "")
-			return "Please provide your family name (lastname)";
+			return "Please provide your surname";
 		return true;
 	});
-	initField("submitter_given", "reset_submitter", false, function(value) {
+	initField("submitter_givenname", "reset_submitter", false, function(value) {
 		if (value.trim() == "")
-			return "Please provide your given name (firstname)";
+			return "Please provide your given name";
 		return true;
 	});
 	initField("title", "reset_title", false, function(value) {
@@ -114,7 +114,7 @@ function initFields(info) {
 		});
 
 	$("#next_button").click(function() {
-		var values = validate.all(["submitter_family", "submitter_given",
+		var values = validate.all(["submitter_surname", "submitter_givenname",
 			"title", "description", "master", "version", ]);
 		if (!values)
 			return;

@@ -164,7 +164,7 @@ CREATE TABLE fe_temp_metadata(
 	field text NOT NULL,
 	value text NOT NULL,
 	CHECK (field in ('title', 'description', 'version', 'master',
-		'submitter_family', 'submitter_given')),
+		'submitter_surname', 'submitter_givenname')),
 	PRIMARY KEY (repo, project, uid, field)
 );
 

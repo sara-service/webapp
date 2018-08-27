@@ -103,7 +103,7 @@ public class GitLabRESTv4 implements GitRepo {
 				new ParameterizedTypeReference<GLUserInfo>() {
 				});
 		final Name name = nameSplitter.split(info.displayName);
-		return new UserInfo(info.userID, info.email, name.family, name.given);
+		return new UserInfo(info.userID, info.email, name.surname, name.givenname);
 	}
 
 	@Override

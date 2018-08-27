@@ -43,8 +43,8 @@ public class GitHubRESTv3WithoutShib extends GitHubRESTv3 implements GitRepo {
 				});
 		final Name name = nameSplitter
 				.split(userInfo.getEffectiveDisplayName());
-		return new UserInfo(userInfo.userID, getUserEmail(), name.family,
-				name.given);
+		return new UserInfo(userInfo.userID, getUserEmail(), name.surname,
+				name.givenname);
 	}
 
 	private String getUserEmail() {

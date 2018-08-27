@@ -202,8 +202,8 @@ public class PushTask extends Task {
 		final MetadataFormatter formatter = new MetadataFormatter();
 		formatter.addDC("title", job.meta.get(MetadataField.TITLE));
 		formatter.addDC("description", job.meta.get(MetadataField.DESCRIPTION));
-		final String submitter = job.meta.get(MetadataField.SUBMITTER_FAMILY)
-				+ ", " + job.meta.get(MetadataField.SUBMITTER_GIVEN);
+		final String submitter = job.meta.get(MetadataField.SUBMITTER_SURNAME)
+				+ ", " + job.meta.get(MetadataField.SUBMITTER_GIVENNAME);
 		formatter.addDC("publisher", submitter);
 		formatter.addDC("date", ISO8601.format(now));
 		formatter.addDC("type", "Software");
@@ -265,8 +265,8 @@ public class PushTask extends Task {
 		i.repository_login_id = job.gitrepoEmail;
 		// submitter of publication
 		// FIXME store as separate fields in item!
-		i.meta_submitter = job.meta.get(MetadataField.SUBMITTER_FAMILY) + ", "
-				+ job.meta.get(MetadataField.SUBMITTER_GIVEN);
+		i.meta_submitter = job.meta.get(MetadataField.SUBMITTER_SURNAME) + ", "
+				+ job.meta.get(MetadataField.SUBMITTER_GIVENNAME);
 		// version of git project
 		i.meta_version = meta.get(MetadataField.VERSION);
 		// title of git project

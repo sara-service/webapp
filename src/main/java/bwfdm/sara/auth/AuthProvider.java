@@ -74,10 +74,10 @@ public interface AuthProvider {
 		 */
 		public final String email;
 		/**
-		 * The user's preferred way of representing his/her family name in a
-		 * Unicode string.
+		 * The user's preferred way of representing his/her surname in a Unicode
+		 * string.
 		 */
-		public final String familyName;
+		public final String surname;
 		/**
 		 * The user's preferred way of representing his/her given name in a
 		 * Unicode string.
@@ -85,10 +85,10 @@ public interface AuthProvider {
 		public final String givenName;
 
 		public UserInfo(final String userID, final String email,
-				final String familyName, final String givenName) {
+				final String surname, final String givenName) {
 			this.userID = userID;
 			this.email = email;
-			this.familyName = familyName;
+			this.surname = surname;
 			this.givenName = givenName;
 		}
 	}

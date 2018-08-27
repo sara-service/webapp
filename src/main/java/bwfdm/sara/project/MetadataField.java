@@ -14,10 +14,10 @@ public enum MetadataField {
 	VERSION("version"),
 	/** primary (default) branch in repo. */
 	MAIN_BRANCH("master"),
-	/** family name (lastname, for Europeans) of the submitting user */
-	SUBMITTER_FAMILY("submitter_family"),
+	/** surname (lastname, for Europeans) of the submitting user */
+	SUBMITTER_SURNAME("submitter_surname"),
 	/** given name (firstname, for Europeans) of the submitting user */
-	SUBMITTER_GIVEN("submitter_given");
+	SUBMITTER_GIVENNAME("submitter_givenname");
 
 	private final String displayName;
 

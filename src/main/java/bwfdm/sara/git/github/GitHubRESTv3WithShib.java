@@ -15,11 +15,11 @@ public class GitHubRESTv3WithShib extends GitHubRESTv3 {
 	 *            OAuth application ID
 	 * @param appSecret
 	 *            OAuth application secret
-	 * @param familyNameAttribute
-	 *            attribute containing family name from Shibboleth (usually
+	 * @param surnameAttribute
+	 *            attribute containing surname from Shibboleth (usually
 	 *            {@code sn})
 	 * @param givenNameAttribute
-	 *            attribute containing family name from Shibboleth (usually
+	 *            attribute containing given name from Shibboleth (usually
 	 *            {@code given-name})
 	 * @param emailAttribute
 	 *            attribute containing email from Shibboleth (usually
@@ -38,14 +38,14 @@ public class GitHubRESTv3WithShib extends GitHubRESTv3 {
 	@JsonCreator
 	public GitHubRESTv3WithShib(@JsonProperty("oauthID") final String appID,
 			@JsonProperty("oauthSecret") final String appSecret,
-			@JsonProperty("shibFamilyName") final String familyNameAttribute,
+			@JsonProperty("shibSurname") final String surnameAttribute,
 			@JsonProperty("shibGivenName") final String givenNameAttribute,
 			@JsonProperty("shibEmail") final String emailAttribute,
 			@JsonProperty("shibID") final String userIDAttribute,
 			@JsonProperty(value = "shibDisplayName", required = false) final String displayNameAttribute,
 			@JsonProperty(value = "nameRegex", required = false) final String nameRegex) {
 		super(appID, appSecret);
-		shib = new ShibAuth(familyNameAttribute, givenNameAttribute,
+		shib = new ShibAuth(surnameAttribute, givenNameAttribute,
 				emailAttribute, userIDAttribute, displayNameAttribute,
 				nameRegex);
 	}
