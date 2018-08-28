@@ -34,10 +34,16 @@ public class GitLabArchiveRESTv4 implements ArchiveRepo {
 	// the actual regex (as of 10.8.3) is (! is a backslash):
 	// [!p{Alnum}!u{00A9}-!u{1f9c0}_][!p{Alnum}!p{Pd}!u{00A9}-!u{1f9c0}_!.]*
 	// note that 1f9c0 is incorrect; there's a few emoji after it...
-	// → permit only the stuff guaranteed unchangeable by Unicode consortium:
-	private static final Pattern NAME_FIRST = Pattern.compile("^[\\p{Alnum}_]");
+	// Alnum is ASCII-range only – no accented letters. thus we need a bit more,
+	// but hardcoding the limit feels wrong.
+	// → permit all letters and numbers as defined by Unicode consortium. GitLab
+	// will always have to support basically all of these, or people will start
+	// complaining pretty quickly...
+	private static final Pattern NAME_FIRST = Pattern
+			.compile("^[\\p{L}\\p{N}_]");
 	private static final Pattern NAME_FORBIDDEN = Pattern
-			.compile("[^\\p{Alnum}\\p{Pd}_\\. ]");
+			.compile("[^\\p{L}\\p{N}\\p{Pd}_\\. ]");
+	private static final Pattern SPACES = Pattern.compile("\\p{Z}+");
 	private static final char ELLIPSIS = 0x2026; // "…"
 	/**
 	 * URL prefix for accessing the API. also defines which API version will be
@@ -138,8 +144,11 @@ public class GitLabArchiveRESTv4 implements ArchiveRepo {
 
 	private String filter(final Map<MetadataField, String> meta,
 			MetadataField field, int maxLength) {
+		// canonicalize whitespace. it's definitely NOT a good idea to just
+		// remove spaces like all other invalid characters.
+		String value = SPACES.matcher(meta.get(field)).replaceAll(" ");
 		// remove invalid characters
-		String value = NAME_FORBIDDEN.matcher(meta.get(field)).replaceAll("");
+		value = NAME_FORBIDDEN.matcher(value).replaceAll("");
 		// shorten to maximum length
 		if (value.length() > maxLength)
 			value = value.substring(0, maxLength - 1) + ELLIPSIS;
