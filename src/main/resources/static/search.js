@@ -43,9 +43,10 @@ function initSearch(box, items, overflow, limit) {
 	});
 
 	if (overflow)
-		overflow.click(function() {
+		overflow.click(function(event) {
 			maxMatched += limit;
 			updateSearch();
+			event.preventDefault();
 		});
 	updateSearch();
 }
