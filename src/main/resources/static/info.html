@@ -33,13 +33,24 @@
 		</div>
 	</div>
 
-	<div class="row">
+	<div id="loading" class="loading"><span class="sr-only">loading, please wait...</span></div>
+	<div id="tokeninfo" class="hidden row">
 		<div class="col-xs-12 action-header">
-			<h1>Your archived software artefact</h1>
+			<h1>Your archive ID and access token</h1>
 		</div>
+		<h3 id="item" class="col-sm-offset-1 col-sm-11"></h3>
+		<h3 id="token" class="col-sm-offset-1 col-sm-11">
+				Dammit, something went wrong...
+				Please bookmark the page anyway!</h3>
+		<p class="col-xs-12"><b>Please write these values down</b> (or print this page)
+			and store them in a safe place.
+			You will need the archive ID and access token
+			if you want to retrieve your artefact from the archive later on!</p>
 	</div>
 
-	<div id="loading" class="loading"><span class="sr-only">loading, please wait...</span></div>
+	<div class="row"><div class="col-xs-12 action-header">
+		<h1>Your archived software artefact</h1>
+	</div></div>
 	<dl id="meta" class="hidden dl-horizontal">
 		<dt>title</dt><dd id="title"></dd>
 		<dt>version</dt><dd id="version"></dd>
@@ -48,30 +59,20 @@
 		<dt>access rights</dt><dd id="access"></dd>
 		<dt>description</dt><dd id="description" class="multiline"></dd>
 	</dl>
-	<div id="public" class="hidden">
-		<p>You can access your archived data at:
+
+	<div id="public" class="hidden row">
+		<p class="col-xs-12">You can access your archived data at:
 			<a id="url" target="_blank">unable to retrieve link</a>.
 			<!-- hint at a search function to make it clear that attempting to
 			     keep the link private will not work -->
 			Alternatively, you can use the archive's search function
 			to find your project.</p>
-		<p>Please <strong>do not cite this link</strong>.
+		<p class="col-xs-12">Please <strong>do not cite this link</strong>.
 			It is not guaranteed to be persistent.
 			If you would like to cite your software artefact,
 			please create a bibliographical record and cite that.
 			A bibliographical record <i>is</i> guaranteed to be persistent,
 			and looks so much more professional.</p>
-	</div>
-	<div id="tokeninfo" class="hidden">
-		<p>Your archive ID and access token, respectively, are:</p>
-		<h3 id="item" class="col-sm-offset-1 col-sm-11"></h3>
-		<h3 id="token" class="col-sm-offset-1 col-sm-11">
-				Dammit, something went wrong...
-				Please bookmark the page anyway!</h3>
-		<p><b>Please write these values down</b> (or print this page)
-			and store them in a safe place.
-			You will need the archive ID and access token
-			if you want to retrieve your artefact from the archive later on!</p>
 	</div>
 	<p id="error" class="hidden text-warning">
 		Failed to retrieve metadata!

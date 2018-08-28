@@ -13,7 +13,7 @@ function fillMetaData(meta) {
 	} else
 		$('#access').text("private");
 
-	if (meta.token != null) {
+	if (meta.token != null && !meta.public_access) {
 		$('#token').text(meta.token);
 		$('#tokeninfo').removeClass("hidden");
 	}

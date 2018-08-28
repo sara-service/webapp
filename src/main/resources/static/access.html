@@ -43,19 +43,20 @@
 	<form class="form-horizontal" id="access"><div class="form-group">
 		<div class="col-xs-12 custom-control custom-radio">
 			<input type="radio" name="access" value="public" id="public" class="custom-control-input" checked>
-			<label class="custom-control-label" for="public">make data in git repo <i>public</i>
+			<label class="custom-control-label" for="public">make data in git archive public
 				(recommended)</label>
 		</div>
 		<p class="col-xs-12 pad">
-			<b>Everybody will be able to clone</b> the archived git repo
+			Everybody will be able to clone the archived git repo
 			and continue working where you left off.
 			Publication cannot be undone.</p>
+		<p class="col-xs-12" style="height:1ex"></p>
 		<div class="col-xs-12 custom-control custom-radio">
 			<input type="radio" name="access" value="private" id="private" class="custom-control-input">
-			<label class="custom-control-label" for="private">keep data in git repo <i>private</i></label>
+			<label class="custom-control-label" for="private">keep data in git archive private</label>
 		</div>
 		<p class="col-xs-12 pad">
-			The archived <b>repo will be inaccessible</b>.
+			The archived repo will be inaccessible.
 			You can always make it public later on if you change your mind.
 		</p><p class="col-xs-12 pad">
 			You will be given a token
@@ -63,17 +64,6 @@
 			Store this token securely –
 			you will not be able to access
 			the archived data without it!</p>
-	</div></form>
-	<p class="row" style="height:1ex"></p>
-	<form class="form-horizontal"><div class="form-group">
-		<div class="col-xs-12 custom-control custom-checkbox">
-			<input type="checkbox" class="custom-control-input" id="record" checked>
-			<label class="custom-control-label" for="record">create a bibliographical record
-				for this item (strongly recommended)</label>
-		</div>
-		<p class="col-xs-12 pad">
-			You will get a persistent identifier you can use
-			to <b>cite</b> your archived software artefact.</p>
 	</div></form>
 	<div id="loading" class="loading"><span class="sr-only">loading, please wait...</span></div>
 

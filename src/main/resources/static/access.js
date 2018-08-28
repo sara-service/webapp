@@ -11,9 +11,8 @@ function commit() {
 		$("#public").focus();
 		throw "Invalid access selection!";
 	}
-	var record = $("#record").prop("checked");
 	API.post("complete archiving process", "/api/push/commit",
-		{ public_access: public_access, record: record }, function() {
+		{ public_access: public_access, record: false }, function() {
 			location.href = "/api/push/redirect";
 		});
 }
