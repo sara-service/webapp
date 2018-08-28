@@ -70,7 +70,7 @@ APIERR.handleJSON = function(step, info) {
 		// redirect the user to "done" page, where he can start a publication.
 		// safe to just concatenate query string here; the item UUID cannot
 		// contain anything dangerous because it's only hex digits and dashes.
-		location.replace("/info.html?item=" + info.itemID);
+		location.href = "/info.html?item=" + info.itemID;
 		return;
 	}
 	APIERR.handleOther(step, info.exception, info.message);
