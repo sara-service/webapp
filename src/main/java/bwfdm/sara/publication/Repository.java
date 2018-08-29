@@ -27,6 +27,8 @@ public class Repository implements DAO {
 	public String help;
 	@DatabaseField
 	public boolean enabled;
+	@DatabaseField
+	public String user_hint;
 
 	public Repository(@JsonProperty("uuid") UUID uuid) {
 		this.uuid = uuid;

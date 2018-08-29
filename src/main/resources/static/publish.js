@@ -165,6 +165,8 @@ function initPubRepos(info) {
 		else
 			$("#ir_logo").removeAttr("src");
 		$("#ir_link").attr("href", repo.url);
+		$("#user_hint").text(repo.user_hint);
+		$("#user_hint_group").toggleClass("hidden", !repo.user_hint);
 		// delegate to email validation. the two fields have basically the
 		// same role (influencing the collection list), but we want the UI
 		// messages below the email to which they refer.

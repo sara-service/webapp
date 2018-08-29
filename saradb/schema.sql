@@ -60,6 +60,7 @@ CREATE TABLE repository(
 	adapter text NOT NULL,
 	logo_url text, -- URL of logo, either https:// or data: (optional)
 	help text, -- help for users how publication can be finished
+	user_hint text, -- shown on publish page where user selects the IR
 	enabled boolean NOT NULL
 );
 
