@@ -61,11 +61,11 @@
 }
 
 .list-group-icon > * {
-	height: 6em;
 	padding: .5em .5em;
 }
 
 .list-group-icon > img {
+	height: 6em;
 	width: 11em; /* 2:1 plus .5em padding on each side */
 	margin-right: 1em;
 }
