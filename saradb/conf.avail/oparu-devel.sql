@@ -11,7 +11,7 @@ DECLARE oparu_demo text     := 'https://oparu-devel.sara-service.org';
 
 DECLARE demo_dspace_help text := 'Your publication has been created in the Institutional Repository of Demo University (IRDU). Please login, click "Resume" and submit the publication. You can edit metadata if necessary. Your submission will then be reviewed by the IRDU team, and you will be notified as soon as it has been approved.';
 
-DECLARE userhint text := 'If your email address isn''t registered, either register in IRDU DEVELOPMENT (click the logo in the top right corner, then register a new account) or test with demo-user@sara-service.org instead.';
+DECLARE userhint text := 'If your email address isn''t registered, either register in IRDU DEVELOPMENT ("visit home page", then register a new account) or test with demo-user@sara-service.org instead.';
 
 DECLARE rRef UUID;
 

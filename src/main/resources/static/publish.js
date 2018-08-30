@@ -164,7 +164,7 @@ function initPubRepos(info) {
 			$("#ir_logo").attr("src", logo);
 		else
 			$("#ir_logo").removeAttr("src");
-		$("#ir_link").attr("href", repo.url);
+		$("#ir_link,#ir_button").attr("href", repo.url);
 		$("#user_hint").text(repo.user_hint);
 		$("#user_hint_group").toggleClass("hidden", !repo.user_hint);
 		// delegate to email validation. the two fields have basically the
