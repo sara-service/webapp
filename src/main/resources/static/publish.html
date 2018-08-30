@@ -18,9 +18,6 @@
 		<div class="col-sm-9 col-xs-12">
 			<img src="lib/header.svg" class="logo-header" />
 		</div>
-		<div class="col-sm-3 col-xs-12">
-			<a target="_blank" id="ir_link"><img id="ir_logo"></a>
-		</div>
 	</div>
 	<div class="progress-header col-xs-12">
 		<div class="btn-group">
@@ -44,7 +41,7 @@
 
 	<form class="form-horizontal hidden" id="content">
 		<div class="form-group has-feedback">
-			<label for="irs" class="col-sm-2 control-label">institutional repository</label>
+			<a target="_blank" id="ir_link" class="col-sm-2"><img scale="10%" id="ir_logo"></a>
 			<div class="col-sm-10 nopad">
 				<select class="form-control" id="pubrepo">
 					<option disabled>… loading list of institutional repositories …</option>
@@ -74,11 +71,14 @@
 				<label class="control-label">checking user...</label>
 			</div>
 		</div>
+		
 		<div class="row" id="user_hint_group"><p class="col-sm-10 col-sm-offset-2">
 			<svg width="1em" height="1em" viewBox="0 0 16.93 16.93" aria-hidden="true">
 				<path d="M8.51,0C3.83-.02.02,3.75+0,8.42c-.02,4.68+3.75,8.49+8.42,8.51+4.68.02+8.49-3.75+8.51-8.42C16.96,3.83+13.18.02+8.51,0Zm-.12,2.28c.41,0+.75.15+1.03.44.29.28.43.63.43,1.04+0+.41-.14.75-.43,1.04-.28.28-.63.42-1.03.42-.42,0-.76-.14-1.05-.42C7.06,4.52+6.91,4.17+6.91,3.76+6.91,3.34+7.06,3+7.35,2.72+7.63,2.43+7.98,2.28+8.39,2.28ZM6,6.07h3.89v7.25h1.17v.93H6V13.32H7.16V7H6Z"/>
 			</svg>
 			<span id="user_hint"></span>
+		</div>
+		
 		</p></div>
 
 		<div class="form-group has-feedback hidden" id="policy_group">
