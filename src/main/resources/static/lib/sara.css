@@ -137,10 +137,8 @@ li {
 }
 
 #ir_logo {
-	height: 7ex;
-	margin: 0ex 0ex 0ex 0ex;
-	display: block;
-	float: right;
+	height: 4.5ex;
+	overflow: visible;
 }
 
 .progress-header {
