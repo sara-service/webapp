@@ -55,6 +55,11 @@
 	text-align: center;
 }
 
+.list-group-icon {
+	display: flex;
+	flex-wrap: wrap;
+}
+
 .list-group-icon > * {
 	height: 6em;
 	padding: .5em .5em;
@@ -62,7 +67,6 @@
 
 .list-group-icon > img {
 	width: 11em; /* 2:1 plus .5em padding on each side */
-	float: left;
 	margin-right: 1em;
 }
 
