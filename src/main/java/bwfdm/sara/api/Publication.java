@@ -68,7 +68,7 @@ public class Publication {
 	@GetMapping("repos")
 	public List<Repository> getPubRepos() {
 		return config.getPublicationDatabase().getList(Repository.class,
-				"where enabled");
+				"where enabled order by display_name asc");
 	}
 
 	@GetMapping("meta")

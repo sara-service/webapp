@@ -56,7 +56,7 @@ public class ConfigDatabase {
 	public List<GitRepoFactory> getGitRepos() {
 		return db.<GitRepoFactory> queryRowToList(
 				"select uuid, display_name, logo_url, url, adapter from "
-						+ GITREPOS_TABLE,
+						+ GITREPOS_TABLE + " order by display_name asc",
 				GitRepoFactory.class);
 	}
 
