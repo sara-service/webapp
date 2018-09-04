@@ -13,7 +13,7 @@ BEGIN
 
 -- GitHub "development" app (return address: http://localhost:8080/)
 INSERT INTO source(display_name, contact_email, adapter, url, enabled, logo_url) VALUES
-	('GitHub, Inc.', 'project-sara+github@uni-konstanz.de',
+	('GitHub, Inc. (without Shibboleth)', 'project-sara+github@uni-konstanz.de',
 		'GitHubRESTv3WithoutShib', 'https://github.com', TRUE,
 		'data:image/svg+xml;base64,' || encode(lo_get(logo), 'base64'))
 	RETURNING uuid INTO sRef;
