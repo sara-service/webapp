@@ -18,8 +18,8 @@ INSERT INTO source(display_name, contact_email, adapter, url, enabled, logo_url)
 		'data:image/svg+xml;base64,' || encode(lo_get(logo), 'base64'))
 	RETURNING uuid INTO sRef;
 INSERT INTO source_params(id, param, value) VALUES
-	(sRef, 'oauthID', 'eed8cfac289b122c7e9e'),
-	(sRef, 'oauthSecret', 'ba37452c50b23f6f11b8f09f28107c46c17c5286'),
+	(sRef, 'oauthID', '4e223d78a994f07e0f31'),
+	(sRef, 'oauthSecret', '28befd32e46f3a7f460475be95876410bd138d35'),
 	(sRef, 'shibSurname', 'sn'),
 	(sRef, 'shibGivenName', 'givenName'),
 	(sRef, 'shibEmail', 'mail'),
