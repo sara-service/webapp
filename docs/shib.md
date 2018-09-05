@@ -20,6 +20,7 @@ curl http://pkg.switch.ch/switchaai/SWITCHaai-swdistrib.asc | sudo apt-key add
 Let's Encrypt certificates work, but you'll have to manually replace them in the federation metadata every 3 months.
 this will almost certainly annoy your metadata admin so don't do that.
 
+- get a certificate (see [Getting a DFN Certificate](dfn-cert.md))
 - place private key in `/etc/ssl/private/saradomain.key`, PEM format
 - place certificate in `/etc/ssl/certs/saradomain.pem`, PEM format
 	- for DFN CA, select certificate profile "Shibboleth IdP SP"
@@ -83,6 +84,7 @@ this will almost certainly annoy your metadata admin so don't do that.
 - restart apache and hope that there are no syntax errors: `sudo service apache2 restart`
 	- sure you can do `sudo apache2ctl configtest` first, but where's the fun in that?
 - visit `https://www.ssllabs.com/ssltest/analyze.html?d=saradomain` (replacing `saradomain` in URL!) and verify you get an A or A+
+- watch out for "certificate about to expire" email and occasionally re-check the config generator
 
 ## Configure shibd
 
@@ -156,8 +158,8 @@ sudo wget -O /etc/ssl/certs/dfn-aai.pem https://www.aai.dfn.de/fileadmin/metadat
 </SPConfig>
 ```
 - replace the following placeholders with real values
-	- `entityID` in `<ApplicationDefaults>`: home URL including `https://` (usually)
-		- **entityID is basically unchangeable once set!**
+	- `entityID` in `<ApplicationDefaults>`: home URL, including `https://` (or sometimes just the hostname)
+		- **entityID is basically unchangeable once the SP is registered!**
 	- `discoveryURL` in `<SSO discoveryProtocol="SAMLDS">`: the federation discovery / WAYF service
 		- `https://wayf.aai.dfn.de/DFN-AAI-Test/wayf` for DFN AAI Test
 		- `https://wayf.aai.dfn.de/DFN-AAI/wayf` for DFN AAI Advanced (ie. production)
@@ -201,9 +203,9 @@ sudo wget -O /etc/ssl/certs/dfn-aai.pem https://www.aai.dfn.de/fileadmin/metadat
 	- the hostname is right (major PITA to change all the endpoints)
 - visit `https://saradomain/Shibboleth.sso/DiscoFeed` and check that
 	- you get a long list of JSON-encoded stuff
-	- the list contains all IdPs you want to allow for login
+	- the list contains all IdPs you want to allow for login (actually easier to check in the raw output then the "readable" Firefox view)
 	- the list *doesn't* contains any IdPs you *don't* want to allow
-	- FIXME maybe this only works after the SP can find itself in the federation metadata?
+	- TODO didin't work initially, but worked just fine the next day – wtf?!
 
 ## Set up a Test Endpoint (optional)
 
@@ -301,6 +303,7 @@ foreach (array('$_SERVER' => $_SERVER, '$_REQUEST' => $_REQUEST, '$_SESSION' => 
 - wait 1-2 hours (or overnight) until SP shows up in federation metadata
 - follow any orders and/or liberally apply bribes
 - rinse and repeat for production – you cannot join production directly, you have to be in the test federation first
+- keep a test instance around for testing if at all possible. testing in production can go chernobyl.
 
 Konstanz: fill https://www.kim.uni-konstanz.de/services/administrieren-und-wartung/shibboleth-service-provider/shibboleth-sp-beantragen/
 (in the end it's still a manual process though)
@@ -319,4 +322,4 @@ Konstanz: fill https://www.kim.uni-konstanz.de/services/administrieren-und-wartu
 - check that all attributes are listed in the PHP page
 	- if attributes missing, check `attribute-map.xml`
 	- if `attribute-map.xml` looks ok, check whether the attributes are in the assertion (your config is at fault) or not (the IdP or SP is at fault)
-- expect users to complain that it isn't working for them. resolve problems with their IdP's technical contact.
+- expect users to complain that it isn't working for them. resolve problems with their IdP's technical contact. get used to the fact that doing so takes days.

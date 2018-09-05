@@ -15,8 +15,7 @@ probably much more than you wanted it to.
 
 ### using a real certificate
 
-- get a certificate
-	- TODO document how to do that for DFN CA
+- get a certificate (see [Getting a DFN Certificate](dfn-cert.md))
 - place private key in `/etc/ssl/private/gitlabdomain.key`, PEM format
 - place public key *with entire certificate chain* in `/etc/ssl/certs/gitlabdomain.pem`, PEM format
 - in `/etc/gitlab/gitlab.rb`, set variables as follows (unless you need other things, that's actually the entire config!)
