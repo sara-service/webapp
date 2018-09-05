@@ -155,6 +155,11 @@ li {
 
 .progress-current {
 	font-weight: bold;
+	color: black;
+}
+
+.progress-disabled {
+	pointer-events: none;
 }
 
 .action-header {
