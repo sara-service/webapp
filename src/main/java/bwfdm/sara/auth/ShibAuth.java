@@ -149,7 +149,7 @@ public class ShibAuth {
 		this.givenName = getShibAttr(request, givenNameAttribute, false);
 		if (displayName == null && surname == null)
 			throw new IllegalArgumentException(
-					"neither display name nor given name provided");
+					"neither display name nor surname provided");
 	}
 
 	public UserInfo getUserInfo() {
