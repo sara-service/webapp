@@ -229,10 +229,12 @@ the config here is a subset of the Shibboleth config.
   </Service>
 </Server>
 ```
-- build the WAR: `mvn clean install`
+- build the WAR: `mvn clean install -DskipTests`
 - copy `target/SaraServer-*.war` to `/var/lib/tomcat8/webapps/SaraServer.war` on server
 - copy `src/main/webapp/META-INF/context.xml` to `/etc/tomcat8/Catalina/localhost/SaraServer.xml` on server
-- configure `SaraServer.xml` (database config and `sara.webroot`)
+- configure `SaraServer.xml`
+	- `password` in `jdbc.database` resource: PostgreSQL database password
+	- `sara.webroot` parameter: `https://saradomain/`
 - restart tomcat (`sudo service tomcat8 restart`)
 - check `/var/log/tomcat8/catalina.out` for error messages
 - it should now be running (and working) at `https://saradomain/`
