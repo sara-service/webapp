@@ -12,7 +12,7 @@ DECLARE fullname text     := 'Totally Legitimate Data Repository (TL;DR)';
 
 DECLARE demo_dspace_help text := 'Your publication has been submitted to the ' || fullname || '. It will be automatically accepted and should show up on ' || hostname || ' in a few seconds.' || chr(10) || chr(10) || 'Would you consider using this system, with a real archive and a real institutional repository, for real research software? Please get in touch at git+tldr@uni-konstanz.de and let us know what you think!';
 
-DECLARE userhint text := 'Please use demo-user@sara-service.org to submit.';
+DECLARE userhint text := 'Please use demo-user@sara-service.org to submit. Your submission will be approved automatically.';
 
 DECLARE rRef UUID;
 

@@ -11,7 +11,7 @@ DECLARE oparu_demo text     := 'https://oparu-beta.sara-service.org';
 
 DECLARE demo_dspace_help text := 'Your publication has been created in the Institutional Repository of Demo University (IRDU). Please login, click "Resume" and submit the publication. You can edit metadata if necessary. Your submission will then be reviewed by the IRDU team, and you will be notified as soon as it has been approved.';
 
-DECLARE userhint text := 'Do not publish "junk" projects to this repository!';
+DECLARE userhint text := 'Please use demo-user@sara-service.org to submit. You can then log into IRDU as demo-user@sara-service.org using password "SaraTest" to finish your submission. Note that it will not be approved automatically!';
 
 DECLARE rRef UUID;
 
