@@ -31,6 +31,7 @@ INSERT INTO repository_params(id, param, value) VALUES
 	(rRef, 'sword_pwd', 'SaraTest'),
 	(rRef, 'sword_api_endpoint', oparu_demo || '/swordv2'),
 	(rRef, 'deposit_type', 'workspace'),
+	(rRef, 'check_license', 'false'),
 	(rRef, 'publication_type', 'Software');
 --	(rRef, 'force_onbehalf', '1'),
 --	(rRef, 'workflow_type', 'login_required');

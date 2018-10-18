@@ -31,6 +31,7 @@ INSERT INTO repository_params(id, param, value) VALUES
 	(rRef, 'sword_pwd', 'SaraTest'),
 	(rRef, 'sword_api_endpoint', hostname || '/swordv2'),
 	(rRef, 'deposit_type', 'workflow'),
+        (rRef, 'check_license', 'true'),
 	(rRef, 'publication_type', 'Software');
 
 -- erase the temporary large objects

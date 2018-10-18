@@ -67,6 +67,7 @@ public class DSpace_v6 implements PublicationRepository {
 
 	// for IR
 	private final String deposit_type;
+	private final boolean check_license;
 	private final String publication_type;
 
 	private Client rest_client;
@@ -79,6 +80,7 @@ public class DSpace_v6 implements PublicationRepository {
 			@JsonProperty("sword_pwd") final String sp,
 			@JsonProperty("sword_api_endpoint") final String se,
 			@JsonProperty(value = "deposit_type", required = false) final String dt,
+			@JsonProperty(value = "check_license", required = false) final String cl,
 			@JsonProperty(value = "publication_type", required = false) final String pt,
 			@JsonProperty("dao") final Repository dao) {
 		this.dao = dao;
@@ -90,6 +92,13 @@ public class DSpace_v6 implements PublicationRepository {
 		sword_servicedocumentpath = sword_api_endpoint + "/servicedocument";
 
 		deposit_type = dt;
+
+		if ((cl != null) && (cl.toLowerCase().equals("false"))) {
+			check_license = false;
+		} else {
+			check_license = true;
+		}
+
 		publication_type = pt;
 
 		rest_client = ClientBuilder.newClient();
@@ -109,6 +118,7 @@ public class DSpace_v6 implements PublicationRepository {
 	public DSpace_v6(String serviceDocumentURL, String restURL, String saraUser,
 			String saraPassword) {
 		deposit_type = "workspace";
+		check_license = true;
 		publication_type = "Software";
 		sword_servicedocumentpath = serviceDocumentURL;
 		sword_user = saraUser;
@@ -173,8 +183,8 @@ public class DSpace_v6 implements PublicationRepository {
 		int collectionCount = 0;
 		for (SWORDWorkspace workspace : sword_workspaces) {
 			collectionCount += workspace.getCollections().size(); // increment
-																	// collection
-																	// count
+																  // collection
+																  // count
 		}
 
 		return (collectionCount > 0);
@@ -209,6 +219,7 @@ public class DSpace_v6 implements PublicationRepository {
 				if (!found)
 					entry = entry.addChild(community, null);
 			}
+
 			entry = entry.addChild(collectionsMap.get(url).name, collectionsMap.get(url).policy);
 			entry.setURL(url);
 			entry.setCollection(true);
@@ -299,7 +310,7 @@ public class DSpace_v6 implements PublicationRepository {
 			for (SWORDCollection collection : workspace.getCollections()) {
 				// key = full URL, value = name/policy
 				CollectionInfo collectionInfo = new CollectionInfo();
-				if (this.deposit_type.equals("workflow")) {
+				if (check_license) {
 					try {
 						collectionInfo.policy = collection.getCollectionPolicy().toString();
 					} catch (ProtocolViolationException e) {
