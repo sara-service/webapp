@@ -20,8 +20,8 @@ INSERT INTO source(display_name, contact_email, adapter, url, enabled, logo_url)
 	RETURNING uuid INTO sRef;
 INSERT INTO source_params(id, param, value) VALUES
 	(sRef, 'url', 'https://' || arbeitsgitlab),
-	(sRef, 'oauthID', '0a622046d40a9a543845c8b7101122b2acce81c539fb390b7081e859b70db671'),
-	(sRef, 'oauthSecret', '7aeda662c68a3111ab6f7c41f80ea5ef5c75807a0d4a4e8058831f3762532230'),
+	(sRef, 'oauthID', '__DEMOGITLAB_ID__'),
+	(sRef, 'oauthSecret', '__DEMOGITLAB_SECRET__'),
 	(sRef, 'nameRegex', 'western');
 
 -- erase the temporary large object

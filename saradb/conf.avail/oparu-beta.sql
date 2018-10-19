@@ -25,10 +25,10 @@ INSERT INTO repository(display_name, adapter, url, contact_email, help, enabled,
 	RETURNING uuid INTO rRef;
 INSERT INTO repository_params(id, param, value) VALUES
 	(rRef, 'rest_user', 'project-sara@uni-konstanz.de'),
-	(rRef, 'rest_pwd', 'SaraTest'),
+	(rRef, 'rest_pwd', '__OPARUBETA_PASSWORD__'),
 	(rRef, 'rest_api_endpoint', oparu_demo || '/rest'),
 	(rRef, 'sword_user', 'project-sara@uni-konstanz.de'),
-	(rRef, 'sword_pwd', 'SaraTest'),
+	(rRef, 'sword_pwd', '__OPARUBETA_PASSWORD__'),
 	(rRef, 'sword_api_endpoint', oparu_demo || '/swordv2'),
 	(rRef, 'deposit_type', 'workspace'),
 	(rRef, 'check_license', 'false'),

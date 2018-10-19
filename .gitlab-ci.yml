@@ -14,6 +14,8 @@ maven:
 
 postgres:
   stage: build
+  variables:
+    GIT_SUBMODULE_STRATEGY: normal
   image: postgres:10.4
   script:
     - pg_createcluster --start 10 main -- --nosync

@@ -1,4 +1,6 @@
 #!/bin/bash -ex
+set -o pipefail
+
 BASEDIR=$(readlink -f $(dirname "$0"))
 cd $BASEDIR
 DB=$1
@@ -15,5 +17,5 @@ sed "s/__USERNAME__/$USER/g" permissions.sql | psql -v ON_ERROR_STOP=on -d $DB
 psql -v ON_ERROR_STOP=on -d $DB -f ./licenses.sql
 
 for file in "$BASEDIR/$ENV"/*.sql; do
-	psql -v ON_ERROR_STOP=on -d $DB -v "basedir=$BASEDIR/$ENV" -f "$file"
+	sed -f credentials/$ENV.sed "$file" | psql -v ON_ERROR_STOP=on -d $DB -v "basedir=$BASEDIR"
 done
