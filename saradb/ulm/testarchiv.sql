@@ -5,9 +5,9 @@ DO $$
 
 DECLARE base_dir text := (SELECT basedir from args LIMIT 1);
 
-DECLARE testarchiv_privkey oid := lo_import(base_dir || '/testarchiv.key');
-DECLARE testarchiv_pubkey oid  := lo_import(base_dir || '/testarchiv.key.pub');
-DECLARE testarchiv_known oid   := lo_import(base_dir || '/testarchiv.known');
+DECLARE testarchiv_privkey oid := lo_import(base_dir || '/credentials/testarchiv/ulm.key');
+DECLARE testarchiv_pubkey oid  := lo_import(base_dir || '/credentials/testarchiv/ulm.key.pub');
+DECLARE testarchiv_known oid   := lo_import(base_dir || '/credentials/testarchiv/known_hosts');
 
 DECLARE testarchiv text     := 'testarchiv.sara-service.org';
 
@@ -25,7 +25,7 @@ INSERT INTO archive_params(id, param, value) VALUES
 	(aRef, 'temp-namespace', 'temp-archive-test'),
 	(aRef, 'main-namespace', 'archive-test'),
 	(aRef, 'dark-namespace', 'dark-archive-test'),
-	(aRef, 'token', 'gDiyShBw9-qWXf-qPi6s'),
+	(aRef, 'token', '__TESTARCHIV_TOKEN__'),
 	(aRef, 'private-key', convert_from(lo_get(testarchiv_privkey), 'UTF-8')),
 	(aRef, 'public-key', convert_from(lo_get(testarchiv_pubkey), 'UTF-8')),
 	(aRef, 'known-hosts', convert_from(lo_get(testarchiv_known), 'UTF-8'));

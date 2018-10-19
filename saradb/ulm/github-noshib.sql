@@ -18,8 +18,8 @@ INSERT INTO source(display_name, contact_email, adapter, url, enabled, logo_url)
 		'data:image/svg+xml;base64,' || encode(lo_get(logo), 'base64'))
 	RETURNING uuid INTO sRef;
 INSERT INTO source_params(id, param, value) VALUES
-	(sRef, 'oauthID', 'f900e5206f9ea1137c2c'),
-	(sRef, 'oauthSecret', '7429e8858c3debe11661a59d9cc919f0617a6d8f'),
+	(sRef, 'oauthID', '__GITHUBPLAIN_ID__'),
+	(sRef, 'oauthSecret', '__GITHUBPLAIN_SECRET__'),
 	(sRef, 'nameRegex', 'western');
 
 -- erase the temporary large object
