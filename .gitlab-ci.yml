@@ -27,9 +27,12 @@ postgres:
 
 deploy:
   stage: deploy
+  variables:
+    GIT_SUBMODULE_STRATEGY: normal
   script:
-    - chmod 600 .deploy.key
-    - export SSH='ssh -o UserKnownHostsFile=.deploy.known -i .deploy.key deploy@test.sara-service.org'
+    - export TARGET=saradb/credentials/test.sara-service.org
+    - chmod 600 $TARGET.key
+    - export SSH="ssh -o UserKnownHostsFile=$TARGET.known -i $TARGET.key deploy@test.sara-service.org"
     - $SSH tomcat <target/SaraServer-*.war
     - $SSH postgres <database.sql
   only:
