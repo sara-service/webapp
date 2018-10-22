@@ -22,8 +22,8 @@ INSERT INTO source(display_name, contact_email, adapter, url, enabled, logo_url)
 -- be in any repository, even an access-controlled one!
 INSERT INTO source_params(id, param, value) VALUES
 	(sRef, 'url', 'https://' || omi_gitlab),
-	(sRef, 'oauthID', 'xxx'),
-	(sRef, 'oauthSecret', 'xxx'),
+	(sRef, 'oauthID', '__GITLABIOMI_ID__'),
+	(sRef, 'oauthSecret', '__GITLABIOMI_SECRET__'),
 	(sRef, 'nameRegex', 'western');
 
 -- erase the temporary large object
