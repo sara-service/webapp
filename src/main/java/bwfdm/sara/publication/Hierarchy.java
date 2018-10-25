@@ -112,4 +112,16 @@ public class Hierarchy{
 			System.out.print(path + " ");
 		}
     }
+    
+    public int getCollectionCount() {
+		if (is_collection) {
+			return 1;
+		} else {
+			int sum=0;
+			for (Hierarchy child: getChildren()) {
+				sum=sum+child.getCollectionCount();
+			}
+			return sum;
+		}
+    }
 }

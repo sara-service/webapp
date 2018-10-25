@@ -1,1 +1,0 @@
-../conf.avail/oparu-beta.sql

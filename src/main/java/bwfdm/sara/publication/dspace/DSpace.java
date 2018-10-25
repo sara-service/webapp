@@ -3,17 +3,8 @@ package bwfdm.sara.publication.dspace;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Invocation;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,37 +25,36 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import bwfdm.sara.publication.Hierarchy;
-import bwfdm.sara.publication.Item;
 import bwfdm.sara.publication.PublicationRepository;
 import bwfdm.sara.publication.Repository;
 import bwfdm.sara.publication.SaraMetaDataField;
-import bwfdm.sara.utils.JsonUtils;
-import bwfdm.sara.utils.WebUtils;
 
 public class DSpace implements PublicationRepository {
-	protected static final Logger logger = LoggerFactory
-			.getLogger(DSpace.class);
+	
+	class SDData {
+		public SDData(ServiceDocument sd, List<SWORDWorkspace> ws) {
+			this.sd=sd;
+			this.ws=ws;
+		}
+		public final ServiceDocument sd;
+		public final List<SWORDWorkspace> ws;
+	}
 
-	private final String sword_user, sword_pwd, sword_api_endpoint,
-			sword_servicedocumentpath;
+	protected static final Logger logger = LoggerFactory.getLogger(DSpace.class);
+
+	private final String swordUser, swordPwd, swordApiEndpoint, swordServiceDocumentRoot;
 	private final Repository dao;
 
 	// for SWORD
-	private AuthCredentials sword_authcredentials;
-	private ServiceDocument sword_servicedocument;
-	private SWORDClient sword_client;
-	private List<SWORDWorkspace> sword_workspaces;
+	private SWORDClient swordClient;
 
 	// for IR
-	private final String deposit_type;
-	private final boolean check_license;
-	private final String publication_type;
-
-	private Client rest_client;
+	private final String depositType;
+	private final boolean checkLicense;
+	private final String publicationType;
 
 	@JsonCreator
-	public DSpace(  @JsonProperty("sword_user") final String su,
-			@JsonProperty("sword_pwd") final String sp,
+	public DSpace(@JsonProperty("sword_user") final String su, @JsonProperty("sword_pwd") final String sp,
 			@JsonProperty("sword_api_endpoint") final String se,
 			@JsonProperty(value = "deposit_type", required = false) final String dt,
 			@JsonProperty(value = "check_license", required = false) final String cl,
@@ -72,275 +62,148 @@ public class DSpace implements PublicationRepository {
 			@JsonProperty("dao") final Repository dao) {
 		this.dao = dao;
 
-		rest_api_endpoint = re;
-		sword_user = su;
-		sword_pwd = sp;
-		sword_api_endpoint = se;
-		sword_servicedocumentpath = sword_api_endpoint + "/servicedocument";
+		swordUser = su;
+		swordPwd = sp;
+		swordApiEndpoint = se;
+		swordServiceDocumentRoot = swordApiEndpoint + "/servicedocument";
 
-		deposit_type = dt;
+		depositType = dt;
 
 		if ((cl != null) && (cl.toLowerCase().equals("false"))) {
-			check_license = false;
+			checkLicense = false;
 		} else {
-			check_license = true;
+			checkLicense = true;
 		}
 
-		publication_type = pt;
+		publicationType = pt;
 
-		rest_client = ClientBuilder.newClient();
-
-		// WebTargets
-		restWebTarget = rest_client.target(rest_api_endpoint);
-		collectionsWebTarget = restWebTarget.path("collections");
-		hierarchyWebTarget = restWebTarget.path("hierarchy");
-		rest_hierarchy = null;
-
-		sword_client = new SWORDClient();
-		sword_authcredentials = new AuthCredentials(sword_user, sword_pwd);
-		sword_servicedocument = null;
-		sword_workspaces = null;
+		swordClient = new SWORDClient();
 	}
 
-	private ServiceDocument serviceDocument(AuthCredentials authCredentials) {
+	public SDData serviceDocument(AuthCredentials authCredentials, String sdURL) {
+		ServiceDocument sd = null;
+		List<SWORDWorkspace> ws = null;
+		
 		try {
-			sword_servicedocument = sword_client.getServiceDocument(
-					sword_servicedocumentpath, authCredentials);
-			if (sword_servicedocument != null)
-				sword_workspaces = sword_servicedocument.getWorkspaces();
+			if (sdURL==null) {
+				sdURL=swordServiceDocumentRoot;
+			}
+			sd = swordClient.getServiceDocument(sdURL, authCredentials);
+			if (sd != null)
+				 ws = sd.getWorkspaces();
 		} catch (SWORDClientException | ProtocolViolationException e) {
-			logger.error("Exception by accessing service document: "
-					+ e.getClass().getSimpleName() + ": " + e.getMessage());
+			logger.error(
+					"Exception by accessing service document: " + e.getClass().getSimpleName() + ": " + e.getMessage());
 			return null;
 		}
-		return sword_servicedocument;
-	}
-
-	private ServiceDocument serviceDocument() {
-		if (sword_servicedocument != null) {
-			return sword_servicedocument;
-		} else {
-			return serviceDocument(sword_authcredentials);
-		}
+		
+		return new SDData(sd,ws);
 	}
 
 	@Override
 	public boolean isAccessible() {
-		return (serviceDocument() != null);
+		// checks whether the root service document is accessible
+		return (serviceDocument(new AuthCredentials(swordUser, swordPwd), null) != null);
 	}
 
 	@Override
 	public boolean isUserRegistered(String loginName) {
-		sword_authcredentials = new AuthCredentials(sword_user, sword_pwd,
-				loginName);
-		return (serviceDocument() != null);
+		// checks whether the user has access / is registered
+		return (serviceDocument(new AuthCredentials(swordUser, swordPwd, loginName), null) != null);
 	}
 
 	@Override
 	public boolean isUserAssigned(String loginName) {
-		final ServiceDocument sd = serviceDocument();
+		final SDData sdd = serviceDocument(new AuthCredentials(swordUser, swordPwd, loginName), null);
 
-		if (sd == null)
+		if (sdd.sd == null)
 			return false;
 
-		int collectionCount = 0;
-		for (SWORDWorkspace workspace : sword_workspaces) {
-			collectionCount += workspace.getCollections().size(); // increment
-																  // collection
-																  // count
-		}
-
-		return (collectionCount > 0);
+		Hierarchy hierarchy = getHierarchy(loginName);
+		return (hierarchy.getCollectionCount() > 0);
 	}
 
-	@Override
-	// FIXME this doesn't work unless called after .serviceDocument()!
-	public Hierarchy getHierarchy(String loginName) {
-		Hierarchy hierarchy;
-
-		hierarchy = new Hierarchy("", null);
-		hierarchy.setName("bibliography");
-
-		AuthCredentials authCredentials = new AuthCredentials(sword_user,
-				sword_pwd, loginName); // "on-behalf-of:
-										// loginName"
-		Map<String, CollectionInfo> collectionsMap = getAvailableCollectionsViaSWORD(
-				authCredentials);
-
-		for (String url : collectionsMap.keySet()) {
-			List<String> communities = getCommunityListForCollection(url);
-			Hierarchy entry = hierarchy;
-			for (String community : communities) {
-				boolean found = false;
-				for (Hierarchy child : entry.getChildren()) {
-					if (child.getName().equals(community)) {
-						entry = child;
-						found = true;
-						break;
-					}
-				}
-				if (!found)
-					entry = entry.addChild(community, null);
+	private Hierarchy buildHierarchyLevel(Hierarchy hierarchy, String sdURL, String loginName) {
+		SDData sdd = serviceDocument(new AuthCredentials(swordUser,swordPwd,loginName),sdURL); 
+		String lvlName = null;
+		SWORDWorkspace root = null;
+		
+	    if (sdd.ws != null) {
+	    	if (sdd.ws.size()!=1) {
+	    		logger.error("Something is strange! There should exactly one top-level workspace!");
+	    		return null;		
+	    	} else {
+	    		root = sdd.ws.get(0);
+	    		lvlName = root.getTitle();
+	    		logger.info("Found bibliography level "+lvlName);
+	    	}
+	    }
+	    
+	    hierarchy.setName(lvlName);
+		
+	    for (SWORDCollection coll : root.getCollections()) {
+	    	String policy=null;
+	    	
+			try {
+				policy=coll.getCollectionPolicy();
+			} catch (ProtocolViolationException e) {
+				logger.info("No policy found for "+coll.getTitle()+"! Collections must deliver a policy!");
 			}
+			
+	    	Hierarchy child = new Hierarchy(coll.getTitle(), policy);
+	    	child.setCollection(coll.getSubServices()!=null);
 
-			entry = entry.addChild(collectionsMap.get(url).name, collectionsMap.get(url).policy);
-			entry.setURL(url);
-			entry.setCollection(true);
-		}
-
+			child.setHandle("TODO");
+			child.setURL("TODO");
+			
+			if (!child.isCollection() ) {
+	    		for (String sd: coll.getSubServices()) {
+	    			buildHierarchyLevel(child, sd, loginName);
+	    		}
+			}
+			
+			hierarchy.addChild(child);
+	    }
+		
+		
 		return hierarchy;
 	}
-
-	private List<String> getCommunityListForCollection(String collectionURL) {
-		String collectionHandle = getCollectionHandle(collectionURL);
-		if (collectionHandle == null) {
-			return null;
-		}
-
-		List<String> communityList = new ArrayList<String>(0);
-
-		if (rest_hierarchy == null) {
-			final Response response = getResponse(hierarchyWebTarget,
-					MediaType.APPLICATION_JSON, MediaType.APPLICATION_JSON);
-			rest_hierarchy = JsonUtils.jsonStringToObject(
-					WebUtils.readResponseEntity(String.class, response),
-					HierarchyObject.class);
-		}
-
-		// Get List of communities or "null", if collection is not found
-		communityList = rest_hierarchy.getCommunityListForCollection(
-				rest_hierarchy, collectionHandle, communityList);
-
-		if (communityList != null) {
-			communityList.remove(0); // remove "Workspace" - it is not a
-										// community,
-										// but it is in the first level of the
-										// hierarchy
-		}
-		return communityList; // List of communities ( >= 0) or "null"
-	}
-
-	public String getCollectionHandle(String collectionURL) {
-		logger.info("collectionsWebTarget FAST");
-
-		String swordCollectionPath = ""; // collectionURL without a host name
-											// and port
-
-		// Find a collectionURL inside of all available collections. SWORD is
-		// used.
-		for (SWORDWorkspace workspace : sword_workspaces) {
-			logger.info("WORKSPACE "+workspace.getTitle());
-			for (SWORDCollection collection : workspace.getCollections()) {
-				logger.info(collection.getTitle());
-				logger.info(collection.getAbstract());
-				logger.info("SUBSERVICES");
-				collection.getSubServices().forEach(logger::info);
-				logger.info("/SUBSERVICES");
-				try {
-					logger.info(collection.getCollectionPolicy());
-				} catch (ProtocolViolationException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
 	
-				if (collection.getHref().toString().equals(collectionURL)) {
-					swordCollectionPath = collection.getHref().getPath();
-				}
-			}
-		}
-
-		// Get all collections via REST to check, if swordCollectionPath
-		// contains a
-		// REST-handle
-		if (collections == null) {
-			final Response response = getResponse(collectionsWebTarget,
-					MediaType.APPLICATION_JSON, MediaType.APPLICATION_JSON);
-			collections = JsonUtils.jsonStringToObject(
-					WebUtils.readResponseEntity(String.class, response),
-					CollectionObject[].class);
-		}
-
-		// Compare REST-handle and swordCollectionPath
-		for (CollectionObject collection : collections) {
-			if (swordCollectionPath.contains(collection.handle)) {
-				return collection.handle;
-			}
-		}
-		return null; // collectionURL was not found
-	}
-
-	private Response getResponse(WebTarget webTarget, String contentType,
-			String acceptType) {
-		final Invocation.Builder invocationBuilder = webTarget.request();
-		invocationBuilder.header("Content-Type", contentType);
-		invocationBuilder.header("Accept", acceptType);
-		final Response response = invocationBuilder.get();
-		return response;
-	}
-
-	private Map<String, CollectionInfo> getAvailableCollectionsViaSWORD(
-			AuthCredentials authCredentials) {
-		Map<String, CollectionInfo> collections = new HashMap<String, CollectionInfo>();
-
-		for (SWORDWorkspace workspace : sword_workspaces) {
-			for (SWORDCollection collection : workspace.getCollections()) {
-				// key = full URL, value = name/policy
-				CollectionInfo collectionInfo = new CollectionInfo();
-				if (check_license) {
-					try {
-						collectionInfo.policy = collection.getCollectionPolicy().toString();
-					} catch (ProtocolViolationException | NullPointerException e) {
-						logger.error("Misconfigured IR: the policy cannot be retrieved but is needed!");
-						e.printStackTrace();
-					}
-				}
-				collectionInfo.name = collection.getTitle();
-				collections.put(collection.getHref().toString(), collectionInfo);
-			}
-		}
-		return collections;
+	@Override
+	public Hierarchy getHierarchy(String loginName) {
+		Hierarchy h = new Hierarchy(null,null);
+		return buildHierarchyLevel(h, swordServiceDocumentRoot, loginName);
 	}
 
 	@Override
-	public Map<String, CollectionInfo> getAvailableCollectionPaths(String separator,
-			String loginName) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public boolean publishFile(String userLogin, String collectionURL,
-			File fileFullPath) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public SubmissionInfo publishMetadata(String userLogin, String collectionURL,
-			Map<String, String> metadataMap) {
+	public SubmissionInfo publishMetadata(String userLogin, String collectionURL, Map<String, String> metadataMap) {
 
 		String mimeFormat = "application/atom+xml";
 		String packageFormat = UriRegistry.PACKAGE_BINARY;
 
-		return publishElement(userLogin, collectionURL, mimeFormat,
-				packageFormat, null, metadataMap);
+		return publishElement(userLogin, collectionURL, mimeFormat, packageFormat, null, metadataMap);
 	}
 
-	private SubmissionInfo publishElement(String userLogin, String collectionURL,
-			String mimeFormat, String packageFormat, File file,
+	@Override
+	public SubmissionInfo publishFileAndMetadata(String userLogin, String collectionURL, File fileFullPath,
 			Map<String, String> metadataMap) {
-		
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	private SubmissionInfo publishElement(String userLogin, String collectionURL, String mimeFormat,
+			String packageFormat, File file, Map<String, String> metadataMap) {
+
+		// FIXME TODO
 		SubmissionInfo submissionInfo = new SubmissionInfo();
 
 		// Check if only 1 parameter is used (metadata OR file).
 		// Multipart is not supported.
-		if (((file != null) && (metadataMap != null))
-				|| ((file == null) && (metadataMap == null))) {
+		if (((file != null) && (metadataMap != null)) || ((file == null) && (metadataMap == null))) {
 			return null;
 		}
 
-		AuthCredentials authCredentials = new AuthCredentials(sword_user,
-				sword_pwd, userLogin);
+		AuthCredentials authCredentials = new AuthCredentials(swordUser, swordPwd, userLogin);
 
 		Deposit deposit = new Deposit();
 
@@ -348,18 +211,13 @@ public class DSpace implements PublicationRepository {
 			// Check if "meta data as a Map"
 			if (metadataMap != null) {
 				EntryPart ep = new EntryPart();
-				for (Map.Entry<String, String> metadataEntry : metadataMap
-						.entrySet()) {
-					if (metadataEntry.getKey()
-							.equals(SaraMetaDataField.TYPE.getDisplayName())) {
-						if (publication_type != null) {
-							metadataEntry.setValue(publication_type);
+				for (Map.Entry<String, String> metadataEntry : metadataMap.entrySet()) {
+					if (metadataEntry.getKey().equals(SaraMetaDataField.TYPE.getDisplayName())) {
+						if (publicationType != null) {
+							metadataEntry.setValue(publicationType);
 						}
 					}
-					ep.addDublinCore(metadataEntry.getKey(),
-							metadataEntry.getValue());
-					ep.addDublinCore(metadataEntry.getKey(),
-							metadataEntry.getValue()+"-DUPE");
+					ep.addDublinCore(metadataEntry.getKey(), metadataEntry.getValue());
 				}
 				deposit.setEntryPart(ep);
 			}
@@ -378,89 +236,44 @@ public class DSpace implements PublicationRepository {
 			deposit.setMimeType(mimeFormat);
 			deposit.setPackaging(packageFormat);
 
-			if (deposit_type != null) {
-				switch (deposit_type.toLowerCase()) {
-				case "workspace":
-					deposit.setInProgress(true);
-					submissionInfo.inProgress = true;
-					break;
+			if (depositType != null) {
+				switch (depositType.toLowerCase()) {
 				case "workflow":
 					deposit.setInProgress(false);
-					submissionInfo.inProgress = false;
+					break;
+				default: // "workspace"
+					deposit.setInProgress(true);
 					break;
 				}
 			} else {
 				deposit.setInProgress(true);
-				submissionInfo.inProgress = true;
 			}
+			submissionInfo.inProgress = deposit.isInProgress();
 
-			DepositReceipt receipt = sword_client.deposit(collectionURL,
-					deposit, authCredentials);
+			DepositReceipt receipt = swordClient.deposit(collectionURL, deposit, authCredentials);
 
 			String[] parts = receipt.getLocation().split("/");
 
 			if (receipt.getSplashPageLink() != null) {
 				submissionInfo.edit_ref = receipt.getSplashPageLink().getHref();
 			}
-			submissionInfo.item_ref = parts[parts.length-1];
+			submissionInfo.item_ref = parts[parts.length - 1];
 			return submissionInfo;
 
 		} catch (FileNotFoundException e) {
-			logger.error("Exception by accessing a file: "
-					+ e.getClass().getSimpleName() + ": " + e.getMessage());
+			logger.error("Exception by accessing a file: " + e.getClass().getSimpleName() + ": " + e.getMessage());
 			return null;
 
-		} catch (SWORDClientException | SWORDError
-				| ProtocolViolationException e) {
-			logger.error("Exception by making deposit: "
-					+ e.getClass().getSimpleName() + ": " + e.getMessage());
+		} catch (SWORDClientException | SWORDError | ProtocolViolationException e) {
+			logger.error("Exception by making deposit: " + e.getClass().getSimpleName() + ": " + e.getMessage());
 			return null;
 		}
 	}
 
-	@Override
-	public boolean publishMetadata(String userLogin, String collectionURL,
-			File metadataFileXML) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean publishFileAndMetadata(String userLogin,
-			String collectionURL, File fileFullPath,
-			Map<String, String> metadataMap) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean publishFileAndMetadata(String userLogin,
-			String collectionURL, File fileFullPath, File metadataFileXML) {
-		// TODO Auto-generated method stub
-		return false;
-	}
 
 	@Override
 	public Repository getDAO() {
 		return dao;
-	}
-
-	@Override
-	public String getCollectionName(String uuid) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public String getMetadataName(String uuid) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public boolean publishItem(Item item) {
-		// TODO Auto-generated method stub
-		return false;
 	}
 
 	@Override
