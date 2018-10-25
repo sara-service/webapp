@@ -29,12 +29,12 @@ import javax.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import bwfdm.sara.publication.dspace.DSpace_v6;
+import bwfdm.sara.publication.dspace.DSpace;
 
 
 public class WebUtils {
 	
-	private static final Logger logger = LoggerFactory.getLogger(DSpace_v6.class);
+	private static final Logger logger = LoggerFactory.getLogger(DSpace.class);
 	
 	/**
 	 * Get JAX-RS client without SSL Method is got from
