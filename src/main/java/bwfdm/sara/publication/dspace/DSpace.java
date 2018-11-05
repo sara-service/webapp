@@ -80,14 +80,12 @@ public class DSpace implements PublicationRepository {
 		swordClient = new SWORDClient();
 	}
 
-	public SDData serviceDocument(AuthCredentials authCredentials, String sdURL) {
+	public SDData serviceDocument(final AuthCredentials authCredentials, final String sdURL_) {
 		ServiceDocument sd = null;
 		List<SWORDWorkspace> ws = null;
+		final String sdURL = (sdURL_ == null) ? swordServiceDocumentRoot : sdURL_; 
 		
 		try {
-			if (sdURL==null) {
-				sdURL=swordServiceDocumentRoot;
-			}
 			sd = swordClient.getServiceDocument(sdURL, authCredentials);
 			if (sd != null)
 				 ws = sd.getWorkspaces();
@@ -107,13 +105,13 @@ public class DSpace implements PublicationRepository {
 	}
 
 	@Override
-	public boolean isUserRegistered(String loginName) {
+	public boolean isUserRegistered(final String loginName) {
 		// checks whether the user has access / is registered
 		return (serviceDocument(new AuthCredentials(swordUser, swordPwd, loginName), null) != null);
 	}
 
 	@Override
-	public boolean isUserAssigned(String loginName) {
+	public boolean isUserAssigned(final String loginName) {
 		final SDData sdd = serviceDocument(new AuthCredentials(swordUser, swordPwd, loginName), null);
 
 		if (sdd.sd == null)
@@ -123,14 +121,14 @@ public class DSpace implements PublicationRepository {
 		return (hierarchy.getCollectionCount() > 0);
 	}
 
-	private Hierarchy buildHierarchyLevel(Hierarchy hierarchy, String sdURL, String loginName) {
-		SDData sdd = serviceDocument(new AuthCredentials(swordUser,swordPwd,loginName),sdURL); 
+	private Hierarchy buildHierarchyLevel(final Hierarchy hierarchy, final String sdURL, final String loginName) {
+		final SDData sdd = serviceDocument(new AuthCredentials(swordUser,swordPwd,loginName),sdURL); 
 		String lvlName = null;
 		SWORDWorkspace root = null;
-		
+	
 	    if (sdd.ws != null) {
 	    	if (sdd.ws.size()!=1) {
-	    		logger.error("Something is strange! There should exactly one top-level workspace!");
+	    		logger.error("Something is strange! There should be exactly one top-level workspace!");
 	    		return null;		
 	    	} else {
 	    		root = sdd.ws.get(0);
@@ -141,30 +139,40 @@ public class DSpace implements PublicationRepository {
 	    
 	    hierarchy.setName(lvlName);
 		
-	    for (SWORDCollection coll : root.getCollections()) {
-	    	String policy=null;
+	    for (final SWORDCollection coll : root.getCollections()) {
+	    	final List<String> subservices = coll.getSubServices();
+	    	boolean isCollection = subservices.isEmpty();
 	    	
-			try {
-				policy=coll.getCollectionPolicy();
-			} catch (ProtocolViolationException e) {
-				logger.info("No policy found for "+coll.getTitle()+"! Collections must deliver a policy!");
-			}
-			
-	    	Hierarchy child = new Hierarchy(coll.getTitle(), policy);
-	    	child.setCollection(coll.getSubServices()!=null);
+	    	Hierarchy child = new Hierarchy(coll.getTitle(), null);
+	    	child.setURL(coll.getHref().toString());
+	    	
+	    	final String[] chops=child.getURL().split("/");
+	    	try {
+	    		child.setHandle(chops[chops.length-2]+"/"+chops[chops.length-1]);
+	    	} catch (ArrayIndexOutOfBoundsException e) {
+	    		logger.error("Cannot obtain a valid DSpace handle from the URL!");
+	    		child.setHandle(null);
+	    	}
 
-			child.setHandle("TODO");
-			child.setURL("TODO");
-			
-			if (!child.isCollection() ) {
-	    		for (String sd: coll.getSubServices()) {
-	    			buildHierarchyLevel(child, sd, loginName);
+	    	if (isCollection) {
+	    		logger.info("FOUND COLLECTION "+child.getName());
+	    		child.setCollection(true);
+	    		if (checkLicense) {
+		    		try {
+		    			child.setPolicy(coll.getCollectionPolicy());
+		    		} catch (ProtocolViolationException e) {
+		    			logger.info("No policy found for "+coll.getTitle()+"! Collections must deliver a policy!");
+		    		}
+	    		}
+				hierarchy.addChild(child);
+	    	} else {
+	    		logger.info("FOUND COMMUNITY "+child.getName());
+	    		child.setCollection(false);
+	    		for (String sd: subservices) {
+	    			hierarchy.addChild(buildHierarchyLevel(child, sd, loginName));
 	    		}
 			}
-			
-			hierarchy.addChild(child);
 	    }
-		
 		
 		return hierarchy;
 	}
