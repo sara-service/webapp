@@ -109,7 +109,7 @@ public class Publication {
 		finalMap.putIfAbsent(SaraMetaDataField.SUBMITTER.getDisplayName(),
 				Arrays.asList(meta.get(PublicationField.SUBMITTER)));
 		finalMap.putIfAbsent(SaraMetaDataField.AUTHOR.getDisplayName(),
-				Arrays.asList("Dr.Acula", meta.get(PublicationField.SUBMITTER),"Sylvania, Trans"));
+				Arrays.asList(meta.get(PublicationField.SUBMITTER)));
 		finalMap.putIfAbsent(SaraMetaDataField.TITLE.getDisplayName(),
 				Arrays.asList(meta.get(PublicationField.TITLE)));
 		finalMap.putIfAbsent(SaraMetaDataField.VERSION.getDisplayName(),

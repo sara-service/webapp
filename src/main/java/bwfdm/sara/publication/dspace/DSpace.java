@@ -196,8 +196,11 @@ public class DSpace implements PublicationRepository {
 	@Override
 	public SubmissionInfo publishFileAndMetadata(String userLogin, String collectionURL, File fileFullPath,
 			MultiValueMap<String, String> metadataMap) {
-		// TODO Auto-generated method stub
-		return null;
+
+		String mimeFormat = "application/atom+xml";
+		String packageFormat = UriRegistry.PACKAGE_BINARY;
+
+		return publishElement(userLogin, collectionURL, mimeFormat, packageFormat, fileFullPath, metadataMap);
 	}
 	
 	private SubmissionInfo publishElement(String userLogin, String collectionURL, String mimeFormat,
