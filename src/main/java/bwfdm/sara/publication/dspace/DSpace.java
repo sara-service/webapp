@@ -3,6 +3,7 @@ package bwfdm.sara.publication.dspace;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.util.Arrays;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -222,12 +223,13 @@ public class DSpace implements PublicationRepository {
 				for (final MultiValueMap.Entry<String, List<String>> metadataEntry : metadataMap.entrySet()) {
 				    // FIXME this is a bit hacky
 					if (metadataEntry.getKey().equals(SaraMetaDataField.TYPE.getDisplayName())) {
-						ep.addDublinCore(metadataEntry.getKey(), publicationType);
-					} else {
-						// write ordered list of meta data
-						for (final String m: metadataEntry.getValue()) {
-							ep.addDublinCore(metadataEntry.getKey(), m);
+						if (publicationType != null) {
+							metadataEntry.setValue(Arrays.asList(publicationType));
 						}
+					}
+					// write ordered list of meta data
+					for (final String m: metadataEntry.getValue()) {
+						ep.addDublinCore(metadataEntry.getKey(), m);
 					}
 				}
 				deposit.setEntryPart(ep);
@@ -278,7 +280,6 @@ public class DSpace implements PublicationRepository {
 		}
 	}
 
-
 	@Override
 	public Repository getDAO() {
 		return dao;
@@ -286,7 +287,7 @@ public class DSpace implements PublicationRepository {
 
 	@Override
 	public void dump() {
-		// TODO Auto-generated method stub
+
 	}
 
 }

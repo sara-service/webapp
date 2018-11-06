@@ -22,6 +22,7 @@ public class PublicationRepositoryFactory {
 
 	static {
 		ADAPTERS.put("DSpace", DSpace.class);
+		ADAPTERS.put("DSpace_v6", DSpace.class);
 	}
 
 	@JsonProperty

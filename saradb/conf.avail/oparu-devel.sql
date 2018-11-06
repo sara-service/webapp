@@ -19,17 +19,21 @@ BEGIN
 
 -- Stefan's OPARU Stand-In in bwCloud 
 INSERT INTO repository(display_name, adapter, url, contact_email, help, enabled, logo_url, user_hint) VALUES
-	('Institutional Repository of Demo University (IRDU) DEVELOPMENT', 'DSpace', oparu_demo || '/xmlui',
+	('Institutional Repository of Demo University (IRDU) DEVELOPMENT', 'DSpace_v6', oparu_demo || '/xmlui',
 		'project-sara+oparu-beta@uni-konstanz.de', demo_dspace_help, TRUE,
 		'data:image/svg+xml;base64,' || encode(lo_get(oparu_logo), 'base64'), userhint)
 	RETURNING uuid INTO rRef;
 INSERT INTO repository_params(id, param, value) VALUES
+	(rRef, 'rest_user', 'project-sara@uni-konstanz.de'),
+	(rRef, 'rest_pwd', '__OPARUDEVEL_PASSWORD__'),
+	(rRef, 'rest_api_endpoint', oparu_demo || '/rest'),
 	(rRef, 'sword_user', 'project-sara@uni-konstanz.de'),
 	(rRef, 'sword_pwd', '__OPARUDEVEL_PASSWORD__'),
 	(rRef, 'sword_api_endpoint', oparu_demo || '/swordv2'),
 	(rRef, 'deposit_type', 'workspace'),
-        (rRef, 'check_license', 'false'),
 	(rRef, 'publication_type', 'Software');
+--	(rRef, 'force_onbehalf', '1'),
+--	(rRef, 'workflow_type', 'login_required');
 
 -- erase the temporary large objects
 PERFORM lo_unlink(oparu_logo);
