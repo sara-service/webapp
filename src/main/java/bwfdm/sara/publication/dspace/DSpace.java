@@ -4,10 +4,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.List;
-import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.MultiValueMap;
 import org.swordapp.client.AuthCredentials;
 import org.swordapp.client.Deposit;
 import org.swordapp.client.DepositReceipt;
@@ -184,7 +184,7 @@ public class DSpace implements PublicationRepository {
 	}
 
 	@Override
-	public SubmissionInfo publishMetadata(String userLogin, String collectionURL, Map<String, String> metadataMap) {
+	public SubmissionInfo publishMetadata(String userLogin, String collectionURL, MultiValueMap<String, String> metadataMap) {
 
 		String mimeFormat = "application/atom+xml";
 		String packageFormat = UriRegistry.PACKAGE_BINARY;
@@ -194,13 +194,13 @@ public class DSpace implements PublicationRepository {
 
 	@Override
 	public SubmissionInfo publishFileAndMetadata(String userLogin, String collectionURL, File fileFullPath,
-			Map<String, String> metadataMap) {
+			MultiValueMap<String, String> metadataMap) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 	
 	private SubmissionInfo publishElement(String userLogin, String collectionURL, String mimeFormat,
-			String packageFormat, File file, Map<String, String> metadataMap) {
+			String packageFormat, File file, MultiValueMap<String, String> metadataMap) {
 
 		// FIXME TODO
 		SubmissionInfo submissionInfo = new SubmissionInfo();
@@ -219,13 +219,16 @@ public class DSpace implements PublicationRepository {
 			// Check if "meta data as a Map"
 			if (metadataMap != null) {
 				EntryPart ep = new EntryPart();
-				for (Map.Entry<String, String> metadataEntry : metadataMap.entrySet()) {
+				for (final MultiValueMap.Entry<String, List<String>> metadataEntry : metadataMap.entrySet()) {
+				    // FIXME this is a bit hacky
 					if (metadataEntry.getKey().equals(SaraMetaDataField.TYPE.getDisplayName())) {
-						if (publicationType != null) {
-							metadataEntry.setValue(publicationType);
+						ep.addDublinCore(metadataEntry.getKey(), publicationType);
+					} else {
+						// write ordered list of meta data
+						for (final String m: metadataEntry.getValue()) {
+							ep.addDublinCore(metadataEntry.getKey(), m);
 						}
 					}
-					ep.addDublinCore(metadataEntry.getKey(), metadataEntry.getValue());
 				}
 				deposit.setEntryPart(ep);
 			}
@@ -233,12 +236,9 @@ public class DSpace implements PublicationRepository {
 			// Check if "file"
 			if (file != null) {
 				deposit.setFile(new FileInputStream(file));
-				deposit.setFilename(file.getName()); // deposit works properly
-														// ONLY with a
-														// "filename" parameter
-														// --> in curl: -H
-														// "Content-Disposition:
-														// filename=file.zip"
+				// deposit requires a "filename" parameter
+				// --> in curl: -H "Content-Disposition: filename=file.zip"
+				deposit.setFilename(file.getName()); 
 			}
 
 			deposit.setMimeType(mimeFormat);

@@ -1,9 +1,9 @@
 package bwfdm.sara.api;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.EnumMap;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -14,6 +14,8 @@ import javax.servlet.http.HttpSession;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -91,37 +93,37 @@ public class Publication {
 	}
 
 	@GetMapping("finalMapping")
-	private HashMap<String, String> finalMapping(final HttpSession session) {
+	private MultiValueMap<String, String> finalMapping(final HttpSession session) {
 		final PublicationSession project = PublicationSession
 				.getInstance(session);
 
 		final Map<PublicationField, String> meta = project.getMetadata();
 
+		// FIXME this is somewhat hacky
 		final UUID repository_uuid = UUID
 				.fromString(meta.get(PublicationField.PUBLICATION_REPOSITORY));
 
-		HashMap<String, String> finalMap = new HashMap<String, String>();
-
+		MultiValueMap<String, String> finalMap = new LinkedMultiValueMap<String, String>();
 		finalMap.putIfAbsent(SaraMetaDataField.ABSTRACT.getDisplayName(),
-				meta.get(PublicationField.DESCRIPTION));
+				Arrays.asList(meta.get(PublicationField.DESCRIPTION)));
 		finalMap.putIfAbsent(SaraMetaDataField.SUBMITTER.getDisplayName(),
-				meta.get(PublicationField.SUBMITTER));
+				Arrays.asList(meta.get(PublicationField.SUBMITTER)));
 		finalMap.putIfAbsent(SaraMetaDataField.AUTHOR.getDisplayName(),
-				meta.get(PublicationField.SUBMITTER));
+				Arrays.asList("Dr.Acula", meta.get(PublicationField.SUBMITTER),"Sylvania, Trans"));
 		finalMap.putIfAbsent(SaraMetaDataField.TITLE.getDisplayName(),
-				meta.get(PublicationField.TITLE));
+				Arrays.asList(meta.get(PublicationField.TITLE)));
 		finalMap.putIfAbsent(SaraMetaDataField.VERSION.getDisplayName(),
-				meta.get(PublicationField.VERSION));
+				Arrays.asList(meta.get(PublicationField.VERSION)));
 		finalMap.putIfAbsent(SaraMetaDataField.TYPE.getDisplayName(),
-				"Git Archive");
+				Arrays.asList("Git Archive"));
 		finalMap.putIfAbsent(SaraMetaDataField.PUBLISHER.getDisplayName(),
-				"SARA SERVICE VERSION 'DSPACE ANWENDERTREFFEN'");
+				Arrays.asList("SARA SERVICE VERSION 'IOMI WORKSHOP'"));
 		finalMap.putIfAbsent(SaraMetaDataField.ARCHIVE_URL.getDisplayName(),
-				meta.get(PublicationField.ARCHIVE_URL));
+				Arrays.asList(meta.get(PublicationField.ARCHIVE_URL)));
 		finalMap.putIfAbsent(SaraMetaDataField.ABSTRACT.getDisplayName(),
-				meta.get(PublicationField.DESCRIPTION));
+				Arrays.asList(meta.get(PublicationField.DESCRIPTION)));
 		finalMap.putIfAbsent(SaraMetaDataField.DATE_ARCHIVED.getDisplayName(),
-				ISO8601.format(project.getItem().date_created));
+				Arrays.asList(ISO8601.format(project.getItem().date_created)));
 
 		// configured mappings (repository specific)
 		List<MetadataMapping> mms = project.getPublicationDatabase()
@@ -161,7 +163,7 @@ public class Publication {
 				.get(PublicationField.PUBREPO_COLLECTION);
 		final String userLogin = meta.get(PublicationField.PUBREPO_LOGIN_EMAIL);
 
-		Map<String, String> metadataMap = finalMapping(session);
+		MultiValueMap<String, String> metadataMap = finalMapping(session);
 
 		Item i = project.getItem();
 		i.date_last_modified = new Date();

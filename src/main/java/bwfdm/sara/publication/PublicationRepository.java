@@ -8,7 +8,7 @@ import java.io.File;
  * @author sk, vk
  */
 
-import java.util.Map;
+import org.springframework.util.MultiValueMap;
 
 public interface PublicationRepository {
 	
@@ -18,8 +18,10 @@ public interface PublicationRepository {
 		// link for submitters to edit their items metadata
 		// may be "null" which means they can't make changes afterwards!
 		public String edit_ref = null;
-		// true:  the user will edit metadata in a subsequent step
+		// true:  the user will edit their submission in a subsequent step
+		//        login in the IR is required
 		// false: the user submits the metadata 'as is' to the IR
+		//        login in the IR is NOT required
 		public boolean inProgress = true;
 	}
 	
@@ -70,8 +72,7 @@ public interface PublicationRepository {
 	 * @param metadataMap
 	 * @return
 	 */
-	public SubmissionInfo publishMetadata(String userLogin, String collectionURL,
-			Map<String, String> metadataMap);
+	public SubmissionInfo publishMetadata(String userLogin, String collectionURL, MultiValueMap<String, String> metadataMap);
 	
 	/**
 	 * Publish a file together with the metadata.
@@ -83,7 +84,7 @@ public interface PublicationRepository {
 	 * @param metadataMap
 	 * @return
 	 */
-	public SubmissionInfo publishFileAndMetadata(String userLogin, String collectionURL, File fileFullPath, Map<String, String> metadataMap);
+    public SubmissionInfo publishFileAndMetadata(String userLogin, String collectionURL, File fileFullPath, MultiValueMap<String, String> metadataMap);
 	
 	public Repository getDAO();
 
