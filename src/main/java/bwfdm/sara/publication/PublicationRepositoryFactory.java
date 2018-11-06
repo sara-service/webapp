@@ -13,6 +13,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import bwfdm.sara.publication.dspace.DSpace;
+import bwfdm.sara.publication.dspace.DSpace_v6;
 
 @JsonIgnoreProperties(ignoreUnknown = false)
 public class PublicationRepositoryFactory {
@@ -22,7 +23,7 @@ public class PublicationRepositoryFactory {
 
 	static {
 		ADAPTERS.put("DSpace", DSpace.class);
-		ADAPTERS.put("DSpace_v6", DSpace.class);
+		ADAPTERS.put("DSpace_v6", DSpace_v6.class);
 	}
 
 	@JsonProperty
