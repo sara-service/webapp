@@ -19,7 +19,7 @@ BEGIN
 
 -- Stefan's OPARU Stand-In in bwCloud 
 INSERT INTO repository(display_name, adapter, url, contact_email, help, enabled, logo_url, user_hint) VALUES
-	('Institutional Repository of Demo University (IRDU) BETA', 'DSpace', oparu_demo || '/xmlui',
+	('Institutional Repository of Demo University (IRDU) BETA', 'DSpace_v6', oparu_demo || '/xmlui',
 		'project-sara+oparu-beta@uni-konstanz.de', demo_dspace_help, TRUE,
 		'data:image/svg+xml;base64,' || encode(lo_get(oparu_logo), 'base64'), userhint)
 	RETURNING uuid INTO rRef;

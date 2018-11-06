@@ -82,7 +82,7 @@ public class DSpace_v6 implements PublicationRepository {
 			@JsonProperty("sword_pwd") final String sp,
 			@JsonProperty("sword_api_endpoint") final String se,
 			@JsonProperty(value = "deposit_type", required = false) final String dt,
-			@JsonProperty(value = "check_license", required = false) final boolean cl,
+			@JsonProperty(value = "check_license", required = false) final String cl,
 			@JsonProperty(value = "publication_type", required = false) final String pt,
 			@JsonProperty("dao") final Repository dao) {
 		this.dao = dao;
@@ -94,7 +94,13 @@ public class DSpace_v6 implements PublicationRepository {
 		sword_servicedocumentpath = sword_api_endpoint + "/servicedocument";
 
 		deposit_type = dt;
-		check_license = cl;
+
+		if ((cl != null) && (cl.toLowerCase().equals("false"))) {
+			check_license = false;
+		} else {
+			check_license = true;
+		}
+		
 		publication_type = pt;
 
 		rest_client = ClientBuilder.newClient();
