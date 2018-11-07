@@ -30,7 +30,7 @@ import bwfdm.sara.publication.PublicationRepository;
 import bwfdm.sara.publication.Repository;
 import bwfdm.sara.publication.SaraMetaDataField;
 
-public class DSpace implements PublicationRepository {
+public class DSpace_SwordOnly implements PublicationRepository {
 	
 	class SDData {
 		public SDData(ServiceDocument sd, List<SWORDWorkspace> ws) {
@@ -41,7 +41,7 @@ public class DSpace implements PublicationRepository {
 		public final List<SWORDWorkspace> ws;
 	}
 
-	protected static final Logger logger = LoggerFactory.getLogger(DSpace.class);
+	protected static final Logger logger = LoggerFactory.getLogger(DSpace_SwordOnly.class);
 
 	private final String swordUser, swordPwd, swordApiEndpoint, swordServiceDocumentRoot;
 	private final Repository dao;
@@ -55,7 +55,7 @@ public class DSpace implements PublicationRepository {
 	private final String publicationType;
 
 	@JsonCreator
-	public DSpace(@JsonProperty("sword_user") final String su, @JsonProperty("sword_pwd") final String sp,
+	public DSpace_SwordOnly(@JsonProperty("sword_user") final String su, @JsonProperty("sword_pwd") final String sp,
 			@JsonProperty("sword_api_endpoint") final String se,
 			@JsonProperty(value = "deposit_type", required = false) final String dt,
 			@JsonProperty(value = "check_license", required = false) final String cl,
