@@ -75,14 +75,14 @@ private static final	String contact_email = "stefan.kombrink@uni-ulm.de";
 		for (MetadataMapping mm : metadataMappings) {
 			if (m.map_from.equals(mm.map_from)) {
 				m.metadatamapping_uuid = mm.uuid;
-				final String mmname = oparu.getMetadataName(mm.map_to);
+				/*final String mmname = oparu.getMetadataName(mm.map_to);
 				if (mmname != null) {
 					System.out.println(
 							"Repository " + oparu.getDAO().display_name + " mapping " + mm.map_from + " -> " + mmname);
 				} else {
 					System.out.println("WARNING: Repository " + oparu.getDAO().display_name
 							+ " does not support metadata uuid " + mm.map_to);
-				}
+				}*/
 			}
 		}
 
@@ -96,6 +96,7 @@ private static final	String contact_email = "stefan.kombrink@uni-ulm.de";
 		for (MetadataMapping mm : metadataMappings) {
 			if (m.map_from.equals(mm.map_from)) {
 				m.metadatamapping_uuid = mm.uuid;
+				/*
 				final String mmname = oparu.getMetadataName(mm.map_to);
 				if (mmname != null) {
 					System.out.println(
@@ -104,6 +105,7 @@ private static final	String contact_email = "stefan.kombrink@uni-ulm.de";
 					System.out.println("WARNING: Repository " + oparu.getDAO().display_name
 							+ " does not support metadata uuid " + mm.map_to);
 				}
+				*/
 			}
 		}
 
@@ -130,11 +132,11 @@ private static final	String contact_email = "stefan.kombrink@uni-ulm.de";
 		output += "\n";
 		output += "All available collections";
 		output += "\n";
-		output += oparu.getAvailableCollectionPaths(">", null);
+		//output += oparu.getAvailableCollectionPaths(">", null);
 		output += "\n";
 		output += "Collections where the user has access to";
 		output += "\n";
-		output += oparu.getAvailableCollectionPaths("=> ", contact_email);
+		//output += oparu.getAvailableCollectionPaths("=> ", contact_email);
 		output += "\n";
 		System.out.print("\n" + output);
 

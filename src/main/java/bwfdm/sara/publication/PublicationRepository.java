@@ -8,7 +8,7 @@ import java.io.File;
  * @author sk, vk
  */
 
-import java.util.Map;
+import org.springframework.util.MultiValueMap;
 
 public interface PublicationRepository {
 	
@@ -18,8 +18,10 @@ public interface PublicationRepository {
 		// link for submitters to edit their items metadata
 		// may be "null" which means they can't make changes afterwards!
 		public String edit_ref = null;
-		// true:  the user will edit metadata in a subsequent step
+		// true:  the user will edit their submission in a subsequent step
+		//        login in the IR is required
 		// false: the user submits the metadata 'as is' to the IR
+		//        login in the IR is NOT required
 		public boolean inProgress = true;
 	}
 	
@@ -61,26 +63,6 @@ public interface PublicationRepository {
 	 */
 	public Hierarchy getHierarchy(String loginName);
 	
-	/** Get available collection paths in the form of community => community ... => collection
-	 * (e.g. for DSpace-repository it means "community/subcommunity/collection")
-	 * 
-	 * @param separator string between communities and collection
-	 * @param on-behalf-of user name, if null, use service user
-	 * @return Map of Strings, where key="Collection full URL", value="Collection full name"
-	 */
-	public Map<String, CollectionInfo> getAvailableCollectionPaths(String separator, String loginName);
-
-	
-	/**
-	 * Publish a file to some collections, which is available for the user.
-	 * 
-	 * @param userLogin
-	 * @param collectionURL
-	 * @param fileFullPath
-	 * @return
-	 */
-	public boolean publishFile(String userLogin, String collectionURL, File fileFullPath);
-	
 	/**
 	 * Publish metada only (without any file) to some collection, which is available for the user.
 	 * Metadata are described as a {@link java.util.Map}. 
@@ -90,19 +72,7 @@ public interface PublicationRepository {
 	 * @param metadataMap
 	 * @return
 	 */
-	public SubmissionInfo publishMetadata(String userLogin, String collectionURL,
-			Map<String, String> metadataMap);
-		
-	/**
-	 * Publish metada only (without any file) to some collection, which is available for the user.
-	 * Metadata are described in the xml-file.
-	 * 
-	 * @param userLogin
-	 * @param collectionURL
-	 * @param metadataFileXML
-	 * @return
-	 */
-	public boolean publishMetadata(String userLogin, String collectionURL, File metadataFileXML);
+	public SubmissionInfo publishMetadata(String userLogin, String collectionURL, MultiValueMap<String, String> metadataMap);
 	
 	/**
 	 * Publish a file together with the metadata.
@@ -114,28 +84,9 @@ public interface PublicationRepository {
 	 * @param metadataMap
 	 * @return
 	 */
-	public boolean publishFileAndMetadata(String userLogin, String collectionURL, File fileFullPath, Map<String, String> metadataMap);
-	
-	/**
-	 * Publish a file together with the metadata.
-	 * Metadata are described in the xml-file.
-	 * 
-	 * @param userLogin
-	 * @param collectionURL
-	 * @param fileFullPath
-	 * @param metadataFileXML
-	 * @return
-	 */
-	public boolean publishFileAndMetadata(String userLogin, String collectionURL, File fileFullPath, File metadataFileXML);
-
+    public SubmissionInfo publishFileAndMetadata(String userLogin, String collectionURL, File fileFullPath, MultiValueMap<String, String> metadataMap);
 	
 	public Repository getDAO();
-
-	public String getCollectionName(String uuid);
-
-	public String getMetadataName(String uuid);
-
-	public boolean publishItem(Item item);
 
 	public void dump();
 }

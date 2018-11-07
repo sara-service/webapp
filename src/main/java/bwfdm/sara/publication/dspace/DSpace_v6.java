@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +18,7 @@ import javax.ws.rs.core.Response;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.MultiValueMap;
 import org.swordapp.client.AuthCredentials;
 import org.swordapp.client.Deposit;
 import org.swordapp.client.DepositReceipt;
@@ -51,6 +53,7 @@ public class DSpace_v6 implements PublicationRepository {
 	private final String sword_user, sword_pwd, sword_api_endpoint,
 			sword_servicedocumentpath;
 	private final Repository dao;
+	private final boolean check_license;
 
 	// for SWORD
 	private AuthCredentials sword_authcredentials;
@@ -67,7 +70,6 @@ public class DSpace_v6 implements PublicationRepository {
 
 	// for IR
 	private final String deposit_type;
-	private final boolean check_license;
 	private final String publication_type;
 
 	private Client rest_client;
@@ -79,8 +81,8 @@ public class DSpace_v6 implements PublicationRepository {
 			@JsonProperty("sword_user") final String su,
 			@JsonProperty("sword_pwd") final String sp,
 			@JsonProperty("sword_api_endpoint") final String se,
-			@JsonProperty(value = "deposit_type", required = false) final String dt,
-			@JsonProperty(value = "check_license", required = false) final String cl,
+			@JsonProperty("deposit_type") final String dt,
+			@JsonProperty("check_license") final boolean cl,
 			@JsonProperty(value = "publication_type", required = false) final String pt,
 			@JsonProperty("dao") final Repository dao) {
 		this.dao = dao;
@@ -93,12 +95,8 @@ public class DSpace_v6 implements PublicationRepository {
 
 		deposit_type = dt;
 
-		if ((cl != null) && (cl.toLowerCase().equals("false"))) {
-			check_license = false;
-		} else {
-			check_license = true;
-		}
-
+		check_license = cl;
+		
 		publication_type = pt;
 
 		rest_client = ClientBuilder.newClient();
@@ -118,7 +116,6 @@ public class DSpace_v6 implements PublicationRepository {
 	public DSpace_v6(String serviceDocumentURL, String restURL, String saraUser,
 			String saraPassword) {
 		deposit_type = "workspace";
-		check_license = true;
 		publication_type = "Software";
 		sword_servicedocumentpath = serviceDocumentURL;
 		sword_user = saraUser;
@@ -126,6 +123,7 @@ public class DSpace_v6 implements PublicationRepository {
 		sword_api_endpoint = null;
 		rest_api_endpoint = restURL;
 		dao = null;
+		check_license = false;
 
 		rest_client = ClientBuilder.newClient();
 
@@ -183,8 +181,8 @@ public class DSpace_v6 implements PublicationRepository {
 		int collectionCount = 0;
 		for (SWORDWorkspace workspace : sword_workspaces) {
 			collectionCount += workspace.getCollections().size(); // increment
-																  // collection
-																  // count
+																	// collection
+																	// count
 		}
 
 		return (collectionCount > 0);
@@ -219,7 +217,6 @@ public class DSpace_v6 implements PublicationRepository {
 				if (!found)
 					entry = entry.addChild(community, null);
 			}
-
 			entry = entry.addChild(collectionsMap.get(url).name, collectionsMap.get(url).policy);
 			entry.setURL(url);
 			entry.setCollection(true);
@@ -310,7 +307,7 @@ public class DSpace_v6 implements PublicationRepository {
 			for (SWORDCollection collection : workspace.getCollections()) {
 				// key = full URL, value = name/policy
 				CollectionInfo collectionInfo = new CollectionInfo();
-				if (check_license) {
+				if (this.deposit_type.equals("workflow")) {
 					try {
 						collectionInfo.policy = collection.getCollectionPolicy().toString();
 					} catch (ProtocolViolationException e) {
@@ -325,23 +322,10 @@ public class DSpace_v6 implements PublicationRepository {
 		return collections;
 	}
 
-	@Override
-	public Map<String, CollectionInfo> getAvailableCollectionPaths(String separator,
-			String loginName) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public boolean publishFile(String userLogin, String collectionURL,
-			File fileFullPath) {
-		// TODO Auto-generated method stub
-		return false;
-	}
 
 	@Override
 	public SubmissionInfo publishMetadata(String userLogin, String collectionURL,
-			Map<String, String> metadataMap) {
+			MultiValueMap<String, String> metadataMap) {
 
 		String mimeFormat = "application/atom+xml";
 		String packageFormat = UriRegistry.PACKAGE_BINARY;
@@ -352,7 +336,7 @@ public class DSpace_v6 implements PublicationRepository {
 
 	private SubmissionInfo publishElement(String userLogin, String collectionURL,
 			String mimeFormat, String packageFormat, File file,
-			Map<String, String> metadataMap) {
+			MultiValueMap<String, String> metadataMap) {
 		
 		SubmissionInfo submissionInfo = new SubmissionInfo();
 
@@ -372,16 +356,17 @@ public class DSpace_v6 implements PublicationRepository {
 			// Check if "meta data as a Map"
 			if (metadataMap != null) {
 				EntryPart ep = new EntryPart();
-				for (Map.Entry<String, String> metadataEntry : metadataMap
+				for (Map.Entry<String, List<String>> metadataEntry : metadataMap
 						.entrySet()) {
 					if (metadataEntry.getKey()
 							.equals(SaraMetaDataField.TYPE.getDisplayName())) {
 						if (publication_type != null) {
-							metadataEntry.setValue(publication_type);
+							metadataEntry.setValue(Arrays.asList(publication_type));
 						}
 					}
-					ep.addDublinCore(metadataEntry.getKey(),
-							metadataEntry.getValue());
+					for (final String m: metadataEntry.getValue()) {
+						ep.addDublinCore(metadataEntry.getKey(),m);
+					}
 				}
 				deposit.setEntryPart(ep);
 			}
@@ -440,49 +425,21 @@ public class DSpace_v6 implements PublicationRepository {
 		}
 	}
 
-	@Override
-	public boolean publishMetadata(String userLogin, String collectionURL,
-			File metadataFileXML) {
-		// TODO Auto-generated method stub
-		return false;
-	}
 
 	@Override
-	public boolean publishFileAndMetadata(String userLogin,
-			String collectionURL, File fileFullPath,
-			Map<String, String> metadataMap) {
-		// TODO Auto-generated method stub
-		return false;
-	}
+	public SubmissionInfo publishFileAndMetadata(String userLogin, String collectionURL, File fileFullPath,
+			MultiValueMap<String, String> metadataMap) {
 
-	@Override
-	public boolean publishFileAndMetadata(String userLogin,
-			String collectionURL, File fileFullPath, File metadataFileXML) {
-		// TODO Auto-generated method stub
-		return false;
-	}
+		String mimeFormat = "application/atom+xml";
+		String packageFormat = UriRegistry.PACKAGE_BINARY;
 
+		return publishElement(userLogin, collectionURL, mimeFormat,
+				packageFormat, fileFullPath, metadataMap);
+	}
+	
 	@Override
 	public Repository getDAO() {
 		return dao;
-	}
-
-	@Override
-	public String getCollectionName(String uuid) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public String getMetadataName(String uuid) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public boolean publishItem(Item item) {
-		// TODO Auto-generated method stub
-		return false;
 	}
 
 	@Override

@@ -31,10 +31,8 @@ INSERT INTO repository_params(id, param, value) VALUES
 	(rRef, 'sword_pwd', '__OPARUBETA_PASSWORD__'),
 	(rRef, 'sword_api_endpoint', oparu_demo || '/swordv2'),
 	(rRef, 'deposit_type', 'workspace'),
-	(rRef, 'check_license', 'false'),
+        (rRef, 'check_license', 'false'),
 	(rRef, 'publication_type', 'Software');
---	(rRef, 'force_onbehalf', '1'),
---	(rRef, 'workflow_type', 'login_required');
 
 -- erase the temporary large objects
 PERFORM lo_unlink(oparu_logo);

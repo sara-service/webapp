@@ -109,8 +109,8 @@ public class DBTest {
 					.getList(MetadataMapping.class);
 			for (MetadataMapping mm : mms) {
 				if (mm.repository_uuid.equals(ir.getDAO().uuid)) {
-					System.out.print("Mapping " + mm.display_name + " from " + mm.map_from + " to " + mm.map_to
-							+ ", Name in IR = " + ir.getMetadataName(mm.map_to));
+					//System.out.print("Mapping " + mm.display_name + " from " + mm.map_from + " to " + mm.map_to
+					//		+ ", Name in IR = " + ir.getMetadataName(mm.map_to));
 					if (mm.enabled) {
 						System.out.println(" [ENABLED]");
 					} else {
