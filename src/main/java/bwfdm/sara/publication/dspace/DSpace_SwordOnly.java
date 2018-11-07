@@ -57,8 +57,8 @@ public class DSpace_SwordOnly implements PublicationRepository {
 	@JsonCreator
 	public DSpace_SwordOnly(@JsonProperty("sword_user") final String su, @JsonProperty("sword_pwd") final String sp,
 			@JsonProperty("sword_api_endpoint") final String se,
-			@JsonProperty(value = "deposit_type", required = false) final String dt,
-			@JsonProperty(value = "check_license", required = false) final String cl,
+			@JsonProperty(value = "deposit_type", required = true, defaultValue = "workspace") final String dt,
+			@JsonProperty(value = "check_license", required = true, defaultValue = "false") final boolean cl,
 			@JsonProperty(value = "publication_type", required = false) final String pt,
 			@JsonProperty("dao") final Repository dao) {
 		this.dao = dao;
@@ -69,13 +69,7 @@ public class DSpace_SwordOnly implements PublicationRepository {
 		swordServiceDocumentRoot = swordApiEndpoint + "/servicedocument";
 
 		depositType = dt;
-
-		if ((cl != null) && (cl.toLowerCase().equals("false"))) {
-			checkLicense = false;
-		} else {
-			checkLicense = true;
-		}
-
+		checkLicense = cl;
 		publicationType = pt;
 
 		swordClient = new SWORDClient();

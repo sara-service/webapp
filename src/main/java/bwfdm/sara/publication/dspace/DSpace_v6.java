@@ -82,7 +82,7 @@ public class DSpace_v6 implements PublicationRepository {
 			@JsonProperty("sword_pwd") final String sp,
 			@JsonProperty("sword_api_endpoint") final String se,
 			@JsonProperty(value = "deposit_type", required = false) final String dt,
-			@JsonProperty(value = "check_license", required = false) final String cl,
+			@JsonProperty(value = "check_license", required = true, defaultValue = "false") final boolean cl,
 			@JsonProperty(value = "publication_type", required = false) final String pt,
 			@JsonProperty("dao") final Repository dao) {
 		this.dao = dao;
@@ -95,11 +95,7 @@ public class DSpace_v6 implements PublicationRepository {
 
 		deposit_type = dt;
 
-		if ((cl != null) && (cl.toLowerCase().equals("false"))) {
-			check_license = false;
-		} else {
-			check_license = true;
-		}
+		check_license = cl;
 		
 		publication_type = pt;
 
