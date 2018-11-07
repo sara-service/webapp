@@ -22,11 +22,11 @@
 	</div>
 	<div class="progress-header col-xs-12">
 		<div class="btn-group">
-			<a class="btn btn-success progress-disabled">scope</a>
-			<a class="btn btn-success progress-disabled">describe</a>
-			<a class="btn btn-success progress-disabled">license</a>
-			<a class="btn btn-success progress-disabled">review</a>
-			<a class="btn btn-success disabled progress-current">archive!</a>
+			<a href="/branches.html" class="btn btn-success">scope</a>
+			<a href="/meta.html" class="btn btn-success">describe</a>
+			<a href="/license.html" class="btn btn-success">license</a>
+			<a class="btn btn-success disabled progress-current">access</a>
+			<a class="btn btn-default disabled">archive!</a>
 		</div><div class="btn-group">
 			<a class="btn btn-default disabled">publisher</a>
 			<a class="btn btn-default disabled">submit</a>
@@ -40,7 +40,7 @@
 		</div>
 	</div>
 
-	<form class="form-horizontal" id="access"><div class="form-group">
+	<form class="form-horizontal hidden" id="access"><div class="form-group">
 		<div class="col-xs-12 custom-control custom-radio">
 			<input type="radio" name="access" value="public" id="public" class="custom-control-input" checked>
 			<label class="custom-control-label" for="public">make data in git archive public
@@ -69,9 +69,8 @@
 
 	<p style="height:3ex"></p>
 	<div class="row">
-		<a class="btn btn-default col-sm-3" href="/api/push/cancel">← previous</a>
-		<!-- note: this is NOT a next button! it cannot be undone! -->
-		<a class="btn btn-warning col-sm-4 col-sm-offset-5 disabled" id="next_button">complete archiving process →</a>
+		<a class="btn btn-default col-sm-3" href="/license.html">← previous</a>
+		<a class="btn btn-primary disabled col-sm-2 col-sm-offset-10" id="next_button">next →</a>
 	</div>
 	<p style="height:3ex"></p>
 </div></body>

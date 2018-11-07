@@ -15,7 +15,6 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import bwfdm.sara.api.Push;
 import bwfdm.sara.project.MetadataField;
 import bwfdm.sara.project.Ref;
 import bwfdm.sara.project.RefAction;
@@ -40,8 +39,8 @@ public class FrontendDatabase {
 	private final JacksonTemplate db;
 	private final TransactionTemplate transaction;
 	private Set<MetadataField> update;
-	private Boolean createPublicationRecord;
-	private Boolean isPublic;
+	// FIXME remember from last time instead!
+	private ArchiveAccess access = ArchiveAccess.PUBLIC;
 
 	/**
 	 * Creates a DAO for reading / writing values for a particular project.
@@ -128,39 +127,12 @@ public class FrontendDatabase {
 		return update;
 	}
 
-	/**
-	 * @throws IllegalStateException
-	 *             if attempting to change access rights on an item whose access
-	 *             rights have already been set.
-	 *             {@link Push#commitToArchive(boolean, boolean, javax.servlet.http.HttpSession)}
-	 *             depends on that exception to prevent inconsistent behavior!
-	 */
-	public void setArchiveAccess(final boolean isPublic,
-			final boolean createPublicationRecord) {
-		if (isPublicationRecordDecided() && (this.isPublic != isPublic
-				|| this.createPublicationRecord != createPublicationRecord))
-			throw new IllegalStateException(
-					"cannot change archive access mode once set");
-		this.isPublic = isPublic;
-		this.createPublicationRecord = createPublicationRecord;
+	public void setArchiveAccess(final ArchiveAccess access) {
+		this.access = access;
 	}
 
-	public boolean isPublicationRecordDecided() {
-		return createPublicationRecord != null && isPublic != null;
-	}
-
-	public boolean createPublicationRecord() {
-		if (!isPublicationRecordDecided())
-			throw new IllegalStateException(
-					"we don't yet know whether to create a publciation record or not");
-		return createPublicationRecord;
-	}
-
-	public boolean isPublic() {
-		if (!isPublicationRecordDecided())
-			throw new IllegalStateException(
-					"we don't yet know whether to create a publciation record or not");
-		return isPublic;
+	public ArchiveAccess getArchiveAccess() {
+		return access;
 	}
 
 	/**

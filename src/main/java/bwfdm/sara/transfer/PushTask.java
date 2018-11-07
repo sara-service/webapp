@@ -29,6 +29,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.util.ISO8601DateFormat;
 
 import bwfdm.sara.Config;
+import bwfdm.sara.db.ArchiveAccess;
 import bwfdm.sara.db.License;
 import bwfdm.sara.extractor.LicenseFile;
 import bwfdm.sara.extractor.MetadataExtractor;
@@ -51,6 +52,7 @@ public class PushTask extends Task {
 	private static final String CREATE_PROJECT = "Creating project in archive";
 	private static final String COMMIT_META = "Committing metadata to git archive";
 	private static final String UPDATE_META = "Updating metadata in git repo";
+	private static final String CREATE_METADATA = "Recording metadata for publication";
 	private static final ISO8601DateFormat ISO8601 = new ISO8601DateFormat();
 	private static final String METADATA_FILENAME = "submitted_metadata.xml";
 	private static final Charset UTF8 = Charset.forName("UTF-8");
@@ -113,12 +115,32 @@ public class PushTask extends Task {
 
 		final String id = Config.getRandomID();
 		beginTask(CREATE_PROJECT, 1);
-		project = archive.createProject(id, true, job.meta);
+		project = archive.createProject(id, job.access == ArchiveAccess.PUBLIC,
+				job.meta);
 
 		beginTask(PUSH_REPO, 1);
 		pushRepoToArchive();
+
+		beginTask(CREATE_METADATA, 1);
+		itemUUID = createItemInDB(project.getWebURL(), job.meta,
+				job.access == ArchiveAccess.PUBLIC);
+
+		// FIXME for create-and-move, move project to final archive here
+
+		// now that we're done, get rid of the temporary clone
+		// TODO determine how to handle ZIP file generation without extra clone
+		// for that we'd like to keep this thing around, but we might never
+		// learn that the user just isn't going to create a bibliographical
+		// record any more. we can add a "done" button somewhere, but the user
+		// needs not click it.
+		job.clone.dispose();
 	}
 
+	/**
+	 * @deprecated update should be removed so we don't need to requrest write
+	 *             access
+	 */
+	@Deprecated
 	private void updateMetadataInGitRepo() {
 		final String title = getUpdateValue(MetadataField.TITLE);
 		final String desc = getUpdateValue(MetadataField.DESCRIPTION);
@@ -287,31 +309,14 @@ public class PushTask extends Task {
 		return item.uuid;
 	}
 
-	public void commitToArchive(final boolean isPublic) {
-		if (isCommitted())
-			if (item.is_public != isPublic)
-				throw new IllegalStateException(
-						"item " + itemUUID + " already committed");
-			else
-				return;
-
-		// FIXME implement "move" part of create-and-move workflow here
-
-		itemUUID = createItemInDB(project.getWebURL(), job.meta, isPublic);
-	}
-
-	public boolean isCommitted() {
-		return itemUUID != null;
-	}
-
 	public ArchiveJob getArchiveJob() {
 		return job;
 	}
 
 	public UUID getItemUUID() {
-		if (!isCommitted())
+		if (itemUUID == null)
 			throw new IllegalStateException(
-					"getItemUUID() on uncommitted PushTask");
+					"getItemUUID() on running PushTask");
 		return itemUUID;
 	}
 

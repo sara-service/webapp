@@ -2,7 +2,7 @@
 
 function saveAndContinue(data) {
 	API.put("set licenses", "/api/licenses", data, function(info) {
-		location.href = "/overview.html";
+		location.href = "/access.html";
 	});
 }
 

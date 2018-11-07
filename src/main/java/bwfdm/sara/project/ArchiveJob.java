@@ -13,6 +13,7 @@ import java.util.UUID;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import bwfdm.sara.db.ArchiveAccess;
 import bwfdm.sara.db.ConfigDatabase;
 import bwfdm.sara.db.FrontendDatabase;
 import bwfdm.sara.extractor.LicenseFile;
@@ -44,10 +45,17 @@ public class ArchiveJob {
 	@JsonIgnore
 	private Set<LicenseFile> licensesSet;
 	@JsonProperty
+	public final ArchiveAccess access;
+	@JsonProperty
 	public final UUID archiveUUID;
 	@JsonIgnore
 	public final TransferRepo clone;
-	/** <b>For writing back metadata ONLY!! */
+	/**
+	 * <b>For writing back metadata ONLY!!
+	 * 
+	 * @deprecated remove write-back functionality for readonly access
+	 */
+	@Deprecated
 	@JsonIgnore
 	public final GitProject gitProject;
 	@JsonIgnore
@@ -120,6 +128,8 @@ public class ArchiveJob {
 		if (licensesInfo.hasUndefinedLicenses())
 			throw new IllegalArgumentException(
 					"not all branches have licenses!");
+		// access.html
+		access = frontend.getArchiveAccess();
 		// archive selection, currently just hardcoded
 		this.archiveUUID = UUID.fromString(archiveUUID); // implicit check
 	}
@@ -196,6 +206,8 @@ public class ArchiveJob {
 		// license(s).html
 		for (RefAction a : actions)
 			buffer.add(licenses.get(a.ref));
+		// access.html
+		buffer.add(access.name());
 		// archive selection, currently just hardcoded
 		buffer.add(archiveUUID.toString());
 		return buffer.getHash();

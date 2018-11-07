@@ -18,7 +18,6 @@ import org.springframework.web.servlet.view.RedirectView;
 import bwfdm.sara.Config;
 import bwfdm.sara.auth.AuthProvider;
 import bwfdm.sara.auth.ShibAuth;
-import bwfdm.sara.db.FrontendDatabase;
 import bwfdm.sara.git.GitRepo;
 import bwfdm.sara.project.Project;
 import bwfdm.sara.project.PublicationSession;
@@ -88,17 +87,6 @@ public class Authorization {
 			final HttpSession session) {
 		if (!existingProject.isDone())
 				return false;
-
-		// if archive-only, ignore publication part
-		final FrontendDatabase db = existingProject.getFrontendDatabase();
-		if (!db.isPublicationRecordDecided())
-			// user still has to decide whether that's going to be
-			// archive-only or not! ie. not yet done
-			return false;
-		if (!db.createPublicationRecord())
-			// user definitely chose archive-only, so publication part is
-			// done because there isn't any publication part
-			return true;
 
 		// user definitely chose to publish. that is, we now require the
 		// publication part to be done as well.
