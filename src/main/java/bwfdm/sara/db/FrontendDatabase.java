@@ -32,6 +32,7 @@ public class FrontendDatabase {
 	private static final String ACTION_TABLE = "fe_temp_actions";
 	private static final String METADATA_TABLE = "fe_temp_metadata";
 	private static final String LICENSES_TABLE = "fe_temp_licenses";
+	private static final String ARCHIVE_TABLE = "fe_temp_archive";
 
 	private final String gitRepo;
 	private final String project;
@@ -39,8 +40,6 @@ public class FrontendDatabase {
 	private final JacksonTemplate db;
 	private final TransactionTemplate transaction;
 	private Set<MetadataField> update;
-	// FIXME remember from last time instead!
-	private ArchiveAccess access = ArchiveAccess.PUBLIC;
 
 	/**
 	 * Creates a DAO for reading / writing values for a particular project.
@@ -128,11 +127,38 @@ public class FrontendDatabase {
 	}
 
 	public void setArchiveAccess(final ArchiveAccess access) {
-		this.access = access;
+		transaction.execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(
+					final TransactionStatus status) {
+				updateArchiveAccess(access);
+			}
+		});
+	}
+
+	private void updateArchiveAccess(final ArchiveAccess access) {
+		db.update("delete from " + ARCHIVE_TABLE
+						+ " where repo = ? and project = ? and uid = ?",
+				gitRepo, project, user);
+		db.update("insert into " + ARCHIVE_TABLE
+				+ "(repo, project, uid, access) values(?, ?, ?, ?)",
+				gitRepo, project, user, access.getDisplayName());
 	}
 
 	public ArchiveAccess getArchiveAccess() {
-		return access;
+		final List<ArchiveAccess> list = db.queryRowToList(
+				"select access from " + ARCHIVE_TABLE
+						+ " where repo = ? and project = ? and uid = ?",
+				ArchiveAccess.class, gitRepo, project, user);
+		if (list.isEmpty())
+			// public is the method we prefer, so default to that
+			return ArchiveAccess.PUBLIC;
+		if (list.size() == 1)
+			return list.get(0);
+		// this really shouldn't happen: we're selecting by primary key and are
+		// getting more than a single result!
+		throw new IllegalStateException(
+				"primary key not unique for " + ARCHIVE_TABLE + ": " + list);
 	}
 
 	/**

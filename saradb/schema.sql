@@ -169,6 +169,16 @@ CREATE TABLE fe_temp_metadata(
 	PRIMARY KEY (repo, project, uid, field)
 );
 
+-- archive access (and archive selection, at some point)
+CREATE TABLE fe_temp_archive(
+	repo text NOT NULL,
+	project text NOT NULL,
+	uid text NOT NULL,
+	access text NOT NULL,
+	CHECK (access in ('public', 'private')),
+	PRIMARY KEY (repo, project, uid)
+);
+
 -- list of licenses shown on license selection pages
 CREATE TABLE supported_licenses(
 	id text PRIMARY KEY,
