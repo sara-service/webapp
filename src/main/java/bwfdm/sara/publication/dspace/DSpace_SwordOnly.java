@@ -58,7 +58,7 @@ public class DSpace_SwordOnly implements PublicationRepository {
 	public DSpace_SwordOnly(@JsonProperty("sword_user") final String su, @JsonProperty("sword_pwd") final String sp,
 			@JsonProperty("sword_api_endpoint") final String se,
 			@JsonProperty(value = "deposit_type", required = true, defaultValue = "workspace") final String dt,
-			@JsonProperty(value = "check_license", required = true, defaultValue = "false") final boolean cl,
+			@JsonProperty(value = "check_license", required = true) final boolean cl,
 			@JsonProperty(value = "publication_type", required = false) final String pt,
 			@JsonProperty("dao") final Repository dao) {
 		this.dao = dao;
