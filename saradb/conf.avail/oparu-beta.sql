@@ -11,7 +11,7 @@ DECLARE oparu_demo text     := 'https://oparu-beta.sara-service.org';
 
 DECLARE demo_dspace_help text := 'Your publication has been created in the Institutional Repository of Demo University (IRDU). Please login, click "Resume" and submit the publication. You can edit metadata if necessary. Your submission will then be reviewed by the IRDU team, and you will be notified as soon as it has been approved.';
 
-DECLARE userhint text := 'If your email address isn''t registered, either register in IRDU DEVELOPMENT ("visit home page", then register a new account) or test with demo-user@sara-service.org instead.';
+DECLARE userhint text := 'Please use demo-user@sara-service.org to submit. You can then log into IRDU as demo-user@sara-service.org using password "SaraTest" to finish your submission. Note that it will not be approved automatically!';
 
 DECLARE rRef UUID;
 
@@ -19,16 +19,16 @@ BEGIN
 
 -- Stefan's OPARU Stand-In in bwCloud 
 INSERT INTO repository(display_name, adapter, url, contact_email, help, enabled, logo_url, user_hint) VALUES
-	('Institutional Repository of Demo University (IRDU) BETA', 'DSpace_v6', oparu_demo || '/xmlui',
+	('Institutional Repository of Demo University (IRDU)', 'DSpace_v6', oparu_demo || '/xmlui',
 		'project-sara+oparu-beta@uni-konstanz.de', demo_dspace_help, TRUE,
 		'data:image/svg+xml;base64,' || encode(lo_get(oparu_logo), 'base64'), userhint)
 	RETURNING uuid INTO rRef;
 INSERT INTO repository_params(id, param, value) VALUES
 	(rRef, 'rest_user', 'project-sara@uni-konstanz.de'),
-	(rRef, 'rest_pwd', '__OPARUDEVEL_PASSWORD__'),
+	(rRef, 'rest_pwd', '__OPARUBETA_PASSWORD__'),
 	(rRef, 'rest_api_endpoint', oparu_demo || '/rest'),
 	(rRef, 'sword_user', 'project-sara@uni-konstanz.de'),
-	(rRef, 'sword_pwd', '__OPARUDEVEL_PASSWORD__'),
+	(rRef, 'sword_pwd', '__OPARUBETA_PASSWORD__'),
 	(rRef, 'sword_api_endpoint', oparu_demo || '/swordv2'),
 	(rRef, 'deposit_type', 'workspace'),
 	(rRef, 'publication_type', 'Software');
