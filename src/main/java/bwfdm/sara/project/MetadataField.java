@@ -27,7 +27,7 @@ public enum MetadataField {
 
 	@JsonCreator
 	public static MetadataField forDisplayName(final String name) {
-		for (final MetadataField f : MetadataField.values())
+		for (final MetadataField f : values())
 			if (f.displayName.equals(name))
 				return f;
 		throw new NoSuchElementException(name);

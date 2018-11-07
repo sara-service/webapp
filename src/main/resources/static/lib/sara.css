@@ -10,6 +10,7 @@
 
 /* border width must be 6.9% to match the logo */
 .loading {
+	clear: both;
 	border-radius: 50%;
 	border-top: .345em solid #b45865;
 	border-right: .345em solid #bddd1f;

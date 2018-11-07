@@ -58,6 +58,7 @@ function init(info) {
 	initBranches(info.actions);
 	initMeta(info.meta);
 	initLicenses(info.licenses);
+	$("#" + info.access).removeClass("hidden");
 	$("#loading").remove();
 	$("#content").removeClass("hidden");
 	$("#next_button").click(function() {

@@ -25,8 +25,8 @@
 			<a href="/branches.html" class="btn btn-success">scope</a>
 			<a href="/meta.html" class="btn btn-success">describe</a>
 			<a href="/license.html" class="btn btn-success">license</a>
-			<a class="btn btn-success disabled progress-current">review</a>
-			<a class="btn btn-default disabled">archive!</a>
+			<a href="/access.html" class="btn btn-success">access</a>
+			<a class="btn btn-success disabled progress-current">archive!</a>
 		</div><div class="btn-group">
 			<a class="btn btn-default disabled">publisher</a>
 			<a class="btn btn-default disabled">submit</a>
@@ -84,12 +84,23 @@
 				<a target="_blank" name="license">GNU GPL 4.0</a>
 				<span name="other">GNU GPL 4.0</span></li>
 		</ul>
+
+		<div class="row">
+			<div class="col-xs-12 col-sm-9"><h3 class="inline-heading">Archive it:</h3></div>
+			<a class="col-xs-9 col-xs-offset-3 col-sm-3 col-sm-offset-0 btn btn-default" href="/access.html">edit archive access</a>
+		</div>
+		<ul id="access">
+			<li id="public" class="hidden">publicly</li>
+			<li id="private" class="hidden">privately</li>
+		</ul>
+
 		<p style="height:1ex"></p>
 	</div>
 
 	<p style="height:3ex"></p>
 	<div class="row">
-		<a class="btn btn-primary disabled col-sm-2 col-sm-offset-10" id="next_button">next →</a>
+		<!-- note: this is NOT a next button! it cannot be undone! -->
+		<a class="btn btn-warning col-sm-3 col-sm-offset-9 disabled" id="next_button">archive this artefact →</a>
 	</div>
 	<p style="height:3ex"></p>
 </div></body>

@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 
-import bwfdm.sara.db.FrontendDatabase;
 import bwfdm.sara.project.ArchiveJob;
 import bwfdm.sara.project.Project;
 import bwfdm.sara.transfer.PushTask;
@@ -27,10 +26,9 @@ public class Push {
 
 	@GetMapping("status")
 	public TaskStatus getStatus(final HttpSession session) {
-		// getInstance() because the project only switches to "completed" once
-		// commitToArchive() has been called, which only happens after
-		// archiving.
-		return Project.getInstance(session).getPushTask().getStatus();
+		// getCompletedInstance() because the project is very much expected to
+		// switch to "completed" here.
+		return Project.getCompletedInstance(session).getPushTask().getStatus();
 	}
 
 	@PostMapping("trigger")
@@ -59,20 +57,6 @@ public class Push {
 		return Project.getInstance(session).getArchiveJob();
 	}
 
-	@PostMapping("commit")
-	public void commitToArchive(
-			@RequestParam("public_access") final boolean isPublic,
-			@RequestParam("record") final boolean record,
-			final HttpSession session) {
-		final Project project = Project.getCompletedInstance(session);
-		// note: setArchiveAccess throws an exception if we try to change the
-		// access rights on an already-committed item. we depend on that to
-		// avoid incorrect behavior!
-		project.getFrontendDatabase().setArchiveAccess(isPublic, record);
-		project.getPushTask().commitToArchive(isPublic);
-		project.disposeTransferRepo();
-	}
-
 	@GetMapping("redirect")
 	public RedirectView redirectAfterArchiving(final HttpSession session,
 			final RedirectAttributes redir) {
@@ -82,12 +66,6 @@ public class Push {
 					"redirectAfterArchiving before push is done");
 
 		final PushTask push = project.getPushTask();
-		final FrontendDatabase db = project.getFrontendDatabase();
-		if (db.isPublic() && db.createPublicationRecord()) {
-			redir.addAttribute("item", push.getItemUUID());
-			return new RedirectView("/api/auth/publish");
-		}
-
 		redir.addAttribute("token", push.getAccessToken());
 		redir.addAttribute("item", push.getItemUUID());
 		return new RedirectView("/info.html");

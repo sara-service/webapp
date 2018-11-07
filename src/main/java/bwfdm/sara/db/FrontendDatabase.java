@@ -15,7 +15,6 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import bwfdm.sara.api.Push;
 import bwfdm.sara.project.MetadataField;
 import bwfdm.sara.project.Ref;
 import bwfdm.sara.project.RefAction;
@@ -33,6 +32,7 @@ public class FrontendDatabase {
 	private static final String ACTION_TABLE = "fe_temp_actions";
 	private static final String METADATA_TABLE = "fe_temp_metadata";
 	private static final String LICENSES_TABLE = "fe_temp_licenses";
+	private static final String ARCHIVE_TABLE = "fe_temp_archive";
 
 	private final String gitRepo;
 	private final String project;
@@ -40,8 +40,6 @@ public class FrontendDatabase {
 	private final JacksonTemplate db;
 	private final TransactionTemplate transaction;
 	private Set<MetadataField> update;
-	private Boolean createPublicationRecord;
-	private Boolean isPublic;
 
 	/**
 	 * Creates a DAO for reading / writing values for a particular project.
@@ -128,39 +126,39 @@ public class FrontendDatabase {
 		return update;
 	}
 
-	/**
-	 * @throws IllegalStateException
-	 *             if attempting to change access rights on an item whose access
-	 *             rights have already been set.
-	 *             {@link Push#commitToArchive(boolean, boolean, javax.servlet.http.HttpSession)}
-	 *             depends on that exception to prevent inconsistent behavior!
-	 */
-	public void setArchiveAccess(final boolean isPublic,
-			final boolean createPublicationRecord) {
-		if (isPublicationRecordDecided() && (this.isPublic != isPublic
-				|| this.createPublicationRecord != createPublicationRecord))
-			throw new IllegalStateException(
-					"cannot change archive access mode once set");
-		this.isPublic = isPublic;
-		this.createPublicationRecord = createPublicationRecord;
+	public void setArchiveAccess(final ArchiveAccess access) {
+		transaction.execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(
+					final TransactionStatus status) {
+				updateArchiveAccess(access);
+			}
+		});
 	}
 
-	public boolean isPublicationRecordDecided() {
-		return createPublicationRecord != null && isPublic != null;
+	private void updateArchiveAccess(final ArchiveAccess access) {
+		db.update("delete from " + ARCHIVE_TABLE
+						+ " where repo = ? and project = ? and uid = ?",
+				gitRepo, project, user);
+		db.update("insert into " + ARCHIVE_TABLE
+				+ "(repo, project, uid, access) values(?, ?, ?, ?)",
+				gitRepo, project, user, access.getDisplayName());
 	}
 
-	public boolean createPublicationRecord() {
-		if (!isPublicationRecordDecided())
-			throw new IllegalStateException(
-					"we don't yet know whether to create a publciation record or not");
-		return createPublicationRecord;
-	}
-
-	public boolean isPublic() {
-		if (!isPublicationRecordDecided())
-			throw new IllegalStateException(
-					"we don't yet know whether to create a publciation record or not");
-		return isPublic;
+	public ArchiveAccess getArchiveAccess() {
+		final List<ArchiveAccess> list = db.queryRowToList(
+				"select access from " + ARCHIVE_TABLE
+						+ " where repo = ? and project = ? and uid = ?",
+				ArchiveAccess.class, gitRepo, project, user);
+		if (list.isEmpty())
+			// public is the method we prefer, so default to that
+			return ArchiveAccess.PUBLIC;
+		if (list.size() == 1)
+			return list.get(0);
+		// this really shouldn't happen: we're selecting by primary key and are
+		// getting more than a single result!
+		throw new IllegalStateException(
+				"primary key not unique for " + ARCHIVE_TABLE + ": " + list);
 	}
 
 	/**

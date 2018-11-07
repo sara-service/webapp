@@ -3,7 +3,7 @@
 function saveAndContinue(data) {
 	API.post("save license selection", "/api/licenses",
 		{ license: data.all }, function() {
-			location.href = "/overview.html";
+			location.href = "/access.html";
 		});
 }
 

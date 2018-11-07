@@ -260,7 +260,7 @@ public class Project {
 	public boolean isDone() {
 		if (push == null)
 			return false;
-		return push.isCommitted();
+		return push.isDone();
 	}
 
 	/**
