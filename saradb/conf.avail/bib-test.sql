@@ -28,6 +28,7 @@ INSERT INTO repository_params(id, param, value) VALUES
        (rRef, 'sword_user', 'project-sara@uni-konstanz.de'),
        (rRef, 'sword_pwd', '__BIBTEST_PASSWORD__'),
        (rRef, 'sword_api_endpoint', oparu_test || '/swordv2'),
+       (rRef, 'check_license', 'false'),
        (rRef, 'deposit_type', 'workflow');
 
 PERFORM lo_unlink(oparu_logo);
