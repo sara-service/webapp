@@ -2,7 +2,6 @@ package bwfdm.sara.transfer;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -40,7 +39,6 @@ import bwfdm.sara.project.ArchiveJob;
 import bwfdm.sara.project.LicensesInfo.LicenseInfo;
 import bwfdm.sara.project.MetadataField;
 import bwfdm.sara.project.Ref;
-import bwfdm.sara.project.Ref.RefType;
 import bwfdm.sara.publication.Item;
 import bwfdm.sara.publication.ItemState;
 import bwfdm.sara.publication.ItemType;
@@ -51,11 +49,9 @@ public class PushTask extends Task {
 	private static final String PUSH_REPO = "Preparing repository for upload";
 	private static final String CREATE_PROJECT = "Creating project in archive";
 	private static final String COMMIT_META = "Committing metadata to git archive";
-	private static final String UPDATE_META = "Updating metadata in git repo";
 	private static final String CREATE_METADATA = "Recording metadata for publication";
 	private static final ISO8601DateFormat ISO8601 = new ISO8601DateFormat();
 	private static final String METADATA_FILENAME = "submitted_metadata.xml";
-	private static final Charset UTF8 = Charset.forName("UTF-8");
 	private static final String TARGET_REMOTE = "target";
 	private static final ObjectMapper JSON_MAPPER = new ObjectMapper();
 	static {
@@ -87,8 +83,6 @@ public class PushTask extends Task {
 		this.job = job;
 		this.archive = archive;
 		this.pubDB = pubDB;
-		if (!job.update.isEmpty())
-			declareSteps(UPDATE_META);
 		declareSteps(COMMIT_META, CREATE_PROJECT, PUSH_REPO);
 	}
 
@@ -104,11 +98,6 @@ public class PushTask extends Task {
 	@Override
 	protected void execute() throws GitAPIException, URISyntaxException,
 			IOException, ProjectExistsException {
-		if (!job.update.isEmpty()) {
-			beginTask(UPDATE_META, 1);
-			updateMetadataInGitRepo();
-		}
-
 		now = new Date();
 		beginTask(COMMIT_META, job.selectedRefs.size());
 		commitMetadataToRepo();
@@ -134,38 +123,6 @@ public class PushTask extends Task {
 		// record any more. we can add a "done" button somewhere, but the user
 		// needs not click it.
 		job.clone.dispose();
-	}
-
-	/**
-	 * @deprecated update should be removed so we don't need to requrest write
-	 *             access
-	 */
-	@Deprecated
-	private void updateMetadataInGitRepo() {
-		final String title = getUpdateValue(MetadataField.TITLE);
-		final String desc = getUpdateValue(MetadataField.DESCRIPTION);
-		if (title != null || desc != null)
-			job.gitProject.updateProjectInfo(title, desc);
-
-		final String version = getUpdateValue(MetadataField.VERSION);
-		if (version != null) {
-			final Ref ref = new Ref(job.meta.get(MetadataField.MAIN_BRANCH));
-			if (!ref.type.equals(RefType.BRANCH))
-				throw new IllegalArgumentException(
-						"attempt to update VERSION in " + ref);
-			// TODO should probably use JGit here
-			// if we're ever going to write back the LICENSE, with JGit that's
-			// doable in a single commit. with putBlob (or the GitLab API, for
-			// that matter), committing several files currently isn't possible.
-			job.gitProject.putBlob(ref.name, MetadataExtractor.VERSION_FILE,
-					"update version to " + version, version.getBytes(UTF8));
-		}
-	}
-
-	private String getUpdateValue(MetadataField field) {
-		if (job.update.contains(field))
-			return job.meta.get(field);
-		return null;
 	}
 
 	private void commitMetadataToRepo() throws IOException {

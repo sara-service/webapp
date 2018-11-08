@@ -1,11 +1,9 @@
 package bwfdm.sara.db;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 
 import javax.sql.DataSource;
 
@@ -39,7 +37,6 @@ public class FrontendDatabase {
 	private final String user;
 	private final JacksonTemplate db;
 	private final TransactionTemplate transaction;
-	private Set<MetadataField> update;
 
 	/**
 	 * Creates a DAO for reading / writing values for a particular project.
@@ -109,21 +106,6 @@ public class FrontendDatabase {
 					+ "(repo, project, uid, field, value) values(?, ?, ?, ?, ?)",
 					gitRepo, project, user, fieldName, values.get(field));
 		}
-	}
-
-	/** Set list of metadata fields that should be writen back to git repo. */
-	public void setUpdateMetadata(final Set<MetadataField> update) {
-		// deliberately NOT stored in the database. this way the checkbox never
-		// defaults to enabled. → user always has to give explicit consent to
-		// have stuff updated in his live repo.
-		this.update = update;
-	}
-
-	/** Get list of metadata fields that should be writen back to git repo. */
-	public Set<MetadataField> getUpdateMetadata() {
-		if (update == null)
-			return Collections.emptySet();
-		return update;
 	}
 
 	public void setArchiveAccess(final ArchiveAccess access) {

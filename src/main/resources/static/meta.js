@@ -2,20 +2,6 @@
 
 var meta, cache = {}, branches = [];
 
-function writeBackProblem() {
-	var action = $("#master :selected").data("refAction");
-	// only allow updating branches that haven't been pushed back. tags
-	// cannot be written to, and trying to update branches a few commits
-	// back is impossible to do consistently.
-	if (action.ref.type == "tag")
-		return "cannot commit to a tag";
-	if (action.ref.type != "branch")
-		return "can only commit to branches";
-	if (action.firstCommit != "HEAD")
-		return "not archiving HEAD of " + action.ref.name;
-	return null;
-};
-
 function initField(id, reset, branchDependent, validator, speshul) {
 	var elem = $("#" + id);
 	$("#" + reset).click(function() {
@@ -26,25 +12,10 @@ function initField(id, reset, branchDependent, validator, speshul) {
 	});
 	elem.val(meta[id].value);
 
-	var update = $("#update_" + id);
 	validate.init(id, meta[id].value, validator, function(value, valid) {
-		var label = $("#update_" + id).parent("label");
-		var changed = value != meta[id].autodetected;
-		var allow = branchDependent ? writeBackProblem() == null : true;
-
-		if (valid && changed && allow) {
-			update.prop("disabled", false);
-			label.removeClass("text-muted");
-		} else {
-			update.prop("disabled", true);
-			update.prop("checked", false);
-			label.addClass("text-muted");
-		}
-
 		if (speshul)
 			speshul();
 	});
-	update.prop("checked", meta[id].update);
 }
 
 function updateBranchSpecific() {
@@ -88,15 +59,6 @@ function initFields(info) {
 			var action = $("#master :selected").data("refAction");
 			if (!action)
 				return;
-			$("[data-master]").text(action.ref.type + " " + action.ref.name);
-			var problem = writeBackProblem();
-			if (problem) {
-				$("[data-noproblem]").css("text-decoration", "line-through");
-				$("[data-problem]").text("(" + problem + ")");
-			} else {
-				$("[data-noproblem]").css("text-decoration", "");
-				$("[data-problem]").text("");
-			}
 
 			var ref = action.ref.path;
 			if (!cache[ref]) {
@@ -115,17 +77,10 @@ function initFields(info) {
 
 	$("#next_button").click(function() {
 		var values = validate.all(["submitter_surname", "submitter_givenname",
-			"title", "description", "master", "version", ]);
+			"title", "description", "master", "version"]);
 		if (!values)
 			return;
-		var data = {};
-		$.each(values, function(field, value) {
-			data[field] = {
-				user: value,
-				update: $("#update_" + field).prop("checked")
-			};
-		});
-		API.put("save fields", "/api/meta", data, function() {
+		API.put("save fields", "/api/meta", values, function() {
 			location.href = "/license.html";
 		});
 	});

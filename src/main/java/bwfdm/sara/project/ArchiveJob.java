@@ -38,8 +38,6 @@ public class ArchiveJob {
 	public final List<Ref> selectedRefs;
 	@JsonProperty
 	public final Map<MetadataField, String> meta;
-	@JsonProperty
-	public final Set<MetadataField> update;
 	@JsonIgnore
 	public final Map<Ref, String> licenses;
 	@JsonIgnore
@@ -108,7 +106,6 @@ public class ArchiveJob {
 		// meta.html
 		meta = metadataExtractor.get(MetadataField.values());
 		meta.putAll(frontend.getMetadata());
-		update = frontend.getUpdateMetadata();
 		checkField(MetadataField.TITLE, false);
 		checkField(MetadataField.DESCRIPTION, true);
 		checkField(MetadataField.VERSION, false);
@@ -199,10 +196,8 @@ public class ArchiveJob {
 		// meta.html
 		// enum values are in a defined order (same order as declared) so we'll
 		// be adding them in the same order every time
-		for (MetadataField field : MetadataField.values()) {
+		for (MetadataField field : MetadataField.values())
 			buffer.add(meta.get(field));
-			buffer.add(update.contains(field) ? "yes" : "no");
-		}
 		// license(s).html
 		for (RefAction a : actions)
 			buffer.add(licenses.get(a.ref));
