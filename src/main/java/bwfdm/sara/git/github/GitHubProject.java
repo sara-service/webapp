@@ -1,7 +1,6 @@
 package bwfdm.sara.git.github;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import org.eclipse.jgit.api.TransportCommand;
@@ -45,7 +44,6 @@ public class GitHubProject implements GitProject {
 		return info.webURL;
 	}
 
-	@Deprecated
 	@Override
 	public String getEditURL(final String branch, final String path) {
 		// FIXME check whether to encode paths with slashes
@@ -54,10 +52,11 @@ public class GitHubProject implements GitProject {
 		return getProjectViewURL() + "/edit/" + branch + "/" + path;
 	}
 
-	@Deprecated
 	@Override
 	public String getCreateURL(final String branch, final String path) {
-		// FIXME allow this to be disabled, or find a way to implement it
+		// FIXME this can apparently now be implemented
+		// but there's a special way to create a license... maybe we want that
+		// instead?
 		// the "new file" url is: getProjectViewURL() + "/new/" + branch
 		// but you cannot actually specify a filename or commit message!
 		// for now, minimal implementation:
@@ -133,24 +132,6 @@ public class GitHubProject implements GitProject {
 	}
 
 	@Override
-	public void putBlob(final String branch, final String path,
-			final String commitMessage, final byte[] data) {
-		final HashMap<String, String> args = new HashMap<>();
-		args.put("branch", branch);
-		args.put("message", commitMessage);
-		args.put("content", Base64Utils.encodeToString(data));
-
-		final UriComponentsBuilder endpoint = rest.uri("/contents/" + path);
-		GHFile existing = getFileInfo("heads/" + branch, path);
-		if (existing != null)
-			args.put("sha", existing.sha1);
-		// FIXME what does GitHub do for non-changes?
-		// GitLab needs:
-		// if (!Arrays.equals(data, existing.data))
-		rest.put(endpoint, args);
-	}
-
-	@Override
 	public void enableClone(final boolean enable) {
 		// we already have access to the repo by using our OAuth token, so
 		// nothing to be done here
@@ -159,7 +140,6 @@ public class GitHubProject implements GitProject {
 
 	@Override
 	public void setCredentials(final TransportCommand<?, ?> tx) {
-		// FIXME test!
 		tx.setCredentialsProvider(new UsernamePasswordCredentialsProvider(token,
 				"x-oauth-basic"));
 	}
@@ -167,14 +147,6 @@ public class GitHubProject implements GitProject {
 	@Override
 	public ProjectInfo getProjectInfo() {
 		return info.toDataObject();
-	}
-
-	@Override
-	public void updateProjectInfo(final String name, final String description) {
-		// TODO implement this, at least partially
-		// (project name is impractical to change)
-		// final GHProjectInfo info = new GHProjectInfo(name, description);
-		// rest.put(rest.uri("" /* the project itself */), info);
 	}
 
 	private static <T> List<T> toDataObject(

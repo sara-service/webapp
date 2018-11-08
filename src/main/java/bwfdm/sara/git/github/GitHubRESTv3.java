@@ -63,6 +63,8 @@ public abstract class GitHubRESTv3 implements GitRepo {
 
 		// test token by retrieving user info. this throws a 401 if executed
 		// without a token.
+		// FIXME should use the official method instead:
+		// https://developer.github.com/v3/oauth_authorizations/#check-an-authorization
 		try {
 			getUserInfo();
 			return true;

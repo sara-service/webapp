@@ -12,6 +12,8 @@ public interface GitProject {
 	/** @return the url of the "main" page to view a project */
 	public String getProjectViewURL();
 
+	// FIXME get & edit used for license only – special versions instead?
+
 	/**
 	 * @param branch
 	 *            the name of the branch containing the file to edit
@@ -19,7 +21,6 @@ public interface GitProject {
 	 *            full, absolute path to file in repo
 	 * @return the url of a page where the user can edit the file
 	 */
-	@Deprecated
 	public String getEditURL(final String branch, String path);
 
 	/**
@@ -29,7 +30,6 @@ public interface GitProject {
 	 *            full, absolute path to file in repo
 	 * @return the url of a page where the user can create such a file
 	 */
-	@Deprecated
 	public String getCreateURL(String branch, String path);
 
 	/** @return a list of all branches in the given project */
@@ -40,17 +40,6 @@ public interface GitProject {
 
 	/** @return the project metadata */
 	public ProjectInfo getProjectInfo();
-
-	/**
-	 * Updates the project metadata with the fields provided. <code>null</code>
-	 * means to keep the current value.
-	 * 
-	 * @param name
-	 *            new project name, or <code>null</code>
-	 * @param description
-	 *            new project description, or <code>null</code>
-	 */
-	public void updateProjectInfo(String name, String description);
 
 	/**
 	 * Enables or disables SARA access to the repo. Can be used to add a system
@@ -108,21 +97,4 @@ public interface GitProject {
 	 *         the file doesn't exist
 	 */
 	public byte[] getBlob(String ref, String path);
-
-	/**
-	 * Commits a file to the repo, either updating or creating it. This
-	 * obviously only works for branches.
-	 * 
-	 * @param branch
-	 *            name of the branch to modify (ie. {@code master})
-	 * @param path
-	 *            full path to a file in the repo, without the initial slash
-	 * @param commitMessage
-	 *            message for the commit that creates or modifies the file
-	 * @param data
-	 *            the contents of the file as a byte array (non-
-	 *            <code>null</code>)
-	 */
-	public void putBlob(String branch, String path, String commitMessage,
-			byte[] data);
 }

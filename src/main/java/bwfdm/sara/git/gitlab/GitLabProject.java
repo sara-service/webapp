@@ -1,15 +1,12 @@
 package bwfdm.sara.git.gitlab;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 
 import org.eclipse.jgit.api.TransportCommand;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpStatus;
-import org.springframework.util.Base64Utils;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -41,13 +38,11 @@ public class GitLabProject implements GitProject {
 		return guiRoot;
 	}
 
-	@Deprecated
 	@Override
 	public String getEditURL(final String branch, final String path) {
 		return guiRoot + "/edit/" + branch + "/" + path;
 	}
 
-	@Deprecated
 	@Override
 	public String getCreateURL(final String branch, final String path) {
 		return guiRoot + "/new/" + branch + "/?commit_message=Add+"
@@ -107,30 +102,6 @@ public class GitLabProject implements GitProject {
 	}
 
 	@Override
-	public void putBlob(final String branch, final String path,
-			final String commitMessage, final byte[] data) {
-		final HashMap<String, String> args = new HashMap<>();
-		args.put("branch", branch);
-		args.put("commit_message", commitMessage);
-		args.put("encoding", "base64");
-		args.put("content", Base64Utils.encodeToString(data));
-
-		final UriComponentsBuilder endpoint = rest.uri("/repository/files/"
-				+ UrlEncode.encodePathSegment(path));
-		final byte[] existing = getBlob("heads/" + branch, path);
-		if (existing == null)
-			// file doesn't exist; send create query.
-			rest.post(endpoint, args);
-		else if (!Arrays.equals(data, existing))
-			// file exists, and has actually been changed. (gitlab doesn't like
-			// no-change writes because they create an empty commit.) send
-			// update query.
-			// note the different request method; it's otherwise identical to a
-			// create query.
-			rest.put(endpoint, args);
-	}
-
-	@Override
 	public void enableClone(final boolean enable) {
 		// we already have access to the repo by using our OAuth token, so
 		// nothing to be done here
@@ -149,21 +120,6 @@ public class GitLabProject implements GitProject {
 		return rest.get(rest.uri("" /* the project itself */),
 				new ParameterizedTypeReference<GLProjectInfo>() {
 				}).toDataObject();
-	}
-
-	@Override
-	public void updateProjectInfo(final String name, final String description) {
-		final GLProjectInfo info = new GLProjectInfo(name, description);
-		try {
-			rest.put(rest.uri("" /* the project itself */), info);
-		} catch (HttpClientErrorException ex) {
-			if (ex.getStatusCode() == HttpStatus.BAD_REQUEST)
-				// GitLab API unfortunately doesn't report useful errors when
-				// requests fail some constraint check
-				throw new RuntimeException("Cannot update project info"
-						+ " (probably: title isn't a valid project name)", ex);
-			throw ex;
-		}
 	}
 
 	private static <T> List<T> toDataObject(
