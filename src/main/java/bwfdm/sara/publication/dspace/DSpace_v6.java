@@ -36,7 +36,6 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import bwfdm.sara.publication.Hierarchy;
-import bwfdm.sara.publication.Item;
 import bwfdm.sara.publication.PublicationRepository;
 import bwfdm.sara.publication.Repository;
 import bwfdm.sara.publication.SaraMetaDataField;
@@ -307,7 +306,7 @@ public class DSpace_v6 implements PublicationRepository {
 			for (SWORDCollection collection : workspace.getCollections()) {
 				// key = full URL, value = name/policy
 				CollectionInfo collectionInfo = new CollectionInfo();
-				if (this.deposit_type.equals("workflow")) {
+				if (check_license) {
 					try {
 						collectionInfo.policy = collection.getCollectionPolicy().toString();
 					} catch (ProtocolViolationException e) {
