@@ -15,7 +15,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import bwfdm.sara.auth.AuthenticatedREST;
 import bwfdm.sara.git.ArchiveProject;
 import bwfdm.sara.git.ArchiveRepo;
-import bwfdm.sara.project.MetadataField;
+import bwfdm.sara.project.ArchiveMetadata;
 
 public class GitLabArchiveRESTv4 implements ArchiveRepo {
 	// "Name is too long (maximum is 255 characters)"
@@ -116,10 +116,10 @@ public class GitLabArchiveRESTv4 implements ArchiveRepo {
 
 	@Override
 	public ArchiveProject createProject(final String id, final boolean visible,
-			final Map<MetadataField, String> meta)
+			final ArchiveMetadata meta)
 			throws ProjectExistsException {
-		final String version = filter(meta, MetadataField.VERSION, MAX_VERSION);
-		final String title = filter(meta, MetadataField.TITLE, MAX_TITLE);
+		final String version = filter(meta.version, MAX_VERSION);
+		final String title = filter(meta.title, MAX_TITLE);
 		String name = title + " " + version + " \u2015 " + id;
 		// if name doesn't start with a permitted character, prepend something
 		if (!NAME_FIRST.matcher(name).find())
@@ -128,7 +128,7 @@ public class GitLabArchiveRESTv4 implements ArchiveRepo {
 		final Map<String, String> args = new HashMap<>();
 		args.put("path", "p" + id);
 		args.put("name", name);
-		args.put("description", meta.get(MetadataField.DESCRIPTION));
+		args.put("description", meta.description);
 		for (final String feature : UNUSED_FEATURES)
 			args.put(feature, "false");
 		args.put("visibility", visible ? "public" : "private");
@@ -142,11 +142,10 @@ public class GitLabArchiveRESTv4 implements ArchiveRepo {
 				sshPublicKey, knownHostsFile, true);
 	}
 
-	private String filter(final Map<MetadataField, String> meta,
-			MetadataField field, int maxLength) {
+	private String filter(final String raw, final int maxLength) {
 		// canonicalize whitespace. it's definitely NOT a good idea to just
 		// remove spaces like all other invalid characters.
-		String value = SPACES.matcher(meta.get(field)).replaceAll(" ");
+		String value = SPACES.matcher(raw).replaceAll(" ");
 		// remove invalid characters
 		value = NAME_FORBIDDEN.matcher(value).replaceAll("");
 		// shorten to maximum length

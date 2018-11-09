@@ -6,7 +6,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.UUID;
 
@@ -37,7 +36,7 @@ public class ArchiveJob {
 	@JsonProperty
 	public final List<Ref> selectedRefs;
 	@JsonProperty
-	public final Map<MetadataField, String> meta;
+	public final ArchiveMetadata meta;
 	@JsonIgnore
 	public final Map<Ref, String> licenses;
 	@JsonIgnore
@@ -104,15 +103,19 @@ public class ArchiveJob {
 					"no branches selected for publication");
 		clone = project.getTransferRepo();
 		// meta.html
-		meta = metadataExtractor.get(MetadataField.values());
-		meta.putAll(frontend.getMetadata());
-		checkField(MetadataField.TITLE, false);
-		checkField(MetadataField.DESCRIPTION, true);
-		checkField(MetadataField.VERSION, false);
-		checkField(MetadataField.MAIN_BRANCH, false);
-		checkField(MetadataField.SUBMITTER_SURNAME, false);
-		checkField(MetadataField.SUBMITTER_GIVENNAME, false);
-		final Ref master = new Ref(meta.get(MetadataField.MAIN_BRANCH));
+		// FIXME userMeta shouldn't be null here
+		final ArchiveMetadata userMeta = frontend.getMetadata();
+		final Ref ref = userMeta != null && userMeta.master != null
+				? new Ref(userMeta.master)
+				: null;
+		meta = metadataExtractor.get(ref).overrideFrom(userMeta);
+		checkNullOrEmpty("title", meta.title);
+		checkNull("description", meta.description);
+		checkNullOrEmpty("version", meta.version);
+		checkNullOrEmpty("master", meta.master);
+		checkNullOrEmpty("submitter.surname", meta.submitter.surname);
+		checkNullOrEmpty("submitter.givenname", meta.submitter.givenname);
+		final Ref master = new Ref(meta.master);
 		if (!selectedRefs.contains(master))
 			throw new IllegalArgumentException(
 					"main branch branch not selected for publication");
@@ -131,24 +134,16 @@ public class ArchiveJob {
 		this.archiveUUID = UUID.fromString(archiveUUID); // implicit check
 	}
 
-	private void checkField(MetadataField field, boolean mayBeEmpty) {
-		if (!meta.containsKey(field))
-			throw new NoSuchElementException(
-					"metadata field " + field + " missing");
-		String value = meta.get(field);
-		if (value == null)
-			throw new NoSuchElementException(
-					"metadata field " + field + " is null");
-		if (!mayBeEmpty && value.isEmpty())
-			throw new NoSuchElementException(
-					"metadata field " + field + " is empty");
-	}
-
 	private static void checkNullOrEmpty(String name, String value) {
 		if (value == null)
 			throw new NullPointerException(name + " is null");
 		if (value.isEmpty())
 			throw new IllegalArgumentException(name + " is empty");
+	}
+
+	private static void checkNull(String name, String value) {
+		if (value == null)
+			throw new NullPointerException(name + " is null");
 	}
 
 	@JsonProperty("heads")
@@ -196,8 +191,12 @@ public class ArchiveJob {
 		// meta.html
 		// enum values are in a defined order (same order as declared) so we'll
 		// be adding them in the same order every time
-		for (MetadataField field : MetadataField.values())
-			buffer.add(meta.get(field));
+		buffer.add(meta.title);
+		buffer.add(meta.description);
+		buffer.add(meta.version);
+		buffer.add(meta.master);
+		buffer.add(meta.submitter.surname);
+		buffer.add(meta.submitter.givenname);
 		// license(s).html
 		for (RefAction a : actions)
 			buffer.add(licenses.get(a.ref));
@@ -238,9 +237,8 @@ public class ArchiveJob {
 				return false;
 		}
 		// meta.html
-		for (MetadataField field : MetadataField.values())
-			if (!job.meta.get(field).equals(meta.get(field)))
-				return false;
+		if (!meta.equals(job.meta))
+			return false;
 		// license(s).html
 		for (RefAction a : actions) {
 			final String lic = job.licenses.get(a.ref);

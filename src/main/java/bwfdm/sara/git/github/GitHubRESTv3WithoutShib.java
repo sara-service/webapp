@@ -9,9 +9,9 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import bwfdm.sara.auth.DisplayNameSplitter;
-import bwfdm.sara.auth.DisplayNameSplitter.Name;
 import bwfdm.sara.auth.ShibAuth;
 import bwfdm.sara.git.GitRepo;
+import bwfdm.sara.project.Name;
 
 /**
  * Uses {@link GitHubRESTv3} with GitHub authentication. Not recommended because
@@ -43,8 +43,7 @@ public class GitHubRESTv3WithoutShib extends GitHubRESTv3 implements GitRepo {
 				});
 		final Name name = nameSplitter
 				.split(userInfo.getEffectiveDisplayName());
-		return new UserInfo(userInfo.userID, getUserEmail(), name.surname,
-				name.givenname);
+		return new UserInfo(userInfo.userID, getUserEmail(), name);
 	}
 
 	private String getUserEmail() {

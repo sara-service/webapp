@@ -41,20 +41,20 @@ public class ConfigDatabase {
 	 *         preference
 	 */
 	public List<License> getLicenses() {
-		return db.queryRowToList("select id, display_name, info_url from "
+		return db.queryToList("select id, display_name, info_url from "
 				+ LICENSES_TABLE + " where not hidden"
 				+ " order by preference asc, id asc", License.class);
 	}
 
 	public String getLicenseText(final String id) {
-		return db.queryRowToObject(
+		return db.querySingleToObject(
 				"select full_text from " + LICENSES_TABLE + " where id = ?",
 				String.class, id);
 	}
 
 	/** @return a list of all supported git repos */
 	public List<GitRepoFactory> getGitRepos() {
-		return db.<GitRepoFactory> queryRowToList(
+		return db.<GitRepoFactory> queryToList(
 				"select uuid, display_name, logo_url, url, adapter from "
 						+ GITREPOS_TABLE + " order by display_name asc",
 				GitRepoFactory.class);
@@ -69,7 +69,7 @@ public class ConfigDatabase {
 	 * @return a new instance of the named {@link GitRepo}
 	 */
 	public GitRepo newGitRepo(final String id) {
-		final GitRepoFactory factory = db.queryRowToObject(
+		final GitRepoFactory factory = db.querySingleToObject(
 				"select uuid, display_name, logo_url, adapter from "
 						+ GITREPOS_TABLE + " where uuid = UUID(?)",
 				GitRepoFactory.class, id);
@@ -82,7 +82,7 @@ public class ConfigDatabase {
 	 */
 	@Deprecated
 	public String getGitArchive() {
-		return db.queryRowToObject("select uuid from " + ARCHIVES_TABLE,
+		return db.querySingleToObject("select uuid from " + ARCHIVES_TABLE,
 				String.class);
 	}
 
@@ -95,7 +95,7 @@ public class ConfigDatabase {
 	 * @return a new instance of the named {@link ArchiveRepo}
 	 */
 	public ArchiveRepo newGitArchive(final String id) {
-		final ArchiveRepoFactory factory = db.queryRowToObject(
+		final ArchiveRepoFactory factory = db.querySingleToObject(
 				"select uuid, display_name, logo_url, adapter from "
 						+ ARCHIVES_TABLE + " where uuid = UUID(?)",
 				ArchiveRepoFactory.class, id);
@@ -104,7 +104,7 @@ public class ConfigDatabase {
 
 	private Map<String, String> readArguments(final String table,
 			final String id) {
-		return db.queryRowToMap(
+		return db.queryToMap(
 				"select param, value from " + table + " where id = UUID(?)",
 				"param", String.class, String.class, id);
 	}

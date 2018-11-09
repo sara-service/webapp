@@ -7,7 +7,7 @@ import javax.servlet.http.HttpServletRequest;
 import com.fasterxml.jackson.annotation.JsonCreator;
 
 import bwfdm.sara.auth.AuthProvider.UserInfo;
-import bwfdm.sara.auth.DisplayNameSplitter.Name;
+import bwfdm.sara.project.Name;
 
 /**
  * Shibboleth authentication using shibd / mod_shib. Basically needs to read a
@@ -157,10 +157,10 @@ public class ShibAuth {
 		// have a given name. it's still better than splitting the display name
 		// incorrectly.
 		if (surname != null)
-			return new UserInfo(userID, email, surname,
-					givenName != null ? givenName : "");
+			return new UserInfo(userID, email,
+					new Name(surname, givenName != null ? givenName : ""));
 
 		final Name name = nameSplitter.split(displayName);
-		return new UserInfo(userID, email, name.surname, name.givenname);
+		return new UserInfo(userID, email, name);
 	}
 }

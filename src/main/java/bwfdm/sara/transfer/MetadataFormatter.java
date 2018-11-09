@@ -36,6 +36,8 @@ class MetadataFormatter {
 	}
 
 	public void addDC(final String name, final String value) {
+		if (value == null || value.isEmpty())
+			return;
 		final Element elem = doc.createElementNS(DC, "dc:" + name);
 		elem.setTextContent(value);
 		desc.appendChild(elem);
