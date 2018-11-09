@@ -123,7 +123,7 @@ CREATE TABLE metadatamapping(
 	map_to text NOT NULL,
 	remark text,
 	enabled boolean NOT NULL,
-	CHECK( map_from IN ('sara-author', 'sara-submitter', 'sara-abstract', 'sara-dateArchived', 'sara-version', 'sara-title', 'sara-archiveUrl', 'sara-publisher', 'sara-type') ),
+	CHECK ( map_from IN ('sara-author', 'sara-submitter', 'sara-abstract', 'sara-dateArchived', 'sara-version', 'sara-title', 'sara-archiveUrl', 'sara-publisher', 'sara-type') ),
 	UNIQUE (repository_uuid, map_from, map_to)
 );
 
@@ -132,7 +132,8 @@ CREATE TABLE metadatavalue(
 	item_uuid UUID REFERENCES item(uuid) ON DELETE CASCADE,
 	metadatamapping_uuid UUID REFERENCES metadatamapping(uuid) ON DELETE SET NULL,
 	map_from text NOT NULL,
-	data text NOT NULL
+	value text NOT NULL,
+	UNIQUE (item_uuid, metadatamapping_uuid, map_from, value)
 );
 
 -- branch selection
