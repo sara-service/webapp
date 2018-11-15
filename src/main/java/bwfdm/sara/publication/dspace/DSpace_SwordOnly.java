@@ -4,7 +4,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,6 +55,8 @@ public class DSpace_SwordOnly implements PublicationRepository {
 	private final String depositType;
 	private final boolean checkLicense;
 	private final String publicationType;
+	
+	private Map<String,Hierarchy> hierarchyMap;
 
 	@JsonCreator
 	public DSpace_SwordOnly(@JsonProperty("sword_user") final String su, @JsonProperty("sword_pwd") final String sp,
@@ -73,6 +77,8 @@ public class DSpace_SwordOnly implements PublicationRepository {
 		publicationType = pt;
 
 		swordClient = new SWORDClient();
+		
+		hierarchyMap = new HashMap<>();
 	}
 
 	public SDData serviceDocument(final AuthCredentials authCredentials, final String sdURL_) {
@@ -174,8 +180,13 @@ public class DSpace_SwordOnly implements PublicationRepository {
 	
 	@Override
 	public Hierarchy getHierarchy(String loginName) {
-		Hierarchy h = new Hierarchy(null,null);
-		return buildHierarchyLevel(h, swordServiceDocumentRoot, loginName);
+		if (hierarchyMap.containsKey(loginName)) {
+			return hierarchyMap.get(loginName);
+		} else {
+			Hierarchy h = new Hierarchy(null,null);
+			hierarchyMap.put(loginName, h);
+			return buildHierarchyLevel(h, swordServiceDocumentRoot, loginName);
+		}
 	}
 
 	@Override
