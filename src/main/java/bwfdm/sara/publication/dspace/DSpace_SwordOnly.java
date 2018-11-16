@@ -108,7 +108,7 @@ public class DSpace_SwordOnly implements PublicationRepository {
 	@Override
 	public boolean isUserRegistered(final String loginName) {
 		// checks whether the user has access / is registered
-		return (serviceDocument(new AuthCredentials(swordUser, swordPwd, loginName), null) != null);
+		return (serviceDocument(new AuthCredentials(swordUser, swordPwd, loginName), null).sd != null);
 	}
 
 	@Override
