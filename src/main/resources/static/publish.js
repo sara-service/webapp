@@ -71,8 +71,13 @@ function setCollectionList(select, collection_path, hierarchy) {
 			setCollectionList(select, cp, child);
 		});
 	} else
-		select.append($("<option>").attr("value", hierarchy.url)
-			.text(collection_path).data("policy", hierarchy.policy));
+		if (hierarchy.is_collection) {
+			select.append($("<option>").attr("value", hierarchy.url)
+					.text(collection_path).data("policy", hierarchy.policy));
+		} else {
+			select.append($("<option>").prop("disabled","true").attr("value", hierarchy.url)
+					.text(collection_path).addClass("text-muted"));
+		};
 }
 
 var initialCollection;
