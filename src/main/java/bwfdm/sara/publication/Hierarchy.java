@@ -124,4 +124,21 @@ public class Hierarchy{
 			return sum;
 		}
     }
+    
+    private int submittableSum(final Hierarchy h) {
+    	int partSum = h.is_collection? (1):(0);
+    	for (final Hierarchy ch : new ArrayList<Hierarchy>(h.children)) {
+    		final int partSum2 = submittableSum(ch);
+    		if (partSum2 == 0) {
+    			h.children.remove(ch);
+    		}
+    		partSum = partSum + partSum2;
+    	}
+    	return partSum;
+    }
+    
+    public void pruneUnsubmittable() {
+    	int sum = submittableSum(this);
+    	System.out.println("Pruned all unsubmittable entries, total left: "+sum);
+    }
 }

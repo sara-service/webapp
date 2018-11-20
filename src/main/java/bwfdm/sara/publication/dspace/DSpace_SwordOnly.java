@@ -55,6 +55,7 @@ public class DSpace_SwordOnly implements PublicationRepository {
 	private final String depositType;
 	private final boolean checkLicense;
 	private final String publicationType;
+	private final boolean showUnsubmittable;
 	
 	private Map<String,Hierarchy> hierarchyMap;
 
@@ -63,6 +64,7 @@ public class DSpace_SwordOnly implements PublicationRepository {
 			@JsonProperty("sword_api_endpoint") final String se,
 			@JsonProperty("deposit_type") final String dt,
 			@JsonProperty("check_license") final boolean cl,
+			@JsonProperty("show_unsubmittable") final boolean shu,
 			@JsonProperty(value = "publication_type", required = false) final String pt,
 			@JsonProperty("dao") final Repository dao) {
 		this.dao = dao;
@@ -75,6 +77,7 @@ public class DSpace_SwordOnly implements PublicationRepository {
 		depositType = dt;
 		checkLicense = cl;
 		publicationType = pt;
+		showUnsubmittable = shu;
 
 		swordClient = new SWORDClient();
 		
@@ -180,13 +183,15 @@ public class DSpace_SwordOnly implements PublicationRepository {
 	
 	@Override
 	public Hierarchy getHierarchy(String loginName) {
-		if (hierarchyMap.containsKey(loginName)) {
-			return hierarchyMap.get(loginName);
-		} else {
+		if (!hierarchyMap.containsKey(loginName)) {
 			Hierarchy h = new Hierarchy(null,null);
+			h = buildHierarchyLevel(h, swordServiceDocumentRoot, loginName);
+			if (!showUnsubmittable) {
+				h.pruneUnsubmittable();
+			}
 			hierarchyMap.put(loginName, h);
-			return buildHierarchyLevel(h, swordServiceDocumentRoot, loginName);
 		}
+		return hierarchyMap.get(loginName);
 	}
 
 	@Override
