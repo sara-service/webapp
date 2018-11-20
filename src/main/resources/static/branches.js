@@ -65,10 +65,7 @@ function addBranch(branch) {
 	// what we prefer.
 	if (!branch.action)
 		branch.action = { publish: "FULL", firstCommit: "HEAD" };
-	// remove the name attributes, forcing validate.all to use the unique
-	// element ID as a key for the dropdown's value.
-	form.action.removeAttr("name");
-	form.commit.removeAttr("name");
+
 	validate.init(form.action, branch.action.publish, function(value) {
 			if (value == null)
 				return "What do you want to do with this branch?";
@@ -129,24 +126,18 @@ function addBranches(branches) {
 	$("#next_button").click(function() {
 		var fields = [];
 		$.each(forms, function(ref, form) {
-			fields.push(form.action, form.commit);
+			fields.push([{ name: "ref", string: ref },
+				{ name: "publish", value: form.action },
+				{ name: "firstCommit", value: form.commit }]);
 		});
-		var values = validate.all(fields);
-
-		var data = [];
-		$.each(forms, function(ref, form) {
-			data.push({
-				ref: ref,
-				publish: values[form.action.attr("id")],
-				firstCommit: values[form.commit.attr("id")]
-			});
-		});
+		var data = validate.array(fields);
 
 		if (data.length == 0) {
-			// this is actually quite hard: the default is only empty if there
-			// are no branches in the repo (empty repo? maybe not even there).
-			// ie. the user really has to remove everything and then expect
-			// "next" to do something...
+			// this is actually quite hard: the default is empty only if there
+			// are no protected branches in the repo, which usually means an
+			// empty repo because master is the default protected branch.
+			// ie. in most cases the user actually has to remove all branches
+			// and then expect "next" to do something useful...
 			console.log("StupidUserException: no refs in the list");
 			$("#add_branch").focus(); // highlighting the button is too subtle
 		} else

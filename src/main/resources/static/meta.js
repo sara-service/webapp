@@ -4,7 +4,7 @@ var meta, cache = {}, branches = [];
 
 function initField(id, reset, branchDependent, validator, speshul) {
 	var elem = $("#" + id);
-		$("#" + reset).click(function() {
+	$("#" + reset).click(function() {
 		// don't bother asking the server because we already have all the
 		// required info...
 		elem.val(meta.autodetected[id]);
@@ -20,13 +20,12 @@ function updateBranchSpecific() {
 function initFields(info) {
 	meta = cache[info.value.master] = info;
 
-	validate.init("submitter_surname", meta.value.submitter.surname,
-		function(value) {
+	validate.init("surname", meta.value.submitter.surname, function(value) {
 			if (value.trim() == "")
 				return "Please provide your surname";
 			return true;
 		});
-	validate.init("submitter_givenname", meta.value.submitter.givenname,
+	validate.init("givenname", meta.value.submitter.givenname,
 		function(value) {
 			if (value.trim() == "")
 				return "Please provide your given name";
@@ -35,10 +34,10 @@ function initFields(info) {
 	$("#reset_submitter").click(function() {
 		// don't bother asking the server because we already have all the
 		// required info...
-		$("#submitter_surname").val(meta.autodetected.submitter.surname);
-		$("#submitter_givenname").val(meta.autodetected.submitter.givenname);
-		validate.check("submitter_surname");
-		validate.check("submitter_givenname");
+		$("#surname").val(meta.autodetected.submitter.surname);
+		$("#givenname").val(meta.autodetected.submitter.givenname);
+		validate.check("surname");
+		validate.check("givenname");
 	});
 
 	initField("title", "reset_title", false, function(value) {
@@ -83,15 +82,10 @@ function initFields(info) {
 		});
 
 	$("#next_button").click(function() {
-		var values = validate.all(["submitter_surname", "submitter_givenname",
-			"title", "description", "master", "version"]);
+		var values = validate.all(['title', 'description', 'master', 'version',
+			{ name: "submitter", value: [ "surname", "givenname" ]}]);
 		if (!values)
 			return;
-		values.submitter = {
-			surname: values.submitter_surname,
-			givenname: values.submitter_givenname };
-		delete values.submitter_surname;
-		delete values.submitter_givenname;
 		API.put("save fields", "/api/meta", values, function() {
 			location.href = "/license.html";
 		});

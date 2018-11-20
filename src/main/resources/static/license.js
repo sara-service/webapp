@@ -1,8 +1,7 @@
 "use strict";
 
 function saveAndContinue(data) {
-	API.post("save license selection", "/api/licenses",
-		{ license: data.all }, function() {
+	API.post("save license selection", "/api/licenses", data, function() {
 			location.href = "/access.html";
 		});
 }
@@ -43,9 +42,9 @@ function initLicense(info) {
 		// we do however allow the user to override differing detected
 		// licenses if he already did so last time.
 		if (info.missing)
-			loadingFinished("confirm_edit", []);
+			loadingFinished("confirm_edit");
 		else
-			loadingFinished("confirm_multi", []);
+			loadingFinished("confirm_multi");
 	} else {
 		// this is silly here, but allows for easy code sharing with the 
 		// multiple-licenses page...
@@ -54,15 +53,15 @@ function initLicense(info) {
 			function(_, id) {
 				form[id] = $("#" + id);
 			});
-		initLicenseList("all", form, info.supported, info.primary,
-			info.user);
+		initLicenseList(form, info.supported, info.primary, info.user);
 		$("#declare_group").removeClass("hidden");
 
 		// enable the right button
+		var fields = [ { name: "license", value: "declare" } ];
 		if (info.missing)
-			loadingFinished("confirm_missing", [form.declare]);
+			loadingFinished("confirm_missing", fields);
 		else
-			loadingFinished("confirm_single", [form.declare]);
+			loadingFinished("confirm_single", fields);
 	}
 }
 

@@ -35,21 +35,17 @@ function initDetected(form, detected) {
 }
 
 function initLicense(info) {
-	var forms = [];
+	var fields = [];
 	$.each(info.branches, function(_, branch) {
 		var form = template("template");
-		initLicenseList(branch.ref.path, form, info.supported, branch.keep,
-			branch.user);
+		initLicenseList(form, info.supported, branch.keep, branch.user);
 		initBranch(form, branch.ref, branch.file);
 		initDetected(form, branch.detected);
 		$("#branch_table").append(form.root);
-		form.declare.on("select change", function() {
-			save(branch.ref, $(this).val());
-		});
-		forms.push(form.declare);
+		fields.push({ name: branch.ref.path, value: form.declare });
 	});
 
-	loadingFinished("confirm", forms);
+	loadingFinished("confirm", fields);
 }
 
 $(function() {

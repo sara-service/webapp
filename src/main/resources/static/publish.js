@@ -192,12 +192,11 @@ function initPubRepos(info) {
 	initialCollection = info.meta.collection;
 	
 	$("#next_button").click(function() {
-		var values = validate.all(["pubrepo", "email", "collection",
-			"policyOk"]);
+		var values = validate.all([ "pubrepo", "email", "collection", "policyOk",
+			{ name: "pubrepo_displayname", value: $("#pubrepo :selected") },
+			{ name: "collection_displayname", value: $("#collection :selected") }]);
 		if (values == null)
 			return;
-		values["pubrepo_displayname"] = $("#pubrepo :selected").text();
-		values["collection_displayname"] = $("#collection :selected").text();
 		// FIXME we should probably send the policy to server for checking!
 		delete values["policyOk"];
 		API.put("save fields", "/api/publish/meta", values, function() {
