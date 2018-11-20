@@ -33,19 +33,22 @@ import bwfdm.sara.publication.Repository;
 import bwfdm.sara.publication.SaraMetaDataField;
 
 public class DSpace_SwordOnly implements PublicationRepository {
-	
+
 	class SDData {
 		public SDData(ServiceDocument sd, List<SWORDWorkspace> ws) {
-			this.sd=sd;
-			this.ws=ws;
+			this.sd = sd;
+			this.ws = ws;
 		}
+
 		public final ServiceDocument sd;
 		public final List<SWORDWorkspace> ws;
 	}
 
-	protected static final Logger logger = LoggerFactory.getLogger(DSpace_SwordOnly.class);
+	protected static final Logger logger = LoggerFactory
+			.getLogger(DSpace_SwordOnly.class);
 
-	private final String swordUser, swordPwd, swordApiEndpoint, swordServiceDocumentRoot;
+	private final String swordUser, swordPwd, swordApiEndpoint,
+			swordServiceDocumentRoot;
 	private final Repository dao;
 
 	// for SWORD
@@ -56,11 +59,12 @@ public class DSpace_SwordOnly implements PublicationRepository {
 	private final boolean checkLicense;
 	private final String publicationType;
 	private final boolean showUnsubmittable;
-	
-	private Map<String,Hierarchy> hierarchyMap;
+
+	private Map<String, Hierarchy> hierarchyMap;
 
 	@JsonCreator
-	public DSpace_SwordOnly(@JsonProperty("sword_user") final String su, @JsonProperty("sword_pwd") final String sp,
+	public DSpace_SwordOnly(@JsonProperty("sword_user") final String su,
+			@JsonProperty("sword_pwd") final String sp,
 			@JsonProperty("sword_api_endpoint") final String se,
 			@JsonProperty("deposit_type") final String dt,
 			@JsonProperty("check_license") final boolean cl,
@@ -80,43 +84,49 @@ public class DSpace_SwordOnly implements PublicationRepository {
 		showUnsubmittable = shu;
 
 		swordClient = new SWORDClient();
-		
+
 		hierarchyMap = new HashMap<>();
 	}
 
-	public SDData serviceDocument(final AuthCredentials authCredentials, final String sdURL_) {
+	public SDData serviceDocument(final AuthCredentials authCredentials,
+			final String sdURL_) {
 		ServiceDocument sd = null;
 		List<SWORDWorkspace> ws = null;
-		final String sdURL = (sdURL_ == null) ? swordServiceDocumentRoot : sdURL_; 
-		
+		final String sdURL = (sdURL_ == null) ? swordServiceDocumentRoot
+				: sdURL_;
+
 		try {
 			sd = swordClient.getServiceDocument(sdURL, authCredentials);
 			if (sd != null)
-				 ws = sd.getWorkspaces();
+				ws = sd.getWorkspaces();
 		} catch (SWORDClientException | ProtocolViolationException e) {
-			logger.error(
-					"Exception by accessing service document: " + e.getClass().getSimpleName() + ": " + e.getMessage());
+			logger.error("Exception by accessing service document: "
+					+ e.getClass().getSimpleName() + ": " + e.getMessage());
 			return null;
 		}
-		
-		return new SDData(sd,ws);
+
+		return new SDData(sd, ws);
 	}
 
 	@Override
 	public boolean isAccessible() {
 		// checks whether the root service document is accessible
-		return (serviceDocument(new AuthCredentials(swordUser, swordPwd), null) != null);
+		return (serviceDocument(new AuthCredentials(swordUser, swordPwd),
+				null) != null);
 	}
 
 	@Override
 	public boolean isUserRegistered(final String loginName) {
 		// checks whether the user has access / is registered
-		return (serviceDocument(new AuthCredentials(swordUser, swordPwd, loginName), null).sd != null);
+		return (serviceDocument(
+				new AuthCredentials(swordUser, swordPwd, loginName),
+				null).sd != null);
 	}
 
 	@Override
 	public boolean isUserAssigned(final String loginName) {
-		final SDData sdd = serviceDocument(new AuthCredentials(swordUser, swordPwd, loginName), null);
+		final SDData sdd = serviceDocument(
+				new AuthCredentials(swordUser, swordPwd, loginName), null);
 
 		if (sdd.sd == null)
 			return false;
@@ -125,66 +135,73 @@ public class DSpace_SwordOnly implements PublicationRepository {
 		return (hierarchy.getCollectionCount() > 0);
 	}
 
-	private Hierarchy buildHierarchyLevel(final Hierarchy hierarchy, final String sdURL, final String loginName) {
-		final SDData sdd = serviceDocument(new AuthCredentials(swordUser,swordPwd,loginName),sdURL); 
+	private Hierarchy buildHierarchyLevel(final Hierarchy hierarchy,
+			final String sdURL, final String loginName) {
+		final SDData sdd = serviceDocument(
+				new AuthCredentials(swordUser, swordPwd, loginName), sdURL);
 		String lvlName = null;
 		SWORDWorkspace root = null;
-	
-	    if (sdd.ws != null) {
-	    	if (sdd.ws.size()!=1) {
-	    		logger.error("Something is strange! There should be exactly one top-level workspace!");
-	    		return null;		
-	    	} else {
-	    		root = sdd.ws.get(0);
-	    		lvlName = root.getTitle();
-	    		logger.info("Found bibliography level "+lvlName);
-	    	}
-	    }
-	    
-	    hierarchy.setName(lvlName);
-		
-	    for (final SWORDCollection coll : root.getCollections()) {
-	    	final List<String> subservices = coll.getSubServices();
-	    	boolean isCollection = subservices.isEmpty();
-	    	
-	    	Hierarchy child = new Hierarchy(coll.getTitle(), null);
-	    	child.setURL(coll.getHref().toString());
-	    	
-	    	final String[] chops=child.getURL().split("/");
-	    	try {
-	    		child.setHandle(chops[chops.length-2]+"/"+chops[chops.length-1]);
-	    	} catch (ArrayIndexOutOfBoundsException e) {
-	    		logger.error("Cannot obtain a valid DSpace handle from the URL!");
-	    		child.setHandle(null);
-	    	}
 
-	    	if (isCollection) {
-	    		logger.info("FOUND COLLECTION "+child.getName());
-	    		child.setCollection(true);
-	    		if (checkLicense) {
-		    		try {
-		    			child.setPolicy(coll.getCollectionPolicy());
-		    		} catch (ProtocolViolationException e) {
-		    			logger.info("No policy found for "+coll.getTitle()+"! Collections must deliver a policy!");
-		    		}
-	    		}
-				hierarchy.addChild(child);
-	    	} else {
-	    		logger.info("FOUND COMMUNITY "+child.getName());
-	    		child.setCollection(false);
-	    		for (String sd: subservices) {
-	    			hierarchy.addChild(buildHierarchyLevel(child, sd, loginName));
-	    		}
+		if (sdd.ws != null) {
+			if (sdd.ws.size() != 1) {
+				logger.error(
+						"Something is strange! There should be exactly one top-level workspace!");
+				return null;
+			} else {
+				root = sdd.ws.get(0);
+				lvlName = root.getTitle();
+				logger.info("Found bibliography level " + lvlName);
 			}
-	    }
-		
+		}
+
+		hierarchy.setName(lvlName);
+
+		for (final SWORDCollection coll : root.getCollections()) {
+			final List<String> subservices = coll.getSubServices();
+			boolean isCollection = subservices.isEmpty();
+
+			Hierarchy child = new Hierarchy(coll.getTitle(), null);
+			child.setURL(coll.getHref().toString());
+
+			final String[] chops = child.getURL().split("/");
+			try {
+				child.setHandle(chops[chops.length - 2] + "/"
+						+ chops[chops.length - 1]);
+			} catch (ArrayIndexOutOfBoundsException e) {
+				logger.error(
+						"Cannot obtain a valid DSpace handle from the URL!");
+				child.setHandle(null);
+			}
+
+			if (isCollection) {
+				logger.info("FOUND COLLECTION " + child.getName());
+				child.setCollection(true);
+				if (checkLicense) {
+					try {
+						child.setPolicy(coll.getCollectionPolicy());
+					} catch (ProtocolViolationException e) {
+						logger.info("No policy found for " + coll.getTitle()
+								+ "! Collections must deliver a policy!");
+					}
+				}
+				hierarchy.addChild(child);
+			} else {
+				logger.info("FOUND COMMUNITY " + child.getName());
+				child.setCollection(false);
+				for (String sd : subservices) {
+					hierarchy.addChild(
+							buildHierarchyLevel(child, sd, loginName));
+				}
+			}
+		}
+
 		return hierarchy;
 	}
-	
+
 	@Override
 	public Hierarchy getHierarchy(String loginName) {
 		if (!hierarchyMap.containsKey(loginName)) {
-			Hierarchy h = new Hierarchy(null,null);
+			Hierarchy h = new Hierarchy(null, null);
 			h = buildHierarchyLevel(h, swordServiceDocumentRoot, loginName);
 			if (!showUnsubmittable) {
 				h.pruneUnsubmittable();
@@ -195,37 +212,44 @@ public class DSpace_SwordOnly implements PublicationRepository {
 	}
 
 	@Override
-	public SubmissionInfo publishMetadata(String userLogin, String collectionURL, MultiValueMap<String, String> metadataMap) {
+	public SubmissionInfo publishMetadata(String userLogin,
+			String collectionURL, MultiValueMap<String, String> metadataMap) {
 
 		String mimeFormat = "application/atom+xml";
 		String packageFormat = UriRegistry.PACKAGE_BINARY;
 
-		return publishElement(userLogin, collectionURL, mimeFormat, packageFormat, null, metadataMap);
+		return publishElement(userLogin, collectionURL, mimeFormat,
+				packageFormat, null, metadataMap);
 	}
 
 	@Override
-	public SubmissionInfo publishFileAndMetadata(String userLogin, String collectionURL, File fileFullPath,
+	public SubmissionInfo publishFileAndMetadata(String userLogin,
+			String collectionURL, File fileFullPath,
 			MultiValueMap<String, String> metadataMap) {
 
 		String mimeFormat = "application/atom+xml";
 		String packageFormat = UriRegistry.PACKAGE_BINARY;
 
-		return publishElement(userLogin, collectionURL, mimeFormat, packageFormat, fileFullPath, metadataMap);
+		return publishElement(userLogin, collectionURL, mimeFormat,
+				packageFormat, fileFullPath, metadataMap);
 	}
-	
-	private SubmissionInfo publishElement(String userLogin, String collectionURL, String mimeFormat,
-			String packageFormat, File file, MultiValueMap<String, String> metadataMap) {
+
+	private SubmissionInfo publishElement(String userLogin,
+			String collectionURL, String mimeFormat, String packageFormat,
+			File file, MultiValueMap<String, String> metadataMap) {
 
 		// FIXME TODO
 		SubmissionInfo submissionInfo = new SubmissionInfo();
 
 		// Check if only 1 parameter is used (metadata OR file).
 		// Multipart is not supported.
-		if (((file != null) && (metadataMap != null)) || ((file == null) && (metadataMap == null))) {
+		if (((file != null) && (metadataMap != null))
+				|| ((file == null) && (metadataMap == null))) {
 			return null;
 		}
 
-		AuthCredentials authCredentials = new AuthCredentials(swordUser, swordPwd, userLogin);
+		AuthCredentials authCredentials = new AuthCredentials(swordUser,
+				swordPwd, userLogin);
 
 		Deposit deposit = new Deposit();
 
@@ -233,15 +257,18 @@ public class DSpace_SwordOnly implements PublicationRepository {
 			// Check if "meta data as a Map"
 			if (metadataMap != null) {
 				EntryPart ep = new EntryPart();
-				for (final MultiValueMap.Entry<String, List<String>> metadataEntry : metadataMap.entrySet()) {
-				    // FIXME this is a bit hacky
-					if (metadataEntry.getKey().equals(SaraMetaDataField.TYPE.getDisplayName())) {
+				for (final MultiValueMap.Entry<String, List<String>> metadataEntry : metadataMap
+						.entrySet()) {
+					// FIXME this is a bit hacky
+					if (metadataEntry.getKey()
+							.equals(SaraMetaDataField.TYPE.getDisplayName())) {
 						if (publicationType != null) {
-							metadataEntry.setValue(Arrays.asList(publicationType));
+							metadataEntry
+									.setValue(Arrays.asList(publicationType));
 						}
 					}
 					// write ordered list of meta data
-					for (final String m: metadataEntry.getValue()) {
+					for (final String m : metadataEntry.getValue()) {
 						ep.addDublinCore(metadataEntry.getKey(), m);
 					}
 				}
@@ -253,7 +280,7 @@ public class DSpace_SwordOnly implements PublicationRepository {
 				deposit.setFile(new FileInputStream(file));
 				// deposit requires a "filename" parameter
 				// --> in curl: -H "Content-Disposition: filename=file.zip"
-				deposit.setFilename(file.getName()); 
+				deposit.setFilename(file.getName());
 			}
 
 			deposit.setMimeType(mimeFormat);
@@ -273,7 +300,8 @@ public class DSpace_SwordOnly implements PublicationRepository {
 			}
 			submissionInfo.inProgress = deposit.isInProgress();
 
-			DepositReceipt receipt = swordClient.deposit(collectionURL, deposit, authCredentials);
+			DepositReceipt receipt = swordClient.deposit(collectionURL, deposit,
+					authCredentials);
 
 			String[] parts = receipt.getLocation().split("/");
 
@@ -284,11 +312,14 @@ public class DSpace_SwordOnly implements PublicationRepository {
 			return submissionInfo;
 
 		} catch (FileNotFoundException e) {
-			logger.error("Exception by accessing a file: " + e.getClass().getSimpleName() + ": " + e.getMessage());
+			logger.error("Exception by accessing a file: "
+					+ e.getClass().getSimpleName() + ": " + e.getMessage());
 			return null;
 
-		} catch (SWORDClientException | SWORDError | ProtocolViolationException e) {
-			logger.error("Exception by making deposit: " + e.getClass().getSimpleName() + ": " + e.getMessage());
+		} catch (SWORDClientException | SWORDError
+				| ProtocolViolationException e) {
+			logger.error("Exception by making deposit: "
+					+ e.getClass().getSimpleName() + ": " + e.getMessage());
 			return null;
 		}
 	}

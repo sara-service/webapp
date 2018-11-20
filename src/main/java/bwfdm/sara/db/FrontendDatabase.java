@@ -119,11 +119,13 @@ public class FrontendDatabase {
 	}
 
 	private void updateArchiveAccess(final ArchiveAccess access) {
-		db.update("delete from " + ARCHIVE_TABLE
+		db.update(
+				"delete from " + ARCHIVE_TABLE
 						+ " where repo = ? and project = ? and uid = ?",
 				gitRepo, project, user);
-		db.update("insert into " + ARCHIVE_TABLE
-				+ "(repo, project, uid, access) values(?, ?, ?, ?)",
+		db.update(
+				"insert into " + ARCHIVE_TABLE
+						+ "(repo, project, uid, access) values(?, ?, ?, ?)",
 				gitRepo, project, user, access.getDisplayName());
 	}
 
@@ -188,20 +190,19 @@ public class FrontendDatabase {
 	 *            are left unchanged.
 	 */
 	public void setLicenses(final Map<Ref, String> values) {
-			transaction.execute(new TransactionCallbackWithoutResult() {
-				@Override
-				protected void doInTransactionWithoutResult(
-						final TransactionStatus status) {
+		transaction.execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(
+					final TransactionStatus status) {
 				for (final Entry<Ref, String> e : values.entrySet())
 					updateLicense(e.getKey(), e.getValue());
-				}
+			}
 		});
 	}
 
 	private void updateLicense(final Ref ref, final String value) {
-			db.update(
-				"delete from " + LICENSES_TABLE
-						+ " where repo = ? and project = ? and uid = ? and ref = ?",
+		db.update("delete from " + LICENSES_TABLE
+				+ " where repo = ? and project = ? and uid = ? and ref = ?",
 				gitRepo, project, user, ref.path);
 		if (value != null)
 			db.update("insert into " + LICENSES_TABLE
@@ -267,5 +268,5 @@ public class FrontendDatabase {
 					+ "(repo, project, uid, ref, action, start) values(?, ?, ?, ?, ?, ?)",
 					gitRepo, project, user, action.ref.path,
 					action.publicationMethod.name(), action.firstCommit);
-		}
 	}
+}

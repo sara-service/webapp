@@ -40,14 +40,16 @@ public class PublicationRepositoryFactory {
 	 * Creates a new {@link PublicationRepository} instance.
 	 * <p>
 	 * Uses Jackson to construct the object from JSON. For this to work, the
-	 * constructor must be annotated with {@link JsonCreator}, and all its arguments
-	 * must have {@link JsonProperty} annotation giving the argument's name in the
-	 * JSON, ie. something like {@code @JsonProperty("url")}.
+	 * constructor must be annotated with {@link JsonCreator}, and all its
+	 * arguments must have {@link JsonProperty} annotation giving the argument's
+	 * name in the JSON, ie. something like {@code @JsonProperty("url")}.
 	 * 
 	 * @return a new {@link PublicationRepository}
 	 */
-	public PublicationRepository newPublicationRepository(final Map<String, Object> args) {
-		final Class<? extends PublicationRepository> cls = ADAPTERS.get(dao.adapter);
+	public PublicationRepository newPublicationRepository(
+			final Map<String, Object> args) {
+		final Class<? extends PublicationRepository> cls = ADAPTERS
+				.get(dao.adapter);
 		return MAPPER.convertValue(args, cls);
 	}
 }

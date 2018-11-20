@@ -95,7 +95,7 @@ public class DSpace_v6 implements PublicationRepository {
 		deposit_type = dt;
 
 		check_license = cl;
-		
+
 		publication_type = pt;
 
 		rest_client = ClientBuilder.newClient();
@@ -216,11 +216,13 @@ public class DSpace_v6 implements PublicationRepository {
 				if (!found)
 					entry = entry.addChild(community, null);
 			}
-			entry = entry.addChild(collectionsMap.get(url).name, collectionsMap.get(url).policy);
+			entry = entry.addChild(collectionsMap.get(url).name,
+					collectionsMap.get(url).policy);
 			entry.setURL(url);
 			entry.setCollection(true);
 		}
 
+		hierarchy.pruneUnsubmittable();
 		return hierarchy;
 	}
 
@@ -308,23 +310,25 @@ public class DSpace_v6 implements PublicationRepository {
 				CollectionInfo collectionInfo = new CollectionInfo();
 				if (check_license) {
 					try {
-						collectionInfo.policy = collection.getCollectionPolicy().toString();
+						collectionInfo.policy = collection.getCollectionPolicy()
+								.toString();
 					} catch (ProtocolViolationException e) {
-						logger.error("Misconfigured IR: the policy cannot be retrieved but is needed!");
+						logger.error(
+								"Misconfigured IR: the policy cannot be retrieved but is needed!");
 						e.printStackTrace();
 					}
 				}
 				collectionInfo.name = collection.getTitle();
-				collections.put(collection.getHref().toString(), collectionInfo);
+				collections.put(collection.getHref().toString(),
+						collectionInfo);
 			}
 		}
 		return collections;
 	}
 
-
 	@Override
-	public SubmissionInfo publishMetadata(String userLogin, String collectionURL,
-			MultiValueMap<String, String> metadataMap) {
+	public SubmissionInfo publishMetadata(String userLogin,
+			String collectionURL, MultiValueMap<String, String> metadataMap) {
 
 		String mimeFormat = "application/atom+xml";
 		String packageFormat = UriRegistry.PACKAGE_BINARY;
@@ -333,10 +337,10 @@ public class DSpace_v6 implements PublicationRepository {
 				packageFormat, null, metadataMap);
 	}
 
-	private SubmissionInfo publishElement(String userLogin, String collectionURL,
-			String mimeFormat, String packageFormat, File file,
-			MultiValueMap<String, String> metadataMap) {
-		
+	private SubmissionInfo publishElement(String userLogin,
+			String collectionURL, String mimeFormat, String packageFormat,
+			File file, MultiValueMap<String, String> metadataMap) {
+
 		SubmissionInfo submissionInfo = new SubmissionInfo();
 
 		// Check if only 1 parameter is used (metadata OR file).
@@ -360,11 +364,12 @@ public class DSpace_v6 implements PublicationRepository {
 					if (metadataEntry.getKey()
 							.equals(SaraMetaDataField.TYPE.getDisplayName())) {
 						if (publication_type != null) {
-							metadataEntry.setValue(Arrays.asList(publication_type));
+							metadataEntry
+									.setValue(Arrays.asList(publication_type));
 						}
 					}
-					for (final String m: metadataEntry.getValue()) {
-						ep.addDublinCore(metadataEntry.getKey(),m);
+					for (final String m : metadataEntry.getValue()) {
+						ep.addDublinCore(metadataEntry.getKey(), m);
 					}
 				}
 				deposit.setEntryPart(ep);
@@ -408,7 +413,7 @@ public class DSpace_v6 implements PublicationRepository {
 			if (receipt.getSplashPageLink() != null) {
 				submissionInfo.edit_ref = receipt.getSplashPageLink().getHref();
 			}
-			submissionInfo.item_ref = parts[parts.length-1];
+			submissionInfo.item_ref = parts[parts.length - 1];
 			return submissionInfo;
 
 		} catch (FileNotFoundException e) {
@@ -424,9 +429,9 @@ public class DSpace_v6 implements PublicationRepository {
 		}
 	}
 
-
 	@Override
-	public SubmissionInfo publishFileAndMetadata(String userLogin, String collectionURL, File fileFullPath,
+	public SubmissionInfo publishFileAndMetadata(String userLogin,
+			String collectionURL, File fileFullPath,
 			MultiValueMap<String, String> metadataMap) {
 
 		String mimeFormat = "application/atom+xml";
@@ -435,7 +440,7 @@ public class DSpace_v6 implements PublicationRepository {
 		return publishElement(userLogin, collectionURL, mimeFormat,
 				packageFormat, fileFullPath, metadataMap);
 	}
-	
+
 	@Override
 	public Repository getDAO() {
 		return dao;

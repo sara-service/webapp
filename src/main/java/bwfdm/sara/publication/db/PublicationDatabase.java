@@ -66,7 +66,7 @@ public class PublicationDatabase {
 	public <D extends DAO> List<D> getList(Class<D> cls) {
 		return getList(cls, "");
 	}
-	
+
 	/**
 	 * Retrieves a list of all DAO entries matching a given where clause
 	 * 
@@ -111,8 +111,8 @@ public class PublicationDatabase {
 	 * 
 	 * @param d
 	 *            The DAO to be inserted
-	 * @return The original DAO updated with the 'uuid' key which has been created
-	 *         in the DB automatically. If the table uses a 'uuid'.
+	 * @return The original DAO updated with the 'uuid' key which has been
+	 *         created in the DB automatically. If the table uses a 'uuid'.
 	 */
 	public <D extends DAO> D insertInDB(D d) throws DataAccessException {
 		Map<String, Object> values = new HashMap<String, Object>();
@@ -166,7 +166,7 @@ public class PublicationDatabase {
 			// getDynamicFields)
 			set.append(',').append(LAST_MODIFIED_COLUMN).append("=now()");
 		}
-		
+
 		// build the set clause of the prepared statement, and collect the
 		// corresponding values in the right order
 		final Object[] values = new Object[fieldNames.size()];
@@ -212,7 +212,7 @@ public class PublicationDatabase {
 	 *         database
 	 */
 	public <D extends DAO> D updateFromDB(D d) throws DataAccessException {
- 		@SuppressWarnings("unchecked")
+		@SuppressWarnings("unchecked")
 		final Class<? extends D> cls = (Class<? extends D>) d.getClass();
 		final WhereClause<D> where = new WhereClause<D>(cls);
 		final Map<String, Object> singleMap = db.queryForMap(
@@ -229,12 +229,14 @@ public class PublicationDatabase {
 	}
 
 	public PublicationRepository newPublicationRepository(Repository r) {
-		PublicationRepositoryFactory factory = new PublicationRepositoryFactory(r);
-		Map<String, Object> args = readArguments(getTableName(r)+ "_params", r.uuid.toString());
+		PublicationRepositoryFactory factory = new PublicationRepositoryFactory(
+				r);
+		Map<String, Object> args = readArguments(getTableName(r) + "_params",
+				r.uuid.toString());
 		args.put("dao", r);
 		return factory.newPublicationRepository(args);
 	}
-	
+
 	/** @return a publication repository for the given repo UUID */
 
 	public PublicationRepository getPubRepo(final UUID repository_uuid) {
@@ -243,11 +245,11 @@ public class PublicationDatabase {
 	}
 
 	/** @return a list of all supported publication repositories */
-	
+
 	public List<PublicationRepository> getPubRepos() {
 		// FIXME why does this convert a list into a... list??
 		List<PublicationRepository> repos = new ArrayList<PublicationRepository>();
-		for (final Repository r: getList(Repository.class)) {
+		for (final Repository r : getList(Repository.class)) {
 			repos.add(newPublicationRepository(r));
 		}
 		return repos;
@@ -296,7 +298,7 @@ public class PublicationDatabase {
 			return null;
 		}
 	}
-	
+
 	private Map<String, Object> readArguments(final String table,
 			final String id) {
 		return db.queryRowToMap(

@@ -29,6 +29,7 @@ public class MetadataMapping implements DAO {
 	public MetadataMapping(@JsonProperty("uuid") UUID uuid) {
 		this.uuid = uuid;
 	}
+
 	public MetadataMapping() {
 		uuid = null;
 	}

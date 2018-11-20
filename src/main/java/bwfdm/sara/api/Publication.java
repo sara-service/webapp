@@ -93,7 +93,8 @@ public class Publication {
 	}
 
 	@GetMapping("finalMapping")
-	private MultiValueMap<String, String> finalMapping(final HttpSession session) {
+	private MultiValueMap<String, String> finalMapping(
+			final HttpSession session) {
 		final PublicationSession project = PublicationSession
 				.getInstance(session);
 
@@ -172,8 +173,8 @@ public class Publication {
 		i.collection_id = collectionURL;
 
 		// TODO Error Handling
-		final SubmissionInfo submissionInfo = repo.publishMetadata(userLogin, collectionURL,
-				metadataMap);
+		final SubmissionInfo submissionInfo = repo.publishMetadata(userLogin,
+				collectionURL, metadataMap);
 
 		i.repository_url = submissionInfo.edit_ref;
 		i.item_id = submissionInfo.item_ref;
@@ -194,7 +195,7 @@ public class Publication {
 		Map<PublicationField, String> m = new EnumMap<>(PublicationField.class);
 		m.put(PublicationField.REPOSITORY_URL, i.repository_url);
 		project.setMetadata(m);
-		
+
 		if (submissionInfo.inProgress) {
 			redirectionUrl = "/final_workspace.html";
 		} else {
