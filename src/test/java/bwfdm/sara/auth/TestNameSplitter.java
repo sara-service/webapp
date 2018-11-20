@@ -5,7 +5,7 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
 
-import bwfdm.sara.auth.DisplayNameSplitter.Name;
+import bwfdm.sara.project.Name;
 
 public class TestNameSplitter {
 	private DisplayNameSplitter western, eastern;

@@ -7,7 +7,7 @@ function addLicense(form, license) {
 	form.declare.append(option);
 }
 
-function initLicenseList(ref, form, supported, keep, user) {
+function initLicenseList(form, supported, keep, user) {
 	// create the "keep" entry separately. this automatically deals with
 	// the situation where it isn't in the list (ie. "other" or a hidden
 	// license).
@@ -44,7 +44,6 @@ function initLicenseList(ref, form, supported, keep, user) {
 			addLicense(form, info);
 	});
 
-	form.declare.attr("name", ref);
 	validate.init(form.declare, user, function(value) {
 		// we don't care what the user actually selected as long as
 		// we have a useful license, ie. anything but the "choose a
@@ -70,7 +69,6 @@ function updateInfoButton(form) {
 }
 
 function checkLicenses(fields) {
-	console.log(fields);
 	var data = validate.all(fields);
 	if (data)
 		saveAndContinue(data);

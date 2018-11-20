@@ -153,18 +153,26 @@ validate.init = function(field, value, validator, updateHook) {
 	validate.check(elem, true);
 }
 
+// checks whether a field is valid.
+// - if valid, returns the field's value and clears the error message.
+// - if invalid, returns null.
+// - if invalid and disableFeedback is false or missing, displays an error
+//   message underneath the field.
+// accepts either a jQuery object or an element ID
 validate.check = function(field, disableFeedback) {
 	var elem = typeof field == "string" ? $("#" + field) : field;
+	var value = elem.val();
+
 	var validator = elem.data("validator");
-	var res = validator ? validator(elem.val()) : null;
-	if (!disableFeedback)
+	var res = validator ? validator(value) : null;
+	var valid = res === true || res === null;
+	if (valid || !disableFeedback)
 		validate.feedback(elem, res);
 
-	var valid = res === true || res === null;
 	var updateHook = elem.data("updateHook");
 	if (updateHook)
 		updateHook(elem.val(), valid, elem, disableFeedback);
-	return valid;
+	return valid ? value : null;
 }
 
 validate.feedback = function(field, status) {
@@ -189,25 +197,68 @@ validate.feedback = function(field, status) {
 			text.text("please fill in this field");
 		else
 			text.text(status);
+		// focus the field as well to really make sure the user notices
+		fields.focus();
 	}
 }
 
+// if fields is a single string or jQuery object, returns the value of that
+// element as a string. otherwise, fields is an array of selectors and the
+// method will return an object where each selector contributes a single
+// property to the returned object.
+// each selector can be:
+// - { name: "foo", value: bar } → { foo: validate.all(bar) }, that is:
+//   - if bar is an array of selectors, the value is an object
+//   - if bar is a string or jQuery object, the value is simply a string
+// - { name: "foo", array: bar } → { foo: validate.array(bar) }, that is, the
+//   value is an array of strings or objects
+// - { name: "foo", string: bar } → { foo: bar }, that is, a constant value
+// - "foo" is shorthand for { name: "foo", value: "foo" }, because that is the
+//   most common use case
+// always returns null if any of the values is invalid.
 validate.all = function(fields) {
-	var valid = true;
+	if (typeof fields == "string" || fields.jquery)
+		return validate.check(fields);
+
 	var data = {};
 	$.each(fields, function(_, field) {
-		var elem = typeof field == "string" ? $("#" + field) : field;
-		if (!validate.check(elem)) {
-			valid = false;
-			elem.focus(); // let's hope the user notices
+		if (typeof field == "string")
+			field = { name: field, value: field };
+
+		var value;
+		if (field.array)
+			value = validate.array(field.array);
+		else if (field.string)
+			value = field.string;
+		else
+			value = validate.all(field.value);
+		data[field.name] = value;
+
+		// if any field is null, return null instead of an object
+		if (value === null) {
+			data = null;
 			return false;
 		}
-		var id = elem.attr("name");
-		if (!id)
-			id = elem.attr("id");
-		data[id] = elem.val();
 	});
-	if (!valid)
-		return null;
+	return data;
+}
+
+// returns an array data such that data[i] = validate.all(fields[i]). that is,
+// an array of strings or jQuery objects yields an array of strings, but
+// it's possible to use selectors to get an array of objects. JavaScript will
+// handle a mix of dissimilar objects and/or strings, but Jackson won't, so
+// all objects should be in the same format.
+// like validadte.all, always returns null if any of the values is invalid.
+validate.array = function(fields) {
+	var data = [];
+	$.each(fields, function(_, field) {
+		var value = validate.all(field);
+		data.push(value);
+		// if any element is null, return null instead of an object
+		if (value === null) {
+			data = null;
+			return false;
+		}
+	});
 	return data;
 }

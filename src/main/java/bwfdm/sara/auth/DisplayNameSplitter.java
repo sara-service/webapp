@@ -3,6 +3,8 @@ package bwfdm.sara.auth;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import bwfdm.sara.project.Name;
+
 /**
  * Tries to split a single display name into surname and given name. This is
  * impossible to get right all the time, but reasonably easy to get right most
@@ -59,28 +61,17 @@ public class DisplayNameSplitter {
 		// the librarian format is pretty much unambiguous, so always allow it
 		final Matcher librarian = LIBRARIAN.matcher(name);
 		if (librarian.find())
-			return new Name(librarian);
+			return toName(librarian);
 
 		final Matcher m = pattern.matcher(name);
 		if (m.find())
-			return new Name(m);
+			return toName(m);
 
 		// fallback: stick the entire string into the surname
 		return new Name(name, "");
 	}
 
-	public static class Name {
-		public final String givenname;
-		public final String surname;
-
-		public Name(final String surname, final String given) {
-			this.givenname = given;
-			this.surname = surname;
-		}
-
-		public Name(final Matcher m) {
-			givenname = m.group("given");
-			surname = m.group("surname");
-		}
+	private Name toName(final Matcher m) {
+		return new Name(m.group("surname"), m.group("given"));
 	}
 }

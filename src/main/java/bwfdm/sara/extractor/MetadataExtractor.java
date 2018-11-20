@@ -2,9 +2,7 @@ package bwfdm.sara.extractor;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -18,7 +16,7 @@ import bwfdm.sara.extractor.licensee.LicenseeExtractor;
 import bwfdm.sara.git.GitProject;
 import bwfdm.sara.git.GitRepo;
 import bwfdm.sara.git.ProjectInfo;
-import bwfdm.sara.project.MetadataField;
+import bwfdm.sara.project.ArchiveMetadata;
 import bwfdm.sara.project.Ref;
 import bwfdm.sara.project.Ref.RefType;
 import bwfdm.sara.transfer.RepoFile;
@@ -40,8 +38,8 @@ public class MetadataExtractor {
 	 * LGPL are just too important to ignore. Eg. the PostgreSQL license
 	 * mentions {@code COPYRIGHT}, but it's not a very common license.
 	 */
-	private static final Pattern OBVIOUS_GLOBAL_LICENSE = Pattern.compile("^"
-			+ LICENSE + EXTENSION + "$", Pattern.CASE_INSENSITIVE);
+	private static final Pattern OBVIOUS_GLOBAL_LICENSE = Pattern
+			.compile("^" + LICENSE + EXTENSION + "$", Pattern.CASE_INSENSITIVE);
 	/**
 	 * regex for other files that obviously contain a license. this is
 	 * essentially just {@code LICENSE.*}, but because some projects (JRuby...)
@@ -53,8 +51,7 @@ public class MetadataExtractor {
 	private static final Pattern GLOBAL_LICENSE_OR_SUBLICENSE = Pattern
 			.compile("^" + LICENSE + "\\..+$", Pattern.CASE_INSENSITIVE);
 
-	private final Map<MetadataField, String> meta = new EnumMap<>(
-			MetadataField.class);
+	private final ArchiveMetadata meta = new ArchiveMetadata();
 	private final Map<String, String> versions = new HashMap<>();
 	private final TransferRepo clone;
 	private final GitProject project;
@@ -71,35 +68,22 @@ public class MetadataExtractor {
 	}
 
 	/**
-	 * Get autodetected values for a defined set of {@link MetadataField}s. Pass
-	 * {@link MetadataField#values()} to get all fields.
+	 * Get autodetected values for a defined {@link Ref}. Pass <code>null</code>
+	 * to get branch-dependent fields for the default branch.
 	 */
-	public Map<MetadataField, String> get(final MetadataField... fields) {
-		return get(null, fields);
-	}
-
-	/**
-	 * Get autodetected values for a defined set of {@link MetadataField}s. Pass
-	 * {@link MetadataField#values()} to get all fields.
-	 */
-	public Map<MetadataField, String> get(final Ref ref,
-			final MetadataField... fields) {
-		final Map<MetadataField, String> res = new EnumMap<>(meta);
-		if (ref != null) { // need to add version-specific metadata
-			res.put(MetadataField.VERSION, versions.get(ref.path));
-		}
-
-		res.keySet().retainAll(Arrays.asList(fields));
+	public ArchiveMetadata get(final Ref ref) {
+		final ArchiveMetadata res = new ArchiveMetadata(meta);
+		if (ref != null) // need to add version-specific metadata
+			res.version = versions.get(ref.path);
 		return res;
 	}
 
 	public void detectProjectInfo() {
 		final ProjectInfo info = project.getProjectInfo();
 		userInfo = repo.getUserInfo();
-		meta.put(MetadataField.TITLE, info.name);
-		meta.put(MetadataField.DESCRIPTION, info.description);
-		meta.put(MetadataField.SUBMITTER_SURNAME, userInfo.surname);
-		meta.put(MetadataField.SUBMITTER_GIVENNAME, userInfo.givenName);
+		meta.title = info.name;
+		meta.description = info.description;
+		meta.submitter = userInfo.name;
 	}
 
 	public Map<Ref, LicenseFile> detectLicenses(final Collection<Ref> refs)
@@ -121,7 +105,8 @@ public class MetadataExtractor {
 		final List<RepoFile> likely = new ArrayList<>();
 		// final List<RepoFile> possible = new ArrayList<>();
 		final List<RepoFile> files = clone.getFiles(ref);
-		for (final Iterator<RepoFile> iter = files.iterator(); iter.hasNext();) {
+		for (final Iterator<RepoFile> iter = files.iterator(); iter
+				.hasNext();) {
 			final RepoFile file = iter.next();
 			if (file.getType() != FileType.FILE)
 				continue;
@@ -148,8 +133,8 @@ public class MetadataExtractor {
 
 	private LicenseFile detectLicenses(final LicenseeExtractor extractor,
 			final List<RepoFile> files) {
-		final List<LicenseFile> licenses = extractor
-				.detectLicenses(clone, files);
+		final List<LicenseFile> licenses = extractor.detectLicenses(clone,
+				files);
 		// trivial case: only one license file, or missing license
 		if (licenses.size() == 0)
 			return null;
@@ -176,7 +161,7 @@ public class MetadataExtractor {
 	public Ref detectMasterBranch(final Collection<Ref> refs)
 			throws IOException {
 		final Ref master = detectMaster(refs);
-		meta.put(MetadataField.MAIN_BRANCH, master.path);
+		meta.master = master.path;
 		return master;
 	}
 
@@ -216,7 +201,7 @@ public class MetadataExtractor {
 	}
 
 	public void setVersionFromBranch(final Ref ref) {
-		meta.put(MetadataField.VERSION, versions.get(ref.path));
+		meta.version = versions.get(ref.path);
 	}
 
 	public String getEmail() {

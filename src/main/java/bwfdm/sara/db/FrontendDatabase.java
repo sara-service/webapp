@@ -13,7 +13,7 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import bwfdm.sara.project.MetadataField;
+import bwfdm.sara.project.ArchiveMetadata;
 import bwfdm.sara.project.Ref;
 import bwfdm.sara.project.RefAction;
 import bwfdm.sara.project.RefAction.PublicationMethod;
@@ -66,27 +66,29 @@ public class FrontendDatabase {
 	}
 
 	/**
-	 * Get metadata. The returned map is a snapshot; it doesn't reflect later
+	 * Get metadata. The returned object is a snapshot; it doesn't reflect later
 	 * changes made by {@link #setMetadata(MetadataField, String)}! Also, some
-	 * fields will be missing if the user never entered a value for them.
+	 * fields will be <code>null</code> if the user never entered a value for
+	 * them.
 	 *
-	 * @return all metadata fields in a {@link Map}
+	 * @return all metadata fields as a {@link ArchiveMetadata} instance
 	 */
-	public Map<MetadataField, String> getMetadata() {
-		return db.queryRowToMap(
-				"select field, value from " + METADATA_TABLE
-						+ " where repo = ? and project = ? and uid = ?",
-				"field", MetadataField.class, String.class, gitRepo, project,
-				user);
+	public ArchiveMetadata getMetadata() {
+			return db.queryToObject("select title, description, version, master,"
+					+ " submitter_surname, submitter_givenname from "
+					+ METADATA_TABLE
+					+ " where repo = ? and project = ? and uid = ?",
+					ArchiveMetadata.class, gitRepo, project, user);
 	}
 
 	/**
-	 * Set all metadata fields. Any fields missing in the map are left alone.
+	 * Set all metadata fields. <code>null</code> fields in the object result in
+	 * SQL NULLs in the database.
 	 *
 	 * @param values
-	 *            a map of field name to field value
+	 *            a {@link ArchiveMetadata} instance containing the new row
 	 */
-	public void setMetadata(final Map<MetadataField, String> values) {
+	public void setMetadata(final ArchiveMetadata values) {
 		transaction.execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(
@@ -96,16 +98,18 @@ public class FrontendDatabase {
 		});
 	}
 
-	private void updateMetadata(final Map<MetadataField, String> values) {
-		for (MetadataField field : values.keySet()) {
-			final String fieldName = field.getDisplayName();
-			db.update("delete from " + METADATA_TABLE
-					+ " where repo = ? and project = ? and uid = ? and field = ?",
-					gitRepo, project, user, fieldName);
-			db.update("insert into " + METADATA_TABLE
-					+ "(repo, project, uid, field, value) values(?, ?, ?, ?, ?)",
-					gitRepo, project, user, fieldName, values.get(field));
-		}
+	private void updateMetadata(final ArchiveMetadata values) {
+		db.update(
+				"delete from " + METADATA_TABLE
+						+ " where repo = ? and project = ? and uid = ?",
+				gitRepo, project, user);
+		db.update("insert into " + METADATA_TABLE
+				+ "(repo, project, uid, title, description, version, master,"
+				+ " submitter_surname, submitter_givenname)"
+				+ " values(?, ?, ?, ?, ?, ?, ?, ?, ?)", gitRepo, project,
+				user, values.title, values.description, values.version,
+				values.master, values.submitter.surname,
+				values.submitter.givenname);
 	}
 
 	public void setArchiveAccess(final ArchiveAccess access) {
@@ -130,19 +134,10 @@ public class FrontendDatabase {
 	}
 
 	public ArchiveAccess getArchiveAccess() {
-		final List<ArchiveAccess> list = db.queryRowToList(
+		return db.queryToObject(
 				"select access from " + ARCHIVE_TABLE
 						+ " where repo = ? and project = ? and uid = ?",
 				ArchiveAccess.class, gitRepo, project, user);
-		if (list.isEmpty())
-			// public is the method we prefer, so default to that
-			return ArchiveAccess.PUBLIC;
-		if (list.size() == 1)
-			return list.get(0);
-		// this really shouldn't happen: we're selecting by primary key and are
-		// getting more than a single result!
-		throw new IllegalStateException(
-				"primary key not unique for " + ARCHIVE_TABLE + ": " + list);
 	}
 
 	/**
@@ -155,7 +150,7 @@ public class FrontendDatabase {
 	 *         tag
 	 */
 	public Map<Ref, String> getLicenses() {
-		return db.queryRowToMap(
+		return db.queryToMap(
 				"select ref, license from " + LICENSES_TABLE
 						+ " where repo = ? and project = ? and uid = ?",
 				"ref", Ref.class, String.class, gitRepo, project, user);
@@ -220,7 +215,7 @@ public class FrontendDatabase {
 	 * @return a {@link List} of {@link RefAction}
 	 */
 	public List<RefAction> getRefActions() {
-		return db.queryRowToList(
+		return db.queryToList(
 				"select ref, action, start from " + ACTION_TABLE
 						+ " where repo = ? and project = ? and uid = ?",
 				RefAction.class, gitRepo, project, user);
@@ -235,7 +230,7 @@ public class FrontendDatabase {
 	 * @return a {@link List} of {@link Ref Refs}
 	 */
 	public List<Ref> getSelectedRefs() {
-		return db.queryRowToList(
+		return db.queryToList(
 				"select ref from " + ACTION_TABLE
 						+ " where repo = ? and project = ? and uid = ?",
 				Ref.class, gitRepo, project, user);

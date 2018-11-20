@@ -7,6 +7,8 @@ import javax.servlet.http.HttpSession;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 
+import bwfdm.sara.project.Name;
+
 public interface AuthProvider {
 	/**
 	 * @return <code>true</code> if we already have a token for GitLab,
@@ -74,22 +76,16 @@ public interface AuthProvider {
 		 */
 		public final String email;
 		/**
-		 * The user's preferred way of representing his/her surname in a Unicode
+		 * The user's preferred way of representing his/her name in a Unicode
 		 * string.
 		 */
-		public final String surname;
-		/**
-		 * The user's preferred way of representing his/her given name in a
-		 * Unicode string.
-		 */
-		public final String givenName;
+		public final Name name;
 
 		public UserInfo(final String userID, final String email,
-				final String surname, final String givenName) {
+				final Name name) {
 			this.userID = userID;
 			this.email = email;
-			this.surname = surname;
-			this.givenName = givenName;
+			this.name = name;
 		}
 	}
 }

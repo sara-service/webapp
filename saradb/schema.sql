@@ -163,11 +163,13 @@ CREATE TABLE fe_temp_metadata(
 	repo text NOT NULL,
 	project text NOT NULL,
 	uid text NOT NULL,
-	field text NOT NULL,
-	value text NOT NULL,
-	CHECK (field in ('title', 'description', 'version', 'master',
-		'submitter_surname', 'submitter_givenname')),
-	PRIMARY KEY (repo, project, uid, field)
+	title text,
+	description text,
+	version text,
+	master text,
+	submitter_surname text,
+	submitter_givenname text,
+	PRIMARY KEY (repo, project, uid)
 );
 
 -- archive access (and archive selection, at some point)

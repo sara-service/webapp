@@ -36,8 +36,8 @@ import bwfdm.sara.git.ArchiveProject;
 import bwfdm.sara.git.ArchiveRepo;
 import bwfdm.sara.git.ArchiveRepo.ProjectExistsException;
 import bwfdm.sara.project.ArchiveJob;
+import bwfdm.sara.project.ArchiveMetadata;
 import bwfdm.sara.project.LicensesInfo.LicenseInfo;
-import bwfdm.sara.project.MetadataField;
 import bwfdm.sara.project.Ref;
 import bwfdm.sara.publication.Item;
 import bwfdm.sara.publication.ItemState;
@@ -127,7 +127,7 @@ public class PushTask extends Task {
 
 	private void commitMetadataToRepo() throws IOException {
 		final TransferRepo repo = job.clone;
-		final String version = job.meta.get(MetadataField.VERSION);
+		final String version = job.meta.version;
 		final ObjectId versionFile = repo.insertBlob(version);
 		// TODO this should definitely be configurable!
 		final PersonIdent sara = new PersonIdent("SARA Service",
@@ -179,10 +179,10 @@ public class PushTask extends Task {
 
 	private String getMetadataXML(final String licenseID) {
 		final MetadataFormatter formatter = new MetadataFormatter();
-		formatter.addDC("title", job.meta.get(MetadataField.TITLE));
-		formatter.addDC("description", job.meta.get(MetadataField.DESCRIPTION));
-		final String submitter = job.meta.get(MetadataField.SUBMITTER_SURNAME)
-				+ ", " + job.meta.get(MetadataField.SUBMITTER_GIVENNAME);
+		formatter.addDC("title", job.meta.title);
+		formatter.addDC("description", job.meta.description);
+		final String submitter = job.meta.submitter.surname + ", "
+				+ job.meta.submitter.givenname;
 		formatter.addDC("publisher", submitter);
 		formatter.addDC("date", ISO8601.format(now));
 		formatter.addDC("type", "Software");
@@ -224,7 +224,7 @@ public class PushTask extends Task {
 	}
 
 	private UUID createItemInDB(final String webURL,
-			Map<MetadataField, String> meta, boolean isPublic) {
+			ArchiveMetadata meta, boolean isPublic) {
 		final Item i = new Item();
 		i.archive_uuid = job.archiveUUID;
 		i.source_uuid = job.sourceUUID;
@@ -244,14 +244,14 @@ public class PushTask extends Task {
 		i.repository_login_id = job.gitrepoEmail;
 		// submitter of publication
 		// FIXME store as separate fields in item!
-		i.meta_submitter = job.meta.get(MetadataField.SUBMITTER_SURNAME) + ", "
-				+ job.meta.get(MetadataField.SUBMITTER_GIVENNAME);
+		i.meta_submitter = job.meta.submitter.surname + ", "
+				+ job.meta.submitter.givenname;
 		// version of git project
-		i.meta_version = meta.get(MetadataField.VERSION);
+		i.meta_version = meta.version;
 		// title of git project
-		i.meta_title = meta.get(MetadataField.TITLE);
+		i.meta_title = meta.title;
 		// description of git project
-		i.meta_description = meta.get(MetadataField.DESCRIPTION);
+		i.meta_description = meta.description;
 		// URL where the archive has been deposited
 		i.archive_url = webURL;
 

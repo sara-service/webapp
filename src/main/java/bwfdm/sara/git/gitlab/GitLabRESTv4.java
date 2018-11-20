@@ -14,7 +14,6 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import bwfdm.sara.auth.DisplayNameSplitter;
-import bwfdm.sara.auth.DisplayNameSplitter.Name;
 import bwfdm.sara.auth.OAuthCode;
 import bwfdm.sara.auth.OAuthREST;
 import bwfdm.sara.auth.ShibAuth;
@@ -22,6 +21,7 @@ import bwfdm.sara.git.DataObject;
 import bwfdm.sara.git.GitProject;
 import bwfdm.sara.git.GitRepo;
 import bwfdm.sara.git.ProjectInfo;
+import bwfdm.sara.project.Name;
 
 /** high-level abstraction of the GitLab REST API. */
 public class GitLabRESTv4 implements GitRepo {
@@ -103,7 +103,7 @@ public class GitLabRESTv4 implements GitRepo {
 				new ParameterizedTypeReference<GLUserInfo>() {
 				});
 		final Name name = nameSplitter.split(info.displayName);
-		return new UserInfo(info.userID, info.email, name.surname, name.givenname);
+		return new UserInfo(info.userID, info.email, name);
 	}
 
 	@Override
