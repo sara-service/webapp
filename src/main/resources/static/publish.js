@@ -76,7 +76,7 @@ function setCollectionList(select, collection_path, hierarchy) {
 					.text(collection_path).data("policy", hierarchy.policy));
 		} else {
 			select.append($("<option>").prop("disabled","true").attr("value", hierarchy.url)
-					.text(collection_path).addClass("text-muted"));
+					.text(collection_path));
 		};
 }
 
@@ -137,7 +137,7 @@ function updateCollections(_, valid) {
 		if (selectedCollection == null)
 			collection.prepend($("<option>").prop('disabled', true)
 				.prop('selected', true).attr("id", "collection_placeholder")
-				.text("Please select a collection").addClass("text-muted"));
+				.text("Please select a collection"));
 	} else
 		collection.prop("disabled", true);
 	
