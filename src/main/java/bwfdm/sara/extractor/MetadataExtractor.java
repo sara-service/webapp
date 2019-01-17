@@ -17,6 +17,7 @@ import bwfdm.sara.git.GitProject;
 import bwfdm.sara.git.GitRepo;
 import bwfdm.sara.git.ProjectInfo;
 import bwfdm.sara.project.ArchiveMetadata;
+import bwfdm.sara.project.Name;
 import bwfdm.sara.project.Ref;
 import bwfdm.sara.project.Ref.RefType;
 import bwfdm.sara.transfer.RepoFile;
@@ -73,12 +74,48 @@ public class MetadataExtractor {
 	 */
 	public ArchiveMetadata get(final Ref ref) {
 		final ArchiveMetadata res = new ArchiveMetadata(meta);
-		if (ref != null) // need to add version-specific metadata
-			res.version = versions.get(ref.path);
+		// add branch-specific metadata
+		final String path = ref != null ? ref.path : meta.master;
+		res.version = versions.get(path);
 		return res;
 	}
 
-	public void detectProjectInfo() {
+	/**
+	 * The user's validated email address from project settings. Implementations
+	 * of {@link GitRepo#getUserInfo()} must ensure the "validated" part.
+	 */
+	public String getEmail() {
+		return userInfo.email;
+	}
+
+	/**
+	 * The user's validated, unique user ID in that git repo. Implementations of
+	 * {@link GitRepo#getUserInfo()} must ensure the "validated" and "unique"
+	 * parts.
+	 */
+	public String getUserID() {
+		return userInfo.userID;
+	}
+
+	/**
+	 * Runs the main metadata detection. After this method, {@link #get(Ref)},
+	 * {@link #getEmail()} and {@link #getUserID()} return valid information.
+	 * 
+	 * @param refs
+	 *            set of refs to analyze
+	 * @throws IOException
+	 *             if repo access fails
+	 */
+	public void detectMetaData(final Collection<Ref> refs) throws IOException {
+		detectProjectInfo();
+
+		final Ref master = detectMasterBranch(refs);
+		detectAuthors(refs);
+		detectVersions(refs); // detect for ALL branches
+		meta.version = versions.get(master.path);
+	}
+
+	private void detectProjectInfo() {
 		final ProjectInfo info = project.getProjectInfo();
 		userInfo = repo.getUserInfo();
 		meta.title = info.name;
@@ -86,79 +123,7 @@ public class MetadataExtractor {
 		meta.submitter = userInfo.name;
 	}
 
-	public Map<Ref, LicenseFile> detectLicenses(final Collection<Ref> refs)
-			throws IOException {
-		licenses.clear();
-		licenseSet.clear();
-		for (final Ref ref : refs) {
-			final LicenseFile license = detectLicenses(ref);
-			if (license != null) {
-				licenses.put(ref, license);
-				licenseSet.add(license);
-			}
-		}
-		return licenses;
-	}
-
-	private LicenseFile detectLicenses(final Ref ref) throws IOException {
-		final List<RepoFile> obvious = new ArrayList<>();
-		final List<RepoFile> likely = new ArrayList<>();
-		// final List<RepoFile> possible = new ArrayList<>();
-		final List<RepoFile> files = clone.getFiles(ref);
-		for (final Iterator<RepoFile> iter = files.iterator(); iter
-				.hasNext();) {
-			final RepoFile file = iter.next();
-			if (file.getType() != FileType.FILE)
-				continue;
-
-			final String name = file.getName();
-			if (OBVIOUS_GLOBAL_LICENSE.matcher(name).find())
-				obvious.add(file);
-			else if (GLOBAL_LICENSE_OR_SUBLICENSE.matcher(name).find())
-				likely.add(file);
-			// else
-			// possible.add(file);
-		}
-
-		final LicenseeExtractor extractor = LicenseeExtractor.getInstance();
-		if (!obvious.isEmpty())
-			return detectLicenses(extractor, obvious);
-		if (!likely.isEmpty())
-			return detectLicenses(extractor, likely);
-		// if (!possible.isEmpty())
-		// return detectLicenses(extractor, possible);
-		// there really isn't any license file in this branch
-		return null;
-	}
-
-	private LicenseFile detectLicenses(final LicenseeExtractor extractor,
-			final List<RepoFile> files) {
-		final List<LicenseFile> licenses = extractor.detectLicenses(clone,
-				files);
-		// trivial case: only one license file, or missing license
-		if (licenses.size() == 0)
-			return null;
-		if (licenses.size() == 1)
-			return licenses.get(0);
-
-		// multiple license files. even if only one of them matches, the others
-		// could contain licenses we just don't know. treat as unrecognized
-		// license.
-		// TODO maybe we should pick the preferred file here?
-		// the sets are in order of preference anyway, though
-		final RepoFile file = files.get(0);
-		return new LicenseFile(file, null, Float.NaN);
-	}
-
-	public Map<Ref, LicenseFile> getLicenses() {
-		return licenses;
-	}
-
-	public Set<LicenseFile> getLicenseSet() {
-		return licenseSet;
-	}
-
-	public Ref detectMasterBranch(final Collection<Ref> refs)
+	private Ref detectMasterBranch(final Collection<Ref> refs)
 			throws IOException {
 		final Ref master = detectMaster(refs);
 		meta.master = master.path;
@@ -191,7 +156,16 @@ public class MetadataExtractor {
 		return best;
 	}
 
-	public void detectVersion(final Collection<Ref> set) throws IOException {
+	private void detectAuthors(final Collection<Ref> set) throws IOException {
+		final List<Name> authors = new ArrayList<>();
+		// trivial heuristic: the submitter wrote all of it.
+		// probably works just fine in a fairly large number of cases...
+		// TODO implement something smarter (obviously)
+		authors.add(userInfo.name);
+		meta.setAuthors(authors);
+	}
+
+	private void detectVersions(final Collection<Ref> set) throws IOException {
 		for (final Ref ref : set) {
 			String data = clone.readString(ref, VERSION_FILE);
 			if (data == null)
@@ -200,15 +174,98 @@ public class MetadataExtractor {
 		}
 	}
 
-	public void setVersionFromBranch(final Ref ref) {
-		meta.version = versions.get(ref.path);
+	/**
+	 * Gets the licenses for each ref. The map contains either the detected
+	 * {@link LicenseFile} or <code>null</code> if no license file was detected
+	 * in that branch.
+	 * 
+	 * @return a map containing all detected license files, per branch
+	 */
+	public Map<Ref, LicenseFile> getLicenses() {
+		return licenses;
 	}
 
-	public String getEmail() {
-		return userInfo.email;
+	/**
+	 * Gets the set of {@link LicenseFile} used across all refs. If there are
+	 * several files containing the same license in slightly different variants
+	 * (ie. different hash), all variants are returned. That is, the returned
+	 * set can contain several versions of the same license, eg. two GPLs with
+	 * different line endings.
+	 * 
+	 * @return the set of {@link LicenseFile} that were detected
+	 */
+	public Set<LicenseFile> getLicenseSet() {
+		return licenseSet;
 	}
 
-	public String getUserID() {
-		return userInfo.userID;
+	/**
+	 * Runs the license detection. After this method, {@link #getLicenses()} and
+	 * {@link #getLicenseSet()} return valid information.
+	 * 
+	 * @param refs
+	 *            set of refs to analyze
+	 * @throws IOException
+	 *             if repo access fails
+	 */
+	public void detectLicenses(final Collection<Ref> refs) throws IOException {
+		licenses.clear();
+		licenseSet.clear();
+		for (final Ref ref : refs) {
+			final LicenseFile license = detectLicenses(ref);
+			if (license != null) {
+				licenses.put(ref, license);
+				licenseSet.add(license);
+			}
+		}
+	}
+
+	private LicenseFile detectLicenses(final LicenseeExtractor extractor,
+			final List<RepoFile> files) {
+		final List<LicenseFile> licenses = extractor.detectLicenses(clone,
+				files);
+		// trivial case: only one license file, or missing license
+		if (licenses.size() == 0)
+			return null;
+		if (licenses.size() == 1)
+			return licenses.get(0);
+
+		// multiple license files. even if only one of them matches, the others
+		// could contain licenses we just don't know. treat as unrecognized
+		// license.
+		// TODO maybe we should pick the preferred file here?
+		// the sets are in order of preference anyway, though
+		final RepoFile file = files.get(0);
+		return new LicenseFile(file, null, Float.NaN);
+	}
+
+	private LicenseFile detectLicenses(final Ref ref) throws IOException {
+		final List<RepoFile> obvious = new ArrayList<>();
+		final List<RepoFile> likely = new ArrayList<>();
+		// final List<RepoFile> possible = new ArrayList<>();
+		final List<RepoFile> files = clone.getFiles(ref);
+		for (final Iterator<RepoFile> iter = files.iterator(); iter
+				.hasNext();) {
+			final RepoFile file = iter.next();
+			if (file.getType() != FileType.FILE)
+				continue;
+
+			final String name = file.getName();
+			if (OBVIOUS_GLOBAL_LICENSE.matcher(name).find())
+				obvious.add(file);
+			else if (GLOBAL_LICENSE_OR_SUBLICENSE.matcher(name).find())
+				likely.add(file);
+			// else
+			// possible.add(file);
+		}
+
+		final LicenseeExtractor extractor = LicenseeExtractor.getInstance();
+		if (!obvious.isEmpty())
+			return detectLicenses(extractor, obvious);
+		if (!likely.isEmpty())
+			return detectLicenses(extractor, likely);
+		// if (!possible.isEmpty())
+		// return detectLicenses(extractor, possible);
+		// there really isn't any license file in this branch
+		return null;
 	}
 }

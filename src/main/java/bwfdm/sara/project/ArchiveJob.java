@@ -197,6 +197,10 @@ public class ArchiveJob {
 		buffer.add(meta.master);
 		buffer.add(meta.submitter.surname);
 		buffer.add(meta.submitter.givenname);
+		for (final Name a : meta.getAuthors()) {
+			buffer.add(a.surname);
+			buffer.add(a.givenname);
+		}
 		// license(s).html
 		for (RefAction a : actions)
 			buffer.add(licenses.get(a.ref));

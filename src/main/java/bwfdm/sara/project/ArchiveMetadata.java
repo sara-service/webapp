@@ -1,6 +1,12 @@
 package bwfdm.sara.project;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -21,8 +27,17 @@ public class ArchiveMetadata {
 	/** name of the submitting user */
 	@JsonProperty
 	public Name submitter;
+	/** list of authors, in order (immutable {@link List} instance) */
+	@JsonIgnore
+	private List<Name> authors;
 
+	/**
+	 * Used (and needed) by Jackson to create the object from JSON. The
+	 * properties are then set by directly accessing the fields (using
+	 * {@link #setAuthors(Collection)} for {@link #authors}).
+	 */
 	public ArchiveMetadata() {
+		authors = Collections.emptyList();
 	}
 
 	public ArchiveMetadata(final ArchiveMetadata orig) {
@@ -31,9 +46,13 @@ public class ArchiveMetadata {
 		version = orig.version;
 		master = orig.master;
 		submitter = orig.submitter;
+		authors = orig.authors;
 	}
 
-	/** Used by the database connection code only. */
+	/**
+	 * Used to create an instance from a database row, with separate fields for
+	 * the submitter's surname and givenname.
+	 */
 	@JsonCreator
 	public ArchiveMetadata(@JsonProperty("title") String title,
 			@JsonProperty("description") String description,
@@ -46,6 +65,21 @@ public class ArchiveMetadata {
 		this.version = version;
 		this.master = master;
 		this.submitter = new Name(submitterSurname, submitterGivenname);
+		authors = Collections.emptyList();
+	}
+
+	/** list of authors, in order */
+	@JsonProperty
+	public Collection<Name> getAuthors() {
+		return Collections.unmodifiableList(authors);
+	}
+
+	@JsonProperty
+	public void setAuthors(final Collection<Name> authors) {
+		if (authors != null)
+			this.authors = new ArrayList<>(authors);
+		else
+			this.authors = Collections.emptyList();
 	}
 
 	/**
@@ -70,6 +104,8 @@ public class ArchiveMetadata {
 			res.master = meta.master;
 		if (meta.submitter != null)
 			res.submitter = meta.submitter;
+		if (!meta.authors.isEmpty())
+			res.setAuthors(meta.authors);
 		return res;
 	}
 
@@ -85,6 +121,8 @@ public class ArchiveMetadata {
 		if (!meta.master.equals(master))
 			return false;
 		if (!meta.submitter.equals(submitter))
+			return false;
+		if (!meta.authors.equals(authors))
 			return false;
 		return true;
 	}
