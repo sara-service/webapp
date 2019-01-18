@@ -1,7 +1,13 @@
 package bwfdm.sara;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.Properties;
+
 import javax.annotation.PostConstruct;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -16,6 +22,8 @@ import bwfdm.sara.extractor.licensee.LicenseeExtractor;
 @Configuration
 @EnableAutoConfiguration(exclude = { ErrorMvcAutoConfiguration.class })
 public class Application extends SpringBootServletInitializer {
+	private static final Log logger = LogFactory.getLog(Application.class);
+
 	/** Tomcat entry point. */
 	@Override
 	protected SpringApplicationBuilder configure(
@@ -24,8 +32,16 @@ public class Application extends SpringBootServletInitializer {
 	}
 
 	/** Eclipse IDE entry point. */
-	public static void main(final String[] args) {
-		SpringApplication.run(Application.class, args);
+	public static void main(final String[] args) throws IOException {
+		// load email credentials from a separate file. these context params are
+		// needed for development but cannot be put in the (public)
+		// application.properties used for the other development context params.
+		final Properties emailCred = new Properties();
+		emailCred.load(new FileInputStream("email.properties"));
+
+		final SpringApplication app = new SpringApplication(Application.class);
+		app.setDefaultProperties(emailCred);
+		app.run(args);
 	}
 
 	/**

@@ -198,7 +198,7 @@ validate.feedback = function(field, status) {
 		else
 			text.text(status);
 		// focus the field as well to really make sure the user notices
-		fields.focus();
+		elem.focus();
 	}
 }
 

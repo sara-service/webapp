@@ -149,9 +149,13 @@ function initFields(info) {
 				{ name: "surname", value: author.surname },
 				{ name: "givenname", value: author.givenname }]);
 		});
-		var values = validate.all(['title', 'description', 'master', 'version',
+		// note: these should be in page order because the first field to be
+		// invalid will be focused. this becomes very confusing if several are
+		// invalid, but it jumps to one somewhere in the middle of the page.
+		var values = validate.all([
 			{ name: "submitter", value: [ "surname", "givenname" ]},
-			{ name: "authors", array: authorList}]);
+			'title', 'description', 'master', 'version',
+			{ name: "authors", array: authorList }]);
 		if (!values)
 			return;
 		API.put("save fields", "/api/meta", values, function() {

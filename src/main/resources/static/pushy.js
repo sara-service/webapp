@@ -1,3 +1,5 @@
+"use strict";
+
 $(function() {
 	API.get("initialize page", "/api/session-info", {}, function(info) {
 		$("*[data-old]").text(info.project);
