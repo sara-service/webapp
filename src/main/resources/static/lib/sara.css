@@ -71,6 +71,10 @@
 	margin-right: 1em;
 }
 
+.list-dense > li {
+	margin: 0px;
+}
+
 li {
 	margin-bottom: 1ex;
 }

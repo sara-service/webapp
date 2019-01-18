@@ -51,6 +51,12 @@ function initMeta(info) {
 		"version", "master"], function(_, name) {
 			$("#" + name).text(info[name]);
 		});
+	$.each(info.authors, function(_, author) {
+		var row = template("author");
+		row.surname.text(author.surname);
+		row.givenname.text(author.givenname);
+		$("#authors").append(row.root);
+	});
 }
 
 function init(info) {

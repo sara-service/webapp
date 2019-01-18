@@ -1,6 +1,6 @@
 "use strict";
 
-var meta, cache = {}, branches = [];
+var meta, cache = {}, branches = [], authors = [];
 
 function initField(id, reset, branchDependent, validator, speshul) {
 	var elem = $("#" + id);
@@ -15,6 +15,60 @@ function initField(id, reset, branchDependent, validator, speshul) {
 
 function updateBranchSpecific() {
 	validate.check("version", true);
+}
+
+function removeAuthor(row) {
+	// don't allow user to remove the last entry
+	if (authors.length == 1)
+		return;
+
+	row.root.remove();
+	authors.splice(authors.indexOf(row), 1);
+
+	// also disable the button to avoid confusion
+	if (authors.length == 1)
+		authors[0].remove.addClass("disabled");
+}
+
+function addAuthor(info, predecessor) {
+	if (info === null)
+		info = { surname: "", givenname: "" };
+
+	var row = template("author");
+	validate.init(row.surname, info.surname, function(value) {
+			if (value.trim() == "")
+				return "Please provide the author's surname";
+			return true;
+		});
+	validate.init(row.givenname, info.givenname, function(value) {
+			if (value.trim() == "")
+				return "Please provide the author's given name";
+			return true;
+		});
+	row.add.click(function() {
+		addAuthor(null, row);
+	});
+	row.remove.click(function() {
+		removeAuthor(row);
+	});
+
+	if (predecessor) {
+		predecessor.root.after(row.root);
+		authors.splice(authors.indexOf(predecessor) + 1, 0, row);
+	} else {
+		$("#authors").append(row.root);
+		authors.push(row);
+	}
+
+	// enable delete buttons if there is more than a single author field
+	if (authors.length > 1)
+		row.remove.removeClass("disabled");
+	// if there were ≥2 fields before, all buttons are already enabled. but
+	// if we're inserting the second field, the existing author field's button
+	// is disabled and we need to enable it here
+	if (authors.length == 2)
+		authors[0].remove.removeClass("disabled");
+	return row;
 }
 
 function initFields(info) {
@@ -81,9 +135,23 @@ function initFields(info) {
 			}
 		});
 
+	if (meta.value.authors.length > 0)
+		$.each(meta.value.authors, function (seq, author) {
+			addAuthor(author);
+		});
+	else
+		addAuthor(null); // make sure there always is at least one field
+
 	$("#next_button").click(function() {
+		var authorList = [];
+		$.each(authors, function(_, author) {
+			authorList.push([
+				{ name: "surname", value: author.surname },
+				{ name: "givenname", value: author.givenname }]);
+		});
 		var values = validate.all(['title', 'description', 'master', 'version',
-			{ name: "submitter", value: [ "surname", "givenname" ]}]);
+			{ name: "submitter", value: [ "surname", "givenname" ]},
+			{ name: "authors", array: authorList}]);
 		if (!values)
 			return;
 		API.put("save fields", "/api/meta", values, function() {

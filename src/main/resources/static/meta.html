@@ -119,6 +119,37 @@
 				</div>
 			</div>
 		</form>
+
+		<div class="row">
+			<div class="col-xs-12 action-header">
+				<h1>Who do you want to credit for it?</h1>
+			</div>
+		</div>
+		<form class="form-horizontal" id="authors">
+			<div class="form-group has-feedback hidden" id="author">
+				<label class="control-label sr-only" id="submitter_label">author's full name</label>
+				<div class="col-xs-4 col-sm-4 col-md-4 nopad">
+					<input type="text" class="form-control" name="surname" placeholder="author's surname" aria-describedby="submitter_label">
+					<span class="form-control-feedback" aria-hidden="true"></span>
+					<span class="form-control-feedback-text text-danger hidden"></span>
+				</div>
+				<div class="col-xs-5 col-sm-6 col-md-7 nopad">
+					<div class="field-with-comma">
+						<input type="text" class="form-control" name="givenname" placeholder="author's given name" aria-describedby="submitter_label">
+						<span class="form-control-feedback" aria-hidden="true"></span>
+						<span class="form-control-feedback-text text-danger hidden"></span>
+					</div>
+				</div>
+				<div class="col-xs-3 col-sm-2 col-md-1 nopad"><div class="float-xs-right">
+					<button type="button" class="btn btn-sm btn-success" name="add">+</button>
+					<button type="button" class="btn btn-sm btn-danger disabled" name="remove">–</button>
+				</div></div>
+			</div>
+		</form>
+		<p class="col-sm-12">
+			Please list all authors who contributed significantly to this crime
+			against software engineering, worst offenders first.
+		</p>
 	</div>
 
 	<p style="height:3ex"></p>
