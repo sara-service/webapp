@@ -38,6 +38,7 @@ import bwfdm.sara.git.ArchiveRepo.ProjectExistsException;
 import bwfdm.sara.project.ArchiveJob;
 import bwfdm.sara.project.ArchiveMetadata;
 import bwfdm.sara.project.LicensesInfo.LicenseInfo;
+import bwfdm.sara.project.Name;
 import bwfdm.sara.project.Ref;
 import bwfdm.sara.publication.Item;
 import bwfdm.sara.publication.ItemState;
@@ -181,9 +182,10 @@ public class PushTask extends Task {
 		final MetadataFormatter formatter = new MetadataFormatter();
 		formatter.addDC("title", job.meta.title);
 		formatter.addDC("description", job.meta.description);
-		final String submitter = job.meta.submitter.surname + ", "
-				+ job.meta.submitter.givenname;
-		formatter.addDC("publisher", submitter);
+		formatter.addDC("publisher", job.meta.submitter.surname + ", "
+				+ job.meta.submitter.givenname);
+		for (final Name a : job.meta.getAuthors())
+			formatter.addDC("creator", a.surname + ", " + a.givenname);
 		formatter.addDC("date", ISO8601.format(now));
 		formatter.addDC("type", "Software");
 		formatter.addDC("rights", licenseID);
@@ -246,6 +248,7 @@ public class PushTask extends Task {
 		// FIXME store as separate fields in item!
 		i.meta_submitter = job.meta.submitter.surname + ", "
 				+ job.meta.submitter.givenname;
+		// TODO store authors in item table as well
 		// version of git project
 		i.meta_version = meta.version;
 		// title of git project
