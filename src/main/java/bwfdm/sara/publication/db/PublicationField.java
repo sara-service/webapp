@@ -13,6 +13,7 @@ public enum PublicationField {
 	/** software version number */
 	VERSION("version"), SUBMITTER("submitter"),
 	/** ID of the institutional repository to publish the item in */
+	PUBID("pubid"),
 	PUBLICATION_REPOSITORY("pubrepo"),
 	/**
 	 * unique identifier of the selected collection in the institutional

@@ -71,6 +71,21 @@ public class PublicationSession {
 
 		this.userID = userID;
 		this.item = item;
+
+		updatePubID();
+	}
+
+	void updatePubID() {
+		Hash h = new Hash();
+		// FIXME this is better to be casted somehow, order may change the hash! Help!!! Matthias?
+		for (Map.Entry<PublicationField, String> entry : this.meta.entrySet())
+		{
+			if (entry.getKey() != PublicationField.PUBID) {
+				h.add(entry.getKey().getDisplayName());
+				h.add(entry.getValue());
+			}
+		}
+		meta.put(PublicationField.PUBID, h.getHash());
 	}
 
 	private void checkHaveItem() {
@@ -115,6 +130,7 @@ public class PublicationSession {
 
 	public void setMetadata(final Map<PublicationField, String> values) {
 		meta.putAll(values);
+		updatePubID();
 	}
 
 	public static PublicationSession getInstance(final HttpSession session) {

@@ -18,12 +18,12 @@ function blockLoaded(name) {
 
 function initMeta(info) {
 	$.each(["title", "description", "version", "pubrepo_displayname", "collection_displayname",
-		"email", "submitter"], function(_, name) {
+		"email", "submitter", "pubid"], function(_, name) {
 			$("#" + name).text(info[name]);
 		});
-
-	$('#pubrepo_displayname').prop('title',info["pubrepo_displayname"]);
-	$('#collection_displayname').prop('title',info["collection_displayname"]);
+	// display some info tooltip on mouse hover
+	$('#pubrepo_displayname').prop('title',info["pubrepo"]);
+	$('#collection_displayname').prop('title',info["collection"]);
 	blockLoaded("meta");
 }
 
