@@ -22,8 +22,8 @@ function initMeta(info) {
 			$("#" + name).text(info[name]);
 		});
 
-	$('#pubrepo_displayname').prop('title',info["pubrepo"]);
-	$('#collection_displayname').prop('title',info["collection"]);
+	$('#pubrepo_displayname').prop('title',info["pubrepo_displayname"]);
+	$('#collection_displayname').prop('title',info["collection_displayname"]);
 	blockLoaded("meta");
 }
 
