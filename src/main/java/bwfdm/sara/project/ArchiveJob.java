@@ -197,8 +197,6 @@ public class ArchiveJob {
 			buffer.add(getHead(a.ref));
 		}
 		// meta.html
-		// enum values are in a defined order (same order as declared) so we'll
-		// be adding them in the same order every time
 		buffer.add(meta.title);
 		buffer.add(meta.description);
 		buffer.add(meta.version);
