@@ -1,5 +1,6 @@
 package bwfdm.sara.project;
 
+import java.util.Calendar;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.UUID;
@@ -28,6 +29,7 @@ public class PublicationSession {
 			PublicationField.class);
 	private String userID;
 	private Item item;
+	private String verificationCode;
 
 	private PublicationSession(final UUID sourceUUID, final AuthProvider auth,
 			final UUID itemUUID, final Config config) {
@@ -35,6 +37,7 @@ public class PublicationSession {
 		this.auth = auth;
 		this.itemUUID = itemUUID;
 		this.config = config;
+		this.verificationCode = null;
 	}
 
 	public UUID getSourceUUID() {
@@ -68,6 +71,10 @@ public class PublicationSession {
 		meta.put(PublicationField.ARCHIVE_URL, item.archive_url);
 		meta.put(PublicationField.PUBREPO_LOGIN_EMAIL,
 				item.repository_login_id);
+		meta.put(PublicationField.VERIFY_USER, "true"); // FIXME! This needs to
+														// be
+														// somehow
+														// configurable!!!
 
 		this.userID = userID;
 		this.item = item;
@@ -86,6 +93,29 @@ public class PublicationSession {
 			}
 		}
 		meta.put(PublicationField.PUBID, h.getHash());
+	}
+
+	// this will return a pseudo-random hash code
+	public String getVerificationCode() {
+		updatePubID();
+		Hash h = new Hash();
+		h.add(meta.get(PublicationField.PUBID));
+		h.add(String.valueOf(Calendar.getInstance().getTimeInMillis()));
+		// TODO replace characters that break selection
+		// via double click in the email
+		this.verificationCode = h.getHash().replaceAll("-", "");
+		return this.verificationCode;
+	}
+
+	// check whether the generated code matches the given one!
+	public boolean verifyCode(String code) {
+		// we have no generated code hence
+		// do not want verification
+		if (this.verificationCode == null) {
+			return true;
+		}
+		// we want verification
+		return code.equals(this.verificationCode);
 	}
 
 	private void checkHaveItem() {

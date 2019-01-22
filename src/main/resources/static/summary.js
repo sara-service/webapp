@@ -13,7 +13,9 @@ function blockLoaded(name) {
 		// FIXME ?id=deadbeef
 		location.href = "/api/publish/trigger";
 	});
-	$("#next_button").removeClass("disabled");
+	$("#send_verification_button").click(function() {
+		location.href = "/api/publish/verify";
+	});
 }
 
 function initMeta(info) {
@@ -24,6 +26,11 @@ function initMeta(info) {
 	// display some info tooltip on mouse hover
 	$('#pubrepo_displayname').prop('title',info["pubrepo"]);
 	$('#collection_displayname').prop('title',info["collection"]);
+	if (info["verify_user"]=="true") {
+		$("#verify").removeClass("hidden");
+	} else {
+		$("#noverify").removeClass("hidden");
+	}
 	blockLoaded("meta");
 }
 
