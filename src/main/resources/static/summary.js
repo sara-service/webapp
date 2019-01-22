@@ -13,9 +13,22 @@ function blockLoaded(name) {
 		// FIXME ?id=deadbeef
 		location.href = "/api/publish/trigger";
 	});
-	$("#send_verification_button").click(function() {
-		location.href = "/api/publish/verify";
+	
+	$('#vcode').on('input', function() {
+	    API.post("checking verification code", "/api/publish/verify", { vcode: $("#vcode").val() }, setEnabledNextButton);
 	});
+	
+	$("#send_verification_button").on('click', function() {
+		API.get("sending verification code", "/api/publish/sendVerification", {}, {});
+	});
+}
+
+function setEnabledNextButton(enable) {
+	if (enable) {
+		$("#next_button").removeClass("disabled");
+	} else {
+		$("#next_button").addClass("disabled");
+	}
 }
 
 function initMeta(info) {

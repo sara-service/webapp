@@ -30,6 +30,7 @@ public class PublicationSession {
 	private String userID;
 	private Item item;
 	private String verificationCode;
+	private boolean isVerified;
 
 	private PublicationSession(final UUID sourceUUID, final AuthProvider auth,
 			final UUID itemUUID, final Config config) {
@@ -37,7 +38,8 @@ public class PublicationSession {
 		this.auth = auth;
 		this.itemUUID = itemUUID;
 		this.config = config;
-		this.verificationCode = null;
+		this.verificationCode = getVerificationCode();
+		this.isVerified = false;
 	}
 
 	public UUID getSourceUUID() {
@@ -95,6 +97,10 @@ public class PublicationSession {
 		meta.put(PublicationField.PUBID, h.getHash());
 	}
 
+	public boolean isVerified() {
+		return this.isVerified;
+	}
+
 	// this will return a pseudo-random hash code
 	public String getVerificationCode() {
 		updatePubID();
@@ -109,13 +115,8 @@ public class PublicationSession {
 
 	// check whether the generated code matches the given one!
 	public boolean verifyCode(String code) {
-		// we have no generated code hence
-		// do not want verification
-		if (this.verificationCode == null) {
-			return true;
-		}
-		// we want verification
-		return code.equals(this.verificationCode);
+		isVerified = (this.verificationCode.equals(code));
+		return isVerified;
 	}
 
 	private void checkHaveItem() {

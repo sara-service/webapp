@@ -152,7 +152,16 @@ public class Publication {
 		return finalMap;
 	}
 
-	@GetMapping("verify")
+	@PostMapping("verify")
+	public boolean doesCodeVerify(final HttpSession session,
+			final String vcode) {
+		final PublicationSession project = PublicationSession
+				.getInstance(session);
+
+		return project.verifyCode(vcode);
+	}
+
+	@GetMapping("sendVerification")
 	public void sendEMailVerification(final HttpSession session) {
 		final PublicationSession project = PublicationSession
 				.getInstance(session);
@@ -161,21 +170,19 @@ public class Publication {
 
 		final String userLogin = meta.get(PublicationField.PUBREPO_LOGIN_EMAIL);
 		final String pubid = meta.get(PublicationField.PUBID);
-
-		if (!meta.get(PublicationField.VERIFY_USER).equals("true")) {
-			return;
-		}
+		final String submitter = meta.get(PublicationField.SUBMITTER);
 
 		Mail mail = new Mail();
 		mail.setFrom("SARA Service <noreply@sara-service.org>");
 		mail.setTo(userLogin);
 		mail.setSubject("Your submission <" + pubid + ">");
-		mail.setContent("Please acknowledge your submission to \""
+		mail.setContent("Dear " + submitter
+				+ "\n please acknowledge your submission to \""
 				+ meta.get(PublicationField.PUBREPO_REPOSITORYNAME) + "\"\n"
-				+ "using this the following code:\n\n"
+				+ "using this code:\n\n"
 				+ project.getVerificationCode() + "\n\n"
 				+ "If you did not initiate this submission just do nothing!\n\n"
-				+ "Sincerely yours\n Sara Service Bot");
+				+ "Sincerely yours\n SARA Service Bot");
 		emailService.sendSimpleMessage(mail);
 	}
 
@@ -183,6 +190,10 @@ public class Publication {
 	public RedirectView triggerPublication(final HttpSession session) {
 		final PublicationSession project = PublicationSession
 				.getInstance(session);
+
+		if (!project.isVerified()) {
+			return null;
+		}
 
 		final Map<PublicationField, String> meta = project.getMetadata();
 
@@ -232,8 +243,7 @@ public class Publication {
 			redirectionUrl = "/final_workflow.html";
 		}
 
-		return null;
-		// return new RedirectView(redirectionUrl);
+		return new RedirectView(redirectionUrl);
 	}
 
 	@GetMapping("list")
