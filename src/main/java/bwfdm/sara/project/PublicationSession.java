@@ -32,6 +32,8 @@ public class PublicationSession {
 	private String verificationCode;
 	private boolean isVerified;
 
+	private String seed;
+
 	private PublicationSession(final UUID sourceUUID, final AuthProvider auth,
 			final UUID itemUUID, final Config config) {
 		this.sourceUUID = sourceUUID;
@@ -40,6 +42,7 @@ public class PublicationSession {
 		this.config = config;
 		this.verificationCode = getVerificationCode();
 		this.isVerified = false;
+		seed = String.valueOf(Calendar.getInstance().getTimeInMillis());
 	}
 
 	public UUID getSourceUUID() {
@@ -77,7 +80,6 @@ public class PublicationSession {
 														// be
 														// somehow
 														// configurable!!!
-
 		this.userID = userID;
 		this.item = item;
 
@@ -86,15 +88,17 @@ public class PublicationSession {
 
 	void updatePubID() {
 		Hash h = new Hash();
-		// FIXME this is better to be casted somehow, order may change the hash! Help!!! Matthias?
-		for (Map.Entry<PublicationField, String> entry : this.meta.entrySet())
-		{
-			if (entry.getKey() != PublicationField.PUBID) {
-				h.add(entry.getKey().getDisplayName());
-				h.add(entry.getValue());
-			}
-		}
-		meta.put(PublicationField.PUBID, h.getHash());
+		// this seed is unique per session
+		h.add(seed);
+		// do not change if login email persists
+		h.add(meta.get(PublicationField.PUBREPO_LOGIN_EMAIL));
+
+		// split into pubid / vcode
+		String s = h.getHash();
+		meta.put(PublicationField.PUBID, s.substring(0, s.length() / 2 - 1));
+		// TODO replace characters that break selection
+		// via double click in the email
+		verificationCode = s.substring(s.length() / 2).replaceAll("-", "");
 	}
 
 	public boolean isVerified() {
@@ -104,13 +108,7 @@ public class PublicationSession {
 	// this will return a pseudo-random hash code
 	public String getVerificationCode() {
 		updatePubID();
-		Hash h = new Hash();
-		h.add(meta.get(PublicationField.PUBID));
-		h.add(String.valueOf(Calendar.getInstance().getTimeInMillis()));
-		// TODO replace characters that break selection
-		// via double click in the email
-		this.verificationCode = h.getHash().replaceAll("-", "");
-		return this.verificationCode;
+		return verificationCode;
 	}
 
 	// check whether the generated code matches the given one!
