@@ -1,8 +1,5 @@
 #!/bin/bash -ex
-
 BASEDIR=$(readlink -f $(dirname "$0"))
-cd $BASEDIR
-
 cd $BASEDIR
 
 pg_dropcluster --stop 10 main
