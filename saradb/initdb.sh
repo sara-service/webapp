@@ -3,10 +3,6 @@
 BASEDIR=$(readlink -f $(dirname "$0"))
 cd $BASEDIR
 
-# set mail auth properties which need to reside in the private credentials repo
-cd ..
-./saradb/credentials/devel.properties
-
 cd $BASEDIR
 
 pg_dropcluster --stop 10 main
@@ -22,7 +18,3 @@ psql -d test -c "GRANT ALL ON ALL TABLES IN SCHEMA public TO admin"
 
 psql -d test
 service postgresql stop
-
-# cleanup private mail auth credentials
-cd .. && rm -f settings.properties
-
