@@ -1,8 +1,8 @@
 package bwfdm.sara.project;
 
-import java.util.Calendar;
 import java.util.EnumMap;
 import java.util.Map;
+import java.util.Random;
 import java.util.UUID;
 
 import javax.servlet.http.HttpSession;
@@ -42,7 +42,8 @@ public class PublicationSession {
 		this.config = config;
 		this.verificationCode = getVerificationCode();
 		this.isVerified = false;
-		seed = String.valueOf(Calendar.getInstance().getTimeInMillis());
+		Random r = new Random();
+		seed = String.valueOf(String.valueOf(r.nextLong()));
 	}
 
 	public UUID getSourceUUID() {
