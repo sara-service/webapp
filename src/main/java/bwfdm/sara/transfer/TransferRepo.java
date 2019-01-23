@@ -2,7 +2,6 @@ package bwfdm.sara.transfer;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +24,6 @@ import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.treewalk.TreeWalk;
-import org.mozilla.universalchardet.UniversalDetector;
 import org.springframework.util.FileSystemUtils;
 
 import bwfdm.sara.project.Ref;
@@ -36,6 +34,7 @@ public class TransferRepo {
 	private static final Charset UTF8 = Charset.forName("UTF-8");
 	private static final byte[] ROOT_PREFIX = new byte[0];
 	private static final int MAX_SYMLINKS = 40; // match Linux here
+	private static final MiniCharDet CHARSET_DETECTOR = new MiniCharDet();
 
 	private final File root;
 	private Repository repo;
@@ -146,25 +145,7 @@ public class TransferRepo {
 	/** Used by JRuby to read files by hash. */
 	public String readString(final ObjectId hash) throws IOException {
 		checkInitialized();
-		return detectEncoding(repo.open(hash).getBytes());
-	}
-
-	private String detectEncoding(final byte[] blob)
-			throws UnsupportedEncodingException {
-		if (blob == null)
-			return null;
-
-		final UniversalDetector det = new UniversalDetector(null);
-		det.handleData(blob, 0, blob.length);
-		det.dataEnd();
-		final String charset = det.getDetectedCharset();
-		if (charset == null)
-			// bug / peculiarity in juniversalchardet: if the input is ASCII, it
-			// doesn't detect anything and returns null.
-			// workaround by falling back to UTF-8 if nothing detected. in that
-			// situation, it's the best guess anyway.
-			return new String(blob, UTF8);
-		return new String(blob, charset);
+		return CHARSET_DETECTOR.detect(repo.open(hash).getBytes());
 	}
 
 	public List<RepoFile> getFiles(final Ref ref)

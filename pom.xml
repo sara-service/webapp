@@ -121,15 +121,6 @@
 			<artifactId>jruby</artifactId>
 			<version>9.1.17.0</version>
 		</dependency>
-		<!-- juniversalchardet to guess character encoding of files.
-		     mvnrepo says this is MPL 1.1, but the project's site
-		     https://code.google.com/archive/p/juniversalchardet/
-		     also permits GPL ≥2.0 and LGPL ≥2.1 -->
-		<dependency>
-			<groupId>com.googlecode.juniversalchardet</groupId>
-			<artifactId>juniversalchardet</artifactId>
-			<version>1.0.3</version>
-		</dependency>
 		<!-- JGit for accessing git repositories -->
 		<dependency>
 			<groupId>org.eclipse.jgit</groupId>
