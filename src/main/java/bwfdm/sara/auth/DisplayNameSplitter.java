@@ -16,10 +16,13 @@ public class DisplayNameSplitter {
 	// anything non-space-y is accepted as part of a name.
 	/**
 	 * Librarian / bureaucratic name format, which has surname first but
-	 * <b>separated with a comma</b>. Ugly, but at least pretty unambiguous.
+	 * <b>separated with a comma</b>. Ugly, but at least pretty unambiguous. The
+	 * obvious counterexample is the ", Jr." in "Henry Ford, Jr.", which
+	 * analogous to {@link https://nwalsh.com/tex/texhelp/bibtx-23.html BibTeX}
+	 * is supported if written as "Ford, Jr., Henry".
 	 */
 	private static final Pattern LIBRARIAN = Pattern
-			.compile("^(?<surname>[^,]+),\\p{Z}+(?<given>[^,]*)$");
+			.compile("^(?<surname>.+),\\p{Z}+(?<given>[^,]*?)$");
 
 	/**
 	 * "Western" name order, which has surname <b>last</b>. For names like

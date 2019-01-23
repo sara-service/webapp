@@ -44,6 +44,14 @@ public class TestNameSplitter {
 	}
 
 	@Test
+	public void testLibrarian() {
+		// basic librarian-format name
+		test(western, "Trump, Donald J.", "Trump", "Donald J.");
+		// TeX-compatible "Junior" suffix
+		test(western, "Ford, Jr., Henry", "Ford, Jr.", "Henry");
+	}
+
+	@Test
 	public void testNoRewrite() {
 		// name already in correct format
 		test(western, "Trump, Donald", "Trump", "Donald");
