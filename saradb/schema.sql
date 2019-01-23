@@ -171,6 +171,18 @@ CREATE TABLE fe_temp_metadata(
 	submitter_givenname text,
 	PRIMARY KEY (repo, project, uid)
 );
+CREATE TABLE fe_temp_authors(
+	repo text NOT NULL,
+	project text NOT NULL,
+	uid text NOT NULL,
+	seq integer NOT NULL,
+	surname text,
+	givenname text,
+	CHECK (seq >= 0),
+	FOREIGN KEY (repo, project, uid) REFERENCES fe_temp_metadata(repo, project, uid)
+		ON DELETE CASCADE ON UPDATE CASCADE, -- no zombie authors please!
+	PRIMARY KEY (repo, project, uid, seq)
+);
 
 -- archive access (and archive selection, at some point)
 CREATE TABLE fe_temp_archive(

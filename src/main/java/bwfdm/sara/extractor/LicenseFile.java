@@ -45,6 +45,10 @@ public class LicenseFile {
 
 	@Override
 	public boolean equals(Object obj) {
+		// treat different variants (different hash) of the same license as
+		// different. this is required because critical values such as the
+		// copyright holder don't change the ID of the detected license, but
+		// make a huge difference wrt licensing.
 		return ((LicenseFile) obj).hash.equals(hash);
 	}
 

@@ -14,6 +14,7 @@ import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import bwfdm.sara.project.ArchiveMetadata;
+import bwfdm.sara.project.Name;
 import bwfdm.sara.project.Ref;
 import bwfdm.sara.project.RefAction;
 import bwfdm.sara.project.RefAction.PublicationMethod;
@@ -29,6 +30,7 @@ import bwfdm.sara.project.RefAction.PublicationMethod;
 public class FrontendDatabase {
 	private static final String ACTION_TABLE = "fe_temp_actions";
 	private static final String METADATA_TABLE = "fe_temp_metadata";
+	private static final String AUTHORS_TABLE = "fe_temp_authors";
 	private static final String LICENSES_TABLE = "fe_temp_licenses";
 	private static final String ARCHIVE_TABLE = "fe_temp_archive";
 
@@ -74,11 +76,18 @@ public class FrontendDatabase {
 	 * @return all metadata fields as a {@link ArchiveMetadata} instance
 	 */
 	public ArchiveMetadata getMetadata() {
-			return db.queryToObject("select title, description, version, master,"
-					+ " submitter_surname, submitter_givenname from "
-					+ METADATA_TABLE
-					+ " where repo = ? and project = ? and uid = ?",
-					ArchiveMetadata.class, gitRepo, project, user);
+		final ArchiveMetadata meta = db.queryToObject(
+				"select title, description, version, master,"
+						+ " submitter_surname, submitter_givenname from "
+						+ METADATA_TABLE
+						+ " where repo = ? and project = ? and uid = ?",
+				ArchiveMetadata.class, gitRepo, project, user);
+		if (meta != null)
+			meta.setAuthors(db.queryToList("select surname, givenname from "
+					+ AUTHORS_TABLE
+					+ " where repo = ? and project = ? and uid = ? order by seq asc",
+					Name.class, gitRepo, project, user));
+		return meta;
 	}
 
 	/**
@@ -100,16 +109,27 @@ public class FrontendDatabase {
 
 	private void updateMetadata(final ArchiveMetadata values) {
 		db.update(
+				"delete from " + AUTHORS_TABLE
+						+ " where repo = ? and project = ? and uid = ?",
+				gitRepo, project, user);
+		db.update(
 				"delete from " + METADATA_TABLE
 						+ " where repo = ? and project = ? and uid = ?",
 				gitRepo, project, user);
+
 		db.update("insert into " + METADATA_TABLE
 				+ "(repo, project, uid, title, description, version, master,"
 				+ " submitter_surname, submitter_givenname)"
-				+ " values(?, ?, ?, ?, ?, ?, ?, ?, ?)", gitRepo, project,
-				user, values.title, values.description, values.version,
-				values.master, values.submitter.surname,
-				values.submitter.givenname);
+				+ " values(?, ?, ?, ?, ?, ?, ?, ?, ?)", gitRepo, project, user,
+				values.title, values.description, values.version, values.master,
+				values.submitter.surname, values.submitter.givenname);
+		int seq = 0;
+		for (final Name a : values.getAuthors())
+			db.update(
+					"insert into " + AUTHORS_TABLE
+							+ "(repo, project, uid, seq, surname, givenname)"
+							+ " values(?, ?, ?, ?, ?, ?)",
+					gitRepo, project, user, seq++, a.surname, a.givenname);
 	}
 
 	public void setArchiveAccess(final ArchiveAccess access) {

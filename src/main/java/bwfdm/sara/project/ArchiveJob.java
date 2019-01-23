@@ -2,6 +2,7 @@ package bwfdm.sara.project;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -103,7 +104,7 @@ public class ArchiveJob {
 					"no branches selected for publication");
 		clone = project.getTransferRepo();
 		// meta.html
-		// FIXME userMeta shouldn't be null here
+		// FIXME userMeta should never be null here, but sometimes is!
 		final ArchiveMetadata userMeta = frontend.getMetadata();
 		final Ref ref = userMeta != null && userMeta.master != null
 				? new Ref(userMeta.master)
@@ -115,10 +116,17 @@ public class ArchiveJob {
 		checkNullOrEmpty("master", meta.master);
 		checkNullOrEmpty("submitter.surname", meta.submitter.surname);
 		checkNullOrEmpty("submitter.givenname", meta.submitter.givenname);
+		final Collection<Name> authors = meta.getAuthors();
+		if (authors.isEmpty())
+			throw new IllegalArgumentException("author list is empty");
+		for (final Name a : authors) {
+			checkNullOrEmpty("author.surname", a.surname);
+			checkNullOrEmpty("author.givenname", a.givenname);
+		}
 		final Ref master = new Ref(meta.master);
 		if (!selectedRefs.contains(master))
 			throw new IllegalArgumentException(
-					"main branch branch not selected for publication");
+					"main branch not selected for publication");
 		// license(s).html
 		detectedLicenses = metadataExtractor.getLicenses();
 		licenses = frontend.getLicenses();
@@ -189,14 +197,16 @@ public class ArchiveJob {
 			buffer.add(getHead(a.ref));
 		}
 		// meta.html
-		// enum values are in a defined order (same order as declared) so we'll
-		// be adding them in the same order every time
 		buffer.add(meta.title);
 		buffer.add(meta.description);
 		buffer.add(meta.version);
 		buffer.add(meta.master);
 		buffer.add(meta.submitter.surname);
 		buffer.add(meta.submitter.givenname);
+		for (final Name a : meta.getAuthors()) {
+			buffer.add(a.surname);
+			buffer.add(a.givenname);
+		}
 		// license(s).html
 		for (RefAction a : actions)
 			buffer.add(licenses.get(a.ref));

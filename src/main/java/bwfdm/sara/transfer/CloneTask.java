@@ -68,7 +68,7 @@ public class CloneTask extends Task {
 		beginTask(ABBREV_HISTORY, 1);
 		rewriteHistory();
 		transferRepo.setRepo(git.getRepository());
-		beginTask(EXTRACT_META, 3);
+
 		extractMetaData();
 		endTask();
 	}
@@ -105,7 +105,8 @@ public class CloneTask extends Task {
 		update(1);
 	}
 
-	private void fetchHeads() throws GitAPIException, InvalidRemoteException,
+	private void fetchHeads()
+			throws GitAPIException, InvalidRemoteException,
 			TransportException {
 		final FetchCommand fetch = git.fetch();
 		// to guard against corruption
@@ -168,14 +169,9 @@ public class CloneTask extends Task {
 	}
 
 	private void extractMetaData() throws IOException {
-		extractor.detectProjectInfo();
+		beginTask(EXTRACT_META, 2);
+		extractor.detectMetaData(refs);
 		update(1);
-
-		final Ref master = extractor.detectMasterBranch(refs);
-		extractor.detectVersion(refs); // detect for ALL branches
-		extractor.setVersionFromBranch(master);
-		update(1);
-
 		extractor.detectLicenses(refs);
 		update(1);
 	}

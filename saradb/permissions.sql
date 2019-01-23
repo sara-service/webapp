@@ -1,6 +1,7 @@
 -- permission config for database tables in PostgreSQL.
 
 GRANT SELECT, INSERT, UPDATE, DELETE ON fe_temp_metadata TO __USERNAME__;
+GRANT SELECT, INSERT, UPDATE, DELETE ON fe_temp_authors TO __USERNAME__;
 GRANT SELECT, INSERT, UPDATE, DELETE ON fe_temp_actions TO __USERNAME__;
 GRANT SELECT, INSERT, UPDATE, DELETE ON fe_temp_licenses TO __USERNAME__;
 GRANT SELECT, INSERT, UPDATE, DELETE ON fe_temp_archive TO __USERNAME__;

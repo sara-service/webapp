@@ -75,7 +75,7 @@ public class JacksonTemplate extends JdbcTemplate {
 	 * 
 	 * @param query
 	 *            SQL query
-	 * @param typecreateObjectFromRow
+	 * @param type
 	 *            {@link Class} of return type, for type conversion
 	 * @param args
 	 *            substituted for the parameters in {@code query}

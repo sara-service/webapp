@@ -47,10 +47,18 @@ function initLicenses(info) {
 }
 
 function initMeta(info) {
-	$.each(["submitter_surname", "submitter_givenname", "title", "description",
-		"version", "master"], function(_, name) {
-			$("#" + name).text(info[name]);
-		});
+	$.each(["title", "description", "version", "master"], function(_, name) {
+		$("#" + name).text(info[name]);
+	});
+	$.each(["surname", "givenname"], function(_, name) {
+		$("#submitter_" + name).text(info.submitter[name]);
+	});
+	$.each(info.authors, function(_, author) {
+		var row = template("author");
+		row.surname.text(author.surname);
+		row.givenname.text(author.givenname);
+		$("#authors").append(row.root);
+	});
 }
 
 function init(info) {

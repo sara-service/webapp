@@ -18,6 +18,12 @@ public interface AuthProvider {
 	public boolean hasWorkingToken();
 
 	/**
+	 * Get a user's validated credentials. The user must not be able to change
+	 * the {@link UserInfo#email} and {@link UserInfo#userID} fields without
+	 * validating them! If that isn't possible to ensure, use
+	 * {@link #getShibAuth()} to wrap everything with Shibboleth and get a
+	 * validated email and user ID that way.
+	 * 
 	 * @return a {@link UserInfo} object containing the user's display name and
 	 *         email
 	 */
