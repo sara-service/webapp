@@ -96,6 +96,13 @@ public class Publication {
 		PublicationSession.getInstance(session).setMetadata(values);
 	}
 
+	@GetMapping("getpubid")
+	public String getPublicationID(final HttpSession session) {
+		final PublicationSession project = PublicationSession
+				.getInstance(session);
+		return project.getPubID();
+	}
+
 	@GetMapping("finalMapping")
 	private MultiValueMap<String, String> finalMapping(
 			final HttpSession session) {
@@ -169,15 +176,15 @@ public class Publication {
 		final Map<PublicationField, String> meta = project.getMetadata();
 
 		final String userLogin = meta.get(PublicationField.PUBREPO_LOGIN_EMAIL);
-		final String pubid = meta.get(PublicationField.PUBID);
 		final String submitter = meta.get(PublicationField.SUBMITTER);
+		final String pubid = project.getPubID();
 
 		Mail mail = new Mail();
 		mail.setFrom("SARA Service <noreply@sara-service.org>");
 		mail.setTo(userLogin);
 		mail.setSubject("Your submission <" + pubid + ">");
 		mail.setContent("Dear " + submitter
-				+ "\n please acknowledge your submission to \""
+				+ "\n\n please acknowledge your submission to \""
 				+ meta.get(PublicationField.PUBREPO_REPOSITORYNAME) + "\"\n"
 				+ "using this code:\n\n"
 				+ project.getVerificationCode() + "\n\n"

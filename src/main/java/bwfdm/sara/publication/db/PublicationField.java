@@ -13,7 +13,6 @@ public enum PublicationField {
 	/** software version number */
 	VERSION("version"), SUBMITTER("submitter"),
 	/** ID of the institutional repository to publish the item in */
-	PUBID("pubid"), // FIXME move into API, this needs to be read-only!!!
 	PUBLICATION_REPOSITORY("pubrepo"),
 	/** Whether the workflow will need to verify the users email address */
 	VERIFY_USER("verify_user"),

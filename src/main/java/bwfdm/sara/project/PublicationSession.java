@@ -29,10 +29,12 @@ public class PublicationSession {
 			PublicationField.class);
 	private String userID;
 	private Item item;
-	private String verificationCode;
-	private boolean isVerified;
 
+	private String verificationCode;
+	private String publicationId;
 	private String seed;
+
+	private boolean verified;
 
 	private PublicationSession(final UUID sourceUUID, final AuthProvider auth,
 			final UUID itemUUID, final Config config) {
@@ -40,10 +42,10 @@ public class PublicationSession {
 		this.auth = auth;
 		this.itemUUID = itemUUID;
 		this.config = config;
-		this.verificationCode = getVerificationCode();
-		this.isVerified = false;
+		this.verified = false;
 		Random r = new Random();
 		seed = String.valueOf(String.valueOf(r.nextLong()));
+		updateHash();
 	}
 
 	public UUID getSourceUUID() {
@@ -84,10 +86,10 @@ public class PublicationSession {
 		this.userID = userID;
 		this.item = item;
 
-		updatePubID();
+		updateHash();
 	}
 
-	void updatePubID() {
+	void updateHash() {
 		Hash h = new Hash();
 		// this seed is unique per session
 		h.add(seed);
@@ -96,26 +98,30 @@ public class PublicationSession {
 
 		// split into pubid / vcode
 		String s = h.getHash();
-		meta.put(PublicationField.PUBID, s.substring(0, s.length() / 2 - 1));
+		publicationId = s.substring(0, s.length() / 2 - 1);
 		// TODO replace characters that break selection
 		// via double click in the email
 		verificationCode = s.substring(s.length() / 2).replaceAll("-", "");
 	}
 
+	public String getPubID() {
+		return publicationId;
+	};
+
 	public boolean isVerified() {
-		return this.isVerified;
+		return this.verified;
 	}
 
 	// this will return a pseudo-random hash code
 	public String getVerificationCode() {
-		updatePubID();
+		updateHash();
 		return verificationCode;
 	}
 
 	// check whether the generated code matches the given one!
 	public boolean verifyCode(String code) {
-		isVerified = (this.verificationCode.equals(code));
-		return isVerified;
+		verified = (this.verificationCode.equals(code));
+		return verified;
 	}
 
 	private void checkHaveItem() {
@@ -160,7 +166,7 @@ public class PublicationSession {
 
 	public void setMetadata(final Map<PublicationField, String> values) {
 		meta.putAll(values);
-		updatePubID();
+		updateHash();
 	}
 
 	public static PublicationSession getInstance(final HttpSession session) {

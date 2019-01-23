@@ -33,7 +33,7 @@ function setEnabledNextButton(enable) {
 
 function initMeta(info) {
 	$.each(["title", "description", "version", "pubrepo_displayname", "collection_displayname",
-		"email", "submitter", "pubid"], function(_, name) {
+		"email", "submitter"], function(_, name) {
 			$("#" + name).text(info[name]);
 		});
 	// display some info tooltip on mouse hover
@@ -47,6 +47,11 @@ function initMeta(info) {
 	blockLoaded("meta");
 }
 
+function initPubID(pubid) {
+	$("#pubid").text(pubid);
+}
+
 $(function() {
 	API.get("load metadata fields", "/api/publish/meta", {}, initMeta);
+	API.get("initialize publication ID", "/api/publish/getpubid", {}, initPubID);
 });
