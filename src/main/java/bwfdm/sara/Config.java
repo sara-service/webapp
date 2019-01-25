@@ -52,8 +52,7 @@ public class Config implements ServletContextAware {
 	private static final String WEBROOT_ATTR = "sara.webroot";
 	private static final String TEMPDIR_ATTR = "temp.dir";
 	private static final String CONTEXT_PARAM_PREFIX = "server.context_parameters.";
-	private static final String DATASOURCE_PREFIX = CONTEXT_PARAM_PREFIX
-			+ "spring.datasource.";
+	private static final String DATASOURCE_PREFIX = "spring.datasource.";
 
 	private static final SecureRandom RNG = new SecureRandom();
 	private static final Charset UTF8 = Charset.forName("UTF-8");
