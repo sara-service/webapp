@@ -31,9 +31,11 @@ import com.fasterxml.jackson.databind.util.ISO8601DateFormat;
 import bwfdm.sara.Config;
 import bwfdm.sara.project.Project;
 import bwfdm.sara.project.PublicationSession;
+import bwfdm.sara.publication.EmailService;
 import bwfdm.sara.publication.Hierarchy;
 import bwfdm.sara.publication.Item;
 import bwfdm.sara.publication.ItemState;
+import bwfdm.sara.publication.Mail;
 import bwfdm.sara.publication.MetadataMapping;
 import bwfdm.sara.publication.PublicationRepository;
 import bwfdm.sara.publication.PublicationRepository.SubmissionInfo;
@@ -48,6 +50,8 @@ public class Publication {
 	private static final Log logger = LogFactory.getLog(Publication.class);
 	@Autowired
 	private Config config;
+	@Autowired
+	private EmailService emailService;
 
 	@GetMapping("")
 	public PubrepoConfig getPubRepoConfig(final HttpSession session) {
@@ -90,6 +94,13 @@ public class Publication {
 			@RequestBody final Map<PublicationField, String> values,
 			final HttpSession session) {
 		PublicationSession.getInstance(session).setMetadata(values);
+	}
+
+	@GetMapping("getpubid")
+	public String getPublicationID(final HttpSession session) {
+		final PublicationSession project = PublicationSession
+				.getInstance(session);
+		return project.getPubID();
 	}
 
 	@GetMapping("finalMapping")
@@ -148,10 +159,48 @@ public class Publication {
 		return finalMap;
 	}
 
+	@PostMapping("verify")
+	public boolean doesCodeVerify(final HttpSession session,
+			final String vcode) {
+		final PublicationSession project = PublicationSession
+				.getInstance(session);
+
+		return project.verifyCode(vcode);
+	}
+
+	@GetMapping("sendVerification")
+	public void sendEMailVerification(final HttpSession session) {
+		final PublicationSession project = PublicationSession
+				.getInstance(session);
+
+		final Map<PublicationField, String> meta = project.getMetadata();
+
+		final String userLogin = meta.get(PublicationField.PUBREPO_LOGIN_EMAIL);
+		final String submitter = meta.get(PublicationField.SUBMITTER);
+		final String pubid = project.getPubID();
+
+		Mail mail = new Mail();
+		mail.setFrom("SARA Service <noreply@sara-service.org>");
+		mail.setTo(userLogin);
+		mail.setSubject("Your submission <" + pubid + ">");
+		mail.setContent("Dear " + submitter
+				+ "\n\n please acknowledge your submission to \""
+				+ meta.get(PublicationField.PUBREPO_REPOSITORYNAME) + "\"\n"
+				+ "using this code:\n\n"
+				+ project.getVerificationCode() + "\n\n"
+				+ "If you did not initiate this submission just do nothing!\n\n"
+				+ "Sincerely yours\n SARA Service Bot");
+		emailService.sendSimpleMessage(mail);
+	}
+
 	@GetMapping("trigger")
 	public RedirectView triggerPublication(final HttpSession session) {
 		final PublicationSession project = PublicationSession
 				.getInstance(session);
+
+		if (!project.isVerified()) {
+			return null;
+		}
 
 		final Map<PublicationField, String> meta = project.getMetadata();
 
@@ -165,7 +214,6 @@ public class Publication {
 		final String userLogin = meta.get(PublicationField.PUBREPO_LOGIN_EMAIL);
 
 		MultiValueMap<String, String> metadataMap = finalMapping(session);
-
 		Item i = project.getItem();
 		i.date_last_modified = new Date();
 		i.item_state = ItemState.SUBMITTED.name();
@@ -218,7 +266,7 @@ public class Publication {
 			sourceUUID = project.getSourceUUID();
 			userID = project.getSourceUserID();
 		} else {
-			// NoSessionException thown here if there is no session.
+			// NoSessionException thrown here if there is no session.
 			// (and we definitely want that exception here)
 			final Project project = Project.getCompletedInstance(session);
 			sourceUUID = UUID.fromString(project.getRepoID());

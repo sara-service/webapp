@@ -14,6 +14,9 @@ public enum PublicationField {
 	VERSION("version"), SUBMITTER("submitter"),
 	/** ID of the institutional repository to publish the item in */
 	PUBLICATION_REPOSITORY("pubrepo"),
+	/** Whether the workflow will need to verify the users email address */
+	VERIFY_USER("verify_user"),
+
 	/**
 	 * unique identifier of the selected collection in the institutional
 	 * repository

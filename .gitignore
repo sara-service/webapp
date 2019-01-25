@@ -3,3 +3,5 @@
 .settings/
 target/
 database.sql
+settings.properties
+temp.sql

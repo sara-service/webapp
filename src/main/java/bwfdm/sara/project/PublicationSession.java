@@ -2,6 +2,7 @@ package bwfdm.sara.project;
 
 import java.util.EnumMap;
 import java.util.Map;
+import java.util.Random;
 import java.util.UUID;
 
 import javax.servlet.http.HttpSession;
@@ -29,12 +30,22 @@ public class PublicationSession {
 	private String userID;
 	private Item item;
 
+	private String verificationCode;
+	private String publicationId;
+	private String seed;
+
+	private boolean verified;
+
 	private PublicationSession(final UUID sourceUUID, final AuthProvider auth,
 			final UUID itemUUID, final Config config) {
 		this.sourceUUID = sourceUUID;
 		this.auth = auth;
 		this.itemUUID = itemUUID;
 		this.config = config;
+		this.verified = false;
+		Random r = new Random();
+		seed = String.valueOf(String.valueOf(r.nextLong()));
+		updateHash();
 	}
 
 	public UUID getSourceUUID() {
@@ -68,9 +79,49 @@ public class PublicationSession {
 		meta.put(PublicationField.ARCHIVE_URL, item.archive_url);
 		meta.put(PublicationField.PUBREPO_LOGIN_EMAIL,
 				item.repository_login_id);
-
+		meta.put(PublicationField.VERIFY_USER, "true"); // FIXME! This needs to
+														// be
+														// somehow
+														// configurable!!!
 		this.userID = userID;
 		this.item = item;
+
+		updateHash();
+	}
+
+	void updateHash() {
+		Hash h = new Hash();
+		// this seed is unique per session
+		h.add(seed);
+		// do not change if login email persists
+		h.add(meta.get(PublicationField.PUBREPO_LOGIN_EMAIL));
+
+		// split into pubid / vcode
+		String s = h.getHash();
+		publicationId = s.substring(0, s.length() / 2 - 1);
+		// TODO replace characters that break selection
+		// via double click in the email
+		verificationCode = s.substring(s.length() / 2).replaceAll("-", "");
+	}
+
+	public String getPubID() {
+		return publicationId;
+	};
+
+	public boolean isVerified() {
+		return this.verified;
+	}
+
+	// this will return a pseudo-random hash code
+	public String getVerificationCode() {
+		updateHash();
+		return verificationCode;
+	}
+
+	// check whether the generated code matches the given one!
+	public boolean verifyCode(String code) {
+		verified = (this.verificationCode.equals(code));
+		return verified;
 	}
 
 	private void checkHaveItem() {
@@ -115,6 +166,7 @@ public class PublicationSession {
 
 	public void setMetadata(final Map<PublicationField, String> values) {
 		meta.putAll(values);
+		updateHash();
 	}
 
 	public static PublicationSession getInstance(final HttpSession session) {
