@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>bwfdm.sara</groupId>
 	<artifactId>SaraServer</artifactId>
-	<version>0.2.5</version>
+	<version>0.3.0</version>
 	<packaging>war</packaging>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -101,14 +101,20 @@
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
 			<version>42.1.4</version>
-			<scope>runtime</scope>
+			<scope>provided</scope>
 		</dependency>
-		<!-- javax.mail.jar must be placed in tomcat's /lib directory -->
+		<!-- this JAR also has to be placed in tomcat's /lib directory! -->
 		<dependency>
-			<groupId>javax.mail</groupId>
-			<artifactId>mail</artifactId>
-			<version>1.4</version>
-			<scope>runtime</scope>
+			<groupId>org.apache.geronimo.specs</groupId>
+			<artifactId>geronimo-javamail_1.4_spec</artifactId>
+			<version>1.6</version>
+			<scope>provided</scope>
+		</dependency>
+		<!-- SMTP provider for javax.mail. this can just go into the WAR. -->
+		<dependency>
+			<groupId>org.apache.geronimo.javamail</groupId>
+			<artifactId>geronimo-javamail_1.4_provider</artifactId>
+			<version>1.6</version>
 		</dependency>
 		<!-- explicitly declare Jackson version. spring-boot-starter-web
 		     pulls in Jackson automatically but the version must match the

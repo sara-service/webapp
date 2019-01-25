@@ -231,6 +231,9 @@ the config here is a subset of the Shibboleth config.
 ```
 - build the WAR: `mvn clean package -DskipTests`
 - copy `target/SaraServer-*.war` to `/var/lib/tomcat8/webapps/SaraServer.war` on server
+- copy `postgresql-42.1.4.jar` and `geronimo-javamail_1.4_spec-1.6.jar` to `/var/lib/tomcat8/lib` on server
+	- they're needed while parsing `SaraServer.xml`, before the WAR is loaded, so they must be in `lib`
+	- before you start searching the web, they're somewhere in `~/.m2/repository/` after building...
 - copy `src/main/webapp/META-INF/context.xml` to `/etc/tomcat8/Catalina/localhost/SaraServer.xml` on server
 - configure `SaraServer.xml`
 	- `password` in `jdbc.database` resource: PostgreSQL database password

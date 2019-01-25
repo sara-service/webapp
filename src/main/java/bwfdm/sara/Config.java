@@ -14,6 +14,7 @@ import javax.sql.DataSource;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.datasource.SimpleDriverDataSource;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Component;
 import org.springframework.util.DigestUtils;
 import org.springframework.web.context.ServletContextAware;
@@ -64,6 +65,7 @@ public class Config implements ServletContextAware {
 	private File temproot;
 	private ConfigDatabase configDB;
 	private PublicationDatabase pubDB;
+	private JavaMailSender sender;
 
 	/**
 	 * Constructor used by Spring, along with
@@ -112,6 +114,11 @@ public class Config implements ServletContextAware {
 		this.db = db;
 		configDB = new ConfigDatabase(db);
 		pubDB = new PublicationDatabase(db);
+	}
+
+	@Autowired
+	public void setEmailSender(final JavaMailSender sender) {
+		this.sender = sender;
 	}
 
 	@Override
@@ -172,6 +179,10 @@ public class Config implements ServletContextAware {
 
 	public DataSource getDatabase() {
 		return db;
+	}
+
+	public JavaMailSender getEmailSender() {
+		return sender;
 	}
 
 	public String getWebRoot() {
