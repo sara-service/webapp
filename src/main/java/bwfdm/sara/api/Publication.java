@@ -15,7 +15,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -50,8 +49,6 @@ public class Publication {
 	private static final Log logger = LogFactory.getLog(Publication.class);
 	@Autowired
 	private Config config;
-	@Autowired
-	private JavaMailSender emailService;
 
 	@GetMapping("")
 	public PubrepoConfig getPubRepoConfig(final HttpSession session) {
@@ -190,7 +187,7 @@ public class Publication {
 				+ project.getVerificationCode() + "\n\n"
 				+ "If you did not initiate this submission just do nothing!\n\n"
 				+ "Sincerely yours\n SARA Service Bot");
-		emailService.send(mail);
+		config.getEmailSender().send(mail);
 	}
 
 	@GetMapping("trigger")

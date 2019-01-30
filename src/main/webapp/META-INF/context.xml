@@ -1,10 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Context copyXML="true">
+	<Resource name="mail.session" auth="Container" type="javax.mail.Session"
+		default-encoding="UTF-8" mail.transport.protocol="smtp"
+		mail.smtp.host="mailhub.uni-konstanz.de" mail.smtp.port="587"
+		mail.smtp.auth="true" mail.smtp.starttls.enable="true"
+		mail.smtp.user="sara-notify" password="secret"
+		description="email config as a javax.mail Session resource" />
 	<Resource name="jdbc.database" auth="Container" type="javax.sql.DataSource"
 		validationQuery="SELECT 1" testOnBorrow="true" closeMethod="close"
 		driverClassName="org.postgresql.Driver" username="sara" password="secret"
 		url="jdbc:postgresql://localhost/sara" maxActive="10" maxIdle="4"
 		description="JDBC database connection config as a DataSource resource" />
+
+	<Parameter name="spring.mail.jndi-name" value="java:comp/env/mail.session"
+		description="tells spring to use the mail session defined above (no need to change)" />
 	<Parameter name="spring.datasource.jndi-name" value="java:comp/env/jdbc.database"
 		description="tells spring to use the datasource defined above (no need to change)" />
 
