@@ -1,6 +1,5 @@
 package bwfdm.sara.api;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.EnumMap;
@@ -30,10 +29,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.util.ISO8601DateFormat;
 
 import bwfdm.sara.Config;
-import bwfdm.sara.project.Project;
 import bwfdm.sara.project.PublicationSession;
 import bwfdm.sara.publication.Hierarchy;
-import bwfdm.sara.publication.Item;
 import bwfdm.sara.publication.ItemPublication;
 import bwfdm.sara.publication.ItemState;
 import bwfdm.sara.publication.MetadataMapping;
@@ -254,38 +251,6 @@ public class Publication {
 		return new RedirectView(redirectionUrl);
 	}
 
-	@GetMapping("list")
-	public List<PublicationItem> getArchivedItems(final HttpSession session) {
-		// special case: this can be called directly after login, before there
-		// is a PublicationSession. if so, get the relevant info from the
-		// Project instead.
-		final UUID sourceUUID;
-		final String userID;
-		if (PublicationSession.hasInstance(session)) {
-			final PublicationSession project = PublicationSession
-					.getInstance(session);
-			sourceUUID = project.getSourceUUID();
-			userID = project.getSourceUserID();
-		} else {
-			// NoSessionException thrown here if there is no session.
-			// (and we definitely want that exception here)
-			final Project project = Project.getCompletedInstance(session);
-			sourceUUID = UUID.fromString(project.getRepoID());
-			userID = project.getGitRepo().getUserInfo().userID;
-		}
-
-		// WARNING this discloses the token (so it's in the URL when coming from
-		// the resume screen). that is, make absolutely sure this isn't publicly
-		// accessible!!
-		final List<Item> items = config.getPublicationDatabase()
-				.getPublishedItems(sourceUUID, userID);
-		final List<PublicationItem> res = new ArrayList<PublicationItem>(
-				items.size());
-		for (Item item : items)
-			res.add(new PublicationItem(sourceUUID, item));
-		return res;
-	}
-
 	@PostMapping("query-hierarchy")
 	public CollectionList queryHierarchy(
 			@RequestParam("user_email") final String user_email,
@@ -340,33 +305,6 @@ public class Publication {
 		public CollectionList(Hierarchy accessibleCollections) {
 			this.isUserValid = true;
 			this.accessibleCollections = accessibleCollections;
-		}
-	}
-
-	public class PublicationItem {
-		@JsonProperty("source")
-		public final UUID source;
-		@JsonProperty("title")
-		public final String title;
-		@JsonProperty("version")
-		public final String version;
-		@JsonProperty("description")
-		public final String description;
-		@JsonProperty("archive_url")
-		public final String archive_url;
-		@JsonProperty("item")
-		public final UUID item;
-		@JsonProperty("token")
-		public final String token;
-
-		public PublicationItem(final UUID source, final Item item) {
-			this.item = item.uuid;
-			this.source = source;
-			title = item.title;
-			version = item.version;
-			description = item.description;
-			archive_url = item.archive_url;
-			token = item.token;
 		}
 	}
 }
