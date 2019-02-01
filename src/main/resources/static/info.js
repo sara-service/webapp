@@ -1,8 +1,8 @@
 "use strict";
 
 function fillMetaData(meta) {
-	$.each(["title", "description", "version", "url", "submitter", "date"],
-		function(_, id) {
+	$.each(["title", "description", "version", "url", "submitter_surname",
+		"submitter_givenname", "date"], function(_, id) {
 			$('#' + id).text(meta[id]);
 		});
 
