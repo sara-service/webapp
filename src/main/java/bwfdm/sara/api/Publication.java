@@ -34,6 +34,7 @@ import bwfdm.sara.project.Project;
 import bwfdm.sara.project.PublicationSession;
 import bwfdm.sara.publication.Hierarchy;
 import bwfdm.sara.publication.Item;
+import bwfdm.sara.publication.ItemPublication;
 import bwfdm.sara.publication.ItemState;
 import bwfdm.sara.publication.MetadataMapping;
 import bwfdm.sara.publication.PublicationRepository;
@@ -211,7 +212,9 @@ public class Publication {
 		final String userLogin = meta.get(PublicationField.PUBREPO_LOGIN_EMAIL);
 
 		MultiValueMap<String, String> metadataMap = finalMapping(session);
-		Item i = project.getItem();
+		ItemPublication i = new ItemPublication();
+		i.item_uuid = project.getItemUUID();
+
 		i.date_last_modified = new Date();
 		i.item_state = ItemState.SUBMITTED.name();
 		i.repository_uuid = repository_uuid;
@@ -235,7 +238,7 @@ public class Publication {
 			logger.info(i.item_id);
 		}
 
-		project.getPublicationDatabase().updateInDB(i);
+		i = project.getPublicationDatabase().insertInDB(i);
 
 		Map<PublicationField, String> m = new EnumMap<>(PublicationField.class);
 		m.put(PublicationField.REPOSITORY_URL, i.repository_url);
@@ -358,9 +361,9 @@ public class Publication {
 		public PublicationItem(final UUID source, final Item item) {
 			this.item = item.uuid;
 			this.source = source;
-			title = item.meta_title;
-			version = item.meta_version;
-			description = item.meta_description;
+			title = item.title;
+			version = item.version;
+			description = item.description;
 			archive_url = item.archive_url;
 			token = item.token;
 		}

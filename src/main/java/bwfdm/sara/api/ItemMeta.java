@@ -59,6 +59,7 @@ public class ItemMeta {
 				&& item.source_user_id.equals(userID);
 	}
 
+	// FIXME should extend ArchiveMetadata instead!!
 	@JsonInclude(Include.NON_NULL)
 	public static class ItemInfo {
 		@JsonProperty
@@ -75,7 +76,9 @@ public class ItemMeta {
 		@JsonProperty
 		public final String url;
 		@JsonProperty
-		public final String submitter;
+		public final String submitter_surname;
+		@JsonProperty
+		public final String submitter_givenname;
 		@JsonProperty
 		@JsonFormat(shape = Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
 		public final Date date;
@@ -85,10 +88,11 @@ public class ItemMeta {
 		public ItemInfo(final Item item, final boolean authenticated) {
 			this.item = item.uuid;
 			isPublic = item.is_public;
-			title = item.meta_title;
-			description = item.meta_description;
-			version = item.meta_version;
-			submitter = item.meta_submitter;
+			title = item.title;
+			description = item.description;
+			version = item.version;
+			submitter_surname = item.submitter_surname;
+			submitter_givenname = item.submitter_givenname;
 			date = item.date_created;
 			url = isPublic ? item.archive_url : null;
 			token = authenticated ? item.token : null;

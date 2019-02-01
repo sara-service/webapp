@@ -13,7 +13,6 @@ import bwfdm.sara.Config;
 import bwfdm.sara.api.Authorization;
 import bwfdm.sara.auth.AuthProvider;
 import bwfdm.sara.publication.Item;
-import bwfdm.sara.publication.ItemState;
 import bwfdm.sara.publication.db.PublicationDatabase;
 import bwfdm.sara.publication.db.PublicationField;
 
@@ -72,17 +71,19 @@ public class PublicationSession {
 			throw new InvalidItemException(userID);
 
 		// initialize publication metadata from item
-		meta.put(PublicationField.TITLE, item.meta_title);
-		meta.put(PublicationField.VERSION, item.meta_version);
-		meta.put(PublicationField.DESCRIPTION, item.meta_description);
-		meta.put(PublicationField.SUBMITTER, item.meta_submitter);
+		meta.put(PublicationField.TITLE, item.title);
+		meta.put(PublicationField.VERSION, item.version);
+		meta.put(PublicationField.DESCRIPTION, item.description);
+		// TODO split submitter field here
+		meta.put(PublicationField.SUBMITTER, item.submitter_surname + ", "
+				+ item.submitter_givenname);
 		meta.put(PublicationField.ARCHIVE_URL, item.archive_url);
-		meta.put(PublicationField.PUBREPO_LOGIN_EMAIL,
-				item.repository_login_id);
-		meta.put(PublicationField.VERIFY_USER, "true"); // FIXME! This needs to
-														// be
-														// somehow
-														// configurable!!!
+		// initialization with reasonable defaults: email from git repo
+		meta.put(PublicationField.PUBREPO_LOGIN_EMAIL, item.contact_email);
+		// FIXME! This needs to be somehow configurable!!!
+		meta.put(PublicationField.VERIFY_USER, "true");
+		// mark item as not yet published
+		meta.remove(PublicationField.REPOSITORY_URL);
 		this.userID = userID;
 		this.item = item;
 
@@ -143,11 +144,10 @@ public class PublicationSession {
 		// done or not. just throw an exception instead...
 		checkHaveItem();
 
-		// update the item
-		final Item item = config.getPublicationDatabase()
-				.updateFromDB(new Item(itemUUID));
-		// do not lose an open session while item is in CREATED state
-		if (item.item_state.equals(ItemState.CREATED.name())) {
+		// this relies on the fact that only actually publishing the item sets
+		// the repository URL
+		if (meta.containsKey(PublicationField.REPOSITORY_URL)) {
+			// do not lose an open session while item is not yet submitted
 			return false;
 		} else {
 			return true;
