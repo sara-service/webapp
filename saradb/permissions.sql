@@ -16,6 +16,7 @@ GRANT SELECT ON archive_params TO __USERNAME__;
 GRANT SELECT ON metadatamapping TO __USERNAME__;
 GRANT SELECT, INSERT ON metadatavalue TO __USERNAME__;
 
-GRANT SELECT, INSERT, UPDATE ON item TO __USERNAME__;
-GRANT SELECT, INSERT, UPDATE ON item_authors TO __USERNAME__;
+-- note: no UPDATE or DELETE on item and item_authors! they are append-only
+GRANT SELECT, INSERT ON item TO __USERNAME__;
+GRANT SELECT, INSERT ON item_authors TO __USERNAME__;
 GRANT SELECT, INSERT, UPDATE ON item_publication TO __USERNAME__;
