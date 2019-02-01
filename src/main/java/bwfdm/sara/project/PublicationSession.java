@@ -43,8 +43,7 @@ public class PublicationSession {
 		this.itemUUID = itemUUID;
 		this.config = config;
 		this.verified = false;
-		Random r = new Random();
-		seed = String.valueOf(String.valueOf(r.nextLong()));
+		seed = config.getToken();
 		updateHash();
 	}
 
