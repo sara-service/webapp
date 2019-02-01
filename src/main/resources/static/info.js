@@ -1,10 +1,18 @@
 "use strict";
 
 function fillMetaData(meta) {
-	$.each(["title", "description", "version", "url", "submitter", "date"],
+	$.each(["title", "description", "version", "url", "date"],
 		function(_, id) {
 			$('#' + id).text(meta[id]);
 		});
+	$.each(["surname", "givenname"], function(_, id) {
+		$('#submitter_' + id).text(meta.submitter[id]);
+	});
+	$.each(meta.authors, function(_, author) {
+		var row = $("<li>");
+		row.text(author.surname + ", " + author.givenname);
+		$("#authors").append(row);
+	});
 
 	if (meta.public_access) {
 		$('#access').text("public");

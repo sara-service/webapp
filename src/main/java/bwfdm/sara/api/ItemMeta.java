@@ -1,6 +1,8 @@
 package bwfdm.sara.api;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 
@@ -20,7 +22,9 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import bwfdm.sara.Config;
+import bwfdm.sara.project.ArchiveMetadata;
 import bwfdm.sara.project.Project;
+import bwfdm.sara.project.PublicationSession;
 import bwfdm.sara.publication.Item;
 
 @RestController
@@ -33,8 +37,8 @@ public class ItemMeta {
 	public ItemInfo getItemInfo(@PathVariable("uuid") final UUID itemID,
 			@RequestParam(name = "token", required = false) final String token,
 			final HttpSession session) {
-		final Item item = config.getPublicationDatabase()
-				.updateFromDB(new Item(itemID));
+		// FIXME getItem so we have authors!
+		final Item item = config.getPublicationDatabase().getItem(itemID);
 
 		if (isAuthenticated(item, token, session))
 			return new ItemInfo(item, true);
@@ -59,36 +63,62 @@ public class ItemMeta {
 				&& item.source_user_id.equals(userID);
 	}
 
+	@GetMapping("list")
+	public List<ItemInfo> getArchivedItems(final HttpSession session) {
+		// special case: this can be called directly after login, before there
+		// is a PublicationSession. if so, get the relevant info from the
+		// Project instead.
+		final UUID sourceUUID;
+		final String userID;
+		if (PublicationSession.hasInstance(session)) {
+			final PublicationSession project = PublicationSession
+					.getInstance(session);
+			sourceUUID = project.getSourceUUID();
+			userID = project.getSourceUserID();
+		} else {
+			// NoSessionException thrown here if there is no session.
+			// (and we definitely want that exception here)
+			final Project project = Project.getCompletedInstance(session);
+			sourceUUID = UUID.fromString(project.getRepoID());
+			userID = project.getGitRepo().getUserInfo().userID;
+		}
+
+		// WARNING this discloses the token (so it's in the URL when coming from
+		// the resume screen). that is, make absolutely sure this isn't publicly
+		// accessible!!
+		final List<Item> items = config.getPublicationDatabase()
+				.getPublishedItems(sourceUUID, userID);
+		final List<ItemInfo> res = new ArrayList<ItemInfo>(items.size());
+		for (final Item item : items)
+			res.add(new ItemInfo(item, true));
+		return res;
+	}
+
 	@JsonInclude(Include.NON_NULL)
-	public static class ItemInfo {
+	public static class ItemInfo extends ArchiveMetadata {
 		@JsonProperty
 		public final UUID item;
-		@JsonProperty("public_access")
-		public final boolean isPublic;
 
 		@JsonProperty
-		public final String title;
-		@JsonProperty
-		public final String description;
-		@JsonProperty
-		public final String version;
+		public final UUID source;
 		@JsonProperty
 		public final String url;
 		@JsonProperty
-		public final String submitter;
-		@JsonProperty
 		@JsonFormat(shape = Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
 		public final Date date;
+
+		@JsonProperty("public_access")
+		public final boolean isPublic;
 		@JsonProperty
 		public final String token;
 
 		public ItemInfo(final Item item, final boolean authenticated) {
+			super(item.title, item.description, item.version, item.master,
+					item.submitter_surname, item.submitter_givenname);
+			setAuthors(item.authors);
+			this.source = item.source_uuid;
 			this.item = item.uuid;
 			isPublic = item.is_public;
-			title = item.meta_title;
-			description = item.meta_description;
-			version = item.meta_version;
-			submitter = item.meta_submitter;
 			date = item.date_created;
 			url = isPublic ? item.archive_url : null;
 			token = authenticated ? item.token : null;

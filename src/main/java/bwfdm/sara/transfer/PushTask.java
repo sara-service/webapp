@@ -41,8 +41,6 @@ import bwfdm.sara.project.LicensesInfo.LicenseInfo;
 import bwfdm.sara.project.Name;
 import bwfdm.sara.project.Ref;
 import bwfdm.sara.publication.Item;
-import bwfdm.sara.publication.ItemState;
-import bwfdm.sara.publication.ItemType;
 import bwfdm.sara.publication.db.PublicationDatabase;
 
 /** Pushes a repository to a git archive. */
@@ -84,7 +82,7 @@ public class PushTask extends Task {
 		this.job = job;
 		this.archive = archive;
 		this.pubDB = pubDB;
-		declareSteps(COMMIT_META, CREATE_PROJECT, PUSH_REPO);
+		declareSteps(COMMIT_META, CREATE_PROJECT, PUSH_REPO, CREATE_METADATA);
 	}
 
 	@Override
@@ -228,42 +226,29 @@ public class PushTask extends Task {
 	private UUID createItemInDB(final String webURL,
 			ArchiveMetadata meta, boolean isPublic) {
 		final Item i = new Item();
-		i.archive_uuid = job.archiveUUID;
+		// source stuff
 		i.source_uuid = job.sourceUUID;
-		i.item_state = ItemState.CREATED.name();
-		i.item_state_sent = i.item_state;
-
-		i.item_type = (isPublic ? ItemType.ARCHIVE_PUBLIC
-				: ItemType.ARCHIVE_HIDDEN).name();
-
 		i.source_user_id = job.sourceUserID;
 		i.contact_email = job.gitrepoEmail;
-		i.date_created = now;
-		i.date_last_modified = i.date_created;
 
-		// initialization with reasonable defaults
-		// email from working gitlab
-		i.repository_login_id = job.gitrepoEmail;
+		// metadata
+		i.title = meta.title; // title of publication
+		i.description = meta.description; // description of artefact
+		i.version = meta.version; // version of git project
+		i.master = meta.master; // main branch of git project
 		// submitter of publication
-		// FIXME store as separate fields in item!
-		i.meta_submitter = job.meta.submitter.surname + ", "
-				+ job.meta.submitter.givenname;
-		// TODO store authors in item table as well
-		// version of git project
-		i.meta_version = meta.version;
-		// title of git project
-		i.meta_title = meta.title;
-		// description of git project
-		i.meta_description = meta.description;
-		// URL where the archive has been deposited
-		i.archive_url = webURL;
+		i.submitter_surname = job.meta.submitter.surname;
+		i.submitter_givenname = job.meta.submitter.givenname;
+		i.authors = meta.getAuthors(); // list of authors
 
+		// archive stuff
+		i.archive_uuid = job.archiveUUID;
+		i.archive_url = webURL; // URL where the archive has been deposited
 		i.is_public = isPublic;
-		// randomly generated access token for the user
-		i.token = Config.getToken();
+		i.token = Config.getToken(); // randomly generated access token for user
+		i.date_created = now;
 
-		this.item = pubDB.insertInDB(i);
-
+		this.item = pubDB.insert(i);
 		logger.info("Item submission succeeded with item uuid "
 				+ item.uuid.toString());
 		return item.uuid;

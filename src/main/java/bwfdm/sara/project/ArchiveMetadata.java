@@ -70,7 +70,7 @@ public class ArchiveMetadata {
 
 	/** list of authors, in order */
 	@JsonProperty
-	public Collection<Name> getAuthors() {
+	public List<Name> getAuthors() {
 		return Collections.unmodifiableList(authors);
 	}
 

@@ -5,10 +5,12 @@ package bwfdm.sara.publication;
  */
 
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import bwfdm.sara.project.Name;
 import bwfdm.sara.publication.db.DAO;
 import bwfdm.sara.publication.db.DatabaseField;
 import bwfdm.sara.publication.db.PrimaryKey;
@@ -18,50 +20,43 @@ import bwfdm.sara.publication.db.TableName;
 public class Item implements DAO {
 	@PrimaryKey
 	public final UUID uuid;
+
+	// source stuff
 	@DatabaseField
 	public UUID source_uuid;
-	@DatabaseField
-	public UUID archive_uuid;
-	@DatabaseField
-	public UUID repository_uuid;
 	@DatabaseField
 	public String source_user_id;
 	@DatabaseField
 	public String contact_email;
+
+	// metadata
 	@DatabaseField
-	public String collection_id;
+	public String title;
 	@DatabaseField
-	public String item_id;
+	public String version;
 	@DatabaseField
-	public Date date_created;
+	public String description;
 	@DatabaseField
-	public Date date_last_modified;
+	public String master;
 	@DatabaseField
-	public String item_type;
+	public String submitter_surname;
 	@DatabaseField
-	public String item_state;
+	public String submitter_givenname;
+
+	// archive stuff
 	@DatabaseField
-	public String item_state_sent;
-	@DatabaseField
-	public String persistent_identifier;
-	@DatabaseField
-	public String repository_login_id;
-	@DatabaseField
-	public String meta_title;
-	@DatabaseField
-	public String meta_version;
-	@DatabaseField
-	public String meta_description;
-	@DatabaseField
-	public String meta_submitter;
+	public UUID archive_uuid;
 	@DatabaseField
 	public String archive_url;
 	@DatabaseField
-	public String repository_url;
+	public boolean is_public;
 	@DatabaseField
 	public String token;
 	@DatabaseField
-	public boolean is_public;
+	public Date date_created;
+
+	// not handled by generic database stuff!
+	public List<Name> authors;
 
 	public Item(@JsonProperty("uuid") UUID uuid) {
 		this.uuid = uuid;
@@ -69,17 +64,5 @@ public class Item implements DAO {
 
 	public Item() {
 		uuid = null;
-	}
-
-	public ItemState getState() {
-		return ItemState.valueOf(item_state);
-	}
-
-	public ItemType getType() {
-		return ItemType.valueOf(item_type);
-	}
-
-	public boolean isArchiveOnly() {
-		return item_type.equals(ItemType.ARCHIVE_HIDDEN.name());
 	}
 }

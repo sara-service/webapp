@@ -28,5 +28,6 @@ function initProjects(projects) {
 }
 
 $(function() {
-	API.get("load list of projects", "/api/publish/list", {}, initProjects);
+	API.get("load list of archived projects", "/api/item/list", {},
+		initProjects);
 });
