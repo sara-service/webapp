@@ -63,8 +63,7 @@ public class PublicationSession {
 		final String userID = auth.getUserInfo().userID;
 		// check that the user actually owns the item, and show a nasty error
 		// message if not
-		final Item item = config.getPublicationDatabase()
-				.updateFromDB(new Item(itemUUID));
+		final Item item = config.getPublicationDatabase().getItem(itemUUID);
 		if (!item.source_uuid.equals(sourceUUID)
 				|| !item.source_user_id.equals(userID))
 			throw new InvalidItemException(userID);

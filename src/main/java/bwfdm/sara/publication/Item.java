@@ -14,6 +14,7 @@ import bwfdm.sara.project.Name;
 import bwfdm.sara.publication.db.DAO;
 import bwfdm.sara.publication.db.DatabaseField;
 import bwfdm.sara.publication.db.PrimaryKey;
+import bwfdm.sara.publication.db.PublicationDatabase;
 import bwfdm.sara.publication.db.TableName;
 
 @TableName("item")
@@ -58,6 +59,14 @@ public class Item implements DAO {
 	// not handled by generic database stuff!
 	public List<Name> authors;
 
+	/**
+	 * For use by {@link PublicationDatabase} only! For everything else, use
+	 * {@link PublicationDatabase#getItem(UUID)} instead.
+	 * <p>
+	 * Using {@link Item} like a normal {@link DAO} mostly works, except for the
+	 * {@link #authors} field which will be <code>null</code> in that case.
+	 * Thus, to avoid hard to find bugs, <b>do not use this method</b>.
+	 */
 	public Item(@JsonProperty("uuid") UUID uuid) {
 		this.uuid = uuid;
 	}

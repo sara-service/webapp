@@ -136,7 +136,7 @@ public class Authorization {
 			@RequestParam("item") final String itemID,
 			final RedirectAttributes redir, final HttpSession session) {
 		final Item item = config.getPublicationDatabase()
-				.updateFromDB(new Item(UUID.fromString(itemID)));
+				.getItem(UUID.fromString(itemID));
 
 		final GitRepo repo;
 		if (Project.hasInstance(session) && item.source_uuid.equals(UUID
