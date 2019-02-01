@@ -77,42 +77,63 @@ CREATE TABLE repository_params(
 CREATE TABLE item(
 	uuid UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 
+	-- source stuff
 	source_uuid UUID NOT NULL REFERENCES source(uuid) ON DELETE RESTRICT,
-	archive_uuid UUID NOT NULL REFERENCES archive(uuid) ON DELETE RESTRICT,
-	repository_uuid UUID REFERENCES repository(uuid) ON DELETE RESTRICT,
-
 	source_user_id text NOT NULL, -- unique user ID in source
-	repository_login_id text,
-	meta_title text,
-	meta_description text,
-	meta_version text,
-	meta_submitter text,
-	archive_url text,
-	repository_url text,
-	contact_email text NOT NULL, -- email address to be used for contacting the user
+	contact_email text NOT NULL, -- email address from source
 
+	-- metadata
+	title text NOT NULL,
+	description text NOT NULL,
+	version text NOT NULL,
+	master text NOT NULL,
+	submitter_surname text NOT NULL,
+	submitter_givenname text NOT NULL,
+
+	-- archive stuff
+	archive_uuid UUID NOT NULL REFERENCES archive(uuid) ON DELETE RESTRICT,
+	archive_url text,
 	is_public boolean NOT NULL,
 	token text,
-
-	collection_id text, -- ID of collection in institutional repository
-	item_id text, -- ID of submitted item in institutional repository
-
 	date_created timestamp with time zone NOT NULL,
-	date_last_modified timestamp with time zone NOT NULL,
+	CHECK (is_public OR token IS NOT NULL)
+);
+CREATE TABLE item_authors(
+	item_uuid UUID NOT NULL REFERENCES item(uuid) ON DELETE RESTRICT,
+	seq integer NOT NULL, -- sequence number to preserve order of authors
+	surname text,
+	givenname text,
+	CHECK (seq >= 0),
+	PRIMARY KEY (item_uuid, seq) -- keep "seq" last so query can use the index!
+);
+-- index to speed up the query for all artefacts archived by a particular user
+CREATE INDEX ON item(source_uuid, source_user_id);
 
-	item_type text NOT NULL,
-	item_state text NOT NULL,
-	item_state_sent text NOT NULL, -- last state the user was informed about
+CREATE TABLE item_publication(
+	uuid UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+	item_uuid UUID NOT NULL REFERENCES item(uuid) ON DELETE RESTRICT,
 
+	-- stuff entered on publication page
+	repository_uuid UUID NOT NULL REFERENCES repository(uuid) ON DELETE RESTRICT,
+	repository_url text NOT NULL,
+	repository_login_id text NOT NULL,
+	collection_id text NOT NULL, -- ID of collection in institutional repository
+
+	-- stuff populated after triggering submission
+	item_id text, -- ID of submitted item in institutional repository
 	persistent_identifier text, -- DOI, URN, HDL, ...
 
-	CHECK (is_public OR token IS NOT NULL),
-	CHECK (item_type IN ('PUBLISH', 'ARCHIVE_PUBLIC', 'ARCHIVE_HIDDEN')),
-	CHECK (item_state IN ('CREATED', 'VERIFIED', 'SUBMITTED', 'ACCEPTED', 'DONE', 'REJECTED', 'DELETED')),
-	CHECK (item_state_sent IN ('CREATED', 'VERIFIED', 'SUBMITTED', 'ACCEPTED', 'DONE', 'REJECTED', 'DELETED'))
+	-- state tracking
+	date_created timestamp with time zone NOT NULL,
+	date_last_modified timestamp with time zone NOT NULL,
+	item_state text NOT NULL,
+
+	CHECK (item_state IN ('CREATED', 'VERIFIED', 'SUBMITTED', 'ACCEPTED', 'DONE', 'REJECTED', 'DELETED'))
+	-- TODO: CHECK ((state = not yet submitted) OR (repository_uuid IS NOT NULL AND repository_url IS NOT NULL AND repository_login_id IS NOT NULL AND collection_id IS NOT NULL AND item_id IS NOT NULL))
+	-- TODO: CHECK ((state = identifier not yet assigned) OR (persistent_identifier IS NOT NULL))
 );
--- index to speed up the query for the artefacts archived by a particular user
-CREATE INDEX ON item(source_uuid, source_user_id);
+-- index to allow fast join by item_uuid when listing publication per user
+CREATE INDEX ON item_publication(item_uuid);
 
 -- Table: metadatamapping
 CREATE TABLE metadatamapping(
@@ -175,13 +196,13 @@ CREATE TABLE fe_temp_authors(
 	repo text NOT NULL,
 	project text NOT NULL,
 	uid text NOT NULL,
-	seq integer NOT NULL,
+	seq integer NOT NULL, -- sequence number to preserve order of authors
 	surname text,
 	givenname text,
 	CHECK (seq >= 0),
 	FOREIGN KEY (repo, project, uid) REFERENCES fe_temp_metadata(repo, project, uid)
 		ON DELETE CASCADE ON UPDATE CASCADE, -- no zombie authors please!
-	PRIMARY KEY (repo, project, uid, seq)
+	PRIMARY KEY (repo, project, uid, seq) -- keep "seq" last for fast query!
 );
 
 -- archive access (and archive selection, at some point)
