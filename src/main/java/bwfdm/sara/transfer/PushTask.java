@@ -82,7 +82,7 @@ public class PushTask extends Task {
 		this.job = job;
 		this.archive = archive;
 		this.pubDB = pubDB;
-		declareSteps(COMMIT_META, CREATE_PROJECT, PUSH_REPO);
+		declareSteps(COMMIT_META, CREATE_PROJECT, PUSH_REPO, CREATE_METADATA);
 	}
 
 	@Override
