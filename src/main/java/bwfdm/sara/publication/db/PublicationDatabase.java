@@ -13,11 +13,17 @@ import javax.sql.DataSource;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import bwfdm.sara.db.JacksonTemplate;
+import bwfdm.sara.project.Name;
 import bwfdm.sara.publication.Item;
+import bwfdm.sara.publication.ItemAuthor;
 import bwfdm.sara.publication.PublicationRepository;
 import bwfdm.sara.publication.PublicationRepositoryFactory;
 import bwfdm.sara.publication.Repository;
@@ -27,7 +33,7 @@ public class PublicationDatabase {
 	private static final String GENERATED_PRIMARY_KEY = "uuid";
 	private static final String LAST_MODIFIED_COLUMN = "date_last_modified";
 	private final JacksonTemplate db;
-	private final DataSource ds;
+	private final TransactionTemplate transaction;
 
 	/**
 	 * Creates a DAO for reading config values.
@@ -36,12 +42,9 @@ public class PublicationDatabase {
 	 *            the {@link DataSource} to use for all queries
 	 */
 	public PublicationDatabase(final DataSource db) {
-		this.ds = db;
 		this.db = new JacksonTemplate(db);
-	}
-
-	public final DataSource getDataSource() {
-		return this.ds;
+		transaction = new TransactionTemplate(
+				new DataSourceTransactionManager(db));
 	}
 
 	public Boolean exists(DAO d) {
@@ -255,11 +258,45 @@ public class PublicationDatabase {
 		return repos;
 	}
 
+	public Item insert(final Item item) {
+		return transaction.execute(new TransactionCallback<Item>() {
+			@Override
+			public Item doInTransaction(final TransactionStatus status) {
+				return insertItem(item);
+			}
+		});
+	}
+
+	private Item insertItem(final Item item) {
+		final Item i = insertInDB(item);
+		int seq = 0;
+		for (final Name a : item.authors)
+			insertInDB(new ItemAuthor(i.uuid, seq++, a.surname, a.givenname));
+		return i;
+	}
+
+	public Item getItem(final UUID id) {
+		final Item item = updateFromDB(new Item(id));
+		queryAuthors(item);
+		return item;
+	}
+
 	public List<Item> getPublishedItems(final UUID sourceUUID,
 			final String userID) {
-		return getList(Item.class,
+		final List<Item> items = getList(Item.class,
 				"where source_uuid = ? and source_user_id = ?", sourceUUID,
 				userID);
+		for (final Item i : items)
+			queryAuthors(i);
+		return items;
+	}
+
+	private void queryAuthors(final Item item) {
+		item.authors = db.queryToList(
+				"select surname, givenname from "
+						+ getTableName(ItemAuthor.class)
+						+ " where item_uuid = ? order by seq asc",
+				Name.class, item.uuid);
 	}
 
 	public static SortedSet<String> getPrimaryKey(Class<? extends DAO> cls) {

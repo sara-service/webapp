@@ -239,7 +239,7 @@ public class PushTask extends Task {
 		// submitter of publication
 		i.submitter_surname = job.meta.submitter.surname;
 		i.submitter_givenname = job.meta.submitter.givenname;
-		// TODO store authors in item_authors table
+		i.authors = meta.getAuthors(); // list of authors
 
 		// archive stuff
 		i.archive_uuid = job.archiveUUID;
@@ -248,7 +248,7 @@ public class PushTask extends Task {
 		i.token = Config.getToken(); // randomly generated access token for user
 		i.date_created = now;
 
-		this.item = pubDB.insertInDB(i);
+		this.item = pubDB.insert(i);
 		logger.info("Item submission succeeded with item uuid "
 				+ item.uuid.toString());
 		return item.uuid;

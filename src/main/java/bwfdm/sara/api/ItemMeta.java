@@ -20,6 +20,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import bwfdm.sara.Config;
+import bwfdm.sara.project.ArchiveMetadata;
 import bwfdm.sara.project.Project;
 import bwfdm.sara.publication.Item;
 
@@ -33,8 +34,8 @@ public class ItemMeta {
 	public ItemInfo getItemInfo(@PathVariable("uuid") final UUID itemID,
 			@RequestParam(name = "token", required = false) final String token,
 			final HttpSession session) {
-		final Item item = config.getPublicationDatabase()
-				.updateFromDB(new Item(itemID));
+		// FIXME getItem so we have authors!
+		final Item item = config.getPublicationDatabase().getItem(itemID);
 
 		if (isAuthenticated(item, token, session))
 			return new ItemInfo(item, true);
@@ -61,24 +62,14 @@ public class ItemMeta {
 
 	// FIXME should extend ArchiveMetadata instead!!
 	@JsonInclude(Include.NON_NULL)
-	public static class ItemInfo {
+	public static class ItemInfo extends ArchiveMetadata {
 		@JsonProperty
 		public final UUID item;
 		@JsonProperty("public_access")
 		public final boolean isPublic;
 
 		@JsonProperty
-		public final String title;
-		@JsonProperty
-		public final String description;
-		@JsonProperty
-		public final String version;
-		@JsonProperty
 		public final String url;
-		@JsonProperty
-		public final String submitter_surname;
-		@JsonProperty
-		public final String submitter_givenname;
 		@JsonProperty
 		@JsonFormat(shape = Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
 		public final Date date;
@@ -86,13 +77,11 @@ public class ItemMeta {
 		public final String token;
 
 		public ItemInfo(final Item item, final boolean authenticated) {
+			super(item.title, item.description, item.version, item.master,
+					item.submitter_surname, item.submitter_givenname);
+			setAuthors(item.authors);
 			this.item = item.uuid;
 			isPublic = item.is_public;
-			title = item.title;
-			description = item.description;
-			version = item.version;
-			submitter_surname = item.submitter_surname;
-			submitter_givenname = item.submitter_givenname;
 			date = item.date_created;
 			url = isPublic ? item.archive_url : null;
 			token = authenticated ? item.token : null;

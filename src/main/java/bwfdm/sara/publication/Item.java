@@ -5,10 +5,12 @@ package bwfdm.sara.publication;
  */
 
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import bwfdm.sara.project.Name;
 import bwfdm.sara.publication.db.DAO;
 import bwfdm.sara.publication.db.DatabaseField;
 import bwfdm.sara.publication.db.PrimaryKey;
@@ -52,6 +54,9 @@ public class Item implements DAO {
 	public String token;
 	@DatabaseField
 	public Date date_created;
+
+	// not handled by generic database stuff!
+	public List<Name> authors;
 
 	public Item(@JsonProperty("uuid") UUID uuid) {
 		this.uuid = uuid;
