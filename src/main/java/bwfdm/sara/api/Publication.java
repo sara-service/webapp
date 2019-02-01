@@ -214,8 +214,9 @@ public class Publication {
 		MultiValueMap<String, String> metadataMap = finalMapping(session);
 		ItemPublication i = new ItemPublication();
 		i.item_uuid = project.getItemUUID();
+		i.repository_login_id = userLogin;
 
-		i.date_last_modified = new Date();
+		i.date_created = i.date_last_modified = new Date();
 		i.item_state = ItemState.SUBMITTED.name();
 		i.repository_uuid = repository_uuid;
 		i.collection_id = collectionURL;
