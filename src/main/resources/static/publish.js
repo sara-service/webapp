@@ -197,10 +197,9 @@ function initPubRepos(info) {
 	initialCollection = info.meta.collection;
 	
 	$("#next_button").click(function() {
-		var values = validate.all([ "pubrepo", "email", "collection", "policyOk",
-			{ name: "pubrepo_displayname", value: $("#pubrepo :selected").text() },
-			{ name: "collection_displayname", value: $("#collection :selected").text() }]);
+		var values = validate.all([ "pubrepo", "email", "collection", "policyOk",]);
 		// FIXME! validate.all does not work for these elements, ask Matthias how he intended this...
+
 		values["pubrepo_displayname"]=$("#pubrepo :selected").text();
 		values["collection_displayname"]=$("#collection :selected").text();
 		if (values == null)
