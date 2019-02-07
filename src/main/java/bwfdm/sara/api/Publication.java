@@ -3,6 +3,7 @@ package bwfdm.sara.api;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.EnumMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -29,6 +30,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.util.ISO8601DateFormat;
 
 import bwfdm.sara.Config;
+import bwfdm.sara.project.Name;
 import bwfdm.sara.project.PublicationSession;
 import bwfdm.sara.publication.Hierarchy;
 import bwfdm.sara.publication.ItemPublication;
@@ -127,8 +129,6 @@ public class Publication {
 				Arrays.asList(meta.get(PublicationField.DESCRIPTION)));
 		finalMap.putIfAbsent(SaraMetaDataField.SUBMITTER.getDisplayName(),
 				Arrays.asList(meta.get(PublicationField.SUBMITTER)));
-		finalMap.putIfAbsent(SaraMetaDataField.AUTHOR.getDisplayName(),
-				Arrays.asList(meta.get(PublicationField.SUBMITTER)));
 		finalMap.putIfAbsent(SaraMetaDataField.TITLE.getDisplayName(),
 				Arrays.asList(meta.get(PublicationField.TITLE)));
 		finalMap.putIfAbsent(SaraMetaDataField.VERSION.getDisplayName(),
@@ -143,6 +143,15 @@ public class Publication {
 				Arrays.asList(meta.get(PublicationField.DESCRIPTION)));
 		finalMap.putIfAbsent(SaraMetaDataField.DATE_ARCHIVED.getDisplayName(),
 				Arrays.asList(ISO8601.format(project.getItem().date_created)));
+
+		List<String> author_names = new LinkedList<String>();
+		for (Name n : project.getItem().authors) {
+			// TODO this needs to be reworked together with dspace connector....
+			author_names.add(n.givenname + " " + n.surname);
+		}
+
+		finalMap.putIfAbsent(SaraMetaDataField.AUTHOR.getDisplayName(),
+				author_names);
 
 		// configured mappings (repository specific)
 		List<MetadataMapping> mms = project.getPublicationDatabase()

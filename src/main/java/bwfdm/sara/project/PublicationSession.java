@@ -107,6 +107,19 @@ public class PublicationSession {
 	};
 
 	public boolean isVerified() {
+		final Item item = config.getPublicationDatabase().getItem(itemUUID);
+
+		final String repoEMail = meta.get(PublicationField.PUBREPO_LOGIN_EMAIL)
+				.toLowerCase();
+
+		// TODO this should be refactored ... for now override email
+		// verification
+		// when git email equals submission email
+		if (repoEMail.equals(item.contact_email.toLowerCase())) {
+			return true;
+		}
+		;
+
 		return this.verified;
 	}
 
