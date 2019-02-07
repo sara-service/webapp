@@ -25,9 +25,11 @@ function blockLoaded(name) {
 
 function setEnabledNextButton(enable) {
 	if (enable) {
-		$("#next_button").removeClass("disabled");
+		$("#next_button1").removeClass("disabled");
+		$("#next_button2").removeClass("disabled");
 	} else {
-		$("#next_button").addClass("disabled");
+		$("#next_button1").addClass("disabled");
+		$("#next_button2").addClass("disabled");
 	}
 }
 
@@ -41,8 +43,10 @@ function initMeta(info) {
 	$('#collection_displayname').prop('title',info["collection"]);
 	if (info["verify_user"]=="true") {
 		$("#verify").removeClass("hidden");
+		setEnabledNextButton(false);
 	} else {
 		$("#noverify").removeClass("hidden");
+		setEnabledNextButton(true);
 	}
 	blockLoaded("meta");
 }
