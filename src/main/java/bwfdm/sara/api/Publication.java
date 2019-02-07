@@ -88,6 +88,18 @@ public class Publication {
 	public void setMetadata(
 			@RequestBody final Map<PublicationField, String> values,
 			final HttpSession session) {
+
+		final String repoEMail = values
+				.get(PublicationField.PUBREPO_LOGIN_EMAIL).toLowerCase();
+		final String validatedEMail = PublicationSession.getInstance(session)
+				.getItem().contact_email.toLowerCase();
+
+		if (repoEMail.equals(validatedEMail)) {
+			values.put(PublicationField.VERIFY_USER, "false");
+		} else {
+			values.put(PublicationField.VERIFY_USER, "true");
+		}
+
 		PublicationSession.getInstance(session).setMetadata(values);
 	}
 
