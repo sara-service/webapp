@@ -9,7 +9,11 @@ function blockLoaded(name) {
 
 	$("#loading").remove();
 	$("#content").removeClass("hidden");
-	$("#next_button").click(function() {
+	$("#next_button1").click(function() {
+		// FIXME ?id=deadbeef
+		location.href = "/api/publish/trigger";
+	});
+	$("#next_button2").click(function() {
 		// FIXME ?id=deadbeef
 		location.href = "/api/publish/trigger";
 	});
