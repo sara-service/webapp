@@ -2,7 +2,6 @@ package bwfdm.sara.project;
 
 import java.util.EnumMap;
 import java.util.Map;
-import java.util.Random;
 import java.util.UUID;
 
 import javax.servlet.http.HttpSession;
@@ -42,7 +41,7 @@ public class PublicationSession {
 		this.itemUUID = itemUUID;
 		this.config = config;
 		this.verified = false;
-		seed = config.getToken();
+		seed = Config.getToken();
 		updateHash();
 	}
 
