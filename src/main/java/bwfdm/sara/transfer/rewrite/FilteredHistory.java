@@ -22,9 +22,11 @@ import org.eclipse.jgit.revwalk.RevCommit;
  */
 public abstract class FilteredHistory extends RewriteStrategy {
 	private final ObjectInserter ins;
+	private final Repository repo;
 
 	public FilteredHistory(Repository repo, RewriteCache cache) {
-		super(repo, cache);
+		super(cache);
+		this.repo = repo;
 		ins = repo.newObjectInserter();
 	}
 
@@ -90,7 +92,7 @@ public abstract class FilteredHistory extends RewriteStrategy {
 				final int curParent = head.nextParent++;
 				final RevCommit parent = head.commit.getParent(curParent);
 				if (!cache.contains(parent))
-					head = new Stack(head, parent);
+					head = new Stack(head, repo.parseCommit(parent));
 			}
 		}
 	}
@@ -108,6 +110,11 @@ public abstract class FilteredHistory extends RewriteStrategy {
 			this.commit = commit;
 			this.nextParent = 0;
 		}
+	}
+
+	@Override
+	public void close() {
+		ins.close();
 	}
 
 	protected abstract boolean isSignificant(final RevCommit commit,

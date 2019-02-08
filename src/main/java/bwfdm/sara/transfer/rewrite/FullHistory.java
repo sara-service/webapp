@@ -5,7 +5,6 @@ import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 
 /**
@@ -14,8 +13,8 @@ import org.eclipse.jgit.revwalk.RevCommit;
  * needed for other rewriters to find them when they hit them.
  */
 public class FullHistory extends RewriteStrategy {
-	public FullHistory(final Repository repo, final RewriteCache cache) {
-		super(repo, cache);
+	public FullHistory(final RewriteCache cache) {
+		super(cache);
 	}
 
 	@Override
