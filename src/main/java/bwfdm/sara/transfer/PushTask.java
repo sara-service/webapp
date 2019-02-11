@@ -218,6 +218,8 @@ public class PushTask extends Task {
 							.setSourceDestination(heads.get(r),
 									Constants.R_REFS + r.path)
 							.setForceUpdate(true));
+		// TODO once we no longer clone all tags, push tags here as well
+		push.setPushTags();
 		push.setRefSpecs(spec);
 		push.setRemote(TARGET_REMOTE);
 

@@ -32,6 +32,7 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.util.FileSystemUtils;
 
 import bwfdm.sara.project.RefAction.PublicationMethod;
 
@@ -246,7 +247,7 @@ public class RewriteTest {
 		rewrite.execute(null);
 		assertTrue(rewrite.isUnchanged(a.getName()));
 		assertFalse(rewrite.isUnchanged(b.getName()));
-	
+
 		// A tree not changed at all
 		assertUnchangedRef(rewrite, a);
 		assertUnchangedRef(rewrite, ta4);
@@ -347,7 +348,7 @@ public class RewriteTest {
 	}
 
 	@After
-	public void dispose() {
+	public void dispose() throws IOException {
 		repo.close();
 		repo = null;
 		git.close();
@@ -358,6 +359,7 @@ public class RewriteTest {
 		b1 = b2 = b3 = b4 = b5 = b6 = b7 = b8 = null;
 		c1 = c2 = c3 = c4 = c5 = c6 = c7 = c8 = c9 = null;
 		a = b = c = ta4 = tb3 = tb5 = tc3 = tc6 = null;
-		root.delete();
+		FileSystemUtils.deleteRecursively(root);
+		root = null;
 	}
 }
