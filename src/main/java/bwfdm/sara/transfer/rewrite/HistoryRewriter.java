@@ -97,12 +97,15 @@ public class HistoryRewriter {
 	private void rewrite(final Set<ObjectId> heads,
 			final RewriteStrategy strategy, final ProgressMonitor progress)
 			throws IOException {
-		for (final ObjectId head : heads) {
-			strategy.process(repo.parseCommit(head));
-			if (progress != null)
-				progress.update(1);
+		try {
+			for (final ObjectId head : heads) {
+				strategy.process(repo.parseCommit(head));
+				if (progress != null)
+					progress.update(1);
+			}
+		} finally {
+			strategy.close();
 		}
-		strategy.close();
 	}
 
 	/**

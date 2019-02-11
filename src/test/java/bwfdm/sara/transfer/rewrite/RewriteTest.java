@@ -43,9 +43,9 @@ public class RewriteTest {
 	private Repository repo;
 	private RewriteCache cache;
 	private Map<String, ObjectId> objects;
-	private ObjectId a1, a2, a3, a4, a5, a6, a7, a8, a9, a10;
-	private ObjectId b1, b2, b3, b4, b5, b6, b7, b8;
-	private ObjectId c1, c2, c3, c4, c5, c6, c7, c8, c9;
+	private RevCommit a1, a2, a3, a4, a5, a6, a7, a8, a9, a10;
+	private RevCommit b1, b2, b3, b4, b5, b6, b7, b8;
+	private RevCommit c1, c2, c3, c4, c5, c6, c7, c8, c9;
 	private Ref ta4, tb3, tb5, tc3, tc6, a, b, c;
 
 	@Before
@@ -100,7 +100,7 @@ public class RewriteTest {
 		tc6 = tag("tc6", c6, true);
 	}
 
-	private ObjectId commit(final String id, final ObjectId... parents)
+	private RevCommit commit(final String id, final ObjectId... parents)
 			throws IOException {
 		try (final ObjectInserter ins = repo.newObjectInserter()) {
 			final ObjectId file = ins.insert(Constants.OBJ_BLOB,
@@ -117,7 +117,7 @@ public class RewriteTest {
 
 			final ObjectId obj = ins.insert(commit);
 			objects.put(id, obj);
-			return obj;
+			return repo.parseCommit(obj);
 		}
 	}
 
@@ -178,33 +178,50 @@ public class RewriteTest {
 	@Test
 	public void testFullHistory() throws IOException {
 		final HistoryRewriter rewrite = new HistoryRewriter(repo);
+		rewrite.addHead(a.getName(), PublicationMethod.FULL);
+		rewrite.addHead(b.getName(), PublicationMethod.FULL);
 		rewrite.addHead(c.getName(), PublicationMethod.FULL);
 		rewrite.execute(null);
 		// full rewrite must have left the object ID of the root, and all tags
 		// alongside, completely unchanged.
+		assertUnchangedRef(rewrite, a);
+		assertUnchangedRef(rewrite, b);
 		assertUnchangedRef(rewrite, c);
-		assertUnchangedRef(rewrite, tc6);
+		assertUnchangedRef(rewrite, ta4);
+		assertUnchangedRef(rewrite, tb3);
+		assertUnchangedRef(rewrite, tb5);
 		assertUnchangedRef(rewrite, tc3);
+		assertUnchangedRef(rewrite, tc6);
 	}
 
 	@Test
 	public void testAbbreviatedHistory() throws IOException {
 		final HistoryRewriter rewrite = new HistoryRewriter(repo);
+		rewrite.addHead(a.getName(), PublicationMethod.ABBREV);
+		rewrite.addHead(b.getName(), PublicationMethod.ABBREV);
 		rewrite.addHead(c.getName(), PublicationMethod.ABBREV);
 		rewrite.execute(null);
+		assertFalse(rewrite.isUnchanged(a.getName()));
+		assertFalse(rewrite.isUnchanged(b.getName()));
 		assertFalse(rewrite.isUnchanged(c.getName()));
 
+		final RevCommit newA = checkMetadata(rewrite, a);
+		final RevCommit newB = checkMetadata(rewrite, b);
+		final RevCommit newC = checkMetadata(rewrite, c);
+		final RevCommit newTA4 = checkMetadata(rewrite, ta4);
+		final RevCommit newTB3 = checkMetadata(rewrite, tb3);
+		final RevCommit newTB5 = checkMetadata(rewrite, tb5);
+		final RevCommit newTC3 = checkMetadata(rewrite, tc3);
+		final RevCommit newTC6 = checkMetadata(rewrite, tc6);
 		// tree structure retained
-		final RevCommit newC = getNew(rewrite, c);
-		final RevCommit newTC3 = getNew(rewrite, tc3);
-		final RevCommit newTC6 = getNew(rewrite, tc6);
 		assertParents(newC, newTC6);
 		assertParents(newTC6, newTC3);
 		assertParents(newTC3);
-		// commit metadata stays the same
-		assertSameMetadata(c, newC);
-		assertSameMetadata(tc6, newTC6);
-		assertSameMetadata(tc3, newTC3);
+		assertParents(newA, newTA4);
+		assertParents(newTA4);
+		assertParents(newB, newTB5, newTA4);
+		assertParents(newTB5, newTB3, newTA4);
+		assertParents(newTB3);
 	}
 
 	@Test
@@ -214,13 +231,81 @@ public class RewriteTest {
 		rewrite.execute(null);
 		assertFalse(rewrite.isUnchanged(c.getName()));
 
-		// only one commit is left
-		assertParents(getNew(rewrite, c));
-		// commit metadata stays the same
-		assertSameMetadata(c, getNew(rewrite, c));
+		// only one commit is left, ie. no parents
+		assertParents(checkMetadata(rewrite, c));
 		// tags along history are removed
-		assertNull(getNew(rewrite, tc3));
-		assertNull(getNew(rewrite, tc6));
+		assertDeleted(rewrite, tc3);
+		assertDeleted(rewrite, tc6);
+	}
+
+	@Test
+	public void testAbbreviatedAndFull() throws IOException {
+		final HistoryRewriter rewrite = new HistoryRewriter(repo);
+		rewrite.addHead(a.getName(), PublicationMethod.FULL);
+		rewrite.addHead(b.getName(), PublicationMethod.ABBREV);
+		rewrite.execute(null);
+		assertTrue(rewrite.isUnchanged(a.getName()));
+		assertFalse(rewrite.isUnchanged(b.getName()));
+	
+		// A tree not changed at all
+		assertUnchangedRef(rewrite, a);
+		assertUnchangedRef(rewrite, ta4);
+
+		final RevCommit newB = checkMetadata(rewrite, b);
+		final RevCommit newTB3 = checkMetadata(rewrite, tb3);
+		final RevCommit newTB5 = checkMetadata(rewrite, tb5);
+		// B tree structure retained, and rejoins A tree
+		assertParents(newB, newTB5, a8);
+		assertParents(newTB5, newTB3, a5);
+		assertParents(newTB3, a2);
+	}
+
+	@Test
+	public void testAbbreviatedAndLatest() throws IOException {
+		final HistoryRewriter rewrite = new HistoryRewriter(repo);
+		rewrite.addHead(a.getName(), PublicationMethod.ABBREV);
+		rewrite.addHead(b.getName(), PublicationMethod.LATEST);
+		rewrite.execute(null);
+		assertFalse(rewrite.isUnchanged(a.getName()));
+		assertFalse(rewrite.isUnchanged(b.getName()));
+
+		final RevCommit newA = checkMetadata(rewrite, a);
+		final RevCommit newB = checkMetadata(rewrite, b);
+		final RevCommit newTA4 = checkMetadata(rewrite, ta4);
+		// tree structure retained, B tree rejoins A tree
+		assertParents(newA, newTA4);
+		assertParents(newTA4);
+		assertParents(newB, newTA4);
+		// all B tree tags deleted
+		assertDeleted(rewrite, tb5);
+		assertDeleted(rewrite, tb3);
+	}
+
+	@Test
+	public void testLatestAndFull() throws IOException {
+		final HistoryRewriter rewrite = new HistoryRewriter(repo);
+		rewrite.addHead(a.getName(), PublicationMethod.FULL);
+		rewrite.addHead(b.getName(), PublicationMethod.LATEST);
+		rewrite.execute(null);
+		assertTrue(rewrite.isUnchanged(a.getName()));
+		assertFalse(rewrite.isUnchanged(b.getName()));
+
+		// A tree not changed at all
+		assertUnchangedRef(rewrite, a);
+		assertUnchangedRef(rewrite, ta4);
+
+		// single B tree commit derives from A tree
+		// TODO maybe we should do fast-forward detection a la git instead?
+		// OTOH this does document where A was merged into B...
+		assertParents(checkMetadata(rewrite, b), a2, a5, a8);
+		// all B tree tags deleted
+		assertDeleted(rewrite, tb5);
+		assertDeleted(rewrite, tb3);
+	}
+
+	private void assertDeleted(HistoryRewriter rewrite, Ref ref)
+			throws IOException {
+		assertNull(rewrite.getRewrittenCommit(ref.getName()));
 	}
 
 	private void assertParents(final RevCommit newRev,
@@ -230,9 +315,12 @@ public class RewriteTest {
 			assertEquals(parents[i], newRev.getParent(i));
 	}
 
-	private void assertSameMetadata(final Ref oldCommit,
-			final RevCommit newCommit) throws IOException {
+	private RevCommit checkMetadata(final HistoryRewriter rewrite,
+			final Ref oldCommit) throws IOException {
+		final RevCommit newCommit = rewrite
+				.getRewrittenCommit(oldCommit.getName());
 		assertSameMetadata(resolve(oldCommit), newCommit);
+		return newCommit;
 	}
 
 	private void assertSameMetadata(final RevCommit oldCommit,
@@ -248,7 +336,7 @@ public class RewriteTest {
 	private void assertUnchangedRef(final HistoryRewriter rewrite,
 			final Ref ref) throws IOException {
 		assertTrue(rewrite.isUnchanged(ref.getName()));
-		assertEquals(resolve(ref), getNew(rewrite, ref));
+		assertEquals(resolve(ref), checkMetadata(rewrite, ref));
 	}
 
 	private RevCommit resolve(final Ref ref) throws IOException {
@@ -256,11 +344,6 @@ public class RewriteTest {
 		final ObjectId tagCommit = leaf.getPeeledObjectId();
 		final ObjectId id = tagCommit != null ? tagCommit : leaf.getObjectId();
 		return repo.parseCommit(id);
-	}
-
-	private RevCommit getNew(final HistoryRewriter rewrite, Ref ref)
-			throws IOException {
-		return rewrite.getRewrittenCommit(ref.getName());
 	}
 
 	@After

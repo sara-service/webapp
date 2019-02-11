@@ -28,7 +28,8 @@ public class FullHistory extends RewriteStrategy {
 			final RevCommit commit = repo.parseCommit(queue.remove());
 			// we don't change the commit IDs, so we don't wait for the parents
 			// to be rewritten here.
-			cache.keep(commit, commit);
+			if (!cache.contains(commit))
+				cache.keep(commit, commit);
 
 			// enqueue all parents
 			for (final RevCommit parent : commit.getParents())
