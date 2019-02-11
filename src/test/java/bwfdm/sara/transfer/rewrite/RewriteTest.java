@@ -1,7 +1,10 @@
 package bwfdm.sara.transfer.rewrite;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,6 +16,7 @@ import java.util.Map;
 
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.InitCommand;
+import org.eclipse.jgit.api.TagCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.AnyObjectId;
 import org.eclipse.jgit.lib.CommitBuilder;
@@ -28,6 +32,8 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
+import bwfdm.sara.project.RefAction.PublicationMethod;
 
 public class RewriteTest {
 	private static final Charset UTF8 = Charset.forName("UTF-8");
@@ -87,11 +93,11 @@ public class RewriteTest {
 		c = branch("c", c9);
 
 		// some tags to mark important points
-		ta4 = tag("ta4", a4);
-		tb3 = tag("tb3", b3);
-		tb5 = tag("tb5", b5);
-		tc3 = tag("tc3", c3);
-		tc6 = tag("tc6", c6);
+		ta4 = tag("ta4", a4, true);
+		tb3 = tag("tb3", b3, false);
+		tb5 = tag("tb5", b5, true);
+		tc3 = tag("tc3", c3, false);
+		tc6 = tag("tc6", c6, true);
 	}
 
 	private ObjectId commit(final String id, final ObjectId... parents)
@@ -115,10 +121,15 @@ public class RewriteTest {
 		}
 	}
 
-	private Ref tag(final String id, final AnyObjectId commit)
-			throws IOException, GitAPIException {
-		return git.tag().setName(id).setObjectId(repo.parseCommit(commit))
-				.call();
+	private Ref tag(final String id, final AnyObjectId commit,
+			final boolean annotated) throws IOException, GitAPIException {
+		final TagCommand tagger = git.tag().setName(id)
+				.setObjectId(repo.parseCommit(commit)).setAnnotated(annotated);
+		if (annotated) {
+			tagger.setMessage("tag " + id);
+			tagger.setTagger(new PersonIdent(id, id + "@example.gov"));
+		}
+		return tagger.call();
 	}
 
 	private Ref branch(final String id, final AnyObjectId commit)
@@ -129,9 +140,11 @@ public class RewriteTest {
 
 	/**
 	 * A null rewrite (which keeps every commit) must not change the commit IDs.
+	 * This bypasses {@link HistoryRewriter} because it needs to test the
+	 * non-optimized case.
 	 */
 	@Test
-	public void testNullRewrite() throws IOException {
+	public void testIdentityRewrite() throws IOException {
 		try (RewriteStrategy filterAll = new FilteredHistory(repo, cache) {
 			@Override
 			protected boolean isSignificant(RevCommit commit,
@@ -143,22 +156,111 @@ public class RewriteTest {
 			filterAll.process(repo.parseCommit(b8));
 			filterAll.process(repo.parseCommit(c9));
 
-			for (final ObjectId object : objects.values())
-				assertIdentityRewrite(object);
+			// all object IDs have stayed the same.
+			// if this ever fails, probably new commit headers have been added
+			// and must be copied in FilteredHistory.rewrite()...
+			for (final ObjectId object : objects.values()) {
+				final List<ObjectId> rewritten = cache.getRewriteResult(object);
+				assertEquals(1, rewritten.size());
+				assertEquals(object, rewritten.get(0));
+				assertTrue(cache.isKeep(object));
+			}
 
 			// check that the rewriter actually did something, by validating
 			// that it doesn't just return the ObjectId object we passed in.
 			// FullHistory does it that way for sake of efficiency, but here
 			// we're testing the algorithm and deliberately bypass FullHistory.
 			for (final ObjectId object : objects.values())
-				assertNotSame(object, cache.getRewriteResult(object).get(0));
+				assertNotSame(object, cache.getRewrittenCommit(object));
 		}
 	}
 
-	private void assertIdentityRewrite(final ObjectId object) {
-		final List<ObjectId> rewritten = cache.getRewriteResult(object);
-		assertEquals(1, rewritten.size());
-		assertEquals(object, rewritten.get(0));
+	@Test
+	public void testFullHistory() throws IOException {
+		final HistoryRewriter rewrite = new HistoryRewriter(repo);
+		rewrite.addHead(c.getName(), PublicationMethod.FULL);
+		rewrite.execute(null);
+		// full rewrite must have left the object ID of the root, and all tags
+		// alongside, completely unchanged.
+		assertUnchangedRef(rewrite, c);
+		assertUnchangedRef(rewrite, tc6);
+		assertUnchangedRef(rewrite, tc3);
+	}
+
+	@Test
+	public void testAbbreviatedHistory() throws IOException {
+		final HistoryRewriter rewrite = new HistoryRewriter(repo);
+		rewrite.addHead(c.getName(), PublicationMethod.ABBREV);
+		rewrite.execute(null);
+		assertFalse(rewrite.isUnchanged(c.getName()));
+
+		// tree structure retained
+		final RevCommit newC = getNew(rewrite, c);
+		final RevCommit newTC3 = getNew(rewrite, tc3);
+		final RevCommit newTC6 = getNew(rewrite, tc6);
+		assertParents(newC, newTC6);
+		assertParents(newTC6, newTC3);
+		assertParents(newTC3);
+		// commit metadata stays the same
+		assertSameMetadata(c, newC);
+		assertSameMetadata(tc6, newTC6);
+		assertSameMetadata(tc3, newTC3);
+	}
+
+	@Test
+	public void testLatestVersion() throws IOException {
+		final HistoryRewriter rewrite = new HistoryRewriter(repo);
+		rewrite.addHead(c.getName(), PublicationMethod.LATEST);
+		rewrite.execute(null);
+		assertFalse(rewrite.isUnchanged(c.getName()));
+
+		// only one commit is left
+		assertParents(getNew(rewrite, c));
+		// commit metadata stays the same
+		assertSameMetadata(c, getNew(rewrite, c));
+		// tags along history are removed
+		assertNull(getNew(rewrite, tc3));
+		assertNull(getNew(rewrite, tc6));
+	}
+
+	private void assertParents(final RevCommit newRev,
+			final RevCommit... parents) {
+		assertEquals(parents.length, newRev.getParentCount());
+		for (int i = 0; i < parents.length; i++)
+			assertEquals(parents[i], newRev.getParent(i));
+	}
+
+	private void assertSameMetadata(final Ref oldCommit,
+			final RevCommit newCommit) throws IOException {
+		assertSameMetadata(resolve(oldCommit), newCommit);
+	}
+
+	private void assertSameMetadata(final RevCommit oldCommit,
+			final RevCommit newCommit) throws IOException {
+		assertEquals(oldCommit.getTree(), newCommit.getTree());
+		assertEquals(oldCommit.getFullMessage(), newCommit.getFullMessage());
+		assertEquals(oldCommit.getCommitterIdent(),
+				newCommit.getCommitterIdent());
+		assertEquals(oldCommit.getAuthorIdent(), newCommit.getAuthorIdent());
+		assertEquals(oldCommit.getCommitTime(), newCommit.getCommitTime());
+	}
+
+	private void assertUnchangedRef(final HistoryRewriter rewrite,
+			final Ref ref) throws IOException {
+		assertTrue(rewrite.isUnchanged(ref.getName()));
+		assertEquals(resolve(ref), getNew(rewrite, ref));
+	}
+
+	private RevCommit resolve(final Ref ref) throws IOException {
+		final Ref leaf = repo.peel(ref.getLeaf());
+		final ObjectId tagCommit = leaf.getPeeledObjectId();
+		final ObjectId id = tagCommit != null ? tagCommit : leaf.getObjectId();
+		return repo.parseCommit(id);
+	}
+
+	private RevCommit getNew(final HistoryRewriter rewrite, Ref ref)
+			throws IOException {
+		return rewrite.getRewrittenCommit(ref.getName());
 	}
 
 	@After

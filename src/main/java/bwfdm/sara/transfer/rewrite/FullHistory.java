@@ -1,10 +1,10 @@
 package bwfdm.sara.transfer.rewrite;
 
-import java.util.Arrays;
+import java.io.IOException;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 
 /**
@@ -13,18 +13,22 @@ import org.eclipse.jgit.revwalk.RevCommit;
  * needed for other rewriters to find them when they hit them.
  */
 public class FullHistory extends RewriteStrategy {
-	public FullHistory(final RewriteCache cache) {
+	private final Repository repo;
+
+	public FullHistory(final Repository repo, final RewriteCache cache) {
 		super(cache);
+		this.repo = repo;
 	}
 
 	@Override
-	public void process(final RevCommit head) {
+	public void process(final RevCommit head) throws IOException {
 		final Queue<RevCommit> queue = new LinkedBlockingQueue<>();
+		queue.add(head);
 		while (!queue.isEmpty()) {
-			final RevCommit commit = queue.remove();
+			final RevCommit commit = repo.parseCommit(queue.remove());
 			// we don't change the commit IDs, so we don't wait for the parents
 			// to be rewritten here.
-			cache.setRewriteResult(commit, Arrays.<ObjectId> asList(commit));
+			cache.keep(commit, commit);
 
 			// enqueue all parents
 			for (final RevCommit parent : commit.getParents())

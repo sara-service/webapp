@@ -2,7 +2,6 @@ package bwfdm.sara.transfer.rewrite;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.jgit.lib.CommitBuilder;
@@ -20,11 +19,12 @@ import org.eclipse.jgit.revwalk.RevCommit;
  * {@link #isSignificant(RevCommit, List)} always returns <code>true</code>, but
  * it's hopelessly inefficient at that.
  */
-public abstract class FilteredHistory extends RewriteStrategy {
+public abstract class FilteredHistory extends RewriteStrategy
+		implements AutoCloseable {
 	private final ObjectInserter ins;
 	private final Repository repo;
 
-	public FilteredHistory(Repository repo, RewriteCache cache) {
+	public FilteredHistory(final Repository repo, final RewriteCache cache) {
 		super(cache);
 		this.repo = repo;
 		ins = repo.newObjectInserter();
@@ -80,11 +80,10 @@ public abstract class FilteredHistory extends RewriteStrategy {
 					// rewritten parents
 					final ObjectId rewritten = ins
 							.insert(rewrite(head.commit, parents));
-					cache.setRewriteResult(head.commit,
-							Arrays.asList(rewritten));
+					cache.keep(head.commit, rewritten);
 				} else
 					// insignificant commits rewrite to the set of their parents
-					cache.setRewriteResult(head.commit, parents);
+					cache.omit(head.commit, parents);
 
 				head = head.prev;
 			} else {
@@ -98,14 +97,12 @@ public abstract class FilteredHistory extends RewriteStrategy {
 	}
 
 	/** Mini linked-list stack. */
-	@SuppressWarnings("serial")
-	private class Stack extends ArrayList<ObjectId> {
+	private class Stack {
 		private final Stack prev;
 		private final RevCommit commit;
 		private int nextParent;
 
 		public Stack(final Stack prev, final RevCommit commit) {
-			super(commit.getParentCount());
 			this.prev = prev;
 			this.commit = commit;
 			this.nextParent = 0;
@@ -120,7 +117,7 @@ public abstract class FilteredHistory extends RewriteStrategy {
 	protected abstract boolean isSignificant(final RevCommit commit,
 			final List<ObjectId> parents);
 
-	protected CommitBuilder rewrite(final RevCommit orig,
+	private CommitBuilder rewrite(final RevCommit orig,
 			final List<ObjectId> parents) throws IOException {
 		final CommitBuilder rewritten = new CommitBuilder();
 		rewritten.setTreeId(orig.getTree());
