@@ -15,8 +15,11 @@ import org.eclipse.jgit.api.errors.TransportException;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.RefUpdate;
+import org.eclipse.jgit.lib.RefUpdate.Result;
+import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.StoredConfig;
 import org.eclipse.jgit.lib.SubmoduleConfig.FetchRecurseSubmodulesMode;
+import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.transport.RefSpec;
 import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.jgit.transport.TagOpt;
@@ -26,6 +29,8 @@ import bwfdm.sara.extractor.MetadataExtractor;
 import bwfdm.sara.git.GitProject;
 import bwfdm.sara.project.Ref;
 import bwfdm.sara.project.RefAction;
+import bwfdm.sara.project.RefAction.PublicationMethod;
+import bwfdm.sara.transfer.rewrite.HistoryRewriter;
 
 public class CloneTask extends Task {
 	private static final String EXTRACT_META = "Extracting metadata";
@@ -37,6 +42,7 @@ public class CloneTask extends Task {
 	private final List<Ref> refs;
 	private final File root;
 	private final TransferRepo transferRepo;
+	private final boolean abbrev;
 	private Git git;
 
 	public CloneTask(final TransferRepo transferRepo,
@@ -47,10 +53,18 @@ public class CloneTask extends Task {
 		this.project = project;
 		this.actions = actions;
 		refs = new ArrayList<>(actions.size());
-		for (final RefAction a : actions)
+		boolean abbrev = false;
+		for (final RefAction a : actions) {
 			refs.add(a.ref);
+			if (a.publicationMethod != PublicationMethod.FULL)
+				abbrev = true;
+		}
 		root = transferRepo.getRoot();
-		declareSteps(INIT_REPO, ABBREV_HISTORY, EXTRACT_META);
+		declareSteps(INIT_REPO);
+		if (abbrev)
+			declareSteps(ABBREV_HISTORY);
+		declareSteps(EXTRACT_META);
+		this.abbrev = abbrev;
 	}
 
 	@Override
@@ -59,22 +73,23 @@ public class CloneTask extends Task {
 	}
 
 	@Override
-	protected void execute() throws GitAPIException, URISyntaxException,
-			IOException {
+	protected void execute()
+			throws GitAPIException, URISyntaxException, IOException {
 		beginTask(INIT_REPO, 1);
 		initRepo();
 		fetchHeads();
 		pushBackHeads();
-		beginTask(ABBREV_HISTORY, 1);
-		rewriteHistory();
-		transferRepo.setRepo(git.getRepository());
 
+		if (abbrev)
+			rewriteHistory();
+
+		transferRepo.setRepo(git.getRepository());
 		extractMetaData();
 		endTask();
 	}
 
-	private void initRepo() throws GitAPIException, URISyntaxException,
-			IOException {
+	private void initRepo()
+			throws GitAPIException, URISyntaxException, IOException {
 		git = Git.init().setBare(true).setGitDir(root).call();
 		// add the "origin" remote
 		final RemoteAddCommand add = git.remoteAdd();
@@ -106,8 +121,9 @@ public class CloneTask extends Task {
 	}
 
 	private void fetchHeads()
-			throws GitAPIException, InvalidRemoteException,
-			TransportException {
+			throws GitAPIException, InvalidRemoteException, TransportException {
+		// FIXME should remove all existing tags here!
+		// otherwise deleting a tag on the source won't propagate here
 		final FetchCommand fetch = git.fetch();
 		// to guard against corruption
 		fetch.setCheckFetchedObjects(true);
@@ -154,18 +170,75 @@ public class CloneTask extends Task {
 			// - people who do probably don't push them backwards
 			// - pointing signed annotated tags at a different commit would
 			//   invalidate the signature so isn't advisable anyway
-			final RefUpdate update = git.getRepository().updateRef(
-					Constants.R_REFS + e.ref.path);
-			update.disableRefLog();
+			final RefUpdate update = git.getRepository()
+					.updateRef(Constants.R_REFS + e.ref.path);
 			update.setNewObjectId(ObjectId.fromString(e.firstCommit));
 			update.setCheckConflicting(false);
+			// log ref update to keep the old objects around. this can make
+			// re-cloning the repo much faster because less objects have to be
+			// transferred.
+			update.setRefLogMessage("SARA rewind", true);
 			update.forceUpdate();
+			checkUpdate(update);
 			update(1);
 		}
 	}
 
-	private void rewriteHistory() {
-		// TODO handle abbreviated history etc, producing @version refs
+	private void rewriteHistory() throws IOException {
+		final Repository repo = git.getRepository();
+		final HistoryRewriter rewriter = new HistoryRewriter(repo);
+		for (final RefAction action : actions)
+			rewriter.addHead(Constants.R_REFS + action.ref.path,
+					action.publicationMethod);
+
+		beginTask(ABBREV_HISTORY, rewriter.getTotalSteps());
+		rewriter.execute(this);
+
+		for (final RefAction action : actions) {
+			final String refPath = Constants.R_REFS + action.ref.path;
+			if (rewriter.isUnchanged(refPath))
+				continue;
+
+			final RefUpdate update = repo
+					.updateRef(Constants.R_REFS + action.ref.path);
+			update.setCheckConflicting(false);
+			// log ref update to keep the old objects around. this can make
+			// re-cloning the repo much faster because less objects have to be
+			// transferred.
+			update.setRefLogMessage("SARA rewind", true);
+
+			final RevCommit newCommit = rewriter.getRewrittenCommit(refPath);
+			if (newCommit != null) {
+				update.setNewObjectId(newCommit);
+				update.forceUpdate();
+			} else
+				update.delete();
+			checkUpdate(update);
+		}
+	}
+
+	private void checkUpdate(RefUpdate update) throws IOException {
+		final Result res = update.getResult();
+		switch (res) {
+		case NO_CHANGE:
+		case FAST_FORWARD:
+		case FORCED:
+			return;
+		case NEW: // impossible if not creating new refs
+		case RENAMED: // impossible if not renaming
+		case REJECTED: // impossible if update forced
+		case REJECTED_CURRENT_BRANCH: // impossible in bare repo
+		case NOT_ATTEMPTED: // impossible if update() / delete() ever called
+			throw new IllegalStateException(
+					"'impossible' ref update/delete result " + res
+							+ " updating " + update.getName());
+		case IO_FAILURE:
+		case LOCK_FAILURE:
+			throw new IOException(
+					"IO error " + res + " updating " + update.getName());
+		}
+		throw new UnsupportedOperationException(
+				"ref update/delete result " + res);
 	}
 
 	private void extractMetaData() throws IOException {
