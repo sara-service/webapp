@@ -13,6 +13,7 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.web.ErrorMvcAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.boot.web.servlet.ServletComponentScan;
 import org.springframework.boot.web.support.SpringBootServletInitializer;
 import org.springframework.context.annotation.Configuration;
 
@@ -20,6 +21,7 @@ import bwfdm.sara.extractor.licensee.LicenseeExtractor;
 
 @SpringBootApplication
 @Configuration
+@ServletComponentScan // only needed for running in Eclipse
 @EnableAutoConfiguration(exclude = { ErrorMvcAutoConfiguration.class })
 public class Application extends SpringBootServletInitializer {
 	private static final Log logger = LogFactory.getLog(Application.class);
