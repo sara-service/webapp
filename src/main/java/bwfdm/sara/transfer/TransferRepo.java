@@ -91,7 +91,11 @@ public class TransferRepo {
 	}
 
 	public RevCommit getCommit(final Ref ref) throws IOException {
-		final ObjectId commit = repo.resolve(Constants.R_REFS + ref.path);
+		final org.eclipse.jgit.lib.Ref intRef = repo
+				.exactRef(Constants.R_REFS + ref.path).getLeaf();
+		ObjectId commit = intRef.getPeeledObjectId();
+		if (commit == null)
+			commit = intRef.getObjectId();
 		if (commit == null)
 			throw new NoSuchElementException(ref.path);
 		return repo.parseCommit(commit);

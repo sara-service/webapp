@@ -168,6 +168,8 @@ public class PushTask extends Task {
 			commit.setTreeId(repo.updateFiles(ref, metaFiles));
 			final ObjectId commitId = repo.insertCommit(commit);
 
+			// TODO this also kills annotated refs
+			// see CloneTask.pushBackHeads() why that's probably ok
 			final RefUpdate ru = repo.getRepo()
 					.updateRef(Constants.R_REFS + "rewritten/" + ref.path);
 			ru.setNewObjectId(commitId);
@@ -217,6 +219,7 @@ public class PushTask extends Task {
 									Constants.R_REFS + r.path)
 							.setForceUpdate(true));
 		push.setRefSpecs(spec);
+		push.setPushTags();
 		push.setRemote(TARGET_REMOTE);
 
 		project.setCredentials(push);
