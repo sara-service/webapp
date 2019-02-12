@@ -53,7 +53,7 @@ function validateEmail(email) {
 	if (userInfo == null)
 		return null; // no checkmark yet; AJAX will call us back with status
 	if (!userInfo["user-valid"])
-		return "Your email isn't registered there";
+		return "Your email is unknown. Click on the repository icon to register!";
 	if (userInfo.hierarchy == null)
 		return "You don't have submit rights to any collection";
 	return true;
@@ -169,7 +169,7 @@ function initPubRepos(info) {
 			$("#ir_logo").attr("src", logo);
 		else
 			$("#ir_logo").removeAttr("src");
-		$("#ir_link,#ir_button").attr("href", repo.url);
+		$("#ir_link,#ir_button").attr("href", repo.url+'/login');
 		$("#user_hint").text(repo.user_hint);
 		$("#user_hint_group").toggleClass("hidden", !repo.user_hint);
 		// delegate to email validation. the two fields have basically the
