@@ -10,8 +10,7 @@ import org.eclipse.jgit.api.FetchCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.RemoteAddCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.api.errors.InvalidRemoteException;
-import org.eclipse.jgit.api.errors.TransportException;
+import org.eclipse.jgit.lib.ConfigConstants;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.RefUpdate;
@@ -34,7 +33,7 @@ import bwfdm.sara.transfer.rewrite.HistoryRewriter;
 
 public class CloneTask extends Task {
 	private static final String EXTRACT_META = "Extracting metadata";
-	private static final String ABBREV_HISTORY = "NOT abbreviating history (not implemented yet)";
+	private static final String ABBREV_HISTORY = "Abbreviating history";
 	private static final String INIT_REPO = "Initializing temporary repository";
 	private final MetadataExtractor extractor;
 	private final GitProject project;
@@ -44,6 +43,7 @@ public class CloneTask extends Task {
 	private final TransferRepo transferRepo;
 	private final boolean abbrev;
 	private Git git;
+	private Repository repo;
 
 	public CloneTask(final TransferRepo transferRepo,
 			final MetadataExtractor extractor, final GitProject project,
@@ -70,6 +70,8 @@ public class CloneTask extends Task {
 	@Override
 	protected void cleanup() {
 		transferRepo.dispose();
+		git = null;
+		repo = null;
 	}
 
 	@Override
@@ -77,13 +79,14 @@ public class CloneTask extends Task {
 			throws GitAPIException, URISyntaxException, IOException {
 		beginTask(INIT_REPO, 1);
 		initRepo();
+		deleteAllTags();
 		fetchHeads();
 		pushBackHeads();
 
 		if (abbrev)
 			rewriteHistory();
 
-		transferRepo.setRepo(git.getRepository());
+		transferRepo.setRepo(repo);
 		extractMetaData();
 		endTask();
 	}
@@ -91,6 +94,7 @@ public class CloneTask extends Task {
 	private void initRepo()
 			throws GitAPIException, URISyntaxException, IOException {
 		git = Git.init().setBare(true).setGitDir(root).call();
+		repo = git.getRepository();
 		// add the "origin" remote
 		final RemoteAddCommand add = git.remoteAdd();
 		add.setName(Constants.DEFAULT_REMOTE_NAME);
@@ -108,8 +112,10 @@ public class CloneTask extends Task {
 					.setForceUpdate(true));
 		}
 		remote.setFetchRefSpecs(spec);
-		final StoredConfig config = git.getRepository().getConfig();
+		final StoredConfig config = repo.getConfig();
 		remote.update(config);
+		config.setBoolean(ConfigConstants.CONFIG_CORE_SECTION, null,
+				ConfigConstants.CONFIG_KEY_LOGALLREFUPDATES, true);
 		config.save();
 
 		// deliberately not calling endTask() here: JGit will take a while until
@@ -120,10 +126,32 @@ public class CloneTask extends Task {
 		update(1);
 	}
 
-	private void fetchHeads()
-			throws GitAPIException, InvalidRemoteException, TransportException {
-		// FIXME should remove all existing tags here!
-		// otherwise deleting a tag on the source won't propagate here
+	private void deleteAllTags() throws IOException {
+		// this method deletes all tags so that a subsequent fetchHeads() will
+		// pick up on tags that have been deleted remotely. if we wouldn't
+		// delete them here, they would stick around – which is bad since we're
+		// using them to mark important commits in history.
+		// techically, this can make objects unreachable, so if git's GC runs in
+		// the meantime, they may end up being deleted and need to be fetched
+		// again. in practice, we're right after a clone, so all objects are in
+		// a single packfile, so GC will try to avoid repacking that. also, tags
+		// are usually along the history, and thus their objects are still
+		// reachable anyway.
+		for (final org.eclipse.jgit.lib.Ref tag : repo.getTags().values()) {
+			final RefUpdate update = repo.updateRef(tag.getName());
+			update.setCheckConflicting(false);
+			update.setForceUpdate(true);
+			// it would be nice if that would actually log the tag update,
+			// keeping the objects reachable. unfortunately it doesn't, neither
+			// in jgit nor in cgit. it doesn't harm, though, so we might as well
+			// keep it in.
+			update.setRefLogMessage("SARA pre-commit cleanup", true);
+			update.delete();
+			checkUpdate(update);
+		}
+	}
+
+	private void fetchHeads() throws GitAPIException {
 		final FetchCommand fetch = git.fetch();
 		// to guard against corruption
 		fetch.setCheckFetchedObjects(true);
@@ -170,13 +198,14 @@ public class CloneTask extends Task {
 			// - people who do probably don't push them backwards
 			// - pointing signed annotated tags at a different commit would
 			//   invalidate the signature so isn't advisable anyway
-			final RefUpdate update = git.getRepository()
+			final RefUpdate update = repo
 					.updateRef(Constants.R_REFS + e.ref.path);
 			update.setNewObjectId(ObjectId.fromString(e.firstCommit));
 			update.setCheckConflicting(false);
 			// log ref update to keep the old objects around. this can make
 			// re-cloning the repo much faster because less objects have to be
 			// transferred.
+			// this silently does nothing for tags.
 			update.setRefLogMessage("SARA rewind", true);
 			update.forceUpdate();
 			checkUpdate(update);
@@ -185,7 +214,6 @@ public class CloneTask extends Task {
 	}
 
 	private void rewriteHistory() throws IOException {
-		final Repository repo = git.getRepository();
 		final HistoryRewriter rewriter = new HistoryRewriter(repo);
 		for (final RefAction action : actions)
 			rewriter.addHead(Constants.R_REFS + action.ref.path,
@@ -202,15 +230,19 @@ public class CloneTask extends Task {
 			final RefUpdate update = repo
 					.updateRef(Constants.R_REFS + action.ref.path);
 			update.setCheckConflicting(false);
+			update.setForceUpdate(true);
 			// log ref update to keep the old objects around. this can make
 			// re-cloning the repo much faster because less objects have to be
 			// transferred.
-			update.setRefLogMessage("SARA rewind", true);
+			// this doesn't work for tags, but tags should be along the history.
+			// also, the objects will stick around anyway, unless the GC happens
+			// to run in between...
+			update.setRefLogMessage("SARA rewrite", true);
 
 			final RevCommit newCommit = rewriter.getRewrittenCommit(refPath);
 			if (newCommit != null) {
 				update.setNewObjectId(newCommit);
-				update.forceUpdate();
+				update.update();
 			} else
 				update.delete();
 			checkUpdate(update);
