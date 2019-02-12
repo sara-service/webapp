@@ -27,6 +27,7 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 import org.springframework.util.FileSystemUtils;
 
 import bwfdm.sara.project.Ref;
+import bwfdm.sara.project.Ref.RefType;
 import bwfdm.sara.transfer.RepoFile.FileType;
 
 public class TransferRepo {
@@ -91,14 +92,14 @@ public class TransferRepo {
 	}
 
 	public RevCommit getCommit(final Ref ref) throws IOException {
-		final org.eclipse.jgit.lib.Ref intRef = repo
-				.exactRef(Constants.R_REFS + ref.path).getLeaf();
-		ObjectId commit = intRef.getPeeledObjectId();
-		if (commit == null)
-			commit = intRef.getObjectId();
-		if (commit == null)
-			throw new NoSuchElementException(ref.path);
-		return repo.parseCommit(commit);
+		return repo.parseCommit(resolve(repo, Constants.R_REFS + ref.path));
+	}
+
+	public List<Ref> getTags() throws IOException {
+		final List<Ref> tags = new ArrayList<>();
+		for (final String name : repo.getTags().keySet())
+			tags.add(new Ref(RefType.TAG, name));
+		return tags;
 	}
 
 	public ObjectId getFile(final Ref ref, final String path)
@@ -152,8 +153,7 @@ public class TransferRepo {
 		return CHARSET_DETECTOR.detect(repo.open(hash).getBytes());
 	}
 
-	public List<RepoFile> getFiles(final Ref ref)
-			throws IOException {
+	public List<RepoFile> getFiles(final Ref ref) throws IOException {
 		checkInitialized();
 		final List<RepoFile> files = new ArrayList<>();
 		try (final TreeWalk walk = new TreeWalk(repo)) {
@@ -184,8 +184,7 @@ public class TransferRepo {
 	}
 
 	public ObjectId updateFiles(final Ref ref,
-			final Map<String, ObjectId> files)
-			throws IOException {
+			final Map<String, ObjectId> files) throws IOException {
 		// build an initial index in-memory, because bare repos don't have one
 		// on disk
 		final DirCache index = DirCache.newInCore();
@@ -226,5 +225,25 @@ public class TransferRepo {
 		try (final ObjectInserter ins = repo.newObjectInserter()) {
 			return ins.insert(commit);
 		}
+	}
+
+	public static ObjectId resolve(final Repository repo, final String refPath)
+			throws IOException {
+		final org.eclipse.jgit.lib.Ref ref = repo.exactRef(refPath);
+		if (ref == null)
+			throw new NoSuchElementException("nonexistent ref " + refPath);
+		final org.eclipse.jgit.lib.Ref leaf = repo.peel(ref.getLeaf());
+		if (!leaf.isPeeled())
+			throw new IOException("failed to peel ref " + leaf.getName());
+
+		// annotated tag?
+		final ObjectId tagCommit = leaf.getPeeledObjectId();
+		if (tagCommit != null)
+			return tagCommit;
+		// all other refs
+		final ObjectId commit = leaf.getObjectId();
+		if (commit == null)
+			throw new IllegalStateException("unborn ref " + refPath);
+		return commit;
 	}
 }

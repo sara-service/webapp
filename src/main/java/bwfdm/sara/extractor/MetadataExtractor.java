@@ -9,6 +9,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import bwfdm.sara.auth.AuthProvider.UserInfo;
@@ -26,6 +27,7 @@ import bwfdm.sara.transfer.TransferRepo;
 
 public class MetadataExtractor {
 	public static final String VERSION_FILE = "VERSION";
+	private static final Pattern VERSION_REGEX = Pattern.compile("v(\\p{N}.*)");
 	public static final String PREFERRED_LICENSE_FILE = "LICENSE";
 	private static final String LICENSE = "((UN)?LICEN[SC]E|COPYING(\\.LESSER)?)";
 	private static final String EXTENSION = "(\\.md|\\.markdown|\\.txt)?";
@@ -53,7 +55,6 @@ public class MetadataExtractor {
 			.compile("^" + LICENSE + "\\..+$", Pattern.CASE_INSENSITIVE);
 
 	private final ArchiveMetadata meta = new ArchiveMetadata();
-	private final Map<String, String> versions = new HashMap<>();
 	private final TransferRepo clone;
 	private final GitProject project;
 	private final GitRepo repo;
@@ -74,9 +75,9 @@ public class MetadataExtractor {
 	 */
 	public ArchiveMetadata get(final Ref ref) {
 		final ArchiveMetadata res = new ArchiveMetadata(meta);
-		// add branch-specific metadata
-		final String path = ref != null ? ref.path : meta.master;
-		res.version = versions.get(path);
+		// to add branch-specific metadata:
+		// final String path = ref != null ? ref.path : meta.master;
+		// then just add it
 		return res;
 	}
 
@@ -109,10 +110,12 @@ public class MetadataExtractor {
 	public void detectMetaData(final Collection<Ref> refs) throws IOException {
 		detectProjectInfo();
 
-		final Ref master = detectMasterBranch(refs);
+		detectMasterBranch(refs);
 		detectAuthors(refs);
-		detectVersions(refs); // detect for ALL branches
-		meta.version = versions.get(master.path);
+		detectVersion();
+		// for version-specific metadata, remember master, detect for all and
+		// then set
+		// meta.foo = foo.get(master);
 	}
 
 	private void detectProjectInfo() {
@@ -165,13 +168,43 @@ public class MetadataExtractor {
 		meta.setAuthors(authors);
 	}
 
-	private void detectVersions(final Collection<Ref> set) throws IOException {
-		for (final Ref ref : set) {
-			String data = clone.readString(ref, VERSION_FILE);
-			if (data == null)
-				data = ""; // force the user to enter something
-			versions.put(ref.path, data);
+	private void detectVersion() throws IOException {
+		// simply uses the tag that points to the most recent commit, as defined
+		// by commit date. prefers tags that look like versions, ie. "v[0-9]*",
+		// though it accepts digits in any script.
+		Ref best = null;
+		long bestDate = Long.MIN_VALUE;
+		for (final Ref ref : clone.getTags()) {
+			final long date = clone.getCommit(ref).getCommitTime();
+			if (best == null
+					|| (parseVersion(best) == null && parseVersion(ref) != null)
+					|| date > bestDate) {
+				best = ref;
+				bestDate = date;
+			}
 		}
+
+		final String version;
+		if (best != null) {
+			final String bestVersion = parseVersion(best);
+			if (bestVersion != null)
+				// an customary v1.2-style version number
+				version = bestVersion;
+			else
+				// just an ordinary tag. who said versions have to be numeric?
+				// "experiment-42" is better than nothing! (though it's nearly
+				// impossible to sort that kind of version chronologically.)
+				version = best.name;
+		} else
+			version = ""; // no version; force user to enter something
+		meta.version = version;
+	}
+
+	private String parseVersion(final Ref ref) {
+		final Matcher m = VERSION_REGEX.matcher(ref.name);
+		if (!m.matches())
+			return null;
+		return m.group(1);
 	}
 
 	/**

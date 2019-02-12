@@ -3,7 +3,6 @@ package bwfdm.sara.transfer.rewrite;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Set;
 
 import org.eclipse.jgit.lib.Constants;
@@ -14,6 +13,7 @@ import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 
 import bwfdm.sara.project.RefAction.PublicationMethod;
+import bwfdm.sara.transfer.TransferRepo;
 
 public class HistoryRewriter {
 	/** Refs whose full history is published. */
@@ -44,7 +44,7 @@ public class HistoryRewriter {
 	 */
 	public void addHead(final String refPath, final PublicationMethod method)
 			throws IOException {
-		final ObjectId commit = resolve(refPath);
+		final ObjectId commit = TransferRepo.resolve(repo, refPath);
 		heads.add(commit);
 
 		switch (method) {
@@ -61,25 +61,6 @@ public class HistoryRewriter {
 			throw new UnsupportedOperationException(
 					"PublicationMethod." + method);
 		}
-	}
-
-	private ObjectId resolve(final String refPath) throws IOException {
-		final Ref ref = repo.exactRef(refPath);
-		if (ref == null)
-			throw new NoSuchElementException("nonexistent ref " + refPath);
-		final Ref leaf = repo.peel(ref.getLeaf());
-		if (!leaf.isPeeled())
-			throw new IOException("failed to peel ref " + leaf.getName());
-
-		// annotated tag?
-		final ObjectId tagCommit = leaf.getPeeledObjectId();
-		if (tagCommit != null)
-			return tagCommit;
-		// all other refs
-		final ObjectId commit = leaf.getObjectId();
-		if (commit == null)
-			throw new IllegalStateException("unborn ref " + refPath);
-		return commit;
 	}
 
 	/**
@@ -126,7 +107,7 @@ public class HistoryRewriter {
 	 * @return <code>true</code> if this ref still points to the same commit
 	 */
 	public boolean isUnchanged(final String refPath) throws IOException {
-		final ObjectId orig = resolve(refPath);
+		final ObjectId orig = TransferRepo.resolve(repo, refPath);
 		return orig.equals(cache.getRewrittenCommit(orig));
 	}
 
@@ -140,7 +121,8 @@ public class HistoryRewriter {
 	 */
 	public RevCommit getRewrittenCommit(final String refPath)
 			throws IOException {
-		final ObjectId rewritten = cache.getRewrittenCommit(resolve(refPath));
+		final ObjectId rewritten = cache
+				.getRewrittenCommit(TransferRepo.resolve(repo, refPath));
 		if (rewritten != null)
 			return repo.parseCommit(rewritten);
 		return null;
@@ -154,7 +136,7 @@ public class HistoryRewriter {
 			super(repo, cache);
 			important = new HashSet<>(heads);
 			for (final Ref tag : repo.getTags().values())
-				important.add(resolve(tag.getName()));
+				important.add(TransferRepo.resolve(repo, tag.getName()));
 		}
 
 		@Override

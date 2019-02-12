@@ -14,7 +14,7 @@ function initField(id, reset, branchDependent, validator, speshul) {
 }
 
 function updateBranchSpecific() {
-	validate.check("version", true);
+	// for branch-specific metadata, validate.check() it here
 }
 
 function removeAuthor(row) {
