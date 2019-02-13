@@ -106,10 +106,7 @@ public class ArchiveJob {
 		// meta.html
 		// FIXME userMeta should never be null here, but sometimes is!
 		final ArchiveMetadata userMeta = frontend.getMetadata();
-		final Ref ref = userMeta != null && userMeta.master != null
-				? new Ref(userMeta.master)
-				: null;
-		meta = metadataExtractor.get(ref).overrideFrom(userMeta);
+		meta = metadataExtractor.getMetadata().overrideFrom(userMeta);
 		checkNullOrEmpty("title", meta.title);
 		checkNull("description", meta.description);
 		checkNullOrEmpty("version", meta.version);

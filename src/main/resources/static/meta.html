@@ -86,8 +86,18 @@
 				</div>
 			</div>
 
-			<!-- per-branch options -->
 			<p style="height:3ex"></p>
+			<div class="form-group has-feedback">
+				<label class="col-sm-2 control-label" for="version">software version</label>
+				<div class="col-sm-7 nopad">
+					<input type="text" class="form-control" id="version" placeholder="version number" aria-describedby="version_text">
+					<span class="form-control-feedback" aria-hidden="true"></span>
+					<span class="form-control-feedback-text text-danger hidden"></span>
+				</div>
+				<div class="col-sm-3 nopad">
+					<button type="button" class="btn btn-sm btn-warning" id="reset_version">autodetect from version history</button>
+				</div>
+			</div>
 			<div class="form-group has-feedback">
 				<label class="col-sm-2 control-label" for="master">main branch</label>
 				<div class="col-sm-7 nopad">
@@ -105,18 +115,6 @@
 					This is the branch shown when someone first
 					looks at your software artefact in the git archive.
 				</p>
-			</div>
-
-			<div class="form-group has-feedback">
-				<label class="col-sm-2 control-label" for="version">software version</label>
-				<div class="col-sm-7 nopad">
-					<input type="text" class="form-control" id="version" placeholder="version number" aria-describedby="version_text">
-					<span class="form-control-feedback" aria-hidden="true"></span>
-					<span class="form-control-feedback-text text-danger hidden"></span>
-				</div>
-				<div class="col-sm-3 nopad">
-					<button type="button" class="btn btn-sm btn-warning" id="reset_version">autodetect from version history</button>
-				</div>
 			</div>
 		</form>
 

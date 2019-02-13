@@ -147,7 +147,7 @@ public class PushTask extends Task {
 					license.getEffectiveLicense().id);
 
 			final Map<String, ObjectId> metaFiles = new HashMap<>(4);
-			// TODO maybe only update in master branch??
+			// FIXME only update in master branch
 			metaFiles.put(MetadataExtractor.VERSION_FILE, versionFile);
 			metaFiles.put(METADATA_FILENAME, repo.insertBlob(metaXML));
 			// canonicalize license filename. that is, delete the existing

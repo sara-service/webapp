@@ -69,16 +69,9 @@ public class MetadataExtractor {
 		this.project = project;
 	}
 
-	/**
-	 * Get autodetected values for a defined {@link Ref}. Pass <code>null</code>
-	 * to get branch-dependent fields for the default branch.
-	 */
-	public ArchiveMetadata get(final Ref ref) {
-		final ArchiveMetadata res = new ArchiveMetadata(meta);
-		// to add branch-specific metadata:
-		// final String path = ref != null ? ref.path : meta.master;
-		// then just add it
-		return res;
+	/** Get autodetected metadata values. */
+	public ArchiveMetadata getMetadata() {
+		return new ArchiveMetadata(meta);
 	}
 
 	/**
@@ -99,7 +92,7 @@ public class MetadataExtractor {
 	}
 
 	/**
-	 * Runs the main metadata detection. After this method, {@link #get(Ref)},
+	 * Runs the main metadata detection. After this method, {@link #getMetadata()},
 	 * {@link #getEmail()} and {@link #getUserID()} return valid information.
 	 * 
 	 * @param refs
