@@ -131,8 +131,8 @@ function initFields(info) {
 		// invalid will be focused. this becomes very confusing if several are
 		// invalid, but it jumps to one somewhere in the middle of the page.
 		var values = validate.all([
-			{ name: "submitter", value: [ "surname", "givenname" ]},
 			'title', 'description', 'version', 'master',
+			{ name: "submitter", value: [ "surname", "givenname" ]},
 			{ name: "authors", array: authorList }]);
 		if (!values)
 			return;
