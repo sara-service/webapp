@@ -25,6 +25,8 @@ INSERT INTO archive_params(id, param, value) VALUES
 	(aRef, 'temp-namespace', 'temp-archive-devel'),
 	(aRef, 'main-namespace', 'archive-devel'),
 	(aRef, 'dark-namespace', 'dark-archive-devel'),
+	(aRef, 'committer-name', 'SARA-devel'),
+	(aRef, 'committer-email', 'ingest+devel@sara-service.org'),
 	(aRef, 'token', '__TESTARCHIV_TOKEN__'),
 	(aRef, 'private-key', convert_from(lo_get(testarchiv_privkey), 'UTF-8')),
 	(aRef, 'public-key', convert_from(lo_get(testarchiv_pubkey), 'UTF-8')),

@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.regex.Pattern;
 
+import org.eclipse.jgit.lib.PersonIdent;
 import org.springframework.core.ParameterizedTypeReference;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -68,6 +69,7 @@ public class GitLabArchiveRESTv4 implements ArchiveRepo {
 	private final AuthenticatedREST authRest;
 	private final String projectNamespace, darkNamespace, tempNamespace;
 	private final String sshPrivateKey, sshPublicKey, knownHostsFile;
+	private final String committerName, committerEmail;
 
 	/**
 	 * @param root
@@ -98,11 +100,16 @@ public class GitLabArchiveRESTv4 implements ArchiveRepo {
 			@JsonProperty("dark-namespace") final String darkNamespace,
 			@JsonProperty("private-key") final String sshPrivateKey,
 			@JsonProperty("public-key") final String sshPublicKey,
-			@JsonProperty("known-hosts") final String knownHostsFile) {
+			@JsonProperty("known-hosts") final String knownHostsFile,
+			@JsonProperty(value = "committer-name", required = false) final String committerName,
+			@JsonProperty("committer-email") final String committerEmail) {
 		if (root.endsWith("/"))
 			throw new IllegalArgumentException(
 					"root URL must not end with slash: " + root);
 
+		this.committerName = committerName != null ? committerName
+				: DEFAULT_COMMITTER_NAME;
+		this.committerEmail = committerEmail;
 		this.projectNamespace = projectNamespace;
 		this.darkNamespace = darkNamespace;
 		this.tempNamespace = tempNamespace;
@@ -191,5 +198,10 @@ public class GitLabArchiveRESTv4 implements ArchiveRepo {
 				return p;
 		throw new NoSuchElementException(
 				"namespace " + projectNamespace + " not found on server");
+	}
+
+	@Override
+	public PersonIdent getMetadataCommitter() {
+		return new PersonIdent(committerName, committerEmail);
 	}
 }

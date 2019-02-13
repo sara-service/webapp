@@ -128,9 +128,7 @@ public class PushTask extends Task {
 		final TransferRepo repo = job.clone;
 		final String version = job.meta.version;
 		final ObjectId versionFile = repo.insertBlob(version);
-		// TODO this should definitely be configurable!
-		final PersonIdent sara = new PersonIdent("SARA Service",
-				"ingest@sara-service.org");
+		final PersonIdent sara = archive.getMetadataCommitter();
 
 		heads = new HashMap<Ref, String>();
 		for (Ref ref : job.selectedRefs) {
