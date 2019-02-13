@@ -249,7 +249,7 @@ public class CloneTask extends Task {
 		}
 	}
 
-	private void checkUpdate(RefUpdate update) throws IOException {
+	static void checkUpdate(RefUpdate update) throws IOException {
 		final Result res = update.getResult();
 		switch (res) {
 		case NO_CHANGE:

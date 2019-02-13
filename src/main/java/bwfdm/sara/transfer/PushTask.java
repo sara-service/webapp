@@ -147,7 +147,7 @@ public class PushTask extends Task {
 					license.getEffectiveLicense().id);
 
 			final Map<String, ObjectId> metaFiles = new HashMap<>(4);
-			// FIXME only update in master branch
+			// FIXME version should probably go into meta.xml instead
 			metaFiles.put(MetadataExtractor.VERSION_FILE, versionFile);
 			metaFiles.put(METADATA_FILENAME, repo.insertBlob(metaXML));
 			// canonicalize license filename. that is, delete the existing
@@ -168,12 +168,20 @@ public class PushTask extends Task {
 			commit.setTreeId(repo.updateFiles(ref, metaFiles));
 			final ObjectId commitId = repo.insertCommit(commit);
 
-			// TODO this also kills annotated refs
-			// see CloneTask.pushBackHeads() why that's probably ok
+			// this also kills annotated refs. see CloneTask.pushBackHeads() why
+			// that's probably ok. also note that this will NOT affect tags
+			// unless they have been added explicitly.
 			final RefUpdate ru = repo.getRepo()
-					.updateRef(Constants.R_REFS + "rewritten/" + ref.path);
+					.updateRef(Constants.R_REFS + ref.path);
+			ru.setCheckConflicting(false);
 			ru.setNewObjectId(commitId);
+			// log ref update to keep the old objects around (faster clone,
+			// though at this point another clone is fairly unlikely. in fact,
+			// we're usually about to delete the entire repo here.)
+			ru.setRefLogMessage("SARA metadata commit", true);
 			ru.forceUpdate();
+			CloneTask.checkUpdate(ru);
+
 			heads.put(ref, ru.getName());
 		}
 	}
@@ -212,12 +220,12 @@ public class PushTask extends Task {
 		final PushCommand push = git.push();
 		final ArrayList<RefSpec> spec = new ArrayList<RefSpec>(
 				job.selectedRefs.size());
-		for (final Ref r : job.selectedRefs)
-			spec.add(
-					new RefSpec()
-							.setSourceDestination(heads.get(r),
-									Constants.R_REFS + r.path)
-							.setForceUpdate(true));
+		for (final Ref r : job.selectedRefs) {
+			final String src = heads.get(r);
+			final String dest = Constants.R_REFS + r.path;
+			spec.add(new RefSpec().setSourceDestination(src, dest)
+					.setForceUpdate(true));
+		}
 		push.setRefSpecs(spec);
 		push.setPushTags();
 		push.setRemote(TARGET_REMOTE);
@@ -226,8 +234,8 @@ public class PushTask extends Task {
 		push.setProgressMonitor(this).call();
 	}
 
-	private UUID createItemInDB(final String webURL,
-			ArchiveMetadata meta, boolean isPublic) {
+	private UUID createItemInDB(final String webURL, final ArchiveMetadata meta,
+			final boolean isPublic) {
 		final Item i = new Item();
 		// source stuff
 		i.source_uuid = job.sourceUUID;
