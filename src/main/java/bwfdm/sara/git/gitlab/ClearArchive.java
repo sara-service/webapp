@@ -12,9 +12,9 @@ public class ClearArchive {
 	// these are deliberately hardcoded. makes it harder to accidentally clear
 	// the wrong archive...
 	private static final String API_URL = "https://testarchiv.unikn.netfuture.ch/api/v4";
-	// this is actually a root token so it can clear the archive, not just the
-	// temp-archive
-	private static final String API_TOKEN = "JM1sJrF7azyFE9yQDAYd";
+	// this actually has to be a root token so it can clear the archive, not
+	// just the temp-archive!
+	private static final String API_TOKEN = "xxx";
 
 	private static final Log logger = LogFactory.getLog(ClearArchive.class);
 
