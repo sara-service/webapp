@@ -18,7 +18,6 @@ import bwfdm.sara.db.ConfigDatabase;
 import bwfdm.sara.db.FrontendDatabase;
 import bwfdm.sara.extractor.LicenseFile;
 import bwfdm.sara.extractor.MetadataExtractor;
-import bwfdm.sara.git.GitProject;
 import bwfdm.sara.project.LicensesInfo.LicenseInfo;
 import bwfdm.sara.transfer.TransferRepo;
 
@@ -48,14 +47,6 @@ public class ArchiveJob {
 	public final UUID archiveUUID;
 	@JsonIgnore
 	public final TransferRepo clone;
-	/**
-	 * <b>For writing back metadata ONLY!!
-	 * 
-	 * @deprecated remove write-back functionality for readonly access
-	 */
-	@Deprecated
-	@JsonIgnore
-	public final GitProject gitProject;
 	@JsonIgnore
 	private Map<Ref, LicenseFile> detectedLicenses;
 	@JsonIgnore
@@ -74,7 +65,6 @@ public class ArchiveJob {
 		sourceUUID = UUID.fromString(project.getRepoID());
 		// projects.html
 		sourceProject = project.getProjectPath();
-		gitProject = project.getGitProject();
 		checkNullOrEmpty("sourceProject", sourceProject);
 		// oauth metadata
 		gitrepoEmail = metadataExtractor.getEmail();
@@ -253,7 +243,7 @@ public class ArchiveJob {
 			if ((lic == null && other != null)
 					|| (lic != null && other == null))
 				return false;
-			if (!lic.equals(other))
+			if (lic != null && other != null && !lic.equals(other))
 				return false;
 		}
 		// archive selection, currently just hardcoded
