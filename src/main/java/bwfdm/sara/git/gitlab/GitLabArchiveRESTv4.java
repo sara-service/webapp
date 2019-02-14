@@ -1,16 +1,13 @@
 package bwfdm.sara.git.gitlab;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.regex.Pattern;
 
 import org.eclipse.jgit.lib.PersonIdent;
 import org.springframework.core.ParameterizedTypeReference;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import bwfdm.sara.auth.AuthenticatedREST;
@@ -67,40 +64,40 @@ public class GitLabArchiveRESTv4 implements ArchiveRepo {
 
 	private final RESTHelper rest;
 	private final AuthenticatedREST authRest;
-	private final String projectNamespace, darkNamespace, tempNamespace;
-	private final String sshPrivateKey, sshPublicKey, knownHostsFile;
+	final String finalNamespace;
+	final String sshPrivateKey, sshPublicKey, sshKnownHosts;
 	private final String committerName, committerEmail;
+	final String root;
 
 	/**
 	 * @param root
 	 *            root URL of GitLab webserver, without trailing slash
 	 * @param apiToken
 	 *            private token used to access the GitLab API
-	 * @param tempNamespace
-	 *            GitLab namespace used for temporarily-archived data
-	 * @param projectNamespace
+	 * @param archiveNamespace
 	 *            GitLab namespace for the final archived data
-	 * @param darkNamespace
-	 *            GitLab namespace for the dark archive
 	 * @param sshPrivateKey
 	 *            full contents of SSH private key file (usually named
 	 *            {@code id_ecdsa})
 	 * @param sshPublicKey
 	 *            full contents of SSH public key file (usually named
 	 *            {@code id_ecdsa.pub})
-	 * @param knownHostsFile
+	 * @param sshKnownHosts
 	 *            all {@code known_hosts} file entries for to the GitLab
 	 *            server's SSH host key, separated by newlines
+	 * @param committerName
+	 *            name to use for commits by SARA. if <code>null</code>, uses
+	 *            {@link ArchiveRepo#DEFAULT_COMMITTER_NAME}
+	 * @param committerEmail
+	 *            email address to use for commits by SARA
 	 */
 	@JsonCreator
 	public GitLabArchiveRESTv4(@JsonProperty("url") final String root,
 			@JsonProperty("token") final String apiToken,
-			@JsonProperty("temp-namespace") final String tempNamespace,
-			@JsonProperty("main-namespace") final String projectNamespace,
-			@JsonProperty("dark-namespace") final String darkNamespace,
+			@JsonProperty("namespace") final String archiveNamespace,
 			@JsonProperty("private-key") final String sshPrivateKey,
 			@JsonProperty("public-key") final String sshPublicKey,
-			@JsonProperty("known-hosts") final String knownHostsFile,
+			@JsonProperty("known-hosts") final String sshKnownHosts,
 			@JsonProperty(value = "committer-name", required = false) final String committerName,
 			@JsonProperty("committer-email") final String committerEmail) {
 		if (root.endsWith("/"))
@@ -110,15 +107,14 @@ public class GitLabArchiveRESTv4 implements ArchiveRepo {
 		this.committerName = committerName != null ? committerName
 				: DEFAULT_COMMITTER_NAME;
 		this.committerEmail = committerEmail;
-		this.projectNamespace = projectNamespace;
-		this.darkNamespace = darkNamespace;
-		this.tempNamespace = tempNamespace;
+		this.finalNamespace = archiveNamespace;
 
 		this.sshPrivateKey = sshPrivateKey;
 		this.sshPublicKey = sshPublicKey;
-		this.knownHostsFile = knownHostsFile;
+		this.sshKnownHosts = sshKnownHosts;
 		authRest = new PrivateTokenREST(root + API_PREFIX, apiToken);
 		rest = new RESTHelper(authRest, "");
+		this.root = root;
 	}
 
 	@Override
@@ -138,15 +134,14 @@ public class GitLabArchiveRESTv4 implements ArchiveRepo {
 		args.put("description", meta.description);
 		for (final String feature : UNUSED_FEATURES)
 			args.put(feature, "false");
-		args.put("visibility", visible ? "public" : "private");
-		// TODO create in own namespace first; then move on success!
-		args.put("namespace_id",
-				Integer.toString(getNamespaceID(projectNamespace)));
+		// always create as private project in the sara user's namespace. it
+		// will then be moved and made public (if necessary) in commit().
+		args.put("visibility", "private");
 		final GLProjectInfo project = rest.post(rest.uri("/projects"), args,
 				new ParameterizedTypeReference<GLProjectInfo>() {
 				});
-		return new GitLabArchiveProject(authRest, project, sshPrivateKey,
-				sshPublicKey, knownHostsFile, true);
+		return new GitLabArchiveProject(this, authRest, project,
+				visible);
 	}
 
 	private String filter(final String raw, final int maxLength) {
@@ -159,45 +154,6 @@ public class GitLabArchiveRESTv4 implements ArchiveRepo {
 		if (value.length() > maxLength)
 			value = value.substring(0, maxLength - 1) + ELLIPSIS;
 		return value;
-	}
-
-	private int getNamespaceID(final String namespace) {
-		final List<Namespace> namespaces = rest.getList(
-				rest.uri("/namespaces").queryParam("search", namespace),
-				new ParameterizedTypeReference<List<Namespace>>() {
-				});
-		for (final Namespace ns : namespaces)
-			if (ns.path.equals(namespace))
-				return ns.id;
-		throw new NoSuchElementException(
-				"namespace " + namespace + " not found on server");
-	}
-
-	@JsonIgnoreProperties(ignoreUnknown = true)
-	private static class Namespace {
-		@JsonProperty("full_path")
-		private String path;
-		@JsonProperty
-		private int id;
-	}
-
-	@Override
-	public ArchiveProject getProject(final String id)
-			throws NoSuchElementException {
-		return new GitLabArchiveProject(authRest, getProjectInfo(id),
-				sshPrivateKey, sshPublicKey, knownHostsFile, false);
-	}
-
-	private GLProjectInfo getProjectInfo(final String id) {
-		final List<GLProjectInfo> projects = rest.getList(
-				rest.uri("/projects").queryParam("search", id),
-				new ParameterizedTypeReference<List<GLProjectInfo>>() {
-				});
-		for (final GLProjectInfo p : projects)
-			if (p.name.equals(id))
-				return p;
-		throw new NoSuchElementException(
-				"namespace " + projectNamespace + " not found on server");
 	}
 
 	@Override

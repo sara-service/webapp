@@ -22,10 +22,7 @@ INSERT INTO archive(display_name, contact_email, adapter, url, enabled) VALUES
 	RETURNING uuid INTO aRef;
 INSERT INTO archive_params(id, param, value) VALUES
 	(aRef, 'url', 'https://' || testarchiv),
-	(aRef, 'temp-namespace', 'temp-archive-devel'),
-	(aRef, 'main-namespace', 'archive-devel'),
-	(aRef, 'dark-namespace', 'dark-archive-devel'),
-	(aRef, 'committer-name', 'SARA-devel'),
+	(aRef, 'namespace', 'archive-devel'),
 	(aRef, 'committer-email', 'ingest+devel@sara-service.org'),
 	(aRef, 'token', '__TESTARCHIV_TOKEN__'),
 	(aRef, 'private-key', convert_from(lo_get(testarchiv_privkey), 'UTF-8')),

@@ -87,10 +87,10 @@ public class PushTask extends Task {
 
 	@Override
 	protected void cleanup() {
-		if (project == null || !project.isEmpty())
-			return; // never remove projects that we didn't create!
-		// FIXME impl create-and-move workflow so we can remove project here
-		// project.deleteProject();
+		if (project == null)
+			return;
+		if (!project.isCommitted())
+			project.rollback();
 		project = null;
 	}
 
@@ -109,18 +109,20 @@ public class PushTask extends Task {
 		beginTask(PUSH_REPO, 1);
 		pushRepoToArchive();
 
+		// record metadata first in case commit() fails. metadata without an
+		// item is better than an item we don't even know exists. archive
+		// projects may be visible publicly, metadata items aren't.
 		beginTask(CREATE_METADATA, 1);
 		itemUUID = createItemInDB(project.getWebURL(), job.meta,
 				job.access == ArchiveAccess.PUBLIC);
 
-		// FIXME for create-and-move, move project to final archive here
-
+		// move to permanent storage
+		// FIXME what should we do if this fails?
+		project.commit();
 		// now that we're done, get rid of the temporary clone
-		// TODO determine how to handle ZIP file generation without extra clone
-		// for that we'd like to keep this thing around, but we might never
-		// learn that the user just isn't going to create a bibliographical
-		// record any more. we can add a "done" button somewhere, but the user
-		// needs not click it.
+		// TODO when implementing ZIP file creation, don't dispose repo here!
+		// instead, dispose the Project after transferring the item, and make
+		// sure disposing calls Project.disposeTransferRepo().
 		job.clone.dispose();
 	}
 
@@ -228,7 +230,7 @@ public class PushTask extends Task {
 		push.setPushTags();
 		push.setRemote(TARGET_REMOTE);
 
-		project.setCredentials(push);
+		project.configureCredentials(push);
 		push.setProgressMonitor(this).call();
 	}
 
