@@ -13,8 +13,6 @@ import org.eclipse.jgit.api.PushCommand;
 import org.eclipse.jgit.api.RemoteAddCommand;
 import org.eclipse.jgit.api.RemoteRemoveCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.api.errors.InvalidRemoteException;
-import org.eclipse.jgit.api.errors.TransportException;
 import org.eclipse.jgit.lib.CommitBuilder;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
@@ -202,7 +200,7 @@ public class PushTask extends Task {
 	}
 
 	private void pushRepoToArchive() throws GitAPIException, URISyntaxException,
-			InvalidRemoteException, TransportException {
+			IOException {
 		final Git git = Git.wrap(job.clone.getRepo());
 		// remove remote before recreating it. it may otherwise still contain
 		// stale information from a previous execution.
@@ -226,8 +224,15 @@ public class PushTask extends Task {
 			spec.add(new RefSpec().setSourceDestination(src, dest)
 					.setForceUpdate(true));
 		}
+		// add all tags, but only those that haven't been explicitly added
+		// already. setPushTags() adds all tags, even those that have already
+		// ben added explicitly, and thus causes "Duplicate remote ref update is
+		// illegal" exceptions
+		for (final Ref r : job.clone.getTags())
+			if (!heads.containsKey(r))
+				spec.add(new RefSpec(Constants.R_REFS + r.path)
+						.setForceUpdate(true));
 		push.setRefSpecs(spec);
-		push.setPushTags();
 		push.setRemote(TARGET_REMOTE);
 
 		project.configureCredentials(push);
