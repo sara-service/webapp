@@ -67,9 +67,21 @@ function init(info) {
 	initMeta(info.meta);
 	initLicenses(info.licenses);
 	$("#" + info.access).removeClass("hidden");
+	if (info.archive.license) {
+		$("#archive_license").html(info.archive.license);
+		$("#archive_license_block").removeClass("hidden");
+		validate.init("agree", false, function() {
+			if (!$("#agree").prop("checked"))
+				return "You have to accept the terms of service to continue";
+			return true;
+		});
+	} else
+		validate.init("agree", true, function() { return true; });
 	$("#loading").remove();
 	$("#content").removeClass("hidden");
 	$("#next_button").click(function() {
+		if (!validate.all(["agree"]))
+			return;
 		location.href = new URI("/api/push/trigger").search({
 				token: info.token
 			});

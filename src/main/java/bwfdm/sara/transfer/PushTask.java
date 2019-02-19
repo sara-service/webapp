@@ -196,6 +196,7 @@ public class PushTask extends Task {
 		formatter.addDC("type", "Software");
 		formatter.addDC("rights", licenseID);
 		// TODO include version and main branch as non-DC items?
+		// TODO maybe store the archive license here? probably not
 		return formatter.getSerializedXML();
 	}
 
@@ -257,11 +258,12 @@ public class PushTask extends Task {
 		i.authors = meta.getAuthors(); // list of authors
 
 		// archive stuff
-		i.archive_uuid = job.archiveUUID;
+		i.archive_uuid = UUID.fromString(job.archive.id);
 		i.archive_url = webURL; // URL where the archive has been deposited
 		i.is_public = isPublic;
 		i.token = Config.getToken(); // randomly generated access token for user
 		i.date_created = now;
+		// TODO store the archive license in item to record consent?
 
 		this.item = pubDB.insert(i);
 		logger.info("Item submission succeeded with item uuid "

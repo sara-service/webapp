@@ -19,6 +19,7 @@ CREATE TABLE archive(
 	contact_email text NOT NULL, -- an email address to contact the archive
 	adapter text NOT NULL,
 	logo_url text, -- URL of logo, either https:// or data: (optional)
+	license text, -- deposit license, as an HTML snippet (without <body> etc)
 	enabled boolean NOT NULL
 );
 
