@@ -26,6 +26,8 @@ import bwfdm.sara.transfer.RepoFile.FileType;
 import bwfdm.sara.transfer.TransferRepo;
 
 public class MetadataExtractor {
+	private static final Version NO_VERSION_FOUND = new Version("",
+			Long.MIN_VALUE, VersionSource.NOTHING);
 	public static final String VERSION_FILE = "VERSION";
 	private static final Pattern VERSION_REGEX = Pattern.compile("v(\\p{N}.*)");
 	public static final String PREFERRED_LICENSE_FILE = "LICENSE";
@@ -105,7 +107,7 @@ public class MetadataExtractor {
 
 		detectMasterBranch(refs);
 		detectAuthors(refs);
-		detectVersion();
+		detectVersion(refs);
 		// for version-specific metadata, remember master, detect for all and
 		// then set
 		// meta.foo = foo.get(master);
@@ -161,43 +163,83 @@ public class MetadataExtractor {
 		meta.setAuthors(authors);
 	}
 
-	private void detectVersion() throws IOException {
-		// simply uses the tag that points to the most recent commit, as defined
-		// by commit date. prefers tags that look like versions, ie. "v[0-9]*",
-		// though it accepts digits in any script.
-		Ref best = null;
-		long bestDate = Long.MIN_VALUE;
-		for (final Ref ref : clone.getTags()) {
-			final long date = clone.getCommit(ref).getCommitTime();
-			if (best == null
-					|| (parseVersion(best) == null && parseVersion(ref) != null)
-					|| date > bestDate) {
-				best = ref;
-				bestDate = date;
-			}
+	private void detectVersion(final Collection<Ref> selectedRefs)
+			throws IOException {
+		Version best = NO_VERSION_FOUND;
+		for (final Ref ref : selectedRefs) {
+			final Version version = parseCommit(ref);
+			if (version.isBetterThan(best))
+				best = version;
 		}
-
-		final String version;
-		if (best != null) {
-			final String bestVersion = parseVersion(best);
-			if (bestVersion != null)
-				// an customary v1.2-style version number
-				version = bestVersion;
-			else
-				// just an ordinary tag. who said versions have to be numeric?
-				// "experiment-42" is better than nothing! (though it's nearly
-				// impossible to sort that kind of version chronologically.)
-				version = best.name;
-		} else
-			version = ""; // no version; force user to enter something
-		meta.version = version;
+		for (final Ref ref : clone.getTags()) {
+			final Version version = parseTag(ref);
+			if (version.isBetterThan(best))
+				best = version;
+		}
+		meta.version = best.version;
 	}
 
-	private String parseVersion(final Ref ref) {
+	private Version parseCommit(final Ref ref) throws IOException {
+		final long date = clone.getCommit(ref).getCommitTime();
+		final String data = clone.readString(ref, VERSION_FILE);
+		if (data == null)
+			return NO_VERSION_FOUND;
+		return new Version(data, date, VersionSource.VERSION_FILE);
+	}
+
+	private Version parseTag(final Ref ref) throws IOException {
+		final long date = clone.getCommit(ref).getCommitTime();
 		final Matcher m = VERSION_REGEX.matcher(ref.name);
 		if (!m.matches())
-			return null;
-		return m.group(1);
+			return new Version(ref.name, date, VersionSource.OTHER_TAG);
+		return new Version(m.group(1), date, VersionSource.VERSION_TAG);
+	}
+
+	private static class Version {
+		private final String version;
+		private final long date;
+		private final VersionSource source;
+
+		private Version(final String version, final long date,
+				final VersionSource source) {
+			this.version = version;
+			this.date = date;
+			this.source = source;
+		}
+
+		private boolean isBetterThan(final Version other) {
+			// prefer sources according to defined preference
+			if (source.ordinal() < other.source.ordinal())
+				return true;
+			// among any one source, prefer the one from the latest commit (for
+			// version files) or pointing to the latest commit (for tags).
+			// not perfect, but doesn't require implementing SemVer comparison,
+			// and should get the same result 99% of the time.
+			if (date > other.date)
+				return true;
+			return false;
+		}
+	}
+
+	private enum VersionSource {
+		// WARNING these are sorted according to preference!!
+		/**
+		 * a file called {@link MetadataExtractor#VERSION_FILE} in any branch or
+		 * tag
+		 */
+		VERSION_FILE,
+		/** a tag of the form vX.Y.Z, ie. a customary version number */
+		VERSION_TAG,
+		/**
+		 * any tag. "experiment-42" is better than nothing, though these are
+		 * almost impossible to put in any kind of ascending order
+		 */
+		OTHER_TAG,
+		/**
+		 * nothing detected. only by {@link MetadataExtractor#NO_VERSION_FOUND}
+		 * instead of <code>null</code> to simplify the code
+		 */
+		NOTHING
 	}
 
 	/**

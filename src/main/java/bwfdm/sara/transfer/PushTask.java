@@ -216,8 +216,7 @@ public class PushTask extends Task {
 		update(1);
 
 		final PushCommand push = git.push();
-		final ArrayList<RefSpec> spec = new ArrayList<RefSpec>(
-				job.selectedRefs.size());
+		final ArrayList<RefSpec> spec = new ArrayList<RefSpec>();
 		for (final Ref r : job.selectedRefs) {
 			final String src = heads.get(r);
 			final String dest = Constants.R_REFS + r.path;
@@ -226,8 +225,8 @@ public class PushTask extends Task {
 		}
 		// add all tags, but only those that haven't been explicitly added
 		// already. setPushTags() adds all tags, even those that have already
-		// ben added explicitly, and thus causes "Duplicate remote ref update is
-		// illegal" exceptions
+		// been added explicitly, and thus causes "Duplicate remote ref update
+		// is illegal" exceptions
 		for (final Ref r : job.clone.getTags())
 			if (!heads.containsKey(r))
 				spec.add(new RefSpec(Constants.R_REFS + r.path)
