@@ -6,25 +6,21 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import bwfdm.sara.db.FrontendDatabase;
 import bwfdm.sara.project.ArchiveMetadata;
 import bwfdm.sara.project.Project;
-import bwfdm.sara.project.Ref;
 
 @RestController
 @RequestMapping("/api/meta")
 public class Metadata {
 	@GetMapping("")
-	public MetadataValues getAllFields(
-			@RequestParam(name = "ref", required = false) final String refPath,
-			final HttpSession session) {
-		final Ref ref = refPath != null ? new Ref(refPath) : null;
-		return getAllFields(ref, Project.getInstance(session));
+	public MetadataValues getAllFields(final HttpSession session) {
+		final Project project = Project.getInstance(session);
+		return new MetadataValues(project.getMetadataExtractor().getMetadata(),
+				project.getFrontendDatabase().getMetadata());
 	}
 
 	@PutMapping("")
@@ -33,20 +29,6 @@ public class Metadata {
 		final Project project = Project.getInstance(session);
 		project.getFrontendDatabase().setMetadata(values);
 		project.invalidateMetadata();
-	}
-
-	public static MetadataValues getAllFields(Ref ref,
-			final Project project) {
-		FrontendDatabase db = project.getFrontendDatabase();
-		final ArchiveMetadata userValues = db.getMetadata();
-		// if the user has selected a different main branch than the
-		// autodetected one, make sure we request the branch-specific metadata
-		// for that branch.
-		if (userValues != null && userValues.master != null && ref == null)
-			ref = new Ref(userValues.master);
-		final ArchiveMetadata detectedValues = project.getMetadataExtractor()
-				.get(ref);
-		return new MetadataValues(detectedValues, userValues);
 	}
 
 	public static class MetadataValues {

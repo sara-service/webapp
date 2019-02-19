@@ -23,6 +23,8 @@ public class ArchiveRepoFactory {
 	public final String displayName;
 	@JsonProperty("logo")
 	public final String logoURL;
+	@JsonProperty("license")
+	public final String license;
 	private final String adapter;
 
 	/**
@@ -34,15 +36,19 @@ public class ArchiveRepoFactory {
 	public ArchiveRepoFactory(@JsonProperty("uuid") final String id,
 			@JsonProperty("display_name") final String displayName,
 			@JsonProperty("logo_url") final String logoURL,
+			@JsonProperty("license") final String license,
 			@JsonProperty("adapter") final String adapter) {
 		this.id = id;
 		this.displayName = displayName;
 		this.logoURL = logoURL;
+		this.license = license;
 		this.adapter = adapter;
 	}
 
 	/**
-	 * Creates a new {@link ArchiveRepo} instance.
+	 * Creates a new {@link ArchiveRepo} instance. In general, use
+	 * {@link ConfigDatabase#newGitArchive(ArchiveRepoFactory)} which then calls
+	 * this method with the arguments loaded from the database.
 	 * <p>
 	 * Uses Jackson to construct the object from a {@code Map<String, String>}.
 	 * For this to work, the constructor must be annotated with

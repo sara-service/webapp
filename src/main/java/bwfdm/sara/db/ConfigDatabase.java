@@ -60,6 +60,13 @@ public class ConfigDatabase {
 				GitRepoFactory.class);
 	}
 
+	private GitRepoFactory getGitRepo(final String id) {
+		return db.querySingleToObject(
+				"select uuid, display_name, logo_url, adapter from "
+						+ GITREPOS_TABLE + " where uuid = UUID(?)",
+				GitRepoFactory.class, id);
+	}
+
 	/**
 	 * Constructs a new {@link GitRepo} object, using the parameters stored in
 	 * the database for the given id.
@@ -69,11 +76,8 @@ public class ConfigDatabase {
 	 * @return a new instance of the named {@link GitRepo}
 	 */
 	public GitRepo newGitRepo(final String id) {
-		final GitRepoFactory factory = db.querySingleToObject(
-				"select uuid, display_name, logo_url, adapter from "
-						+ GITREPOS_TABLE + " where uuid = UUID(?)",
-				GitRepoFactory.class, id);
-		return factory.newGitRepo(readArguments(GITREPO_PARAM_TABLE, id));
+		return getGitRepo(id)
+				.newGitRepo(readArguments(GITREPO_PARAM_TABLE, id));
 	}
 
 	/**
@@ -86,6 +90,32 @@ public class ConfigDatabase {
 				String.class);
 	}
 
+	/** @return a list of all supported git archives */
+	public List<ArchiveRepoFactory> getGitArchives() {
+		return db.<ArchiveRepoFactory> queryToList(
+				"select uuid, display_name, logo_url, license, adapter from "
+						+ ARCHIVES_TABLE + " order by display_name asc",
+				ArchiveRepoFactory.class);
+	}
+
+	/**
+	 * Gets an {@link ArchiveRepoFactory} for a particular git archive, using
+	 * the parameters stored in the database for the given id. This can then be
+	 * used to create an instance of the {@link ArchiveRepo}, or just to get
+	 * information about it.
+	 *
+	 * @param id
+	 *            git archive name used in the {@value #GITREPOS_TABLE} table
+	 * @return an {@link ArchiveRepoFactory} for creating a new instance of the
+	 *         named {@link ArchiveRepo}
+	 */
+	public ArchiveRepoFactory getGitArchive(final String id) {
+		return db.querySingleToObject(
+				"select uuid, display_name, logo_url, license, adapter from "
+						+ ARCHIVES_TABLE + " where uuid = UUID(?)",
+				ArchiveRepoFactory.class, id);
+	}
+
 	/**
 	 * Constructs a new {@link ArchiveRepo} object, using the parameters stored
 	 * in the database for the given id.
@@ -94,12 +124,9 @@ public class ConfigDatabase {
 	 *            git repo name used in the {@value #GITREPOS_TABLE} table
 	 * @return a new instance of the named {@link ArchiveRepo}
 	 */
-	public ArchiveRepo newGitArchive(final String id) {
-		final ArchiveRepoFactory factory = db.querySingleToObject(
-				"select uuid, display_name, logo_url, adapter from "
-						+ ARCHIVES_TABLE + " where uuid = UUID(?)",
-				ArchiveRepoFactory.class, id);
-		return factory.newArchiveRepo(readArguments(ARCHIVE_PARAM_TABLE, id));
+	public ArchiveRepo newGitArchive(final ArchiveRepoFactory factory) {
+		return factory
+				.newArchiveRepo(readArguments(ARCHIVE_PARAM_TABLE, factory.id));
 	}
 
 	private Map<String, String> readArguments(final String table,

@@ -218,7 +218,7 @@ public class Project {
 
 		if (push == null) {
 			final ArchiveRepo archive = config.getConfigDatabase()
-					.newGitArchive(job.archiveUUID.toString());
+					.newGitArchive(job.archive);
 			final PublicationDatabase pubDB = config.getPublicationDatabase();
 			push = new PushTask(job, archive, pubDB);
 		}

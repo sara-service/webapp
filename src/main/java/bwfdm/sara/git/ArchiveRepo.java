@@ -1,10 +1,13 @@
 package bwfdm.sara.git;
 
-import java.util.NoSuchElementException;
+import org.eclipse.jgit.lib.PersonIdent;
 
 import bwfdm.sara.project.ArchiveMetadata;
 
 public interface ArchiveRepo {
+	/** Committer name used when none is configured in the database. */
+	public final String DEFAULT_COMMITTER_NAME = "SARA Service";
+
 	/**
 	 * Creates a project on the archival GitLab.
 	 * 
@@ -25,16 +28,12 @@ public interface ArchiveRepo {
 			ArchiveMetadata meta) throws ProjectExistsException;
 
 	/**
-	 * Get a handle to an existing project on the archival GitLab.
+	 * Determines the committer identity to be used when SARA commits it
+	 * metadata to the archive repo.
 	 * 
-	 * @param id
-	 *            unique name for the new project
-	 * @return an {@link ArchiveProject} containing the properties of the
-	 *         project
-	 * @throws NoSuchElementException
-	 *             if there named project doesn't exist
+	 * @return committer identity as a {@link PersonIdent}
 	 */
-	public ArchiveProject getProject(String id) throws NoSuchElementException;
+	public PersonIdent getMetadataCommitter();
 
 	@SuppressWarnings("serial")
 	public static class ProjectExistsException extends Exception {

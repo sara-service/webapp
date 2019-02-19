@@ -1,8 +1,8 @@
 "use strict";
 
-var meta, cache = {}, branches = [], authors = [];
+var meta, branches = [], authors = [];
 
-function initField(id, reset, branchDependent, validator, speshul) {
+function initField(id, reset, validator, speshul) {
 	var elem = $("#" + id);
 	$("#" + reset).click(function() {
 		// don't bother asking the server because we already have all the
@@ -11,10 +11,6 @@ function initField(id, reset, branchDependent, validator, speshul) {
 		validate.check(id);
 	});
 	validate.init(id, meta.value[id], validator, speshul);
-}
-
-function updateBranchSpecific() {
-	validate.check("version", true);
 }
 
 function removeAuthor(row) {
@@ -72,8 +68,9 @@ function addAuthor(info, predecessor) {
 }
 
 function initFields(info) {
-	meta = cache[info.value.master] = info;
+	meta = info;
 
+	// these are handled separately because they share a reset button
 	validate.init("surname", meta.value.submitter.surname, function(value) {
 			if (value.trim() == "")
 				return "Please provide your surname";
@@ -94,17 +91,17 @@ function initFields(info) {
 		validate.check("givenname");
 	});
 
-	initField("title", "reset_title", false, function(value) {
+	initField("title", "reset_title", function(value) {
 		if (value.trim() == "")
 			return "What title do you want to use for your publication?";
 		return true;
 	});
-	initField("description", "reset_description", false, function(value) {
+	initField("description", "reset_description", function(value) {
 		if (value.trim() != "")
 			return true;
 		return null;
 	});
-	initField("version", "reset_version", true, function(value) {
+	initField("version", "reset_version", function(value) {
 		if (value.trim() == "")
 			return "What version of your software artefact are you publishing?";
 		return true;
@@ -114,26 +111,7 @@ function initFields(info) {
 	// → just replace with autodetected best guess...
 	if (!branches.includes(meta.value.master))
 		meta.value.master = meta.autodetected.master;
-	initField("master", "reset_master", false, function() { return true; },
-		function() {
-			var action = $("#master :selected").data("refAction");
-			if (!action)
-				return;
-
-			var ref = action.ref.path;
-			if (!cache[ref]) {
-				$("#master_loading").removeClass("hidden");
-				API.get("get metadata for " + ref, "/api/meta", { ref: ref },
-					function(info) {
-						meta = cache[ref] = info;
-						$("#master_loading").addClass("hidden");
-						updateBranchSpecific();
-					});
-			} else {
-				meta = cache[ref];
-				updateBranchSpecific();
-			}
-		});
+	initField("master", "reset_master", false, function() { return true; });
 
 	if (meta.value.authors.length > 0)
 		$.each(meta.value.authors, function (seq, author) {
@@ -153,8 +131,8 @@ function initFields(info) {
 		// invalid will be focused. this becomes very confusing if several are
 		// invalid, but it jumps to one somewhere in the middle of the page.
 		var values = validate.all([
+			'title', 'description', 'version', 'master',
 			{ name: "submitter", value: [ "surname", "givenname" ]},
-			'title', 'description', 'master', 'version',
 			{ name: "authors", array: authorList }]);
 		if (!values)
 			return;

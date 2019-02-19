@@ -15,12 +15,6 @@ log in as admin:
 	- Password: run `apg` to create a good one
 	- Projects limit: 100000 (or more!)
 	- Regular user, cannot create group, not external
-- create a group for temporary archive
-	- Path: "temp" (configurable)
-	- Name: "Temporary Archive"
-	- Description: "Stuff stored here will either be moved to the permanent archive or deleted, if the publication is accepted or rejected, respectively."
-	- Visibility: Private, don't allow request access
-- add `sara-user` to `temp` as **Owner**
 - create a group for permanent archive
 	- Path: "archive" (configurable)
 	- Name: "Archive" (or something more useful)
@@ -48,10 +42,10 @@ log in as `sara-user`:
 
 - Type: `GitLabArchiveRESTv4`
 - `url`: `https://gitlabdomain` (no trailing slash!)
-- `temp-namespace`: `temp` (or whatever you called the group)
-- `main-namespace`: `archive` (or whatever you called the group)
-- `dark-namespace`: currently unused; set to `dark-archive` for now
+- `namespace`: `archive` (or whatever you called the group)
 - `token`: the token GitLab generated for `sara-user`
 - `private-key`: the private SSH key from `temp` (preserve the linebreaks)
 - `public-key`: the public SSH key from `temp.pub` (should be a single line)
 - `known-hosts`: the contents of `known_hosts` as created above (preserve the linebreaks)
+- `commiter-name`: name to use when SARA commits its metadata
+- `commiter-email`: email address to use when SARA commits its metadata

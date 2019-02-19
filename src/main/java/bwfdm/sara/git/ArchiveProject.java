@@ -11,15 +11,6 @@ public interface ArchiveProject {
 	 */
 	public String getPushURI();
 
-	/**
-	 * Determine the URL that SARA should use to access the dark-archive
-	 * repository.
-	 * 
-	 * @return a git repository URI, in any syntax that JGit understands (but
-	 *         preferably SSH-based)
-	 */
-	public String getDarkPushURI();
-
 	/** @return the persistent URL for accessing the web UI */
 	public String getWebURL();
 
@@ -40,15 +31,17 @@ public interface ArchiveProject {
 	 *            {@link #getPushURI()} / {@link #getDarkPushURI()} and that
 	 *            should have its credentials set
 	 */
-	public void setCredentials(final TransportCommand<?, ?> tx);
+	public void configureCredentials(final TransportCommand<?, ?> tx);
 
-	/**
-	 * @return <code>true</code> if this project was just created and is thus
-	 *         still empty; <code>false</code> if it refers to an existing
-	 *         project
-	 */
-	boolean isEmpty();
+	/** Moves this project to permanent storage. */
+	void commit();
 
 	/** Deletes this project. */
-	void deleteProject();
+	void rollback();
+
+	/**
+	 * @return <code>true</code> after {@link #commit()} was executed
+	 *         successfully
+	 */
+	boolean isCommitted();
 }

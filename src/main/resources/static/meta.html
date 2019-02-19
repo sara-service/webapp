@@ -42,28 +42,6 @@
 		</div>
 		<form class="form-horizontal">
 			<div class="form-group has-feedback">
-				<label class="col-sm-2 col-xs-12 control-label" for="surname" id="submitter_label">full name of submitter</label>
-				<div class="col-sm-3 col-xs-5 nopad">
-					<input type="text" class="form-control" id="surname" placeholder="your surname" aria-describedby="submitter_label">
-					<span class="form-control-feedback" aria-hidden="true"></span>
-					<span class="form-control-feedback-text text-danger hidden"></span>
-				</div>
-				<div class="col-sm-4 col-xs-7 nopad">
-					<div class="field-with-comma">
-						<input type="text" class="form-control" id="givenname" placeholder="your given name" aria-describedby="submitter_label">
-						<span class="form-control-feedback" aria-hidden="true"></span>
-						<span class="form-control-feedback-text text-danger hidden"></span>
-					</div>
-				</div>
-				<div class="col-sm-3 col-xs-12 nopad">
-					<button type="button" class="btn btn-sm btn-warning" id="reset_submitter">use full name from user account</button>
-				</div>
-				<p class="col-sm-7 col-xs-12 col-sm-offset-2 field-info">
-					Please provide your full name
-					as it should appear in the archive record.
-				</p>
-			</div>
-			<div class="form-group has-feedback">
 				<label class="col-sm-2 control-label" for="title">publication title</label>
 				<div class="col-sm-7 nopad">
 					<input type="text" class="form-control" id="title" placeholder="name of your software artefact" aria-describedby="title_text">
@@ -86,8 +64,18 @@
 				</div>
 			</div>
 
-			<!-- per-branch options -->
 			<p style="height:3ex"></p>
+			<div class="form-group has-feedback">
+				<label class="col-sm-2 control-label" for="version">software version</label>
+				<div class="col-sm-7 nopad">
+					<input type="text" class="form-control" id="version" placeholder="version number" aria-describedby="version_text">
+					<span class="form-control-feedback" aria-hidden="true"></span>
+					<span class="form-control-feedback-text text-danger hidden"></span>
+				</div>
+				<div class="col-sm-3 nopad">
+					<button type="button" class="btn btn-sm btn-warning" id="reset_version">autodetect from version history</button>
+				</div>
+			</div>
 			<div class="form-group has-feedback">
 				<label class="col-sm-2 control-label" for="master">main branch</label>
 				<div class="col-sm-7 nopad">
@@ -106,17 +94,27 @@
 					looks at your software artefact in the git archive.
 				</p>
 			</div>
-
 			<div class="form-group has-feedback">
-				<label class="col-sm-2 control-label" for="version">software version</label>
-				<div class="col-sm-7 nopad">
-					<input type="text" class="form-control" id="version" placeholder="version number" aria-describedby="version_text">
+				<label class="col-sm-2 col-xs-12 control-label" for="surname" id="submitter_label">full name of submitter</label>
+				<div class="col-sm-3 col-xs-5 nopad">
+					<input type="text" class="form-control" id="surname" placeholder="your surname" aria-describedby="submitter_label">
 					<span class="form-control-feedback" aria-hidden="true"></span>
 					<span class="form-control-feedback-text text-danger hidden"></span>
 				</div>
-				<div class="col-sm-3 nopad">
-					<button type="button" class="btn btn-sm btn-warning" id="reset_version">autodetect from main branch</button>
+				<div class="col-sm-4 col-xs-7 nopad">
+					<div class="field-with-comma">
+						<input type="text" class="form-control" id="givenname" placeholder="your given name" aria-describedby="submitter_label">
+						<span class="form-control-feedback" aria-hidden="true"></span>
+						<span class="form-control-feedback-text text-danger hidden"></span>
+					</div>
 				</div>
+				<div class="col-sm-3 col-xs-12 nopad">
+					<button type="button" class="btn btn-sm btn-warning" id="reset_submitter">use full name from user account</button>
+				</div>
+				<p class="col-sm-7 col-xs-12 col-sm-offset-2 field-info">
+					Please provide your full name
+					as it should appear in the archive record.
+				</p>
 			</div>
 		</form>
 
@@ -147,8 +145,10 @@
 			</div>
 		</form>
 		<p class="col-sm-12">
-			Please list all authors who contributed significantly to this crime
-			against software engineering, worst offenders first.
+			Please list all authors who contributed significantly to this
+			<!-- crime against software engineering --> software artefact,
+			<!-- worst offenders first -->
+			in order of significance of their contribution.
 		</p>
 	</div>
 

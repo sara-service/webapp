@@ -1,12 +1,12 @@
 package bwfdm.sara.git.gitlab;
 
-import bwfdm.sara.git.DataObject;
-import bwfdm.sara.git.ProjectInfo;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import bwfdm.sara.git.DataObject;
+import bwfdm.sara.git.ProjectInfo;
 
 /** data class for GitLab project info. */
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -33,6 +33,9 @@ class GLProjectInfo implements DataObject<ProjectInfo> {
 	/** web root URL of project */
 	@JsonProperty("web_url")
 	String webURL;
+	/** namespace containing the project */
+	@JsonProperty("namespace")
+	Namespace namespace;
 
 	/**
 	 * Used (and needed!) by Jackson to create an instance of the class when
@@ -51,5 +54,20 @@ class GLProjectInfo implements DataObject<ProjectInfo> {
 	@Override
 	public ProjectInfo toDataObject() {
 		return new ProjectInfo(path, title, description, master);
+	}
+
+	@Override
+	public String toString() {
+		return path;
+	}
+
+	@JsonIgnoreProperties(ignoreUnknown = true)
+	static class Namespace {
+		/** full path to namespace */
+		@JsonProperty("full_path")
+		String path;
+		/** internal (numeric) ID of namespace */
+		@JsonProperty
+		int id;
 	}
 }

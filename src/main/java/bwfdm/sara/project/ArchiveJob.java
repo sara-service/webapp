@@ -18,7 +18,7 @@ import bwfdm.sara.db.ConfigDatabase;
 import bwfdm.sara.db.FrontendDatabase;
 import bwfdm.sara.extractor.LicenseFile;
 import bwfdm.sara.extractor.MetadataExtractor;
-import bwfdm.sara.git.GitProject;
+import bwfdm.sara.git.ArchiveRepoFactory;
 import bwfdm.sara.project.LicensesInfo.LicenseInfo;
 import bwfdm.sara.transfer.TransferRepo;
 
@@ -45,17 +45,9 @@ public class ArchiveJob {
 	@JsonProperty
 	public final ArchiveAccess access;
 	@JsonProperty
-	public final UUID archiveUUID;
+	public final ArchiveRepoFactory archive;
 	@JsonIgnore
 	public final TransferRepo clone;
-	/**
-	 * <b>For writing back metadata ONLY!!
-	 * 
-	 * @deprecated remove write-back functionality for readonly access
-	 */
-	@Deprecated
-	@JsonIgnore
-	public final GitProject gitProject;
 	@JsonIgnore
 	private Map<Ref, LicenseFile> detectedLicenses;
 	@JsonIgnore
@@ -74,7 +66,6 @@ public class ArchiveJob {
 		sourceUUID = UUID.fromString(project.getRepoID());
 		// projects.html
 		sourceProject = project.getProjectPath();
-		gitProject = project.getGitProject();
 		checkNullOrEmpty("sourceProject", sourceProject);
 		// oauth metadata
 		gitrepoEmail = metadataExtractor.getEmail();
@@ -106,10 +97,7 @@ public class ArchiveJob {
 		// meta.html
 		// FIXME userMeta should never be null here, but sometimes is!
 		final ArchiveMetadata userMeta = frontend.getMetadata();
-		final Ref ref = userMeta != null && userMeta.master != null
-				? new Ref(userMeta.master)
-				: null;
-		meta = metadataExtractor.get(ref).overrideFrom(userMeta);
+		meta = metadataExtractor.getMetadata().overrideFrom(userMeta);
 		checkNullOrEmpty("title", meta.title);
 		checkNull("description", meta.description);
 		checkNullOrEmpty("version", meta.version);
@@ -139,7 +127,8 @@ public class ArchiveJob {
 		// access.html
 		access = frontend.getArchiveAccess();
 		// archive selection, currently just hardcoded
-		this.archiveUUID = UUID.fromString(archiveUUID); // implicit check
+		// getting the factory implicitly checks for existence
+		this.archive = config.getGitArchive(archiveUUID);
 	}
 
 	private static void checkNullOrEmpty(String name, String value) {
@@ -213,7 +202,7 @@ public class ArchiveJob {
 		// access.html
 		buffer.add(access.name());
 		// archive selection, currently just hardcoded
-		buffer.add(archiveUUID.toString());
+		buffer.add(archive.id);
 		return buffer.getHash();
 	}
 
@@ -256,11 +245,11 @@ public class ArchiveJob {
 			if ((lic == null && other != null)
 					|| (lic != null && other == null))
 				return false;
-			if (!lic.equals(other))
+			if (lic != null && other != null && !lic.equals(other))
 				return false;
 		}
 		// archive selection, currently just hardcoded
-		if (!job.archiveUUID.equals(archiveUUID))
+		if (!job.archive.id.equals(archive.id))
 			return false;
 		return true;
 	}

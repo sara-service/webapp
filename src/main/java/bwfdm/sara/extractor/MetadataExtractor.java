@@ -9,6 +9,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import bwfdm.sara.auth.AuthProvider.UserInfo;
@@ -25,7 +26,10 @@ import bwfdm.sara.transfer.RepoFile.FileType;
 import bwfdm.sara.transfer.TransferRepo;
 
 public class MetadataExtractor {
+	private static final Version NO_VERSION_FOUND = new Version("",
+			Long.MIN_VALUE, VersionSource.NOTHING);
 	public static final String VERSION_FILE = "VERSION";
+	private static final Pattern VERSION_REGEX = Pattern.compile("v(\\p{N}.*)");
 	public static final String PREFERRED_LICENSE_FILE = "LICENSE";
 	private static final String LICENSE = "((UN)?LICEN[SC]E|COPYING(\\.LESSER)?)";
 	private static final String EXTENSION = "(\\.md|\\.markdown|\\.txt)?";
@@ -53,7 +57,6 @@ public class MetadataExtractor {
 			.compile("^" + LICENSE + "\\..+$", Pattern.CASE_INSENSITIVE);
 
 	private final ArchiveMetadata meta = new ArchiveMetadata();
-	private final Map<String, String> versions = new HashMap<>();
 	private final TransferRepo clone;
 	private final GitProject project;
 	private final GitRepo repo;
@@ -68,16 +71,9 @@ public class MetadataExtractor {
 		this.project = project;
 	}
 
-	/**
-	 * Get autodetected values for a defined {@link Ref}. Pass <code>null</code>
-	 * to get branch-dependent fields for the default branch.
-	 */
-	public ArchiveMetadata get(final Ref ref) {
-		final ArchiveMetadata res = new ArchiveMetadata(meta);
-		// add branch-specific metadata
-		final String path = ref != null ? ref.path : meta.master;
-		res.version = versions.get(path);
-		return res;
+	/** Get autodetected metadata values. */
+	public ArchiveMetadata getMetadata() {
+		return new ArchiveMetadata(meta);
 	}
 
 	/**
@@ -98,7 +94,7 @@ public class MetadataExtractor {
 	}
 
 	/**
-	 * Runs the main metadata detection. After this method, {@link #get(Ref)},
+	 * Runs the main metadata detection. After this method, {@link #getMetadata()},
 	 * {@link #getEmail()} and {@link #getUserID()} return valid information.
 	 * 
 	 * @param refs
@@ -109,10 +105,12 @@ public class MetadataExtractor {
 	public void detectMetaData(final Collection<Ref> refs) throws IOException {
 		detectProjectInfo();
 
-		final Ref master = detectMasterBranch(refs);
+		detectMasterBranch(refs);
 		detectAuthors(refs);
-		detectVersions(refs); // detect for ALL branches
-		meta.version = versions.get(master.path);
+		detectVersion(refs);
+		// for version-specific metadata, remember master, detect for all and
+		// then set
+		// meta.foo = foo.get(master);
 	}
 
 	private void detectProjectInfo() {
@@ -165,13 +163,83 @@ public class MetadataExtractor {
 		meta.setAuthors(authors);
 	}
 
-	private void detectVersions(final Collection<Ref> set) throws IOException {
-		for (final Ref ref : set) {
-			String data = clone.readString(ref, VERSION_FILE);
-			if (data == null)
-				data = ""; // force the user to enter something
-			versions.put(ref.path, data);
+	private void detectVersion(final Collection<Ref> selectedRefs)
+			throws IOException {
+		Version best = NO_VERSION_FOUND;
+		for (final Ref ref : selectedRefs) {
+			final Version version = parseCommit(ref);
+			if (version.isBetterThan(best))
+				best = version;
 		}
+		for (final Ref ref : clone.getTags()) {
+			final Version version = parseTag(ref);
+			if (version.isBetterThan(best))
+				best = version;
+		}
+		meta.version = best.version;
+	}
+
+	private Version parseCommit(final Ref ref) throws IOException {
+		final long date = clone.getCommit(ref).getCommitTime();
+		final String data = clone.readString(ref, VERSION_FILE);
+		if (data == null)
+			return NO_VERSION_FOUND;
+		return new Version(data, date, VersionSource.VERSION_FILE);
+	}
+
+	private Version parseTag(final Ref ref) throws IOException {
+		final long date = clone.getCommit(ref).getCommitTime();
+		final Matcher m = VERSION_REGEX.matcher(ref.name);
+		if (!m.matches())
+			return new Version(ref.name, date, VersionSource.OTHER_TAG);
+		return new Version(m.group(1), date, VersionSource.VERSION_TAG);
+	}
+
+	private static class Version {
+		private final String version;
+		private final long date;
+		private final VersionSource source;
+
+		private Version(final String version, final long date,
+				final VersionSource source) {
+			this.version = version;
+			this.date = date;
+			this.source = source;
+		}
+
+		private boolean isBetterThan(final Version other) {
+			// prefer sources according to defined preference
+			if (source.ordinal() < other.source.ordinal())
+				return true;
+			// among any one source, prefer the one from the latest commit (for
+			// version files) or pointing to the latest commit (for tags).
+			// not perfect, but doesn't require implementing SemVer comparison,
+			// and should get the same result 99% of the time.
+			if (date > other.date)
+				return true;
+			return false;
+		}
+	}
+
+	private enum VersionSource {
+		// WARNING these are sorted according to preference!!
+		/**
+		 * a file called {@link MetadataExtractor#VERSION_FILE} in any branch or
+		 * tag
+		 */
+		VERSION_FILE,
+		/** a tag of the form vX.Y.Z, ie. a customary version number */
+		VERSION_TAG,
+		/**
+		 * any tag. "experiment-42" is better than nothing, though these are
+		 * almost impossible to put in any kind of ascending order
+		 */
+		OTHER_TAG,
+		/**
+		 * nothing detected. only by {@link MetadataExtractor#NO_VERSION_FOUND}
+		 * instead of <code>null</code> to simplify the code
+		 */
+		NOTHING
 	}
 
 	/**
