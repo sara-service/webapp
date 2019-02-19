@@ -1,0 +1,1 @@
+../conf.avail/bib-test.sql
