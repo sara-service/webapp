@@ -46,16 +46,29 @@ function validateEmail(email) {
 	// validating emails is HARD. just delegate it to the browser.
 	// if the browser doesn't support <input type=email>, everything will be
 	// valid, which isn't too bad an approximation of RFC822.
+	
+	$("#GYST_register").addClass("hidden");
+	$("#GYST_contact").addClass("hidden");
+	$("#next_button").addClass("disabled");
+	
 	if (email == "" || $("#email").is(":invalid"))
 		return "Please enter a valid email address";
 
 	var userInfo = queryHierarchy();
 	if (userInfo == null)
 		return null; // no checkmark yet; AJAX will call us back with status
-	if (!userInfo["user-valid"])
-		return "Your email is unknown. Click on the repository icon to register!";
-	if (userInfo.hierarchy == null)
-		return "You don't have submit rights to any collection";
+	if (!userInfo["user-valid"]) {
+		$("#GYST_register").removeClass("hidden");
+		$("#GYST_contact").addClass("hidden");
+		return "Your email is unknown. Please register it first or use another one!";
+	}
+	if (userInfo.hierarchy == null) {
+		$("#GYST_register").addClass("hidden");
+		$("#GYST_contact").removeClass("hidden");
+		return "You don't have submit rights to any collection. Contact your repository maintainer and ask for submit rights!";
+	}
+
+	$("#next_button").removeClass("disabled");
 	return true;
 }
 
@@ -169,7 +182,9 @@ function initPubRepos(info) {
 			$("#ir_logo").attr("src", logo);
 		else
 			$("#ir_logo").removeAttr("src");
-		$("#ir_link,#ir_button").attr("href", repo.url+'/login');
+		$("#ir_link").attr("href", repo.url);
+		$("#register").attr("href", repo.url+'/login');
+		$("#contact").attr("href", "mailto:"+repo.contact_email+"?subject=SARA%20collection%20access&amp;body=Hi,%2C%0A%20please%20give%20me%20submit%20access!");
 		$("#user_hint").text(repo.user_hint);
 		$("#user_hint_group").toggleClass("hidden", !repo.user_hint);
 		// delegate to email validation. the two fields have basically the
