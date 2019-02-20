@@ -92,13 +92,12 @@
 	
 	<p style="height:3ex"></p>
 
-		<div class="form-group has-feedback hidden" id="policy_group">
-			<label for="policy" class="col-sm-2 control-label">terms of service</label>
-			<div class="col-sm-9 nopad">
-				<textarea readonly class="form-control" id="policy" aria-describedby="policy_text" rows="15"></textarea>
-			</div>
-
-			<div class="col-sm-9 col-sm-offset-2 custom-control custom-checkbox">
+		<div class="hidden panel panel-warning" id="policy_group">
+			<div class="panel-heading"><label for="policy">Terms of Service</label></div>
+			<div class="panel-body license-box"><span id="policy" class="multiline">
+				Here Be Dragons
+			</span></div>
+			<div class="custom-control custom-checkbox panel-footer">
 				<input type="checkbox" class="custom-control-input" id="policyOk">
 				<label class="custom-control-label" for="policyOk">I agree to the terms of services as shown above</label>
 				<div class="form-control-feedback-text text-danger hidden"></div>

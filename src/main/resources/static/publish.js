@@ -97,9 +97,9 @@ var initialCollection;
 
 function initPolicy() {
 	var policyOk = $("#policyOk");
-	var acceptedPolicy = policyOk.prop('checked') ? $("#policy").val() : null;
+	var acceptedPolicy = policyOk.prop('checked') ? $("#policy").text() : null;
 	var policy = $("#collection").find('option:selected').data("policy");
-	$("#policy").val(policy);
+	$("#policy").text(policy);
 	$("#policy_group").toggleClass("hidden", policy == null);
 	// check the box if
 	// - there is no policy (and the box is hidden anyway)
