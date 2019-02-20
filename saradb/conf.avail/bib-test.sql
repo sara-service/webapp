@@ -7,7 +7,7 @@ DECLARE base_dir text := (SELECT basedir from args LIMIT 1);
 
 DECLARE oparu_logo oid := lo_import(base_dir || '/oparu.svg');
 
-DECLARE oparu_test text     := 'https://bib-test.rz.uni-ulm.de';
+DECLARE oparu_test text     := 'https://dspace-test.rz.uni-ulm.de';
 
 DECLARE oparu_demo_help text     := 'Thank you for your submission. Your publication will be reviewed by the OPARU team. You will soon receive an email informing you about its acceptance or rejection. Goodbye!';
 
@@ -28,7 +28,7 @@ INSERT INTO repository_params(id, param, value) VALUES
        (rRef, 'sword_user', 'project-sara@uni-konstanz.de'),
        (rRef, 'sword_pwd', '__BIBTEST_PASSWORD__'),
        (rRef, 'sword_api_endpoint', oparu_test || '/swordv2'),
-       (rRef, 'check_license', 'false'),
+       (rRef, 'check_license', 'true'),
        (rRef, 'deposit_type', 'workspace');
 
 PERFORM lo_unlink(oparu_logo);
