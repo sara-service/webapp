@@ -180,9 +180,10 @@ function initPubRepos(info) {
 		// FIXME these should definitely *not* be hardcoded...
 		// (especially the login url)
 		$("#register").attr("href", repo.url + '/login');
-		$("#contact").attr("href", new URI("mailto:" + repo.contact_email)
-			.search({ subject: "SARA collection access",
-				body: "Hi,\nplease give me submit access!" });
+		$("#contact").attr("href", URI.expand("mailto:{rcpt}{?subject,body}",
+			{ rcpt: repo.contact_email, subject: "SARA collection access",
+				body: "Hi,\n\nplease give me submit access!\n\nYours truly,\n"
+			}));
 		$("#user_hint").text(repo.user_hint);
 		$("#user_hint_group").toggleClass("hidden", !repo.user_hint);
 		// delegate to email validation. the two fields have basically the
