@@ -9,6 +9,7 @@
 	<link rel="stylesheet" href="lib/bootstrap.min.css" />
 	<link rel="stylesheet" href="lib/sara.css" />
 	<script src="lib/jquery.min.js"></script>
+	<script src="lib/uri.min.js"></script>
 	<script src="lib/common.js"></script>
 	<script src="publish.js"></script>
 	<title>Publication options — SARA software publishing</title>
@@ -61,16 +62,14 @@
 				<span class="form-control-feedback" aria-hidden="true"></span>
 				<span class="form-control-feedback-text text-danger hidden"></span>
 			</div>
+			<div class="hidden" id="GYST_register">
+				<a target="_blank" rel="noopener" class="btn btn-primary col-sm-2 col-sm-offset-9" id="register">register →</a>
+			</div>
+			<div class="hidden" id="GYST_contact">
+				<a target="_blank" rel="noopener" class="btn btn-primary col-sm-2 col-sm-offset-9" id="contact">contact →</a>
+			</div>
 		</div>
-		
-		<div class="row hidden" id="GYST_register">
-			<a target="_blank" rel="noopener" class="btn btn-primary enabled col-sm-2 col-sm-offset-10" id="register">register →</a>
-		</div>
-		<div class="row" id="GYST_contact">
-			<a target="_blank" rel="noopener" class="btn btn-primary enabled col-sm-2 col-sm-offset-10" id="contact">contact →</a>
-		</div>
-		<p style="height:3ex"></p>
-				
+
 		<div class="form-group has-feedback" id="collections_group">
 			<label for="collections" class="col-sm-2 control-label">target collection</label>
 			<div class="col-sm-9 nopad hidden" id="collections_list">

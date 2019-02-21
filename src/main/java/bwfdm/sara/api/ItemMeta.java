@@ -37,7 +37,6 @@ public class ItemMeta {
 	public ItemInfo getItemInfo(@PathVariable("uuid") final UUID itemID,
 			@RequestParam(name = "token", required = false) final String token,
 			final HttpSession session) {
-		// FIXME getItem so we have authors!
 		final Item item = config.getPublicationDatabase().getItem(itemID);
 
 		if (isAuthenticated(item, token, session))
