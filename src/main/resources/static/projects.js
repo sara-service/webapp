@@ -5,7 +5,7 @@ function addProjectButton(repo, project) {
 	form.display.text(project.name);
 	form.internal.text(project.path);
 	form.description.text(project.description);
-	form.root.attr("href", URI("/api/auth/login")
+	form.root.attr("href", new URI("/api/auth/login")
 		.search({ project: project.path, repo: repo }));
 	form.root.insertBefore($("#overflow"));
 	return form.root;

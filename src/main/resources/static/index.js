@@ -8,7 +8,8 @@ function addRepoButton(repo, project) {
 	form.url.text(repo.url);
 	if (repo.logo != null)
 		form.icon.attr("src", repo.logo);
-	form.root.attr("href", URI("/api/auth/login").search({ repo: repo.id }));
+	form.root.attr("href", new URI("/api/auth/login")
+			.search({ repo: repo.id }));
 	form.root.insertBefore($("#overflow"));
 	return form.root;
 }
