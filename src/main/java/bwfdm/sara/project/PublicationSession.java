@@ -156,7 +156,7 @@ public class PublicationSession {
 
 		// this relies on the fact that only actually publishing the item sets
 		// the repository URL
-		if (meta.containsKey(PublicationField.REPOSITORY_URL)) {
+		if (!meta.containsKey(PublicationField.REPOSITORY_URL)) {
 			// do not lose an open session while item is not yet submitted
 			return false;
 		} else {
