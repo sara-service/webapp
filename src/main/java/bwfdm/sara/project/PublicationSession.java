@@ -161,8 +161,6 @@ public class PublicationSession {
 		// done or not. just throw an exception instead...
 		checkHaveItem();
 
-		// this relies on the fact that only actually publishing the item sets
-		// the repository URL
 		return !this.sessionActive;
 	}
 

@@ -43,14 +43,11 @@ function queryHierarchy(force) {
 }
 
 function validateEmail(email) {
+	$("#GYST_register,#GYST_contact").addClass("hidden");
+
 	// validating emails is HARD. just delegate it to the browser.
 	// if the browser doesn't support <input type=email>, everything will be
 	// valid, which isn't too bad an approximation of RFC822.
-	
-	$("#GYST_register").addClass("hidden");
-	$("#GYST_contact").addClass("hidden");
-	$("#next_button").addClass("disabled");
-	
 	if (email == "" || $("#email").is(":invalid"))
 		return "Please enter a valid email address";
 
@@ -59,16 +56,13 @@ function validateEmail(email) {
 		return null; // no checkmark yet; AJAX will call us back with status
 	if (!userInfo["user-valid"]) {
 		$("#GYST_register").removeClass("hidden");
-		$("#GYST_contact").addClass("hidden");
-		return "Your email is unknown. Please register it first or use another one!";
+		return "Your email is unknown. Please register it first or use a different one!";
 	}
 	if (userInfo.hierarchy == null) {
-		$("#GYST_register").addClass("hidden");
 		$("#GYST_contact").removeClass("hidden");
-		return "You don't have submit rights to any collection. Contact your repository maintainer and ask for submit rights!";
+		return "You don't have submit rights to any collection. Please contact your repository maintainer and ask for submit rights!";
 	}
 
-	$("#next_button").removeClass("disabled");
 	return true;
 }
 
@@ -183,8 +177,13 @@ function initPubRepos(info) {
 		else
 			$("#ir_logo").removeAttr("src");
 		$("#ir_link").attr("href", repo.url);
-		$("#register").attr("href", repo.url+'/login');
-		$("#contact").attr("href", "mailto:"+repo.contact_email+"?subject=SARA%20collection%20access&amp;body=Hi,%2C%0A%20please%20give%20me%20submit%20access!");
+		// FIXME these should definitely *not* be hardcoded...
+		// (especially the login url)
+		$("#register").attr("href", repo.url + '/login');
+		$("#contact").attr("href", URI.expand("mailto:{rcpt}{?subject,body}",
+			{ rcpt: repo.contact_email, subject: "SARA collection access",
+				body: "Hi,\n\nplease give me submit access!\n\nYours truly,\n"
+			}));
 		$("#user_hint").text(repo.user_hint);
 		$("#user_hint_group").toggleClass("hidden", !repo.user_hint);
 		// delegate to email validation. the two fields have basically the
@@ -212,9 +211,7 @@ function initPubRepos(info) {
 	initialCollection = info.meta.collection;
 	
 	$("#next_button").click(function() {
-		var values = validate.all([ "pubrepo", "email", "collection", "policyOk",]);
-		// FIXME! validate.all does not work for these elements, ask Matthias how he intended this...
-
+		var values = validate.all(["pubrepo", "email", "collection", "policyOk"]);
 		values["pubrepo_displayname"]=$("#pubrepo :selected").text();
 		values["collection_displayname"]=$("#collection :selected").text();
 		if (values == null)

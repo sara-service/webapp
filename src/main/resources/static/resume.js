@@ -4,7 +4,7 @@ function addProjectButton(project) {
 	var form = template("template");
 	form.title.text(project.title);
 	form.version.text(project.version);
-	form.root.attr("href", URI("/info.html")
+	form.root.attr("href", new URI("/info.html")
 		.search({ item: project.item, token: project.token }));
 	form.root.insertBefore($("#overflow"));
 	return form.root;
