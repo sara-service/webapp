@@ -34,6 +34,8 @@ public class PublicationSession {
 
 	private boolean verified;
 
+	private boolean sessionActive;
+
 	private PublicationSession(final UUID sourceUUID, final AuthProvider auth,
 			final UUID itemUUID, final Config config) {
 		this.sourceUUID = sourceUUID;
@@ -41,6 +43,7 @@ public class PublicationSession {
 		this.itemUUID = itemUUID;
 		this.config = config;
 		this.verified = false;
+		this.sessionActive = true;
 		seed = Config.getToken();
 		updateHash();
 	}
@@ -149,6 +152,10 @@ public class PublicationSession {
 		return item;
 	}
 
+	public void setDone() {
+		this.sessionActive = false;
+	}
+
 	public boolean isDone() {
 		// if uninitialized, there is no well-defined answer to whether it's
 		// done or not. just throw an exception instead...
@@ -156,13 +163,7 @@ public class PublicationSession {
 
 		// this relies on the fact that only actually publishing the item sets
 		// the repository URL
-		if (meta.containsKey(PublicationField.REPOSITORY_URL)) {
-			// do not lose an open session while item is not yet submitted
-			return false;
-		} else {
-			return true;
-		}
-
+		return !this.sessionActive;
 	}
 
 	public PublicationDatabase getPublicationDatabase() {

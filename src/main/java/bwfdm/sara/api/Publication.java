@@ -136,7 +136,7 @@ public class Publication {
 		finalMap.putIfAbsent(SaraMetaDataField.TYPE.getDisplayName(),
 				Arrays.asList("Git Archive"));
 		finalMap.putIfAbsent(SaraMetaDataField.PUBLISHER.getDisplayName(),
-				Arrays.asList("SARA SERVICE VERSION 'IOMI WORKSHOP'"));
+				Arrays.asList("SARA Service 1.0 beta"));
 		finalMap.putIfAbsent(SaraMetaDataField.ARCHIVE_URL.getDisplayName(),
 				Arrays.asList(meta.get(PublicationField.ARCHIVE_URL)));
 		finalMap.putIfAbsent(SaraMetaDataField.ABSTRACT.getDisplayName(),
@@ -147,7 +147,7 @@ public class Publication {
 		List<String> author_names = new LinkedList<String>();
 		for (Name n : project.getItem().authors) {
 			// TODO this needs to be reworked together with dspace connector....
-			author_names.add(n.givenname + " " + n.surname);
+			author_names.add(n.surname + ", " + n.givenname);
 		}
 
 		finalMap.putIfAbsent(SaraMetaDataField.AUTHOR.getDisplayName(),
@@ -243,13 +243,13 @@ public class Publication {
 		final SubmissionInfo submissionInfo = repo.publishMetadata(userLogin,
 				collectionURL, metadataMap);
 
-		i.repository_url = submissionInfo.edit_ref;
 		i.item_id = submissionInfo.item_ref;
 
 		String redirectionUrl;
 
 		if (submissionInfo.edit_ref != null) {
 			logger.info("submitted into workspace, user review needed!");
+			i.repository_url = submissionInfo.edit_ref;
 			logger.info(i.repository_url);
 			logger.info(i.item_id);
 		} else {
@@ -258,6 +258,7 @@ public class Publication {
 		}
 
 		i = project.getPublicationDatabase().insertInDB(i);
+		project.setDone();
 
 		Map<PublicationField, String> m = new EnumMap<>(PublicationField.class);
 		m.put(PublicationField.REPOSITORY_URL, i.repository_url);
