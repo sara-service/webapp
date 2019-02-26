@@ -2,14 +2,32 @@
 
 ## Install the GitLab Omnibus package
 
-follow https://about.gitlab.com/installation/#ubuntu
-(or read the the script it wgets into a root shell.
- all it really does is add an apt repo and key...)
+follow https://about.gitlab.com/installation/#ubuntu,
+*making sure you install `gitlab-ce` (not `gitlab-ee`)!!*
 
-*make sure you install `gitlab-ce` (not `gitlab-ee`)!!*
+**or:** read the the script it wgets into a root shell.
+all it really does is add an apt repo and key:
+
+- add the GPG key: `wget -O- https://packages.gitlab.com/gitlab/gitlab-ce/gpgkey | sudo apt-key add`
+- do `sudo apt-key list` and verify that this added key `E15E78F4` (last 8 digits of key hash)
+- add the repo: create `/etc/apt/sources.list.d/gitlab-ce.list` containing
+	```
+	deb https://packages.gitlab.com/gitlab/gitlab-ce/ubuntu/ bionic main
+	deb-src https://packages.gitlab.com/gitlab/gitlab-ce/ubuntu/ bionic main
+	```
+- `sudo apt update` and watch out for key-related errors
+- install GitLab CE: `sudo EXTERNAL_URL=http://gitlab.example.com apt install gitlab-ce`
 
 omnibus will make itself at home on the system.
 probably much more than you wanted it to.
+
+## set admin password
+
+- visit http://gitlab.example.com
+- enter the password
+- hope that nobody else is faster than you
+
+yes that really is the official method :(
 
 ## Set up SSL
 
