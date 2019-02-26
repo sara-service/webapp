@@ -192,7 +192,8 @@ public class Publication {
 		final Map<PublicationField, String> meta = project.getMetadata();
 
 		final String userLogin = meta.get(PublicationField.PUBREPO_LOGIN_EMAIL);
-		final String submitter = meta.get(PublicationField.SUBMITTER);
+		final String submitter = project.getItem().submitter_givenname + " "
+				+ project.getItem().submitter_surname;
 		final String pubid = project.getPubID();
 
 		final SimpleMailMessage mail = new SimpleMailMessage();
@@ -200,7 +201,7 @@ public class Publication {
 		mail.setTo(userLogin);
 		mail.setSubject("Your submission <" + pubid + ">");
 		mail.setText("Dear " + submitter
-				+ "\n\n please acknowledge your submission to \""
+				+ ",\n\n please acknowledge your submission to \""
 				+ meta.get(PublicationField.PUBREPO_REPOSITORYNAME) + "\"\n"
 				+ "using this code:\n\n"
 				+ project.getVerificationCode() + "\n\n"
