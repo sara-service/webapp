@@ -9,7 +9,6 @@ import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +33,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.util.FileSystemUtils;
 
+import bwfdm.sara.UnitTestConfig;
 import bwfdm.sara.project.RefAction.PublicationMethod;
 
 public class RewriteTest {
@@ -51,7 +51,7 @@ public class RewriteTest {
 
 	@Before
 	public void createTestRepo() throws IOException, GitAPIException {
-		root = Files.createTempDirectory("rewrite-test").toFile();
+		root = UnitTestConfig.createTempDirectory();
 		git = new InitCommand().setBare(true).setDirectory(root).call();
 		repo = git.getRepository();
 		objects = new HashMap<>();

@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import bwfdm.sara.Config;
+import bwfdm.sara.SARAVersion;
 import bwfdm.sara.git.GitRepoFactory;
 import bwfdm.sara.git.ProjectInfo;
 import bwfdm.sara.project.Project;
@@ -72,5 +73,10 @@ public class Misc {
 			else
 				item = null;
 		}
+	}
+
+	@GetMapping("webapp-version")
+	public SARAVersion getVersionInfo() {
+		return config.getVersion();
 	}
 }

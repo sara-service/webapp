@@ -2,7 +2,7 @@ package bwfdm.sara;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
+import java.lang.management.ManagementFactory;
 import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.security.SecureRandom;
@@ -17,11 +17,19 @@ import org.springframework.jdbc.datasource.SimpleDriverDataSource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Component;
 import org.springframework.util.DigestUtils;
+import org.springframework.util.StreamUtils;
 import org.springframework.web.context.ServletContextAware;
+
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import bwfdm.sara.db.ConfigDatabase;
 import bwfdm.sara.publication.db.PublicationDatabase;
 
+/**
+ * Catch-all global resource holder. Use
+ * {@code @Autowired private Config config;} to get it injected.
+ */
 @Component
 public class Config implements ServletContextAware {
 	// human-safe, non-ambiguous base32 alphabet. we omit:
@@ -52,13 +60,12 @@ public class Config implements ServletContextAware {
 
 	private static final String WEBROOT_ATTR = "sara.webroot";
 	private static final String TEMPDIR_ATTR = "temp.dir";
-	private static final String CONTEXT_PARAM_PREFIX = "server.context_parameters.";
 	private static final String DATASOURCE_PREFIX = "spring.datasource.";
 
 	private static final SecureRandom RNG = new SecureRandom();
 	private static final Charset UTF8 = Charset.forName("UTF-8");
+	private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
-	private final Properties props;
 	private DataSource db;
 	private ServletContext context;
 	private String webroot;
@@ -66,32 +73,18 @@ public class Config implements ServletContextAware {
 	private ConfigDatabase configDB;
 	private PublicationDatabase pubDB;
 	private JavaMailSender sender;
+	private SARAVersion versionInfo;
 
 	/**
 	 * Constructor used by Spring, along with
 	 * {@link #setServletContext(ServletContext)} and injection for the database
-	 * config.
+	 * config. Do not call; instead use
+	 * {@code @Autowired private Config config;} to get the object injected.
 	 */
-	@SuppressWarnings("unused")
-	private Config() {
-		this.props = null;
+	Config() {
 	}
 
-	/**
-	 * Constructor used <b>for testing only</>, when context parameters are
-	 * simply loaded from a {@link Properties} object. Use
-	 * {@code @Autowired private Config config;} everywhere else!
-	 * 
-	 * @param props
-	 *            {@link Properties} that has been
-	 *            {@link Properties#load(InputStream) loaded} from a file
-	 */
-	public Config(final Properties props) throws IOException {
-		this.props = props;
-		setServletContext(null);
-		setDataSource(createDataSource(props));
-	}
-
+	/** Used for unit tests and standalone utility classes only. */
 	public static DataSource createDataSource(final Properties props)
 			throws IOException {
 		final String klass = props
@@ -141,24 +134,15 @@ public class Config implements ServletContextAware {
 		return pubDB;
 	}
 
-	private String getContextParam(final String name) {
-		final String attr;
-		if (!testMode())
-			attr = context.getInitParameter(name);
-		else
-			// for testing, just read from the properties file directly.
-			// add prefix so we can use application.properties directly.
-			attr = props.getProperty(CONTEXT_PARAM_PREFIX + name);
+	protected String getContextParam(final String name) {
+		final String attr = context.getInitParameter(name);
 		if (attr == null)
-			throw new ConfigurationException("missing context parameter "
-					+ name);
+			throw new ConfigurationException(
+					"missing context parameter " + name);
 		return attr;
 	}
 
-	private File getTempRoot() {
-		if (testMode())
-			return new File("temp");
-
+	protected File getTempRoot() {
 		final File servletTemp = (File) context
 				.getAttribute(ServletContext.TEMPDIR);
 		final String tempPath = context.getInitParameter(TEMPDIR_ATTR);
@@ -171,10 +155,6 @@ public class Config implements ServletContextAware {
 			return absPath;
 		// else resolve it relative to the servlet container's tempdir
 		return new File(servletTemp, tempPath);
-	}
-
-	private boolean testMode() {
-		return context == null && props != null;
 	}
 
 	public DataSource getDatabase() {
@@ -200,8 +180,8 @@ public class Config implements ServletContextAware {
 		final File temp = new File(temproot, name);
 		temp.mkdirs(); // ignore errors; we only need it to exist afterwards
 		if (!temp.isDirectory())
-			throw new RuntimeException("failed to create directory "
-					+ temp.getAbsolutePath());
+			throw new RuntimeException(
+					"failed to create directory " + temp.getAbsolutePath());
 		return temp;
 	}
 
@@ -268,9 +248,41 @@ public class Config implements ServletContextAware {
 		final File temp = new File(temproot, hash.toString());
 		temp.mkdirs(); // ignore error; it may well exist already
 		if (!temp.isDirectory())
-			throw new RuntimeException("failed to create directory "
-					+ temp.getAbsolutePath());
+			throw new RuntimeException(
+					"failed to create directory " + temp.getAbsolutePath());
 		return temp;
+	}
+
+	/** @return webapp version info as a {@link SARAVersion} instance */
+	public SARAVersion getVersion() {
+		if (versionInfo == null)
+			versionInfo = parseVersion();
+		return versionInfo;
+	}
+
+	private SARAVersion parseVersion() {
+		try {
+			final String versionJSON = StreamUtils.copyToString(
+					context.getResourceAsStream("/version.json"), UTF8);
+			try {
+				return OBJECT_MAPPER.readValue(versionJSON, SARAVersion.class);
+			} catch (final JsonParseException e) {
+				// version.json is known to be syntactically invalid when
+				// running in Eclipse because buildnumber-maven-plugin doesn't
+				// get a chance to replace the placeholders. return a special
+				// DEVEL version instead.
+				if (versionJSON.contains("${timestamp}"))
+					return new SARAVersion("DEVEL", "DEVEL",
+							"0000000000000000000000000000000000000000",
+							ManagementFactory.getRuntimeMXBean()
+									.getStartTime());
+				// in all other cases just delegate to the general error handler
+				throw e;
+			}
+		} catch (final IOException e) {
+			throw new RuntimeException(
+					"cannot read version.json from webapp resources", e);
+		}
 	}
 
 	@SuppressWarnings("serial")

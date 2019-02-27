@@ -88,8 +88,7 @@ public class Authorization {
 		if (!existingProject.isDone())
 				return false;
 
-		// user definitely chose to publish. that is, we now require the
-		// publication part to be done as well.
+		// require the publication part to be done as well
 		if (!PublicationSession.hasInstance(session))
 			// user wants to publish, but hasn't even started yet.
 			// his is quite hard to trigger: the user has to close push.html
