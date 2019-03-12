@@ -120,15 +120,15 @@ public class Publication {
 
 		final Map<PublicationField, String> meta = project.getMetadata();
 
-		// FIXME this is somewhat hacky
 		final UUID repository_uuid = UUID
 				.fromString(meta.get(PublicationField.PUBLICATION_REPOSITORY));
+		
+		final PublicationRepository repo = project.getPublicationDatabase()
+				.getPubRepo(repository_uuid);
 
 		MultiValueMap<String, String> finalMap = new LinkedMultiValueMap<String, String>();
 		finalMap.putIfAbsent(SaraMetaDataField.ABSTRACT.getDisplayName(),
 				Arrays.asList(meta.get(PublicationField.DESCRIPTION)));
-		finalMap.putIfAbsent(SaraMetaDataField.SUBMITTER.getDisplayName(),
-				Arrays.asList(meta.get(PublicationField.SUBMITTER)));
 		finalMap.putIfAbsent(SaraMetaDataField.TITLE.getDisplayName(),
 				Arrays.asList(meta.get(PublicationField.TITLE)));
 		finalMap.putIfAbsent(SaraMetaDataField.VERSION.getDisplayName(),
@@ -144,10 +144,14 @@ public class Publication {
 		finalMap.putIfAbsent(SaraMetaDataField.DATE_ARCHIVED.getDisplayName(),
 				Arrays.asList(ISO8601.format(project.getItem().date_created)));
 
+		finalMap.putIfAbsent(SaraMetaDataField.SUBMITTER.getDisplayName(),
+				Arrays.asList(repo.mappedName(
+						meta.get(PublicationField.SUBMITTER_GIVENNAME),
+						meta.get(PublicationField.SUBMITTER_SURNAME))));
+
 		List<String> author_names = new LinkedList<String>();
 		for (Name n : project.getItem().authors) {
-			// TODO this needs to be reworked together with dspace connector....
-			author_names.add(n.surname + ", " + n.givenname);
+			author_names.add(repo.mappedName(n.givenname, n.surname));
 		}
 
 		finalMap.putIfAbsent(SaraMetaDataField.AUTHOR.getDisplayName(),

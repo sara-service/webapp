@@ -60,6 +60,8 @@ public class DSpace_SwordOnly implements PublicationRepository {
 	private final String publicationType;
 	private final boolean showUnsubmittable;
 
+	private final String name_mapping;
+
 	private Map<String, Hierarchy> hierarchyMap;
 
 	@JsonCreator
@@ -70,6 +72,7 @@ public class DSpace_SwordOnly implements PublicationRepository {
 			@JsonProperty("check_license") final boolean cl,
 			@JsonProperty("show_unsubmittable") final boolean shu,
 			@JsonProperty(value = "publication_type", required = false) final String pt,
+			@JsonProperty(value = "name_mapping", required = false) final String nm,
 			@JsonProperty("dao") final Repository dao) {
 		this.dao = dao;
 
@@ -82,6 +85,12 @@ public class DSpace_SwordOnly implements PublicationRepository {
 		checkLicense = cl;
 		publicationType = pt;
 		showUnsubmittable = shu;
+
+		if (nm != null) {
+			name_mapping = nm;
+		} else {
+			name_mapping = "$2, $1";
+		}
 
 		swordClient = new SWORDClient();
 
@@ -334,4 +343,10 @@ public class DSpace_SwordOnly implements PublicationRepository {
 
 	}
 
+	@Override
+	public String mappedName(String givenName, String surName) {
+		final String nameRegex = "(\\S{2,})\\s{1,}(.*)";
+		return new String(givenName + " " + surName).replaceAll(nameRegex,
+				name_mapping);
+	}
 }

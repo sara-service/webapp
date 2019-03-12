@@ -79,6 +79,16 @@ public interface PublicationRepository {
 			final MultiValueMap<String, String> metadataMap);
 
 	/**
+	 * Map given name and surname of submitters or authors into one string
+	 * according to the `name_mapping` parameter in the IR configuration
+	 * 
+	 * @param givenName
+	 * @param surName
+	 * @return mapped name
+	 */
+	public String mappedName(final String givenName, final String surName);
+
+	/**
 	 * Publish a file together with the metadata. Metadata are described as a
 	 * {@link java.util.Map}.
 	 * 

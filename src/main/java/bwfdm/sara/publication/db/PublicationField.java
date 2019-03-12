@@ -11,7 +11,10 @@ public enum PublicationField {
 	/** projects description / abstract */
 	DESCRIPTION("description"),
 	/** software version number */
-	VERSION("version"), SUBMITTER("submitter"),
+	VERSION("version"),
+	/** split submitter into given name and surname */
+	SUBMITTER_SURNAME("submitter_surname"),
+	SUBMITTER_GIVENNAME("submitter_givenname"),
 	/** ID of the institutional repository to publish the item in */
 	PUBLICATION_REPOSITORY("pubrepo"),
 	/** Whether the workflow will need to verify the users email address */

@@ -70,6 +70,7 @@ public class DSpace_v6 implements PublicationRepository {
 	// for IR
 	private final String deposit_type;
 	private final String publication_type;
+	private final String name_mapping;
 
 	private Client rest_client;
 
@@ -83,6 +84,7 @@ public class DSpace_v6 implements PublicationRepository {
 			@JsonProperty("deposit_type") final String dt,
 			@JsonProperty("check_license") final boolean cl,
 			@JsonProperty(value = "publication_type", required = false) final String pt,
+			@JsonProperty(value = "name_mapping", required = false) final String nm,
 			@JsonProperty("dao") final Repository dao) {
 		this.dao = dao;
 
@@ -97,6 +99,12 @@ public class DSpace_v6 implements PublicationRepository {
 		check_license = cl;
 
 		publication_type = pt;
+
+		if (nm != null) {
+			name_mapping = nm;
+		} else {
+			name_mapping = "$2, $1";
+		}
 
 		rest_client = ClientBuilder.newClient();
 
@@ -123,6 +131,7 @@ public class DSpace_v6 implements PublicationRepository {
 		rest_api_endpoint = restURL;
 		dao = null;
 		check_license = false;
+		name_mapping = "$2, $1";
 
 		rest_client = ClientBuilder.newClient();
 
@@ -391,13 +400,13 @@ public class DSpace_v6 implements PublicationRepository {
 
 			if (deposit_type != null) {
 				switch (deposit_type.toLowerCase()) {
-				case "workspace":
-					deposit.setInProgress(true);
-					submissionInfo.inProgress = true;
-					break;
 				case "workflow":
 					deposit.setInProgress(false);
 					submissionInfo.inProgress = false;
+					break;
+				default:
+					deposit.setInProgress(true);
+					submissionInfo.inProgress = true;
 					break;
 				}
 			} else {
@@ -449,6 +458,13 @@ public class DSpace_v6 implements PublicationRepository {
 	@Override
 	public void dump() {
 		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public String mappedName(String givenName, String surName) {
+		final String nameRegex = "(\\S{2,})\\s{1,}(.*)";
+		return new String(givenName + " " + surName).replaceAll(nameRegex,
+				name_mapping);
 	}
 
 }

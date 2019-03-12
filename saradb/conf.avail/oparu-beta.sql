@@ -32,6 +32,7 @@ INSERT INTO repository_params(id, param, value) VALUES
 	(rRef, 'sword_api_endpoint', oparu_demo || '/swordv2'),
 	(rRef, 'deposit_type', 'workspace'),
         (rRef, 'check_license', 'false'),
+	(rRef, 'name_mapping', '$2, $1'),
 	(rRef, 'publication_type', 'Software');
 
 -- erase the temporary large objects

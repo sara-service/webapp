@@ -74,9 +74,9 @@ public class PublicationSession {
 		meta.put(PublicationField.TITLE, item.title);
 		meta.put(PublicationField.VERSION, item.version);
 		meta.put(PublicationField.DESCRIPTION, item.description);
-		// TODO split submitter field here
-		meta.put(PublicationField.SUBMITTER, item.submitter_surname + ", "
-				+ item.submitter_givenname);
+		meta.put(PublicationField.SUBMITTER_SURNAME, item.submitter_surname);
+		meta.put(PublicationField.SUBMITTER_GIVENNAME,
+				item.submitter_givenname);
 		meta.put(PublicationField.ARCHIVE_URL, item.archive_url);
 		// initialization with reasonable defaults: email from git repo
 		meta.put(PublicationField.PUBREPO_LOGIN_EMAIL, item.contact_email);
@@ -121,7 +121,6 @@ public class PublicationSession {
 		if (repoEMail.equals(item.contact_email.toLowerCase())) {
 			return true;
 		}
-		;
 
 		return this.verified;
 	}
