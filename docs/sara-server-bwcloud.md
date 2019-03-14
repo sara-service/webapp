@@ -86,7 +86,6 @@ sudo apt-get install postgresql
 sudo systemctl start postgresql
 sudo -u postgres createuser -l -D -R -S sara
 sudo -u postgres psql -c "ALTER USER sara WITH PASSWORD 'sara';"
-sudo -u postgres createdb --owner=dspace --encoding=UNICODE dspace
 sudo -u postgres createdb -E UTF8 -O sara saradb
 sudo -u postgres psql -d saradb -f saradb/adminconfig.sql
 sudo -u postgres psql -d saradb -f saradb/schema.sql
