@@ -19,7 +19,7 @@ function blockLoaded(name) {
 	});
 	
 	$('#vcode').on('input', function() {
-	    API.post("checking verification code", "/api/publish/verify", { vcode: $("#vcode").val() }, setEnabledNextButton);
+	    API.post("checking verification code", "/api/publish/verify", { vcode: $("#vcode").val().trim() }, setEnabledNextButton);
 	});
 	
 	$("#send_verification_button").on('click', function() {
