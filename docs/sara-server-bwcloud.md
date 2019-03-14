@@ -109,6 +109,7 @@ done
 ### Apache
 ```bash
 sudo apt install apache2 letsencrypt
+sudo systemctl stop apache2
 HN=$(hostname -f)
 ```
 Install Redirect
@@ -176,15 +177,14 @@ cat << EOF | sudo tee /etc/apache2/sites-available/proxy.conf
 	</Directory>
 
 	SSLEngine on
-	SSLCertificateFile	/etc/letsencrypt/live/$HN/fullchain.pem
+	SSLCertificateFile /etc/letsencrypt/live/$HN/fullchain.pem
 	SSLCertificateKeyFile /etc/letsencrypt/live/$HN/privkey.pem
-
 </VirtualHost>
 EOF
 ```
 ```bash
 sudo mkdir -p /var/www/letsencrypt
-sudo letsencrypt certonly --webroot -w /var/www/letsencrypt -d $HN
+sudo letsencrypt certonly --standalone -w /var/www/letsencrypt -d $HN
 sudo a2dissite default-000
 sudo a2enmod proxy_ajp ssl headers
 sudo a2ensite redirect proxy
@@ -231,6 +231,6 @@ sudo -u tomcat8 cp target/SaraServer-*.war /var/lib/tomcat8/webapps/SaraServer.w
 sudo -u tomcat8 cp ~/.m2/repository/org/postgresql/postgresql/42.1.4/postgresql-42.1.4.jar /var/lib/tomcat8/lib
 sudo -u tomcat8 cp ~/.m2/repository/org/apache/geronimo/specs/geronimo-javamail_1.4_spec/1.6/geronimo-javamail_1.4_spec-1.6.jar /var/lib/tomcat8/lib
 sudo  cp src/main/webapp/META-INF/context.xml /etc/tomcat8/Catalina/localhost/SaraServer.xml
-sudo sed -i 's/demo.sara-service.org/'$(hostname)'/' /etc/tomcat8/Catalina/localhost/SaraServer.xml
+sudo sed -i 's/demo.sara-project.org/'$(hostname)'/' /etc/tomcat8/Catalina/localhost/SaraServer.xml
 sudo service tomcat8 restart
 ```
