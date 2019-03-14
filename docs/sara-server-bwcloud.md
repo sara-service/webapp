@@ -115,16 +115,16 @@ Install Redirect
 ```bash
 cat << EOF | sudo tee /etc/apache2/sites-available/redirect.conf
 <VirtualHost *:80>
-	ServerName $HN
-	ServerAdmin webmaster@localhost
+    ServerName $HN
+    ServerAdmin webmaster@localhost
 
-	Alias "/.well-known" "/var/www/letsencrypt/.well-known"
-	<Directory /var/www/letsencrypt/.well-known>
-		Options -MultiViews
-		Require all granted
-	</Directory>
+    Alias "/.well-known" "/var/www/letsencrypt/.well-known"
+    <Directory /var/www/letsencrypt/.well-known>
+        Options -MultiViews
+        Require all granted
+    </Directory>
 
-	RedirectPermanent / "https://$HN/"
+    RedirectPermanent / "https://$HN/"
 </VirtualHost>
 EOF
 ```
@@ -132,46 +132,46 @@ Install TomCat Proxy
 ```bash
 cat << EOF | sudo tee /etc/apache2/sites-available/proxy.conf
 <VirtualHost *:443>
-	ServerName $HN
-	ServerAdmin webmaster@localhost
+    ServerName $HN
+    ServerAdmin webmaster@localhost
 
-	<Location />
-		ProxyPass "ajp://localhost:8009/SaraServer/"
-		ProxyPassReverseCookiePath "/SaraServer" "/"
-	</Location>
-	Alias "/.well-known" "/var/www/letsencrypt/.well-known"
-	<Location /.well-known>
-		ProxyPass !
-	</Location>
-	<Directory /var/www/letsencrypt/.well-known>
-		Options -MultiViews
-		Require all granted
-	</Directory>
+    <Location />
+        ProxyPass "ajp://localhost:8009/SaraServer/"
+        ProxyPassReverseCookiePath "/SaraServer" "/"
+    </Location>
+    Alias "/.well-known" "/var/www/letsencrypt/.well-known"
+    <Location /.well-known>
+        ProxyPass !
+    </Location>
+    <Directory /var/www/letsencrypt/.well-known>
+        Options -MultiViews
+        Require all granted
+    </Directory>
 
-	# limit scripts, styles and fonts to same server only.
-	# for images, allow local images, and https:* and data:* for logos.
-	# disallow everything else.
-	Header always set Content-Security-Policy "default-src 'none'; \
-		script-src 'self'; style-src 'self' 'unsafe-inline'; \
-		img-src 'self' https: data:; connect-src 'self'; font-src 'self'"
-	# disallow frames (anti-clickjacking)
-	Header always set X-Frame-Options deny
-	# make sure XSS protection doesn't mess up ("sanitize") URLs
-	Header always set X-Xss-Protection "1; mode=block"
-	# turn of content type autodetection misfeature (major security risk)
-	Header always set X-Content-Type-Options nosniff
-	# turn of referrer for privacy
-	Header always set Referrer-Policy no-referrer
+    # limit scripts, styles and fonts to same server only.
+    # for images, allow local images, and https:* and data:* for logos.
+    # disallow everything else.
+    Header always set Content-Security-Policy "default-src 'none'; \
+        script-src 'self'; style-src 'self' 'unsafe-inline'; \
+        img-src 'self' https: data:; connect-src 'self'; font-src 'self'"
+    # disallow frames (anti-clickjacking)
+    Header always set X-Frame-Options deny
+    # make sure XSS protection doesn't mess up ("sanitize") URLs
+    Header always set X-Xss-Protection "1; mode=block"
+    # turn of content type autodetection misfeature (major security risk)
+    Header always set X-Content-Type-Options nosniff
+    # turn of referrer for privacy
+    Header always set Referrer-Policy no-referrer
 
-	ErrorLog ${APACHE_LOG_DIR}/error.log
-	CustomLog ${APACHE_LOG_DIR}/access.log combined
+    ErrorLog ${APACHE_LOG_DIR}/error.log
+    CustomLog ${APACHE_LOG_DIR}/access.log combined
 	
-	Alias "/.well-known" "/var/www/letsencrypt/.well-known"
-	<Location /.well-known>
-		ProxyPass !
-	</Location>
-	<Directory /var/www/letsencrypt/.well-known>
-		Options -MultiViews
+    Alias "/.well-known" "/var/www/letsencrypt/.well-known"
+    <Location /.well-known>
+        ProxyPass !
+    </Location>
+    <Directory /var/www/letsencrypt/.well-known>
+        Options -MultiViews
 		Require all granted
 	</Directory>
 
