@@ -82,9 +82,18 @@ sudo apt-get -y upgrade
 ## Installation
 ### Postgres
 ```
+sudo apt-get install postgresql
 sudo systemctl start postgresql
-sudo -u postgres createuser --no-superuser dspace
-sudo -u postgres psql -c "ALTER USER dspace WITH PASSWORD 'dspace';"
+sudo -u postgres createuser -l -D -R -S sara
+sudo -u postgres psql -c "ALTER USER sara WITH PASSWORD 'sara';"
 sudo -u postgres createdb --owner=dspace --encoding=UNICODE dspace
-sudo -u postgres psql dspace -c "CREATE EXTENSION pgcrypto;"
+sudo -u postgres createdb -E UTF8 -O sara saradb
+sudo -u postgres psql -d saradb -f saradb/adminconfig.sql
+sudo -u postgres psql -d saradb -f saradb/schema.sql
+sed "s/__USERNAME__/sara/g" permissions.sql | sudo -u postgres psql -d saradb
+sudo -u postgres psql -d saradb -f saradb/licenses.sql
+```
+Create configuration according to `saradb/ulm` subdirectory
+```
+TODO
 ```
