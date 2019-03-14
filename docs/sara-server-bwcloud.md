@@ -44,3 +44,47 @@ You will need
 ```bash
 ssh -A ubuntu@ulm.sara-service.org
 ```
+
+## Fix hostname
+```
+# Enable history search (pgdn/pgup)
+sudo sed -i.orig '41,+1s/^# //' /etc/inputrc
+
+# Adapt host name
+sudo hostname ulm.sara-service.org
+
+# Log off to apply new host name
+exit
+```
+
+## Prerequisites
+```
+ssh ubuntu@ulm.sara-service.org
+
+# Fetch latest updates
+sudo apt-get update
+
+# Install some important dependencies
+sudo apt-get -y install vim git locales rsync
+
+# Fix locales
+sudo locale-gen de_DE.UTF-8 en_US.UTF-8
+sudo localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8
+
+# Fix timezone
+sudo sh -c 'echo "Europe/Berlin" > /etc/timezone'
+sudo DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true apt-get install tzdata
+
+# Upgrade all packages
+sudo apt-get -y upgrade
+```
+
+## Installation
+### Postgres
+```
+sudo systemctl start postgresql
+sudo -u postgres createuser --no-superuser dspace
+sudo -u postgres psql -c "ALTER USER dspace WITH PASSWORD 'dspace';"
+sudo -u postgres createdb --owner=dspace --encoding=UNICODE dspace
+sudo -u postgres psql dspace -c "CREATE EXTENSION pgcrypto;"
+```
