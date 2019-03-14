@@ -195,5 +195,5 @@ sudo -u tomcat8 cp ~/.m2/repository/org/postgresql/postgresql/42.1.4/postgresql-
 sudo -u tomcat8 cp ~/.m2/repository/org/apache/geronimo/specs/geronimo-javamail_1.4_spec/1.6/geronimo-javamail_1.4_spec-1.6.jar /var/lib/tomcat8/lib
 sudo  cp src/main/webapp/META-INF/context.xml /etc/tomcat8/Catalina/localhost/SaraServer.xml
 sudo sed -i 's/demo.sara-service.org/ulm.sara-service.org' /etc/tomcat8/Catalina/localhost/SaraServer.xml
-/etc/tomcat8/Catalina/localhost/SaraServer.xml
+sudo service tomcat8 restart
 ```
