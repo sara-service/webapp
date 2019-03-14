@@ -105,3 +105,51 @@ for file in $DBBASEDIR/ulm/*.sql; do
     sed -f $DBBASEDIR/credentials/ulm.sed "$file" | sudo -u postgres psql -v ON_ERROR_STOP=on -d saradb -v "basedir=$DBBASEDIR";
 done
 ```
+
+### Apache
+```
+sudo apt install apache2 letsencrypt
+sudo a2dissite 000-default
+sudo a2enmod proxy_ajp ssl headers
+```
+Install TomCat Proxy
+```
+cat << EOF | sudo tee /etc/apache2/sites-available/proxy.conf
+<VirtualHost *:80>
+	ServerName ulm.sara-service.org # change
+	ServerAdmin webmaster@localhost # change
+
+	<Location />
+		ProxyPass "ajp://localhost:8009/SaraServer/"
+		ProxyPassReverseCookiePath "/SaraServer" "/"
+	</Location>
+	Alias "/.well-known" "/var/www/letsencrypt/.well-known"
+	<Location /.well-known>
+		ProxyPass !
+	</Location>
+	<Directory /var/www/letsencrypt/.well-known>
+		Options -MultiViews
+		Require all granted
+	</Directory>
+
+	# limit scripts, styles and fonts to same server only.
+	# for images, allow local images, and https:* and data:* for logos.
+	# disallow everything else.
+	Header always set Content-Security-Policy "default-src 'none'; \
+		script-src 'self'; style-src 'self' 'unsafe-inline'; \
+		img-src 'self' https: data:; connect-src 'self'; font-src 'self'"
+	# disallow frames (anti-clickjacking)
+	Header always set X-Frame-Options deny
+	# make sure XSS protection doesn't mess up ("sanitize") URLs
+	Header always set X-Xss-Protection "1; mode=block"
+	# turn of content type autodetection misfeature (major security risk)
+	Header always set X-Content-Type-Options nosniff
+	# turn of referrer for privacy
+	Header always set Referrer-Policy no-referrer
+
+	ErrorLog ${APACHE_LOG_DIR}/error.log
+	CustomLog ${APACHE_LOG_DIR}/access.log combined
+</VirtualHost>
+
+EOF
+```
