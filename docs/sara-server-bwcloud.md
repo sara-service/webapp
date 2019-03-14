@@ -183,5 +183,5 @@ cat << EOF | sudo tee /etc/tomcat8/server.xml
     </Engine>
   </Service>
 </Server>
-
+EOF
 ```
