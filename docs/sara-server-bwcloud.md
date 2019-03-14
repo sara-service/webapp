@@ -102,6 +102,6 @@ Create configuration according to `saradb/ulm` subdirectory
 ```
 DBBASEDIR="$HOME/SARA-server/saradb"
 for file in $DBBASEDIR/ulm/*.sql; do
-    sed -f $DBBASEDIR/credentials/ulm.sed "$file" | psql -v ON_ERROR_STOP=on -d saradb -v "basedir=$DBBASEDIR"
+    sed -f $DBBASEDIR/credentials/ulm.sed "$file" | sudo -u postgres psql -v ON_ERROR_STOP=on -d saradb -v "basedir=$DBBASEDIR";
 done
 ```
