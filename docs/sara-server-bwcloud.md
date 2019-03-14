@@ -92,17 +92,17 @@ sudo apt-get install postgresql
 sudo systemctl start postgresql
 sudo -u postgres createuser -l -D -R -S sara
 sudo -u postgres psql -c "ALTER USER sara WITH PASSWORD 'secret';"
-sudo -u postgres createdb -E UTF8 -O sara saradb
-sudo -u postgres psql -d saradb -f ~/SARA-server/saradb/adminconfig.sql
-sudo -u postgres psql -d saradb -f ~/SARA-server/saradb/schema.sql
-sed "s/__USERNAME__/sara/g" ~/SARA-server/saradb/permissions.sql | sudo -u postgres psql -d saradb
-sudo -u postgres psql -d saradb -f ~/SARA-server/saradb/licenses.sql
+sudo -u postgres createdb -E UTF8 -O sara sara
+sudo -u postgres psql -d sara -f ~/SARA-server/saradb/adminconfig.sql
+sudo -u postgres psql -d sara -f ~/SARA-server/saradb/schema.sql
+sed "s/__USERNAME__/sara/g" ~/SARA-server/saradb/permissions.sql | sudo -u postgres psql -d sara
+sudo -u postgres psql -d sara -f ~/SARA-server/saradb/licenses.sql
 ```
 Create configuration according to `saradb/ulm` subdirectory
 ```bash
 DBBASEDIR="$HOME/SARA-server/saradb"
 for file in $DBBASEDIR/ulm/*.sql; do
-    sed -f $DBBASEDIR/credentials/ulm.sed "$file" | sudo -u postgres psql -v ON_ERROR_STOP=on -d saradb -v "basedir=$DBBASEDIR";
+    sed -f $DBBASEDIR/credentials/ulm.sed "$file" | sudo -u postgres psql -v ON_ERROR_STOP=on -d sara -v "basedir=$DBBASEDIR";
 done
 ```
 
