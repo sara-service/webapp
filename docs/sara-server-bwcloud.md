@@ -46,7 +46,7 @@ ssh -A ubuntu@ulm.sara-service.org
 ```
 
 ## Fix hostname
-```
+```bash
 # Enable history search (pgdn/pgup)
 sudo sed -i.orig '41,+1s/^# //' /etc/inputrc
 
@@ -58,7 +58,7 @@ exit
 ```
 
 ## Prerequisites
-```
+```bash
 ssh ubuntu@ulm.sara-service.org
 
 # Fetch latest updates
@@ -78,7 +78,7 @@ sudo DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true apt-get ins
 # Upgrade all packages
 sudo apt-get -y upgrade
 ```
-```
+```bash
 # Clone Sara Server code from git
 # FIXME this has to work with https:// and gain access to the private repo credentials
 git clone -b master git@git.uni-konstanz.de:sara/SARA-server.git
@@ -87,7 +87,7 @@ cd SARA-server && git submodule update --init
 
 ## Installation
 ### Postgres
-```
+```bash
 sudo apt-get install postgresql
 sudo systemctl start postgresql
 sudo -u postgres createuser -l -D -R -S sara
@@ -99,7 +99,7 @@ sed "s/__USERNAME__/sara/g" ~/SARA-server/saradb/permissions.sql | sudo -u postg
 sudo -u postgres psql -d saradb -f ~/SARA-server/saradb/licenses.sql
 ```
 Create configuration according to `saradb/ulm` subdirectory
-```
+```bash
 DBBASEDIR="$HOME/SARA-server/saradb"
 for file in $DBBASEDIR/ulm/*.sql; do
     sed -f $DBBASEDIR/credentials/ulm.sed "$file" | sudo -u postgres psql -v ON_ERROR_STOP=on -d saradb -v "basedir=$DBBASEDIR";
@@ -114,10 +114,11 @@ sudo a2enmod proxy_ajp ssl headers
 ```
 Install TomCat Proxy
 ```
+HN=$(hostname)
 cat << EOF | sudo tee /etc/apache2/sites-available/proxy.conf
 <VirtualHost *:80>
-	ServerName ulm.sara-service.org # change
-	ServerAdmin webmaster@localhost # change
+	ServerName $HN
+	ServerAdmin webmaster@localhost
 
 	<Location />
 		ProxyPass "ajp://localhost:8009/SaraServer/"
@@ -150,7 +151,8 @@ cat << EOF | sudo tee /etc/apache2/sites-available/proxy.conf
 	ErrorLog ${APACHE_LOG_DIR}/error.log
 	CustomLog ${APACHE_LOG_DIR}/access.log combined
 </VirtualHost>
-
+sudo a2ensite proxy
+sudo systemctl restart apache2
 EOF
 ```
 
@@ -194,6 +196,6 @@ sudo -u tomcat8 cp target/SaraServer-*.war /var/lib/tomcat8/webapps/SaraServer.w
 sudo -u tomcat8 cp ~/.m2/repository/org/postgresql/postgresql/42.1.4/postgresql-42.1.4.jar /var/lib/tomcat8/lib
 sudo -u tomcat8 cp ~/.m2/repository/org/apache/geronimo/specs/geronimo-javamail_1.4_spec/1.6/geronimo-javamail_1.4_spec-1.6.jar /var/lib/tomcat8/lib
 sudo  cp src/main/webapp/META-INF/context.xml /etc/tomcat8/Catalina/localhost/SaraServer.xml
-sudo sed -i 's/demo.sara-service.org/ulm.sara-service.org' /etc/tomcat8/Catalina/localhost/SaraServer.xml
+sudo sed -i 's/demo.sara-service.org/'$(hostname)'/' /etc/tomcat8/Catalina/localhost/SaraServer.xml
 sudo service tomcat8 restart
 ```
