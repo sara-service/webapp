@@ -78,6 +78,10 @@ sudo DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true apt-get ins
 # Upgrade all packages
 sudo apt-get -y upgrade
 ```
+```
+# Clone Sara Server code from git
+git clone -b master https://git.uni-konstanz.de/sara/SARA-server.git
+```
 
 ## Installation
 ### Postgres
@@ -87,10 +91,10 @@ sudo systemctl start postgresql
 sudo -u postgres createuser -l -D -R -S sara
 sudo -u postgres psql -c "ALTER USER sara WITH PASSWORD 'sara';"
 sudo -u postgres createdb -E UTF8 -O sara saradb
-sudo -u postgres psql -d saradb -f saradb/adminconfig.sql
-sudo -u postgres psql -d saradb -f saradb/schema.sql
-sed "s/__USERNAME__/sara/g" permissions.sql | sudo -u postgres psql -d saradb
-sudo -u postgres psql -d saradb -f saradb/licenses.sql
+sudo -u postgres psql -d saradb -f ~/SARA-server/saradb/adminconfig.sql
+sudo -u postgres psql -d saradb -f ~/SARA-server/saradb/schema.sql
+sed "s/__USERNAME__/sara/g" ~/SARA-server/permissions.sql | sudo -u postgres psql -d saradb
+sudo -u postgres psql -d saradb -f ~/SARA-server/saradb/licenses.sql
 ```
 Create configuration according to `saradb/ulm` subdirectory
 ```
