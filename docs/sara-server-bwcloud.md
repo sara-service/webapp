@@ -80,7 +80,8 @@ sudo apt-get -y upgrade
 ```
 ```
 # Clone Sara Server code from git
-git clone -b master https://git.uni-konstanz.de/sara/SARA-server.git
+# FIXME need to use https and find solution for private repo credentials
+git clone -b master git://git.uni-konstanz.de/sara/SARA-server.git
 ```
 
 ## Installation
@@ -93,10 +94,10 @@ sudo -u postgres psql -c "ALTER USER sara WITH PASSWORD 'sara';"
 sudo -u postgres createdb -E UTF8 -O sara saradb
 sudo -u postgres psql -d saradb -f ~/SARA-server/saradb/adminconfig.sql
 sudo -u postgres psql -d saradb -f ~/SARA-server/saradb/schema.sql
-sed "s/__USERNAME__/sara/g" ~/SARA-server/permissions.sql | sudo -u postgres psql -d saradb
+sed "s/__USERNAME__/sara/g" ~/SARA-server/saradb/permissions.sql | sudo -u postgres psql -d saradb
 sudo -u postgres psql -d saradb -f ~/SARA-server/saradb/licenses.sql
 ```
 Create configuration according to `saradb/ulm` subdirectory
 ```
-TODO
+
 ```
