@@ -153,3 +153,35 @@ cat << EOF | sudo tee /etc/apache2/sites-available/proxy.conf
 
 EOF
 ```
+
+### Tomcat
+```
+sudo apt-get install tomcat8 maven
+
+cat << EOF | sudo tee /etc/tomcat8/server.xml
+<?xml version='1.0' encoding='utf-8'?>
+<Server port="8005" shutdown="SHUTDOWN">
+  <Listener className="org.apache.catalina.startup.VersionLoggerListener" />
+  <!-- Prevent memory leaks due to use of particular java/javax APIs-->
+  <Listener className="org.apache.catalina.core.JreMemoryLeakPreventionListener" />
+  <Listener className="org.apache.catalina.mbeans.GlobalResourcesLifecycleListener" />
+  <Listener className="org.apache.catalina.core.ThreadLocalLeakPreventionListener" />
+
+  <Service name="Catalina">
+    <!-- AJP Connector on port 8009, configured analogous to the default HTTP connector. -->
+    <Connector port="8009" address="127.0.0.1" protocol="AJP/1.3"
+		connectionTimeout="20000" URIEncoding="UTF-8"
+		redirectPort="8443" />
+    <Engine name="Catalina" defaultHost="localhost">
+      <!-- unpackWARs=true is needed on tomcat8; unpackWARs=false is ~50x slower -->
+      <Host name="localhost" appBase="webapps" unpackWARs="true" autoDeploy="true">
+        <Valve className="org.apache.catalina.valves.AccessLogValve" directory="logs"
+               prefix="localhost_access" suffix=".log" fileDateFormat=""
+               pattern="%h %l %u %t &quot;%r&quot; %s %b"
+               rotatable="false" checkExists="true" />
+      </Host>
+    </Engine>
+  </Service>
+</Server>
+
+```
