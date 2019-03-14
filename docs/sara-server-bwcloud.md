@@ -42,7 +42,7 @@ You will need
 
 ### Connect to the machine
 ```bash
-ssh -A ubuntu@ulm.sara-service.org
+ssh ubuntu@ulm.sara-service.org
 ```
 
 ## Fix hostname
@@ -59,7 +59,7 @@ exit
 
 ## Prerequisites
 ```bash
-ssh ubuntu@ulm.sara-service.org
+ssh -A ubuntu@ulm.sara-service.org
 
 # Fetch latest updates
 sudo apt-get update
