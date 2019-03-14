@@ -80,8 +80,9 @@ sudo apt-get -y upgrade
 ```
 ```
 # Clone Sara Server code from git
-# FIXME need to use https and find solution for private repo credentials
-git clone -b master git://git.uni-konstanz.de/sara/SARA-server.git
+# FIXME this has to work with https:// and gain access to the private repo credentials
+git clone -b master git@git.uni-konstanz.de/sara/SARA-server.git
+cd SARA-server && git submodule update --init
 ```
 
 ## Installation
