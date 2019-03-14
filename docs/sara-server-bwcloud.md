@@ -107,16 +107,31 @@ done
 ```
 
 ### Apache
-```
+```bash
 sudo apt install apache2 letsencrypt
-sudo a2dissite 000-default
-sudo a2enmod proxy_ajp ssl headers
+HN=$(hostname -f)
+```
+Install Redirect
+```bash
+cat << EOF | sudo tee /etc/apache2/sites-available/redirect.conf
+<VirtualHost *:80>
+	ServerName $HN
+	ServerAdmin webmaster@localhost
+
+	Alias "/.well-known" "/var/www/letsencrypt/.well-known"
+	<Directory /var/www/letsencrypt/.well-known>
+		Options -MultiViews
+		Require all granted
+	</Directory>
+
+	RedirectPermanent / "https://$HN/"
+</VirtualHost>
+EOF
 ```
 Install TomCat Proxy
-```
-HN=$(hostname)
+```bash
 cat << EOF | sudo tee /etc/apache2/sites-available/proxy.conf
-<VirtualHost *:80>
+<VirtualHost *:443>
 	ServerName $HN
 	ServerAdmin webmaster@localhost
 
@@ -150,10 +165,30 @@ cat << EOF | sudo tee /etc/apache2/sites-available/proxy.conf
 
 	ErrorLog ${APACHE_LOG_DIR}/error.log
 	CustomLog ${APACHE_LOG_DIR}/access.log combined
+	
+	Alias "/.well-known" "/var/www/letsencrypt/.well-known"
+	<Location /.well-known>
+		ProxyPass !
+	</Location>
+	<Directory /var/www/letsencrypt/.well-known>
+		Options -MultiViews
+		Require all granted
+	</Directory>
+
+	SSLEngine on
+	SSLCertificateFile	/etc/letsencrypt/live/$HN/fullchain.pem
+	SSLCertificateKeyFile /etc/letsencrypt/live/$HN/privkey.pem
+
 </VirtualHost>
-sudo a2ensite proxy
-sudo systemctl restart apache2
 EOF
+```
+```bash
+sudo mkdir -p /var/www/letsencrypt
+sudo letsencrypt certonly --webroot -w /var/www/letsencrypt -d $HN
+sudo a2dissite default-000
+sudo a2enmod proxy_ajp ssl headers
+sudo a2ensite redirect proxy
+sudo systemctl restart apache2
 ```
 
 ### Tomcat
