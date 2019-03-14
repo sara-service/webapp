@@ -91,7 +91,7 @@ cd SARA-server && git submodule update --init
 sudo apt-get install postgresql
 sudo systemctl start postgresql
 sudo -u postgres createuser -l -D -R -S sara
-sudo -u postgres psql -c "ALTER USER sara WITH PASSWORD 'sara';"
+sudo -u postgres psql -c "ALTER USER sara WITH PASSWORD 'secret';"
 sudo -u postgres createdb -E UTF8 -O sara saradb
 sudo -u postgres psql -d saradb -f ~/SARA-server/saradb/adminconfig.sql
 sudo -u postgres psql -d saradb -f ~/SARA-server/saradb/schema.sql
@@ -184,4 +184,16 @@ cat << EOF | sudo tee /etc/tomcat8/server.xml
   </Service>
 </Server>
 EOF
+```
+
+### SARA Server
+```
+cd ~/SARA-server
+mvn clean package -DskipTests
+sudo -u tomcat8 cp target/SaraServer-*.war /var/lib/tomcat8/webapps/SaraServer.war
+sudo -u tomcat8 cp ~/.m2/repository/org/postgresql/postgresql/42.1.4/postgresql-42.1.4.jar /var/lib/tomcat8/lib
+sudo -u tomcat8 cp ~/.m2/repository/org/apache/geronimo/specs/geronimo-javamail_1.4_spec/1.6/geronimo-javamail_1.4_spec-1.6.jar /var/lib/tomcat8/lib
+sudo  cp src/main/webapp/META-INF/context.xml /etc/tomcat8/Catalina/localhost/SaraServer.xml
+sudo sed -i 's/demo.sara-service.org/ulm.sara-service.org' /etc/tomcat8/Catalina/localhost/SaraServer.xml
+/etc/tomcat8/Catalina/localhost/SaraServer.xml
 ```
