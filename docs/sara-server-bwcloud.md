@@ -100,6 +100,7 @@ sudo -u postgres psql -d sara -f ~/SARA-server/saradb/licenses.sql
 ```
 Create configuration according to `saradb/ulm` subdirectory
 ```bash
+# TODO insert IOMI credentials here!!!
 DBBASEDIR="$HOME/SARA-server/saradb"
 for file in $DBBASEDIR/ulm/*.sql; do
     sed -f $DBBASEDIR/credentials/ulm.sed "$file" | sudo -u postgres psql -v ON_ERROR_STOP=on -d sara -v "basedir=$DBBASEDIR";
@@ -185,14 +186,14 @@ EOF
 ```bash
 sudo mkdir -p /var/www/letsencrypt
 sudo letsencrypt certonly --standalone -w /var/www/letsencrypt -d $HN
-sudo a2dissite default-000
+sudo a2dissite 000-default
 sudo a2enmod proxy_ajp ssl headers
 sudo a2ensite redirect proxy
 sudo systemctl restart apache2
 ```
 
 ### Tomcat
-```
+```bash
 sudo apt-get install tomcat8 maven
 
 cat << EOF | sudo tee /etc/tomcat8/server.xml
@@ -224,7 +225,7 @@ EOF
 ```
 
 ### SARA Server
-```
+```bash
 cd ~/SARA-server
 mvn clean package -DskipTests
 sudo -u tomcat8 cp target/SaraServer-*.war /var/lib/tomcat8/webapps/SaraServer.war
@@ -234,3 +235,7 @@ sudo  cp src/main/webapp/META-INF/context.xml /etc/tomcat8/Catalina/localhost/Sa
 sudo sed -i 's/demo.sara-project.org/'$(hostname)'/' /etc/tomcat8/Catalina/localhost/SaraServer.xml
 sudo service tomcat8 restart
 ```
+
+### TODOs
+* Fix email verification
+* Fix UI (buttons messed up just dunno why)
