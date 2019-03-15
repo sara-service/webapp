@@ -100,6 +100,7 @@ sudo -u postgres psql -d sara -f ~/SARA-server/saradb/licenses.sql
 ```
 Create configuration according to `saradb/ulm` subdirectory
 ```bash
+# TODO insert IOMI credentials here!!!
 DBBASEDIR="$HOME/SARA-server/saradb"
 for file in $DBBASEDIR/ulm/*.sql; do
     sed -f $DBBASEDIR/credentials/ulm.sed "$file" | sudo -u postgres psql -v ON_ERROR_STOP=on -d sara -v "basedir=$DBBASEDIR";
@@ -185,15 +186,16 @@ EOF
 ```bash
 sudo mkdir -p /var/www/letsencrypt
 sudo letsencrypt certonly --standalone -w /var/www/letsencrypt -d $HN
-sudo a2dissite default-000
+sudo a2dissite 000-default
 sudo a2enmod proxy_ajp ssl headers
 sudo a2ensite redirect proxy
 sudo systemctl restart apache2
 ```
 
 ### Tomcat
-```
-sudo apt-get install tomcat8 maven
+```bash
+sudo apt-mark hold openjdk-11-jre-headless
+sudo apt-get install openjdk-8-jdk tomcat8 maven haveged
 
 cat << EOF | sudo tee /etc/tomcat8/server.xml
 <?xml version='1.0' encoding='utf-8'?>
@@ -224,13 +226,23 @@ EOF
 ```
 
 ### SARA Server
-```
+```bash
+# build & deploy
 cd ~/SARA-server
 mvn clean package -DskipTests
 sudo -u tomcat8 cp target/SaraServer-*.war /var/lib/tomcat8/webapps/SaraServer.war
+# copy some dependencies manually
 sudo -u tomcat8 cp ~/.m2/repository/org/postgresql/postgresql/42.1.4/postgresql-42.1.4.jar /var/lib/tomcat8/lib
 sudo -u tomcat8 cp ~/.m2/repository/org/apache/geronimo/specs/geronimo-javamail_1.4_spec/1.6/geronimo-javamail_1.4_spec-1.6.jar /var/lib/tomcat8/lib
+sudo -u tomcat8 cp ~/repository/org/apache/geronimo/specs/geronimo-activation_1.0.2_spec/1.1/geronimo-activation_1.0.2_spec-1.1.jar /var/lib/tomcat8/lib/
+sudo -u tomcat8 cp ~/repository/org/apache/geronimo/javamail/geronimo-javamail_1.4_provider/1.6/geronimo-javamail_1.4_provider-1.6.jar /var/lib/tomcat8/lib
+# copy and adjust config
 sudo  cp src/main/webapp/META-INF/context.xml /etc/tomcat8/Catalina/localhost/SaraServer.xml
 sudo sed -i 's/demo.sara-project.org/'$(hostname)'/' /etc/tomcat8/Catalina/localhost/SaraServer.xml
+# launch service
 sudo service tomcat8 restart
 ```
+
+### TODOs
+* Fix email verification
+* Fix UI (buttons messed up just dunno why)
