@@ -194,7 +194,7 @@ sudo systemctl restart apache2
 
 ### Tomcat
 ```bash
-sudo apt-get install tomcat8 maven
+sudo apt-get install tomcat8 maven haveged
 
 cat << EOF | sudo tee /etc/tomcat8/server.xml
 <?xml version='1.0' encoding='utf-8'?>
