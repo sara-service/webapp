@@ -226,13 +226,19 @@ EOF
 
 ### SARA Server
 ```bash
+# build & deploy
 cd ~/SARA-server
 mvn clean package -DskipTests
 sudo -u tomcat8 cp target/SaraServer-*.war /var/lib/tomcat8/webapps/SaraServer.war
+# copy some dependencies manually
 sudo -u tomcat8 cp ~/.m2/repository/org/postgresql/postgresql/42.1.4/postgresql-42.1.4.jar /var/lib/tomcat8/lib
 sudo -u tomcat8 cp ~/.m2/repository/org/apache/geronimo/specs/geronimo-javamail_1.4_spec/1.6/geronimo-javamail_1.4_spec-1.6.jar /var/lib/tomcat8/lib
+sudo -u tomcat8 cp ~/repository/org/apache/geronimo/specs/geronimo-activation_1.0.2_spec/1.1/geronimo-activation_1.0.2_spec-1.1.jar /var/lib/tomcat8/lib/
+sudo -u tomcat8 cp ~/repository/org/apache/geronimo/javamail/geronimo-javamail_1.4_provider/1.6/geronimo-javamail_1.4_provider-1.6.jar /var/lib/tomcat8/lib
+# copy and adjust config
 sudo  cp src/main/webapp/META-INF/context.xml /etc/tomcat8/Catalina/localhost/SaraServer.xml
 sudo sed -i 's/demo.sara-project.org/'$(hostname)'/' /etc/tomcat8/Catalina/localhost/SaraServer.xml
+# launch service
 sudo service tomcat8 restart
 ```
 
