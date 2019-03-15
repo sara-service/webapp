@@ -239,6 +239,7 @@ sudo -u tomcat8 cp ~/repository/org/apache/geronimo/javamail/geronimo-javamail_1
 # copy and adjust config
 sudo  cp src/main/webapp/META-INF/context.xml /etc/tomcat8/Catalina/localhost/SaraServer.xml
 sudo sed -i 's/demo.sara-project.org/'$(hostname)'/' /etc/tomcat8/Catalina/localhost/SaraServer.xml
+vim /etc/tomcat8/Catalina/localhost/SaraServer.xml # set email auth pwd
 # launch service
 sudo service tomcat8 restart
 ```
