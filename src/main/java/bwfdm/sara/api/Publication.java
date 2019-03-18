@@ -1,5 +1,6 @@
 package bwfdm.sara.api;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.EnumMap;
@@ -244,9 +245,10 @@ public class Publication {
 		i.repository_uuid = repository_uuid;
 		i.collection_id = collectionURL;
 
-		// TODO Error Handling
-		final SubmissionInfo submissionInfo = repo.publishMetadata(userLogin,
-				collectionURL, metadataMap);
+		// TODO obtain ZIP-file from Matthias
+		File file = null;
+		final SubmissionInfo submissionInfo = repo.publish(userLogin,
+				collectionURL, file, metadataMap);
 
 		i.item_id = submissionInfo.item_ref;
 
