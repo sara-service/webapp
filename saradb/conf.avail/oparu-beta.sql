@@ -33,7 +33,6 @@ INSERT INTO repository_params(id, param, value) VALUES
 	(rRef, 'deposit_type', 'workspace'),
         (rRef, 'check_license', 'false'),
 	(rRef, 'name_mapping', '$2, $1'),
-	(rRef, 'limit_upload_size', '100000000'),
 	(rRef, 'publication_type', 'Software');
 
 -- erase the temporary large objects

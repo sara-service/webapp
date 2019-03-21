@@ -32,7 +32,6 @@ INSERT INTO repository_params(id, param, value) VALUES
 	(rRef, 'sword_api_endpoint', hostname || '/swordv2'),
 	(rRef, 'deposit_type', 'workflow'),
         (rRef, 'check_license', 'true'),
-	(rRef, 'limit_upload_size', '100000000'),
 	(rRef, 'publication_type', 'Software');
 
 -- erase the temporary large objects
