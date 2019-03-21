@@ -9,9 +9,9 @@ DECLARE oparu_logo oid := lo_import(base_dir || '/dspace.svg');
 
 DECLARE oparu_demo text     := 'https://oparu-beta.sara-service.org';
 
-DECLARE demo_dspace_help text := 'Your publication has been created in the Institutional Repository of Demo University (IRDU). Please login, click "Resume" and submit the publication. You can edit metadata if necessary. Your submission will then be reviewed by the IRDU team, and you will be notified as soon as it has been approved.';
+DECLARE demo_dspace_help text := 'Your publication has been created in the Institutional Repository of Demo University (IRDU). Please login, click "Resume" and submit the publication. You can edit metadata or attach files if necessary. You will be notified by mail as soon as it has been published.';
 
-DECLARE userhint text := 'Please use demo-user@sara-service.org to submit. You can then log into IRDU as demo-user@sara-service.org using password "SaraTest" to finish your submission. Note that it will not be approved automatically!';
+DECLARE userhint text := 'You need to be registered to submit to IRDU or use one of the following demo accounts: wsdemo1@sara-service.org wsdemo2@sara-service.org wsdemo3@sara-service.org . Finally you will need to approve your submission by logging into IRDU using password "SaraTest".';
 
 DECLARE rRef UUID;
 
@@ -33,6 +33,7 @@ INSERT INTO repository_params(id, param, value) VALUES
 	(rRef, 'deposit_type', 'workspace'),
         (rRef, 'check_license', 'false'),
 	(rRef, 'name_mapping', '$2, $1'),
+	(rRef, 'limit_upload_size', '100000000'),
 	(rRef, 'publication_type', 'Software');
 
 -- erase the temporary large objects
