@@ -19,7 +19,7 @@ function blockLoaded(name) {
 	});
 	
 	$('#vcode').on('input', function() {
-	    API.post("checking verification code", "/api/publish/verify", { vcode: $("#vcode").val() }, setEnabledNextButton);
+	    API.post("checking verification code", "/api/publish/verify", { vcode: $("#vcode").val().trim() }, setEnabledNextButton);
 	});
 	
 	$("#send_verification_button").on('click', function() {
@@ -39,7 +39,7 @@ function setEnabledNextButton(enable) {
 
 function initMeta(info) {
 	$.each(["title", "description", "version", "pubrepo_displayname", "collection_displayname",
-		"email", "submitter"], function(_, name) {
+		"email", "submitter_givenname", "submitter_surname"], function(_, name) {
 			$("#" + name).text(info[name]);
 		});
 	// display some info tooltip on mouse hover

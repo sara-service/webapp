@@ -70,6 +70,8 @@ public class DSpace_v6 implements PublicationRepository {
 	// for IR
 	private final String deposit_type;
 	private final String publication_type;
+	private final String name_mapping;
+	private final Integer limit_upload_size;
 
 	private Client rest_client;
 
@@ -83,6 +85,8 @@ public class DSpace_v6 implements PublicationRepository {
 			@JsonProperty("deposit_type") final String dt,
 			@JsonProperty("check_license") final boolean cl,
 			@JsonProperty(value = "publication_type", required = false) final String pt,
+			@JsonProperty(value = "name_mapping", required = false) final String nm,
+			@JsonProperty(value = "limit_upload_size", required = false) final String lus,
 			@JsonProperty("dao") final Repository dao) {
 		this.dao = dao;
 
@@ -97,6 +101,21 @@ public class DSpace_v6 implements PublicationRepository {
 		check_license = cl;
 
 		publication_type = pt;
+
+		if (nm != null) {
+			name_mapping = nm;
+		} else {
+			name_mapping = "$2, $1";
+		}
+
+		Integer i;
+		try {
+			i = Integer.parseInt(lus);
+		} catch (Exception e) {
+			i = 0;
+			logger.info(e.getMessage());
+		}
+		limit_upload_size = i;
 
 		rest_client = ClientBuilder.newClient();
 
@@ -123,6 +142,8 @@ public class DSpace_v6 implements PublicationRepository {
 		rest_api_endpoint = restURL;
 		dao = null;
 		check_license = false;
+		name_mapping = "$2, $1";
+		limit_upload_size = 0;
 
 		rest_client = ClientBuilder.newClient();
 
@@ -327,14 +348,30 @@ public class DSpace_v6 implements PublicationRepository {
 	}
 
 	@Override
-	public SubmissionInfo publishMetadata(String userLogin,
-			String collectionURL, MultiValueMap<String, String> metadataMap) {
+	public SubmissionInfo publish(final String userLogin,
+			final String collectionURL, final File fileFullPath,
+			MultiValueMap<String, String> metadataMap) {
 
 		String mimeFormat = "application/atom+xml";
 		String packageFormat = UriRegistry.PACKAGE_BINARY;
 
+		// TODO do some zip file upload handling magic...
+		if (limit_upload_size == 0) {
+			// TODO don't upload no file
+			logger.info("ZIP file deposit disabled");
+		} else {
+			// TODO
+			// 1)check whether ZIP file has a size<=limit
+			// if yes: upload file
+			// if no: don't upload no file
+			// logger.info("File size limit okay - ZIP file will be
+			// deposited!");
+			logger.info(
+					"File size limit exceeded - ZIP file will not be deposited!");
+		}
+
 		return publishElement(userLogin, collectionURL, mimeFormat,
-				packageFormat, null, metadataMap);
+				packageFormat, fileFullPath, metadataMap);
 	}
 
 	private SubmissionInfo publishElement(String userLogin,
@@ -391,13 +428,13 @@ public class DSpace_v6 implements PublicationRepository {
 
 			if (deposit_type != null) {
 				switch (deposit_type.toLowerCase()) {
-				case "workspace":
-					deposit.setInProgress(true);
-					submissionInfo.inProgress = true;
-					break;
 				case "workflow":
 					deposit.setInProgress(false);
 					submissionInfo.inProgress = false;
+					break;
+				default:
+					deposit.setInProgress(true);
+					submissionInfo.inProgress = true;
 					break;
 				}
 			} else {
@@ -430,18 +467,6 @@ public class DSpace_v6 implements PublicationRepository {
 	}
 
 	@Override
-	public SubmissionInfo publishFileAndMetadata(String userLogin,
-			String collectionURL, File fileFullPath,
-			MultiValueMap<String, String> metadataMap) {
-
-		String mimeFormat = "application/atom+xml";
-		String packageFormat = UriRegistry.PACKAGE_BINARY;
-
-		return publishElement(userLogin, collectionURL, mimeFormat,
-				packageFormat, fileFullPath, metadataMap);
-	}
-
-	@Override
 	public Repository getDAO() {
 		return dao;
 	}
@@ -449,6 +474,13 @@ public class DSpace_v6 implements PublicationRepository {
 	@Override
 	public void dump() {
 		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public String mappedName(String givenName, String surName) {
+		final String nameRegex = "(\\S{2,})\\s{1,}(.*)";
+		return new String(givenName + " " + surName).replaceAll(nameRegex,
+				name_mapping);
 	}
 
 }

@@ -30,6 +30,7 @@ INSERT INTO repository_params(id, param, value) VALUES
 	(rRef, 'deposit_type', 'workspace'),
         (rRef, 'check_license', 'false'),
 	(rRef, 'show_unsubmittable', 'false'),
+	(rRef, 'name_mapping', '$2, $1'),
 	(rRef, 'publication_type', 'Software');
 
 -- erase the temporary large objects

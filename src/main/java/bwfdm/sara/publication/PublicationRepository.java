@@ -65,18 +65,14 @@ public interface PublicationRepository {
 	public Hierarchy getHierarchy(final String loginName);
 
 	/**
-	 * Publish metada only (without any file) to some collection, which is
-	 * available for the user. Metadata are described as a
-	 * {@link java.util.Map}.
+	 * Map given name and surname of submitters or authors into one string
+	 * according to the `name_mapping` parameter in the IR configuration
 	 * 
-	 * @param userLogin
-	 * @param collectionURL
-	 * @param metadataMap
-	 * @return
+	 * @param givenName
+	 * @param surName
+	 * @return mapped name
 	 */
-	public SubmissionInfo publishMetadata(final String userLogin,
-			final String collectionURL,
-			final MultiValueMap<String, String> metadataMap);
+	public String mappedName(final String givenName, final String surName);
 
 	/**
 	 * Publish a file together with the metadata. Metadata are described as a
@@ -88,7 +84,7 @@ public interface PublicationRepository {
 	 * @param metadataMap
 	 * @return
 	 */
-	public SubmissionInfo publishFileAndMetadata(final String userLogin,
+	public SubmissionInfo publish(final String userLogin,
 			final String collectionURL, final File fileFullPath,
 			final MultiValueMap<String, String> metadataMap);
 
