@@ -47,7 +47,7 @@ public class RewriteTest {
 	private RevCommit a1, a2, a3, a4, a5, a6, a7, a8, a9, a10;
 	private RevCommit b1, b2, b3, b4, b5, b6, b7, b8;
 	private RevCommit c1, c2, c3, c4, c5, c6, c7, c8, c9;
-	private Ref ta4, tb3, tb5, tc3, tc6, a, b, c;
+	private Ref ta4, tb3, tb5, tc3, tc6, a, b, c, d;
 
 	@Before
 	public void createTestRepo() throws IOException, GitAPIException {
@@ -92,6 +92,8 @@ public class RewriteTest {
 		c8 = commit("c8", c7);
 		c9 = commit("c9", c8);
 		c = branch("c", c9);
+		// typical old, merged feature branch
+		d = branch("d", c4);
 
 		// some tags to mark important points
 		ta4 = tag("ta4", a4, true);
@@ -237,6 +239,21 @@ public class RewriteTest {
 		// tags along history are removed
 		assertDeleted(rewrite, tc3);
 		assertDeleted(rewrite, tc6);
+	}
+
+	@Test
+	public void testPointlesslyAbbreviated() throws IOException {
+		final HistoryRewriter rewrite = new HistoryRewriter(repo);
+		rewrite.addHead(c.getName(), PublicationMethod.FULL);
+		rewrite.addHead(d.getName(), PublicationMethod.ABBREV);
+		rewrite.execute(null);
+		// D is along C, so declaring it as "abbreviated" is pointless.
+		// including all of C will lead to full history of D as well.
+		// FIXME this is a clear user error. maybe report it instead?
+		assertUnchangedRef(rewrite, c);
+		assertUnchangedRef(rewrite, d);
+		assertUnchangedRef(rewrite, tc3);
+		assertUnchangedRef(rewrite, tc6);
 	}
 
 	@Test

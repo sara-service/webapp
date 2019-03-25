@@ -50,6 +50,14 @@ public abstract class FilteredHistory extends RewriteStrategy
 	 */
 	@Override
 	public void process(final RevCommit root) throws IOException {
+		// when branch A is a strict ancestor of B, and B is processed before A,
+		// the root of A has already been processed here. this commonly happens
+		// for old feature branches.
+		// in this situation, just don't re-process A at all, consistently with
+		// what the recursion does.
+		if (cache.contains(root))
+			return;
+
 		Stack head = new Stack(null, root);
 		while (head != null) {
 			if (head.nextParent >= head.commit.getParentCount()) {
