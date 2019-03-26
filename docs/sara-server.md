@@ -262,7 +262,7 @@ the config here is a subset of the Shibboleth config.
 
 ## Update the Actual Webapp
 
-- build the WAR: `mvn clean install`
+- build the WAR: `mvn clean package`
 - delete the unpacked webapp (otherwise it can end up taking precedence over the WAR): `sudo rm -rf /var/lib/tomcat8/webapps/SaraServer/`
 - copy `target/SaraServer-*.war` to `/var/lib/tomcat8/webapps/SaraServer.war` on server
 - restart tomcat (`sudo service tomcat8 restart`)
