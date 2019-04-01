@@ -13,4 +13,4 @@ At the moment SARA supports the repository software DSpace, which is widely used
 The code will be published soon.  
 
 ## Project website & contact
-For more information, visit https://sara-service.org or contact us: "info" at "sara service domain name".
+For more information, visit https://sara-service.org or contact us: "info" at "sara-service dot org".
