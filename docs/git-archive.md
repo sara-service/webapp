@@ -29,12 +29,13 @@ log in as admin:
 
 log in as `sara-user`:
 
-- create an SSH key: `ssh-keygen -t ed25519 -f temp`
-	- `ed25519` is good; so is `ecdsa`
+- create an SSH key: `ssh-keygen -t ecdsa -f temp`
+	- `ecdsa` works and is expected to stay secure for a few decades
 	- `rsa` works but is huge
+	- `ed25519` is not currently supported; use `ecdsa` instead
 	- `dsa` and `rsa1` are *insecure*; never use these!
-- on the server, run `sed 's/^/saradomain /' /etc/ssh/*.pub >known_hosts`
-- in `https://gitlabdomain/profile/personal_access_tokens`, create a token with `api` rights. note "Your New Personal Access Token"
+- on the server, run `sed 's/^/gitlabdomain /' /etc/ssh/*.pub >known_hosts`
+- in `https://gitlabdomain/profile/personal_access_tokens`, create a token with `api` rights. copy "Your New Personal Access Token"
 - in `https://gitlabdomain/profile/keys`, add the public key from `temp.pub`
 - remember to `shred -u temp` after you've installed the key!
 
