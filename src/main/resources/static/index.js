@@ -1,7 +1,5 @@
 "use strict";
 
-"use strict";
-
 function addRepoButton(repo, project) {
 	var form = template("template");
 	form.display.text(repo.display_name);
