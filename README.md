@@ -14,7 +14,7 @@ For more information, visit https://sara-service.org or contact us at info@sara-
 
 ## About SARA
 
-SARA was developed by the [Distributed Systems Working Group](https://www.disy.uni-konstanz.de/), [University of Konstanz](https://www.uni-konstanz.de/), and the [Communication and Information Centre (kiz)](https://www.uni-ulm.de/einrichtungen/kiz/) and the [Institute of Information Resource Management](https://www.uni-ulm.de/in/omi/), [Ulm University](https://www.uni-ulm.de/).
+SARA was developed by the [Distributed Systems Working Group](https://www.disy.uni-konstanz.de/), [University of Konstanz](https://www.uni-konstanz.de/), and the [Communication and Information Centre (kiz)](http://kiz.uni-ulm.de/) and the [Institute of Information Resource Management](https://www.uni-ulm.de/in/omi/), [Ulm University](https://www.uni-ulm.de/).
 
 ![University of Konstanz](unikn.png) ![Ulm University](uulm.png)
 
