@@ -1,4 +1,4 @@
-# Setting up GitLab for use with SARA
+# Setting up GitLab for use with SARA (also works for GitLab.com)
 
 ## Install GitLab (if necessary)
 
@@ -7,6 +7,9 @@ follow [Setting up a Git Repository using GitLab](gitlab.md)
 ## Register OAuth Application
 
 log in as admin and go to `https://gitlabdomain/admin/applications/new`.
+
+if you don't have admin access (eg. on [GitLab.com](https://gitlab.com)), go to https://gitlabdomain/profile/applications instead.
+the rest of the procedure is identical, but *the app will be deleted if your user gets deleted.* ie. creating the app as an admin is much preferrable whenever possible.
 
 - Name: "SARA-Server" (configurable, but will be shown to users)
 - Callback url: `https://saradomain/api/auth/redirect` (for local development, add `http://localhost:8080/api/auth/redirect`)
