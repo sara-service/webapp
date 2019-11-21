@@ -1,15 +1,32 @@
 # Deploying the SARA Server Webapp
 
+## Clone source code
+```bash
+    cd $HOME
+    git clone https://github.com/sara-service/webapp SARA-server
+    cd ~/SARA-server
+
+```
 ## Set up PostgreSQL
 
 - install PostgreSQL (`sudo apt install postgresql`)
-- create user: `sudo -u postgres createuser -l -D -R -S $USER`
-- set a password: `sudo -u postgres psql -d test -c "ALTER USER $USER WITH PASSWORD 'sarapassword'"` (run `apg` to create a good one)
-- create database: `sudo -u postgres createdb -E UTF8 -O $USER $DB`
-- enable `pgcrypto` extension: `sudo -u postgres psql -d $DB -f saradb/adminconfig.sql`
-- create tables: `sudo -u postgres psql -d $DB -f saradb/schema.sql`
-- grant permissions: `sed "s/__USERNAME__/$USER/g" permissions.sql | sudo -u postgres psql -d $DB`
-- import licenses: `sudo -u postgres psql -d $DB -f saradb/licenses.sql`
+- create user: 
+```bash
+SARADB_USER="sara"
+sudo -u postgres createuser -l -D -R -S $SARADB_USER
+
+```
+- set a password: `sudo -u postgres psql -c "ALTER USER $SARADB_USER WITH PASSWORD 'sarapassword'"` (run `apg` to create a good one)
+- create database: 
+```bash
+SARADB="sara"
+sudo -u postgres createdb -E UTF8 -O $SARADB_USER $SARADB
+
+```
+- enable `pgcrypto` extension: `sudo -u postgres psql -d $SARADB -f saradb/adminconfig.sql`
+- create tables: `sudo -u postgres psql -d $SARADB -f saradb/schema.sql`
+- grant permissions: `sed "s/__USERNAME__/$SARADB_USER/g" saradb/permissions.sql | sudo -u postgres psql -d $SARADB`
+- import licenses: `sudo -u postgres psql -d $SARADB -f saradb/licenses.sql`
 	- FIXME: should be able to run the import tool instead
 - create at least one git repo (table `source`)
 - create *exactly one* (right now) git archive (table `archive`)
@@ -23,8 +40,8 @@
 - create config for redirect, eg. `/etc/apache2/sites-available/redirect.conf`:
 ```apache
 <VirtualHost *:80>
-	ServerName saradomain # change
-	ServerAdmin webmaster@localhost # change
+	ServerName saradomain # change and remove this comment from here.
+	ServerAdmin webmaster@localhost # change and remove this comment from here
 
 	Alias "/.well-known" "/var/www/letsencrypt/.well-known"
 	<Directory /var/www/letsencrypt/.well-known>
@@ -32,14 +49,16 @@
 		Require all granted
 	</Directory>
 
-	RedirectPermanent / "https://saradomain/" # change URL
+	RedirectPermanent / "https://saradomain/" # change URL and remove this comment from here
 </VirtualHost>
 ```
+  - INFO: to get a "saradomain" value you can use "nslookup IP-address-of-machine" command and get the "name" parameter from output, without the last dot, e.g. "vm-XXX-XXX.bwcloud.uni-ulm.de" if your SARA-server is running on bwcloud service (https://www.bw-cloud.org/). 
+
 - create config for proxy to Tomcat, eg. `/etc/apache2/sites-available/proxy.conf`:
 ```apache
 <VirtualHost *:443>
-	ServerName saradomain # change
-	ServerAdmin webmaster@localhost # change
+	ServerName saradomain # change and remove this comment from here
+	ServerAdmin webmaster@localhost # change and remove this comment from here
 
 	<Location />
 		ProxyPass "ajp://localhost:8009/SaraServer/"
@@ -106,10 +125,11 @@
 	ErrorLog ${APACHE_LOG_DIR}/error.log
 	CustomLog ${APACHE_LOG_DIR}/access.log combined
 
-	### see beow for SSL config ###
+	### see below for SSL config ###
 </VirtualHost>
 ```
-- enable sites and modules: `sudo a2dissite 000-default`, `sudo a2ensite redirect proxy`, `sudo a2enmod proxy_ajp ssl headers`, then restart Apache
+- enable sites and modules: `sudo a2dissite 000-default`, `sudo a2ensite redirect proxy`, `sudo a2enmod proxy_ajp ssl headers`, then restart Apache: `systemctl restart apache2`
+
 
 ## Set up SSL
 
@@ -161,7 +181,7 @@ the config here is a subset of the Shibboleth config.
 
 ### using Let's Encrypt
 
-- in your SSL site config, make sure you have something like
+- in your SSL site config (e.g. `/etc/apache2/sites-available/proxy.conf`), make sure you have something like
 ```apache
 	Alias "/.well-known" "/var/www/letsencrypt/.well-known"
 	<Location /.well-known>
@@ -180,11 +200,11 @@ the config here is a subset of the Shibboleth config.
 - reload or restart apache (`sudo service apache2 restart`)
 - install Letsencrypt: `sudo apt install letsencrypt`
 - create webroot: `sudo mkdir -p /var/www/letsencrypt`
-- get SSL certificate: `sudo letsencrypt certonly --webroot -w /var/www/letsencrypt -d saradomain`
-- edit site SSL config. delete the snakeoil lines and set
+- get SSL certificate (replace "saradomain" with real URL): `sudo letsencrypt certonly --webroot -w /var/www/letsencrypt -d saradomain`
+- edit site SSL config (e.g. `/etc/apache2/sites-available/proxy.conf`). Delete the snakeoil lines and set (see the comment on line)
 ```apache
-	SSLCertificateFile	/etc/letsencrypt/live/saradomain/fullchain.pem
-	SSLCertificateKeyFile /etc/letsencrypt/live/saradomain/privkey.pem
+	SSLCertificateFile	/etc/letsencrypt/live/saradomain/fullchain.pem # replace "saradomain" with real URL and remove this comment from here
+	SSLCertificateKeyFile /etc/letsencrypt/live/saradomain/privkey.pem # replace "saradomain" with real URL and remove this comment from here
 ```
 - create `/etc/apache2/mods-available/ssl.conf` with contents from the config generator:
 ```apache
@@ -244,19 +264,47 @@ the config here is a subset of the Shibboleth config.
   </Service>
 </Server>
 ```
-- build the WAR: `mvn clean package -DskipTests`
+- install Java and maven
+```
+sudo apt-mark hold openjdk-11-jre-headless
+sudo apt-get -y install openjdk-8-jdk maven
+
+```
+- build the WAR:
+```bash
+cd ~/SARA-server
+mvn clean package -DskipTests
+
+```
 - copy `target/SaraServer-*.war` to `/var/lib/tomcat8/webapps/SaraServer.war` on server
+```bash
+sudo -u tomcat8 cp target/SaraServer-*.war /var/lib/tomcat8/webapps/SaraServer.war
+
+```
 - copy `postgresql-42.1.4.jar` and `geronimo-javamail_1.4_spec-1.6.jar` to `/var/lib/tomcat8/lib` on server
 	- they're needed while parsing `SaraServer.xml`, before the WAR is loaded, so they must be in `lib`
 	- before you start searching the web, they're somewhere in `~/.m2/repository/` after building...
+	- e.g.:
+```bash
+sudo -u tomcat8 cp ~/.m2/repository/org/postgresql/postgresql/42.1.4/postgresql-42.1.4.jar /var/lib/tomcat8/lib
+sudo -u tomcat8 cp ~/.m2/repository/org/apache/geronimo/specs/geronimo-javamail_1.4_spec/1.6/geronimo-javamail_1.4_spec-1.6.jar /var/lib/tomcat8/lib
+sudo -u tomcat8 cp ~/.m2/repository/org/apache/geronimo/specs/geronimo-activation_1.0.2_spec/1.1/geronimo-activation_1.0.2_spec-1.1.jar /var/lib/tomcat8/lib/
+sudo -u tomcat8 cp ~/.m2/repository/org/apache/geronimo/javamail/geronimo-javamail_1.4_provider/1.6/geronimo-javamail_1.4_provider-1.6.jar /var/lib/tomcat8/lib
+
+```
 - copy `src/main/webapp/META-INF/context.xml` to `/etc/tomcat8/Catalina/localhost/SaraServer.xml` on server
-- configure `SaraServer.xml`
+```bash
+sudo cp src/main/webapp/META-INF/context.xml /etc/tomcat8/Catalina/localhost/SaraServer.xml
+
+```
+- configure `/etc/tomcat8/Catalina/localhost/SaraServer.xml`
 	- `password` in `jdbc.database` resource: PostgreSQL database password
 	- `sara.webroot` parameter: `https://saradomain/`
 - restart tomcat (`sudo service tomcat8 restart`)
 - check `/var/log/tomcat8/catalina.out` for error messages
 - it should now be running (and working) at `https://saradomain/`
-
+    - INFO: SARA is not configured yet, that's why some error message could appear on the page, e.g. "Failed to load git repos!"
+    - Configuration page you can find here - "TODO: put a link to the page with a configuration manual!"  
 
 # Updating the SARA Server Webapp
 
