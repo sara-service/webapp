@@ -1,5 +1,7 @@
 package bwfdm.sara.git;
 
+import java.io.IOException;
+
 import org.eclipse.jgit.api.TransportCommand;
 
 public interface ArchiveProject {
@@ -33,8 +35,13 @@ public interface ArchiveProject {
 	 */
 	public void configureCredentials(final TransportCommand<?, ?> tx);
 
-	/** Moves this project to permanent storage. */
-	void commit();
+	/**
+	 * Moves this project to permanent storage.
+	 * 
+	 * @throws IOException
+	 *             if commit fails
+	 */
+	void commit() throws IOException;
 
 	/** Deletes this project. */
 	void rollback();

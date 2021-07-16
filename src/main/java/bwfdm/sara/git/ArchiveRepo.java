@@ -1,5 +1,8 @@
 package bwfdm.sara.git;
 
+import java.io.IOException;
+
+import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.PersonIdent;
 
 import bwfdm.sara.project.ArchiveMetadata;
@@ -23,9 +26,14 @@ public interface ArchiveRepo {
 	 *         project
 	 * @throws ProjectExistsException
 	 *             if the named project already exists
+	 * @throws GitAPIException
+	 *             if performing some git operation fails
+	 * @throws IOException
+	 *             if any local IO fails
 	 */
 	public ArchiveProject createProject(String id, boolean visible,
-			ArchiveMetadata meta) throws ProjectExistsException;
+			ArchiveMetadata meta)
+			throws ProjectExistsException, GitAPIException, IOException;
 
 	/**
 	 * Determines the committer identity to be used when SARA commits it

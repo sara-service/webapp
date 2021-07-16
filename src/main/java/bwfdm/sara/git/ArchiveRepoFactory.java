@@ -9,12 +9,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import bwfdm.sara.db.ConfigDatabase;
 import bwfdm.sara.git.gitlab.GitLabArchiveRESTv4;
+import bwfdm.sara.git.local.LocalArchive;
 
 public class ArchiveRepoFactory {
 	private static final ObjectMapper MAPPER = new ObjectMapper();
 	private static final Map<String, Class<? extends ArchiveRepo>> ADAPTERS = new HashMap<>();
 	static {
 		ADAPTERS.put("GitLabArchiveRESTv4", GitLabArchiveRESTv4.class);
+		ADAPTERS.put("LocalArchive", LocalArchive.class);
 	}
 
 	@JsonProperty("id")
